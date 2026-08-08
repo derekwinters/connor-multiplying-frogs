@@ -41,6 +41,34 @@ namespace Frogs.Core
         public int AndroidVersionCode => (Major * MajorMultiplier) + (Minor * MinorMultiplier) + Patch;
 
         /// <summary>
+        /// Reads the version out of the contents of /VERSION.
+        ///
+        /// That file carries release-please's marker on the same line as the
+        /// version — `0.0.1 # x-release-please-version` — because the generic
+        /// updater only rewrites a line containing the marker. So every
+        /// consumer has to strip from '#' onward, and this is the one place
+        /// that does it.
+        /// </summary>
+        public static AppVersion ReadFrom(string fileContents)
+        {
+            if (fileContents is null)
+            {
+                throw new ArgumentNullException(nameof(fileContents));
+            }
+
+            var withoutComment = fileContents.Split('#')[0];
+            var trimmed = withoutComment.Trim();
+
+            if (trimmed.Length == 0)
+            {
+                throw new FormatException(
+                    "/VERSION has no version on it — expected `0.0.1 # x-release-please-version`.");
+            }
+
+            return Parse(trimmed);
+        }
+
+        /// <summary>
         /// Parses "major.minor.patch". Throws <see cref="FormatException"/> on
         /// anything else — /VERSION is read by the build, so a malformed value
         /// has to fail at the point of reading rather than silently become
