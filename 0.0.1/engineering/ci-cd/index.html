@@ -1535,6 +1535,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Pipeline workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline-tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2225,6 +2242,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Pipeline workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline-tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2328,7 +2362,13 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.</p>
 <td>the named-values rule, ratcheting</td>
 </tr>
 <tr>
-<td><code>pipeline-*</code></td>
+<td><code>pipeline-tests</code></td>
+<td>PR/push touching the pipeline skills</td>
+<td>fails the PR</td>
+<td>the pipeline scripts' own unit tests</td>
+</tr>
+<tr>
+<td><code>pipeline-*</code> (others)</td>
 <td>schedule, issue comments</td>
 <td>no</td>
 <td>the issue pipeline itself</td>
@@ -3017,13 +3057,31 @@ does; this is where the workflows live.</p>
 </tr>
 <tr>
 <td><code>pipeline-tests</code></td>
-<td>PR touching <code>.claude/skills/**</code></td>
+<td>PR/push touching the pipeline skills</td>
 <td>runs the pipeline scripts' own unit tests</td>
 </tr>
 </tbody>
 </table>
-<p><code>pipeline-tests</code> is the one that blocks: the pipeline's scripts are code, they
-have tests, and a broken gatekeeper is a broken queue.</p>
+<h3 id="pipeline-tests"><code>pipeline-tests</code><a class="headerlink" href="#pipeline-tests" title="Link to this section">&para;</a></h3>
+<p>The pipeline's scripts are code, they have tests, and a broken gatekeeper is a
+broken queue — so unlike the rest of the pipeline workflows, this one runs on
+pull requests and fails them.</p>
+<p><strong>Stdlib only. No Unity, no <code>pip install</code>, no lockfile.</strong> These scripts decide
+what gets triaged, built, and requeued, and their tests must not be capable of
+breaking because the game toolchain did. The job needs nothing but the Python
+already on the runner, which is also why it finishes in seconds.</p>
+<p>It runs <code>run_python_tests.py</code> rather than <code>python3 -m unittest discover</code>,
+because discovery cannot find these tests at all: it only recurses into
+directories whose names are valid Python identifiers, and <code>.claude</code> starts with
+a dot. The runner also executes each suite in isolation — several skills have a
+package named <code>tests</code>, and in a shared interpreter the second silently resolves
+to the first's cached module and never runs.</p>
+<p><strong>It is path-gated, so it must not be marked required.</strong> Same trap as
+<a href="#path-gating-and-what-it-means-for-branch-protection"><code>ci-tests</code></a>: a
+path-gated workflow does not report at all on PRs that miss its paths, so a
+required check would block every unrelated PR forever waiting for a run that
+will never happen. "Fails the PRs it runs on" and "required in branch
+protection" are different things, and only the first is true here.</p>
 <h2 id="when-something-is-red">When something is red<a class="headerlink" href="#when-something-is-red" title="Link to this section">&para;</a></h2>
 <ol>
 <li><strong>Read the failure.</strong> Which job, which step, which assertion. CI failures on
