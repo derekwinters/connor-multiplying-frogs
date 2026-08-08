@@ -212,6 +212,29 @@ and runs on every push, with no editor and no network.
    creates the tag and the GitHub release, and triggers the release build, which
    attaches the APK.
 
+### Use the `release-flow` skill
+
+Two things go wrong at step 3 every time, and both are silent:
+
+- **The release PR can be stale.** release-please rewrites it on every push to
+  `main`, but that run takes a minute and can fail. Merging a stale one ships a
+  changelog and a version that omit whatever landed after it was last written —
+  and nothing catches it afterwards, because the release itself succeeds.
+- **Check runs can be parked** in `action_required`, waiting for a human. A
+  parked run never finishes on its own, so merging past it means merging with
+  the checks not having run — which from the merge button looks identical to
+  merging with them green.
+
+`.claude/skills/release-flow/` checks both before the merge, and afterwards
+verifies that all three artifacts appeared: the tag, a *published* release, and
+the `autorelease: tagged` label. Each can happen without the others — a tag with
+no release is a release nobody can download, and a missing label makes
+release-please try the same release again.
+
+The skill never edits the release PR, never approves a parked run, and never
+creates a tag by hand. release-please owns that branch and recomputes it from
+scratch on every run, so an edit is either undone or corrupts the next one.
+
 ## One issue → one PR → one squash commit → one changelog entry
 
 The chain is only as good as its narrowest link, and every link is enforced:
