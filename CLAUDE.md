@@ -172,9 +172,14 @@ Every PR body carries a `**Docs:**` line stating what happened:
 **Docs:** None — no behaviour the docs describe was changed.
 ```
 
-CI enforces the line's presence. The `skip-docs` label is the escape hatch for
-the genuinely doc-irrelevant PR, and using it is a decision you justify in
+**CI enforces the docs change, not the line.** A PR that touches code and
+nothing under `docs/` fails the reconciliation gate. The `skip-docs` label is
+the escape hatch for the genuinely doc-irrelevant PR — adding it re-runs the
+check — and using it is a decision you justify in
 `## Deviations and Decisions`.
+
+The line is still required, because the gate can only see *that* a docs file
+changed. Only you can say what changed in it.
 
 → [`docs/engineering/ci-cd.md`](docs/engineering/ci-cd.md)
 
