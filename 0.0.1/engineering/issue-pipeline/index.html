@@ -1189,6 +1189,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#where-each-command-is-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where each command is refused
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#unknown-commands" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1751,6 +1762,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#where-each-command-is-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where each command is refused
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#unknown-commands" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2225,50 +2247,97 @@ explain yourself in the same comment.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>/approve</code></td>
-<td><code>pending-approval</code> → <code>ready-for-work</code>. Subject to both approval gates.</td>
+<td><code>/admit</code></td>
+<td>bring an issue into the pipeline — it becomes <code>ai-triage</code>.</td>
 </tr>
 <tr>
-<td><code>/park [reason]</code></td>
-<td>any state → <code>parked</code>. The reason is recorded in the ack.</td>
+<td><code>/propose</code></td>
+<td>ask triage to produce a plan for it.</td>
+</tr>
+<tr>
+<td><code>/approve</code></td>
+<td>the plan is right → <code>ready-for-work</code>. Subject to both approval gates.</td>
+</tr>
+<tr>
+<td><code>/revise &lt;notes&gt;</code></td>
+<td>the plan is not right → back to <code>ai-triage</code>, with the notes.</td>
+</tr>
+<tr>
+<td><code>/redo</code></td>
+<td>the built work is not right → queue it again.</td>
+</tr>
+<tr>
+<td><code>/park</code></td>
+<td>set aside deliberately.</td>
 </tr>
 <tr>
 <td><code>/unpark</code></td>
-<td><code>parked</code> → <code>ai-triage</code>, so it gets re-triaged against current reality.</td>
-</tr>
-<tr>
-<td><code>/retriage</code></td>
-<td>any state → <code>ai-triage</code>. Use after answering a <code>needs-clarification</code>.</td>
-</tr>
-<tr>
-<td><code>/block #N</code></td>
-<td>record a native blocked-by relationship on issue N.</td>
-</tr>
-<tr>
-<td><code>/unblock #N</code></td>
-<td>remove it.</td>
+<td>bring it back.</td>
 </tr>
 <tr>
 <td><code>/milestone &lt;title&gt;</code></td>
-<td>set the issue's milestone by title.</td>
+<td>set the issue's milestone, by title.</td>
 </tr>
 <tr>
 <td><code>/focus &lt;title&gt;</code></td>
-<td>set the pipeline's focus milestone. Dashboard issue only.</td>
+<td>set the pipeline's focus milestone. <strong>Dashboard issue only.</strong></td>
 </tr>
 <tr>
 <td><code>/cap &lt;n&gt;</code></td>
-<td>set the max concurrent <code>in-progress</code> issues. Dashboard issue only.</td>
-</tr>
-<tr>
-<td><code>/help</code></td>
-<td>reply with this vocabulary. Works anywhere.</td>
+<td>set the max concurrent <code>in-progress</code> issues. <strong>Dashboard issue only.</strong></td>
 </tr>
 </tbody>
 </table>
 <p>Deliberately absent: anything that closes an issue, edits a body, or merges a
 PR. Those have perfectly good GitHub buttons, and a command vocabulary that can
 do irreversible things is a vocabulary that will eventually do one by accident.</p>
+<h3 id="where-each-command-is-refused">Where each command is refused<a class="headerlink" href="#where-each-command-is-refused" title="Link to this section">&para;</a></h3>
+<p>The parser refuses rather than guessing, and every refusal carries a reason
+code so the ack can say which rule applied:</p>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>not-owner</code></td>
+<td>the comment is from anyone but the owner — dropped <strong>silently</strong></td>
+</tr>
+<tr>
+<td><code>already-applied</code></td>
+<td>the comment already carries the 👀 watermark</td>
+</tr>
+<tr>
+<td><code>unknown-command</code></td>
+<td><code>/aprove</code> — never guessed at; the reply names the closest match</td>
+</tr>
+<tr>
+<td><code>not-dashboard</code></td>
+<td><code>/focus</code> or <code>/cap</code> on an ordinary issue</td>
+</tr>
+<tr>
+<td><code>cap-invalid</code></td>
+<td><code>/cap lots</code>, <code>/cap 0</code>, <code>/cap -1</code></td>
+</tr>
+<tr>
+<td><code>epic-excluded</code></td>
+<td><code>/admit</code>, <code>/propose</code>, <code>/approve</code>, <code>/revise</code>, <code>/redo</code> on a <code>type:epic</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Epics are containers</strong>, so the five commands that would put one in the
+builder's path are refused on them — their children are the work. <code>/park</code> and
+<code>/milestone</code> still apply to a whole epic, because both are reasonable things to
+want.</p>
+<p>Two parsing rules worth knowing:</p>
+<ul>
+<li><strong>A command must start its line.</strong> "see /approve for details" is a mention.</li>
+<li><strong>A command inside a code fence is ignored</strong>, or writing up this table in a
+  comment would execute it.</li>
+</ul>
 <h3 id="unknown-commands">Unknown commands<a class="headerlink" href="#unknown-commands" title="Link to this section">&para;</a></h3>
 <p>A line starting with <code>/</code> that isn't in the table gets a 😕 reaction and a reply
 naming the closest match. It is never guessed at — <code>/aprove</code> does not approve.</p>
