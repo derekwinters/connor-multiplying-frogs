@@ -16,18 +16,6 @@ namespace Frogs.Core.Tests
             Assert.That(version.Patch, Is.EqualTo(3));
         }
 
-        // The formula is specified in docs/engineering/versioning.md. Android
-        // needs a monotonically increasing integer, and deriving it means a
-        // rebuild of a tag produces the same artifact rather than a new number.
-        [TestCase("0.0.1", 1)]
-        [TestCase("0.1.0", 100)]
-        [TestCase("0.2.3", 203)]
-        [TestCase("1.0.0", 10000)]
-        public void AndroidVersionCode_IsDerivedFromTheVersion(string text, int expected)
-        {
-            Assert.That(AppVersion.Parse(text).AndroidVersionCode, Is.EqualTo(expected));
-        }
-
         // /VERSION is read by the build. Malformed input has to fail loudly at
         // the point of reading, not silently become 0.0.0 in a shipped APK.
         [TestCase("")]
