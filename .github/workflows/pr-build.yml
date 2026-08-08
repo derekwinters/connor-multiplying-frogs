@@ -1,0 +1,120 @@
+name: pr-build
+
+# A debug APK for every PR, so "does it still build" is answered by a build
+# rather than by hope, and so Connor can try a change on his phone before it
+# merges.
+#
+# Distribution is the workflow artifact and nothing else — no store, no
+# distribution service, no link that outlives the PR. Artifacts expiring is
+# correct: a stale test build is worse than none.
+
+on:
+  pull_request:
+    paths:
+      - Assets/**
+      - ProjectSettings/**
+      - Packages/**
+      - VERSION
+      - .github/workflows/pr-build.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      # Unlike ci-tests, a missing licence WARNS and skips here. That job is a
+      # correctness gate — a green tick claiming the tests ran when they did not
+      # is a lie. This one is a convenience: no APK is an absent convenience,
+      # not a false claim, and failing every PR over it would train everyone to
+      # ignore a red check.
+      - name: Check for the Unity licence
+        id: licence
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -z "$UNITY_LICENSE" ]; then
+            echo "::warning::No UNITY_LICENSE secret, so no debug APK for this PR." \
+                 "See issue #82. Skipping rather than failing — this build is a" \
+                 "convenience, not a correctness gate."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.licence.outputs.present == 'true'
+        with:
+          # The versionCode is the commit count, so the whole history has to be
+          # here. A shallow checkout would silently produce a lower number than
+          # the last build, and Android refuses to install that.
+          fetch-depth: 0
+
+      - name: Work out the build stamp
+        id: stamp
+        if: steps.licence.outputs.present == 'true'
+        env:
+          # github.event.pull_request.head.sha, not github.sha: the latter is
+          # the merge commit, which is not a commit anyone can check out later.
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          echo "version_code=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+          echo "build_sha=$(git rev-parse --short=7 "$HEAD_SHA")" >> "$GITHUB_OUTPUT"
+          echo "version=$(cut -d'#' -f1 VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Unity's Library
+        if: steps.licence.outputs.present == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Library
+          key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-android-
+
+      # The version name, versionCode, and .debug suffix are applied by
+      # BuildStampPreprocessor from these variables — a build pre-processor, so
+      # no build can be produced without them. See docs/engineering/versioning.md.
+      - name: Build the debug APK
+        if: steps.licence.outputs.present == 'true'
+        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
+          FROGS_BUILD_SHA: ${{ steps.stamp.outputs.build_sha }}
+          FROGS_APPLICATION_ID_SUFFIX: .debug
+        with:
+          unityVersion: 6000.0.81f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          # No keystore inputs, so Unity signs with the Android debug key. That
+          # is deliberate: the release keystore is a secret this workflow should
+          # not be able to reach from a PR branch.
+          buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}
+          allowDirtyBuild: true
+
+      - name: Upload the APK
+        if: steps.licence.outputs.present == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: debug-apk-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}
+          path: build/Android/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Summarise
+        if: always()
+        run: |
+          if [ "${{ steps.licence.outputs.present }}" != "true" ]; then
+            echo "No debug APK: the UNITY_LICENSE secret is not set (#82)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Debug APK \`${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}\`" \
+                 "(versionCode ${{ steps.stamp.outputs.version_code }}), installs alongside the" \
+                 "release build as \`.debug\`." >> "$GITHUB_STEP_SUMMARY"
+          fi

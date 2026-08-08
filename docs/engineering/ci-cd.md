@@ -13,7 +13,7 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | `pr-title-lint` | PR opened/edited | yes | the squash commit message, and therefore the changelog |
 | `ci-tests` | PR, push to `main` | yes | game logic and scene wiring |
 | `docs-test` | PR, push to `main` | yes | the docs site builds, and the docs match the change |
-| `pr-build` | PR | yes | the app still compiles into an installable APK |
+| `pr-build` | PR | no | the app still compiles into an installable APK |
 | `rc-build` | manual, tag | no | a release candidate someone can actually play |
 | `release-please` | push to `main` | no | the version, changelog, tag, release, and release APK |
 | `labels-sync` | push to `main` touching `labels.yml` | no | the label taxonomy matches the file |
@@ -136,6 +136,34 @@ by a build rather than by hope, and so Connor can try a change before it merges.
   Nothing is uploaded anywhere, no store, no distribution service, no link that
   outlives the PR. Artifacts expire and that is correct — a stale test build is
   worse than none.
+
+#### A missing licence warns and skips here
+
+The opposite of [`ci-tests`](#ci-tests-the-two-suites), deliberately.
+
+`ci-tests` is a **correctness gate**: a green tick claiming the tests ran when
+they did not is a lie, so a missing licence fails it. `pr-build` is a
+**convenience**: no APK is an absent convenience, not a false claim. Failing
+every PR over it would train everyone to ignore a red check, which costs more
+than the missing build.
+
+The workflow says so in a `::warning::` and in the step summary, so the absence
+is visible rather than silent.
+
+#### Two details that would be bugs if got wrong
+
+- **`fetch-depth: 0`.** The `versionCode` is the commit count, so the whole
+  history has to be present. A shallow checkout silently produces a *lower*
+  number than the previous build, and Android refuses to install that — with an
+  error that says nothing about depth.
+- **The sha comes from `pull_request.head.sha`, not `github.sha`.** The latter
+  is the ephemeral merge commit, which nobody can check out later; a version
+  name pointing at it identifies nothing.
+
+The version name, `versionCode`, and `.debug` suffix are all applied by
+`BuildStampPreprocessor`, a build pre-processor rather than a step CI remembers
+to call — a stamping step that can be forgotten will be, and a build with the
+wrong version cannot be identified afterwards.
 
 Red here almost always means a compile error the Core suite couldn't catch,
 because it lives in the Unity layer. Read the build log, not the test log.

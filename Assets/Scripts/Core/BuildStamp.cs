@@ -67,6 +67,72 @@ namespace Frogs.Core
             return new BuildStamp(version, commitCount, RequireUsableSha(shortSha));
         }
 
+        /// <summary>
+        /// The Android application identifier for a build, with its suffix
+        /// applied — ".debug" for a PR build, nothing for a release.
+        ///
+        /// A suffixed build installs *alongside* the release rather than
+        /// replacing it, so the game Connor plays survives someone testing a
+        /// change on the same phone.
+        ///
+        /// Idempotent: applying the same suffix twice leaves one, so a build
+        /// that stamps more than once cannot produce `...debug.debug`.
+        /// </summary>
+        public static string ApplicationIdWithSuffix(string applicationId, string suffix)
+        {
+            if (string.IsNullOrWhiteSpace(applicationId))
+            {
+                throw new ArgumentException(
+                    "A build needs an application identifier.", nameof(applicationId));
+            }
+
+            if (string.IsNullOrWhiteSpace(suffix))
+            {
+                return applicationId;
+            }
+
+            RequireUsableSuffix(suffix);
+
+            return applicationId.EndsWith(suffix, StringComparison.Ordinal)
+                ? applicationId
+                : applicationId + suffix;
+        }
+
+        static void RequireUsableSuffix(string suffix)
+        {
+            // Android package segments are lowercase letters, digits, and
+            // underscores, each introduced by a dot. A suffix that does not fit
+            // that produces an APK the device refuses to install, with an error
+            // that does not mention the identifier.
+            var valid = suffix.Length > 1 && suffix[0] == '.';
+
+            if (valid)
+            {
+                foreach (var character in suffix.Substring(1))
+                {
+                    var allowed =
+                        (character >= 'a' && character <= 'z')
+                        || (character >= '0' && character <= '9')
+                        || character == '_'
+                        || character == '.';
+
+                    if (!allowed)
+                    {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!valid)
+            {
+                throw new ArgumentException(
+                    $"'{suffix}' is not a usable applicationId suffix — it must start with a "
+                    + "dot and contain only lowercase letters, digits, and underscores.",
+                    nameof(suffix));
+            }
+        }
+
         static void RequirePositive(int commitCount)
         {
             if (commitCount <= 0)
