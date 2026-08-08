@@ -1,0 +1,107 @@
+# The /docs site is the design contract for Multiplying Frogs (see CLAUDE.md).
+# Build it with `mkdocs build --strict` — CI uses --strict, so a broken nav
+# entry or a dead internal link is a failure, not a warning.
+
+site_name: Multiplying Frogs
+site_description: The design contract and engineering handbook for Multiplying Frogs — a game Derek is building with his son Connor.
+site_author: Derek Winters
+site_url: https://derekwinters.github.io/connor-multiplying-frogs/
+
+repo_url: https://github.com/derekwinters/connor-multiplying-frogs
+repo_name: derekwinters/connor-multiplying-frogs
+edit_uri: edit/main/docs/
+
+copyright: Built by Derek and Connor.
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - content.action.edit
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+  palette:
+    # Light mode, and the toggle into dark.
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    # Dark mode, and the toggle back.
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      accent: light green
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+      permalink_title: Link to this section
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+extra:
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/derekwinters/connor-multiplying-frogs
+      name: This project on GitHub
+
+# Sections are stubbed ahead of the pages that fill them — a nav entry is the
+# commitment that the page gets written. Keep this tree in issue order.
+nav:
+  - Home: index.md
+  - Introduction:
+      - intro/index.md
+      - Vision: intro/vision.md
+      - How to play: intro/how-to-play.md
+      - Conventions: intro/conventions.md
+  - Specs:
+      - specs/index.md
+      - Product scope: specs/product-scope.md
+      - Future ideas: specs/future-ideas.md
+      - UI:
+          - specs/ui/index.md
+  - Engineering:
+      - engineering/index.md
+      - Tech stack: engineering/tech-stack.md
+      - Testing: engineering/testing.md
+      - Versioning: engineering/versioning.md
+      - CI/CD: engineering/ci-cd.md
+      - Agent workflow: engineering/agent-workflow.md
+      - Issue pipeline: engineering/issue-pipeline.md
+      - UI design process: engineering/ui-design-process.md
+      - Unity serialization: engineering/unity-serialization.md
+  - Tools:
+      - tools/index.md
