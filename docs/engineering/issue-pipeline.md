@@ -759,24 +759,71 @@ labels claim against what GitHub shows, and sorts each finding into
 
 **Auto-fixed** — mechanical, single correct answer, no judgement:
 
-- a closed issue still carrying a state label → remove it;
-- `in-progress` with no open PR and no recent activity → back to
-  `ready-for-work`;
-- an issue with two state labels where one was clearly just applied → keep the
-  newest;
-- a merged PR whose issue is still open, with a closing keyword that GitHub
-  missed → close the issue.
+| Finding | Condition | Action | Runs |
+| --- | --- | --- | --- |
+| `strip_labels` | closed issue still carrying a pipeline-state label | remove it | every pass |
+| `requeue` | open, `in-progress`, no open PR, not on `main` | → `ready-for-work` | **cron only** |
+| `requeue_triage` | a state label with no triage-authored analysis | → `ai-triage` | **cron only** |
 
 **Flagged, never touched** — anything needing judgement:
 
-- `ready-for-work` with no milestone (the invariant is broken, but the fix is a
-  decision about which milestone);
-- an issue in the focus milestone blocked by one in a later milestone;
-- a dependency cycle;
-- two dashboard issues, or none.
+| Finding | Condition |
+| --- | --- |
+| `flag_merged_but_open` | the work is on `main` but the issue is still open |
+| `flag_orphaned_analysis` | an analysis comment with no state label |
+| `flag_orphaned_ready` | `ready-for-work` with no milestone |
+| `flag_prose_dependency` | `Blocked by #N` in the body with no native edge |
+| `flag_cycle` | a dependency cycle |
+| `flag_dashboard_count` | two dashboard issues, or none |
 
 The split is the design. A reconciler that guesses is a reconciler you have to
-audit, and one you have to audit is one you turn off.
+audit, and one you have to audit is one you turn off — at which point it is
+worse than absent, because the dashboard still says it ran.
+
+#### The sweep never closes an issue
+
+Not even when the work is demonstrably merged and the issue is demonstrably
+still open. That is `flag_merged_but_open`, and it stays a flag.
+
+`Closes #N` in a PR body is what closes an issue, when Derek merges it. A sweep
+that also closed issues would be deciding that work is finished and accepted on
+evidence that it merely *landed* — and the two are not the same claim. Getting
+it wrong closes something nobody agreed was done, silently, at 01:00.
+
+#### Why two of the auto-fixes are cron-only
+
+`requeue` and `requeue_triage` are correct nightly and wrong on the event path,
+because **the drift they detect is indistinguishable from work in flight.**
+
+- An issue the builder picked up seconds ago has `in-progress` and no PR yet.
+  That is exactly `requeue`'s condition, and firing it would yank the issue out
+  from under a running agent.
+- Triage posts its analysis comment *before* setting the state label. Between
+  those two writes an issue legitimately has neither; moments later it has both.
+  Mid-write, `requeue_triage`'s condition holds.
+
+By 01:00 the transient has resolved: an issue still looking stalled hours later
+genuinely is. So they are **omitted entirely** on the event path rather than
+softened with a time threshold — a threshold is a guess about how long an agent
+takes, and it would be wrong in both directions.
+
+`strip_labels` has no such problem and runs on every pass. It acts only on an
+already-closed issue, and a closed issue is not transiently anything.
+
+#### Done-ness is read from commit bodies
+
+Whether work landed is decided by a **closing keyword in a merged commit's
+body** — never the subject line, never a bare `#N` or `Refs #N`.
+
+The subject line is excluded because a squash merge appends `(#148)` to it, and
+that is a *PR* number. Bare references are excluded because PRs and commits
+mention issues constantly for context; treating a mention as completion would
+mark work done because somebody linked to it.
+
+**`flag_merged_but_open` is checked before the stall rule**, so an issue already
+on `main` never reads as a stall. Without that ordering it would be requeued,
+rebuilt, and requeued again every night — a loop that produces a duplicate PR
+each time.
 
 ### Dashboard
 
