@@ -81,7 +81,7 @@ explain yourself in the same comment.
 | `/unpark` | bring it back. |
 | `/milestone <title>` | set the issue's milestone, by title. |
 | `/focus <title>` | set the pipeline's focus milestone. **Dashboard issue only.** |
-| `/cap <n>` | set the max concurrent `in-progress` issues. **Dashboard issue only.** |
+| `/cap <n>` | set how many issues one build round takes on. **Dashboard issue only.** |
 
 Deliberately absent: anything that closes an issue, edits a body, or merges a
 PR. Those have perfectly good GitHub buttons, and a command vocabulary that can
@@ -321,7 +321,7 @@ Both are stored as HTML-comment markers in the body of the dashboard issue:
 
 ```html
 <!-- pipeline:focus=v0.0.1 -->
-<!-- pipeline:cap=1 -->
+<!-- pipeline:cap=3 -->
 ```
 
 The dashboard issue is the one carrying the `dashboard` label. There is exactly
@@ -631,15 +631,40 @@ to have it.
 **Eligibility** — all of:
 
 - `ready-for-work`;
-- in the focus milestone;
-- not blocked by an open issue;
+- in the focus milestone (no milestone is not the focus milestone);
+- every hard blocker closed or merged;
+- not `parked`;
 - not a `type:epic` (epics are containers; their children are the work);
-- has no open PR already referencing it.
+- has no open PR **closing** it.
 
-**Ordering** — a topological sort over the blocked-by graph, so an issue that
-unblocks others is worked before one that unblocks nothing. Ties break oldest
-first, so nothing starves. A cycle in the graph is reported, not resolved: a
-cycle is a triage mistake, and silently picking an entry point hides it.
+Two of those are narrower than they look.
+
+**Hard blockers are native edges unioned with `Blocked by #N` lines**, merged by
+one helper. An issue can have one dependency recorded natively and another still
+written in prose, and reading either source alone releases work that is still
+half-blocked. A blocker the caller knows nothing about counts as unresolved:
+not knowing whether the thing you depend on is finished is precisely the case
+where starting is expensive.
+
+**An open PR only suppresses an issue if it *closes* it** — a closing keyword,
+not a bare `#47`. PRs reference issues constantly for context, and treating a
+mention as "already being worked" would silently starve an issue that nobody is
+actually working. This is the same keyword rule reconcile uses to decide
+done-ness.
+
+**Ordering** — a stable topological sort. At each step the lowest-numbered
+issue whose in-queue dependencies are already placed, so dependencies come
+first and ties break oldest-first with nothing starving. Soft `Depends on:`
+lines order here even though they never gate: a blocker closed this evening
+still says which of two ready issues was meant to come first.
+
+The sort places **one issue per step**, re-checking after each. Placing the
+whole ready set at once would scatter a dependent away from the thing it
+depends on — with a cap of 2, `#11, #12` rather than `#11, #10` — and a cap is
+far more useful when it cuts a coherent chain than an arbitrary slice.
+
+A cycle is a triage mistake, and reconcile flags it. The builder must not hang
+or drop issues on one, so it falls back to number order for the tangled set.
 
 ### Serial delegated delivery
 
@@ -647,8 +672,27 @@ Issues are worked **one at a time**, each delegated to its own agent session.
 
 Serial because parallel agents on one repository fight: two branches touching
 `ProjectSettings.asset`, two release-please runs, two PRs renumbering the same
-things. The `cap` marker exists to raise this above 1 if that ever stops being
-true, and its default is 1.
+things. Nothing raises that above one at a time.
+
+#### `cap` bounds the round, not the concurrency
+
+The two are separate knobs and it is worth keeping them apart.
+
+| | Means | Value |
+| --- | --- | --- |
+| Concurrency | issues worked at once | always **1** |
+| `cap` | issues the round takes on at all | **3** by default |
+
+`select_queue.py` returns at most `cap` issues; the builder then works through
+them one after another. A night that picks up three issues and delivers them
+serially is entirely compatible with "parallel agents fight" — nothing is
+running in parallel.
+
+The cap is small on purpose. Three issues that land beat six that half-land,
+and it is the only thing standing between a quiet night and thirty open PRs.
+The cap applies **after** ordering, never before: capping first would take the
+three lowest-numbered issues and could admit a dependent without the thing it
+depends on.
 
 Delegated — a fresh session per issue — because context from the previous issue
 is a liability. The agent that just spent an hour on the audio system will find
