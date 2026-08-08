@@ -835,6 +835,18 @@ that would free the most other work, which are the ones worth approving next.
 Wholly regenerated every time, apart from the config markers. Nothing on it is
 remembered, so nothing on it can be stale.
 
+#### How reconcile's flags surface
+
+The sweep's flag findings render into the board's **⚠️ Reconcile** section, and
+that is the only place they appear. They are regenerated with everything else,
+so a flag vanishes the moment its condition stops holding — and one still
+sitting there after several days is one nobody has dealt with.
+
+This is why a flag does not post a comment. A flag describes the board's state
+*right now*; a comment would outlive the state it described and turn into a
+false report of a problem that was fixed weeks ago. The dashboard can be wholly
+regenerated. A comment thread cannot.
+
 ## Skills inventory
 
 | Skill | Owns |
