@@ -617,7 +617,7 @@ does; this is where the workflows live.
 | --- | --- | --- |
 | `gatekeeper-comment` | issue comment created | parses commands (`/approve`, `/park`, …), applies label changes, acknowledges with a reaction |
 | `gatekeeper-sweep` | issue/PR events, 6-hourly cron, dispatch | auto-revisits blockers that have cleared, and applies reconcile's fixes |
-| `dashboard` | schedule, and after pipeline runs | rewrites the live dashboard issue |
+| `dashboard` | human label changes, daily schedules, dispatch | rewrites the live dashboard issue |
 | `pipeline-tests` | PR/push touching the pipeline skills | runs the pipeline scripts' own unit tests |
 
 ### `gatekeeper-comment`
@@ -673,6 +673,41 @@ because it only ever touches an already-closed issue.
 `gatekeeper-comment`. This sweep reads and rewrites the whole board, so two
 overlapping runs would each be acting on a snapshot the other has already
 invalidated.
+
+### `dashboard`
+
+Renders the board on `issues: [labeled, unlabeled]`, on three daily schedules
+offset after the nightly routines, and on dispatch.
+
+**Why the gatekeeper also re-renders inline.** GitHub suppresses workflow runs
+from events initiated by `GITHUB_TOKEN`, and the gatekeeper's label moves use
+that token — so they do *not* fire the `labeled` trigger here. This workflow
+would never see the very changes it most needs to reflect. That is why
+`run_comment_event.py` and `run_sweep.py` call the renderer directly after
+their label writes. The trigger here catches label changes a human makes in the
+GitHub UI; the schedule is the backstop for everything else.
+
+**Concurrency is one group with `cancel-in-progress: false`,** so a burst of
+label changes collapses to one final render on the latest state. Cancelling
+would also be safe — the render is idempotent — but queueing guarantees the
+last render in a burst is the one that sees everything.
+
+#### The timestamp, and how it avoids defeating byte-stability
+
+The "as of" line is computed in the workflow (`TZ=America/Chicago`) and passed
+in as an environment variable. **The renderer never reads a clock**, which is
+what keeps `render()` a pure function of its arguments and the golden test
+possible.
+
+A timestamp makes every render textually different, which would undo what
+byte-stability was for: the scheduled runs would PATCH the issue every time and
+the board's history would become a wall of edits that changed nothing. So
+`write_dashboard` compares the new body against the current one **with the
+timestamp line excluded**, and skips the write when nothing else moved.
+
+The board therefore says when it was last *rendered*, while its edit history
+records only when it last *changed* — which are two genuinely different
+questions, and both worth being able to answer.
 
 ### `pipeline-tests`
 

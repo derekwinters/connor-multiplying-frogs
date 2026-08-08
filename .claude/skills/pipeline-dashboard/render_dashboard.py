@@ -265,8 +265,29 @@ def _bar(count: int, total: int, width: int = 20) -> str:
     return "█" * filled + "░" * (width - filled)
 
 
-def render(data: dict, focus_override=None, cap_override=None) -> str:
-    """The whole dashboard body. Byte-stable for a given input."""
+AS_OF_LINE = re.compile(r"^_Board as of .*_$", re.MULTILINE)
+
+
+def body_changed(current: str, new: str) -> bool:
+    """Do these two bodies differ in anything but their timestamp?
+
+    The "as of" line makes every render textually different, which would
+    defeat byte-stability's whole purpose: the scheduled runs would PATCH the
+    issue every time and the dashboard's history would be a wall of edits that
+    changed nothing.
+
+    So the timestamp is rendered, but it is not on its own a reason to write.
+    """
+    strip = lambda body: AS_OF_LINE.sub("", body or "")  # noqa: E731
+    return strip(current) != strip(new)
+
+
+def render(data: dict, focus_override=None, cap_override=None, as_of=None) -> str:
+    """The whole dashboard body. Byte-stable for a given input.
+
+    `as_of` is an input like any other — the renderer never reads a clock, so
+    the same arguments always produce the same bytes.
+    """
     focus = resolve_focus(data, focus_override)
     cap = resolve_cap(data, cap_override)
 
@@ -282,6 +303,12 @@ def render(data: dict, focus_override=None, cap_override=None) -> str:
         f"<!-- pipeline-focus: {focus} -->",
         f"<!-- pipeline-cap: {cap} -->",
         "",
+    ]
+
+    if as_of:
+        lines += [f"_Board as of {as_of}._", ""]
+
+    lines += [
         f"## 🎯 Focus: {focus}",
         "",
         f"{total} issue{'' if total == 1 else 's'} in this milestone.",
@@ -409,10 +436,16 @@ def write_dashboard(data: dict, body: str, token=None, repository=None):  # prag
 
     Authenticates with `GITHUB_TOKEN` — never a PAT. The token's scope is this
     repository, and the only endpoint touched is this one issue.
+
+    Skips the write entirely when nothing but the timestamp changed, so a
+    scheduled render on an unchanged board costs no edit.
     """
     token = token or os.environ["GITHUB_TOKEN"]
     repository = repository or os.environ["GITHUB_REPOSITORY"]
     number = data["dashboard_issue"]["number"]
+
+    if not body_changed(data["dashboard_issue"].get("body") or "", body):
+        return None
 
     request = urllib.request.Request(
         f"https://api.github.com/repos/{repository}/issues/{number}",
@@ -430,7 +463,10 @@ def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     data = json.load(sys.stdin)
 
-    body = render(data)
+    # Passed in rather than read from a clock, so `render` stays a pure
+    # function of its arguments and the golden test stays possible.
+    as_of = os.environ.get("DASHBOARD_AS_OF") or None
+    body = render(data, as_of=as_of)
 
     if "--write" in argv:  # pragma: no cover - network path
         write_dashboard(data, body)

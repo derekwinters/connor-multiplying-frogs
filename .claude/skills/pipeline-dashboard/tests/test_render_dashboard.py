@@ -337,6 +337,46 @@ class ParkedExclusionTests(unittest.TestCase):
         self.assertEqual(counts["Unplanned"], 3)
 
 
+class AsOfTests(unittest.TestCase):
+    """The timestamp, and how it avoids defeating byte-stability."""
+
+    def test_no_timestamp_is_rendered_by_default(self):
+        self.assertNotIn("as of", dash.render(state()))
+
+    def test_the_timestamp_is_rendered_when_given(self):
+        rendered = dash.render(state(), as_of="8 Aug 2026, 3:04 PM CDT")
+        self.assertIn("8 Aug 2026, 3:04 PM CDT", rendered)
+
+    def test_rendering_is_still_byte_stable_for_a_given_timestamp(self):
+        stamp = "8 Aug 2026, 3:04 PM CDT"
+        self.assertEqual(dash.render(state(), as_of=stamp),
+                         dash.render(state(), as_of=stamp))
+
+    def test_two_renders_differing_only_by_timestamp_are_not_a_change(self):
+        """Otherwise every scheduled run rewrites the issue for nothing."""
+        first = dash.render(state(), as_of="8 Aug 2026, 3:04 PM CDT")
+        second = dash.render(state(), as_of="8 Aug 2026, 4:04 PM CDT")
+
+        self.assertNotEqual(first, second)
+        self.assertFalse(dash.body_changed(first, second))
+
+    def test_a_real_change_is_still_a_change(self):
+        data = state()
+        first = dash.render(data, as_of="8 Aug 2026, 3:04 PM CDT")
+
+        data["issues"].append({
+            "number": 30, "title": "Something new", "state": "open",
+            "labels": ["ready-for-work"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": []})
+        second = dash.render(data, as_of="8 Aug 2026, 4:04 PM CDT")
+
+        self.assertTrue(dash.body_changed(first, second))
+
+    def test_a_body_that_never_had_a_timestamp_still_compares(self):
+        rendered = dash.render(state())
+        self.assertFalse(dash.body_changed(rendered, rendered))
+
+
 class PurityTests(unittest.TestCase):
     def test_render_does_not_mutate_its_input(self):
         data = state()
