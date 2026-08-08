@@ -59,11 +59,19 @@ longer exist. Every skill, workflow, and script that needs to know the
 milestones queries the API for them:
 
 ```bash
-gh api repos/:owner/:repo/milestones --paginate --jq '.[] | "\(.title): \(.description)"'
+python3 .claude/skills/milestone-ops/milestone_ops.py list
 ```
 
 The live set is the truth. This page describes the *shape* of a milestone; the
 API says which ones there are.
+
+### Setting a milestone takes its number, not its title
+
+Worth knowing before it costs you an afternoon: the API's `milestone` field
+takes the milestone's **number**. Passing `"v0.1"` is a 422 at best, and
+silently wrong at worst. The `milestone-ops` skill resolves a title to a number,
+and compares titles **exactly** — `v0.1` and `V0.1` are different milestones,
+and normalising them together is how work lands in the wrong one.
 
 ### Freezing a milestone to new intake
 
