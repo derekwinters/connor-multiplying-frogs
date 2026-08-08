@@ -1683,6 +1683,12 @@ tests are, because this is where all the game logic is.</p>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># One test or one fixture, for a tight red-green loop.</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>dotnet<span class="w"> </span><span class="nb">test</span><span class="w"> </span>Tests/Core/Frogs.Core.Tests.csproj<span class="w"> </span>--filter<span class="w"> </span>FullyQualifiedName~AppVersion
 </code></pre></div>
+<p>The <code>run-tests</code> skill wraps both, along with the non-test checks that also fail
+a PR, and fixes a report format — so "the tests pass" means the same thing every
+time it is said.</p>
+<p>One thing worth knowing when reading the output: <strong>check <code>Total &gt; 0</code> as well as
+<code>Failed: 0</code>.</strong> A run that compiled nothing and executed nothing also reports
+zero failures.</p>
 <p><code>Frogs.Core.Tests.csproj</code> compiles <code>Assets/Scripts/Core/**/*.cs</code> directly rather
 than referencing a built assembly. Unity owns that build and regenerates its
 <code>.csproj</code> on every import, so there is no stable project to reference — and
