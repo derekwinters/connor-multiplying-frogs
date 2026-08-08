@@ -51,11 +51,11 @@ An agent that cannot say this did not do step 2.
 | Layer | Location | Runner | Speed | Needs an editor |
 | --- | --- | --- | --- | --- |
 | Game logic | `Tests/Core/` | plain NUnit | seconds | no |
-| Unity wiring | `Tests/Unity/` | Unity Test Framework, EditMode, headless | minutes | yes |
+| Unity wiring | `Assets/Tests/EditMode/` | Unity Test Framework, EditMode, headless | minutes | yes |
 
 ### Core tests — plain NUnit, no engine
 
-`Tests/Core` references `Core` and nothing else. It compiles and runs with
+`Tests/Core` compiles the Core sources and nothing else. It compiles and runs with
 `dotnet test`: no editor, no licence, no display, no container. This is where
 essentially all the tests are, because this is where all the game logic is.
 
@@ -65,7 +65,7 @@ minutes is a loop you start skipping "just this once".
 
 ### Unity tests — EditMode, headless
 
-`Tests/Unity` covers the shell: that a scene wires the right components
+`Assets/Tests/EditMode` covers the shell: that a scene wires the right components
 together, that a prefab has the fields it needs, that an adapter converts
 between Core's vocabulary and the engine's correctly.
 
