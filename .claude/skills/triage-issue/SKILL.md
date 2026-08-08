@@ -212,15 +212,60 @@ blocker is how a queue deadlocks on work that could have been done at any time.
 
 ## Re-running on the same issue
 
-Triage runs twice — a `/revise`, a `/redo`, a crashed run picked up next round.
-It must not stack duplicate comments or contradictory labels. Each triage
-comment carries a marker; a re-run **edits** its previous comment instead of
-adding a second. `triage_repair.py` (#65) owns finding that comment and
-repairing half-finished states.
+Triage runs twice — a `/revise`, a `/redo`, a sweep catching a comment late, a
+run that crashed after commenting but before labelling. `triage_repair.py`
+decides what to do about it, deterministically:
 
-A re-run also arrives with the owner's note attached — `select_triage.py`
-carries the latest `/revise`, `/redo`, or `/propose` text — so the rewrite
-answers the actual objection rather than starting from scratch.
+```python
+# .claude/skills/triage-issue/triage_repair.py — a module, not a CLI
+plan = plan_repair(labels, comments, intended_state="pending-approval", note=note)
+```
+
+| Situation | Plan |
+| --- | --- |
+| An analysis is already here | **repair** — apply the missing label move, post nothing |
+| No analysis | **re-analyze** — a normal triage run |
+| Analysis, and the label is already right | nothing at all |
+| `/revise`, `/redo`, or `/propose` | **re-analyze**, even though an analysis exists |
+
+**Repair, not repeat.** Re-analyzing an issue that already has a plan stacks a
+second plan on the first, and the two will not agree — triage is not
+deterministic, so the same issue analyzed twice produces two different
+reasonable plans, and Derek gets to work out which one `/approve` means.
+
+The last row is the exception that matters. `/revise` is an objection *to the
+plan*; repairing the label would apply exactly the state the rejected plan asked
+for and drop the objection on the floor. The owner's note comes attached from
+`select_triage.py`, so the rewrite answers the actual complaint.
+
+### The recognizer is shared
+
+`has_analysis_signature` matches a `## Build checklist` heading at the start of
+a line, or the `❓ Needs from Derek/Connor:` marker with optional emphasis
+around it. Prose mentioning either phrase is not a match — the heading must be a
+heading, and the ❓ is what separates the marker from a sentence containing the
+same words.
+
+`pipeline-reconcile` **imports this function** rather than keeping its own copy.
+Two copies drift, and the drift is silent and self-sustaining: reconcile decides
+there is no analysis and sends the issue back to `ai-triage`; triage sees the
+analysis it wrote and repairs the label; reconcile sends it back again. Neither
+side looks wrong alone, and the issue cycles forever. The side that writes the
+format owns the recognizer.
+
+Only comments authored by the bot count. Derek pasting a checklist by hand is
+not a triage run, and treating it as one would let a helpful comment suppress
+the analysis the issue is actually waiting for.
+
+## Running the tests
+
+```bash
+python3 .github/scripts/run_python_tests.py triage-issue
+```
+
+23 tests over `triage_repair.py`: what the recognizer matches and — more
+importantly — what it refuses to match, and the four repair outcomes. No
+network in any of them.
 
 ## See also
 
