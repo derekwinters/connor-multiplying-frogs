@@ -97,9 +97,9 @@ and no way for the two to drift apart.
 | `googleapis/release-please-action` | `45996ed1f6d02564a971a2fa1b5860e934307cf7` | `release-please` |
 | `game-ci/unity-builder` | `d829bfc901f2347c8fe18898f06712b66916ef42` | APK builds |
 | `game-ci/unity-test-runner` | `0ff419b913a3630032cbe0de48a0099b5a9f0ed9` | the EditMode suite |
-| `actions/configure-pages` | `45bfe0192ca1faeb007ade9deae92b16b8254a0d` | `docs-publish` |
-| `actions/upload-pages-artifact` | `fc324d3547104276b827a68afc52ff2a11cc49c9` | `docs-publish` |
-| `actions/deploy-pages` | `cd2ce8fcbc39b97be8ca5fce6e763baed58fa128` | `docs-publish` |
+
+`docs-publish` uses no Pages actions: `mike` commits the built site to
+`gh-pages` itself, which is also what makes the version selector work.
 
 **Adding an action that isn't on this list is a decision, not a detail.** Every
 one is third-party code running with a token; the bar is "there is no reasonable
@@ -518,9 +518,37 @@ which is also the quiet one.
 
 ### `docs-publish`
 
-Publishes the built site to GitHub Pages with `mike`, under the version alias
-for the release. See [Conventions](../intro/conventions.md#docs-versioning).
-Never edit `gh-pages` by hand.
+Publishes the site to GitHub Pages with [mike](https://github.com/jimporter/mike),
+which keeps one built copy per version in the `gh-pages` branch and drives the
+version selector in the header. See
+[Conventions](../intro/conventions.md#docs-versioning).
+
+- **Path-gated** to `docs/`, `mkdocs.yml`, and its own file, on pushes to
+  `main`, plus any `v*` tag and `workflow_dispatch`.
+- **The version comes from `/VERSION`**, marker stripped, so the docs are
+  labelled with the same number the app reports rather than a separate one to
+  keep in step.
+- **`latest` is an alias**, moved with `--update-aliases` on every publish, and
+  set as the default so the site root lands there.
+- **Serialised and never cancelled.** Two mike runs would both rewrite
+  `gh-pages`, and the loser leaves the published site in whatever state it got
+  to.
+
+**Never edit `gh-pages` by hand.** mike rewrites it on every publish, so a hand
+edit disappears at the next one — without warning, and after looking like it
+worked.
+
+#### Between releases, the current version's docs track `main`
+
+`/VERSION` only moves when a release goes out, so a docs change merged after
+`0.1.0` shipped republishes under `0.1.0`. The docs for a released version are
+therefore the *current* docs for that version, not a snapshot of what shipped
+with it.
+
+That is the right trade here: a fix to a confusing page should reach readers
+without waiting for a release. When `0.2.0` ships, `0.2.0` is created fresh and
+`0.1.0` stops moving — so history is preserved at the granularity of releases,
+which is the granularity anyone actually asks about.
 
 ### The reconciliation gate — always on
 
