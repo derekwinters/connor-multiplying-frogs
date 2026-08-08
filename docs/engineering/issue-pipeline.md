@@ -429,10 +429,29 @@ the defence; the Routine ignoring it is the other half, and its prompt says so.
 
 ### Analysis — find what needs triage
 
-`select_triage.py` lists candidate issues: open, not the dashboard, and either
-carrying no state label or carrying `ai-triage`. It returns them oldest-first,
-with everything the triage stage needs already fetched, so the dispatcher can
-fan out without each triage run re-querying.
+`select_triage.py` lists candidate issues. An issue is eligible when it is
+**open** and carries **`ai-triage`**, and is none of the following:
+
+| Excluded | Why |
+| --- | --- |
+| `type:epic` | An epic is a container. Its children are the work, and they carry their own labels. |
+| `dashboard` | The pipeline's own furniture, not something the pipeline works on. |
+| `parked` | A decision the owner made with `/park`. Triage does not get to overrule it — only `/unpark` does. |
+
+Carrying `ai-triage` is the whole entry condition, so an issue with no state
+label at all is not a candidate: it has not been `/admit`ted, and admitting is
+the owner's call. That is the same rule the command table above describes, and
+picking up unadmitted issues would make `/admit` mean nothing.
+
+Each eligible issue comes back with its **number**, its **current milestone**,
+and the **latest owner note** — the most recent `/revise`, `/redo`, or
+`/propose` comment, with its text. Only the latest, because an issue revised
+twice should be triaged against the current feedback rather than a
+conversation; and only the owner's, for the same reason the parser has a
+bad-actor gate. Carrying the note here means the triage run does not have to
+re-read the thread to find out why it is running again.
+
+Results are sorted by issue number, oldest first.
 
 The dispatcher (`pipeline-analysis`) is a thin loop over that list. It makes no
 decisions itself — the decisions are in `triage-issue`, one issue at a time,
