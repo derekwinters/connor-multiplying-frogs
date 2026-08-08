@@ -190,20 +190,52 @@ impossible.
 
 ### Gate 2: milestone order
 
-**Invariant:** work is approved in milestone order. An issue in a later
-milestone cannot become `ready-for-work` while the focus milestone still has
-open work.
+**Invariant:** for every open blocker edge A → B, `order(A) ≥ order(B)`, and B
+must be scheduled.
 
-Milestones are a plan. Approving `v0.2` work while `v0.1` still has twenty open
-issues is how a project ends up with three half-finished versions.
+Without it, an issue can sit in `v0.0.1` blocked by one in `v0.1`. The builder
+correctly skips the dependent — but the blocker is not in the focus milestone to
+be built either, so **the work silently stalls while the milestone reads
+"ready"**. Nothing notices, because from every angle each issue looks fine on
+its own.
 
-The gatekeeper **refuses** and replies with the focus milestone, how many issues
-remain open in it, and the two ways forward: finish the focus milestone, or
-`/focus` the later one deliberately. It never bumps the issue's milestone, and
-never moves focus on its own.
+Two refusals:
 
-The escape hatch is `/focus`, which is a deliberate act, recorded on the
-dashboard, and visible to everyone.
+| Skip | When |
+| --- | --- |
+| `blocker-unscheduled` | the blocker has no milestone, or one with no version order |
+| `blocker-inversion` | the blocker is in a *later* milestone |
+
+Both name the offending issues, so the ack says which ones rather than that
+something is wrong.
+
+#### Milestone order comes from the title
+
+`vMAJOR.MINOR[.PATCH]` is ordered; anything else is **unordered**. That
+deliberately includes `Direct Involvement Needed` — it never ships, so a blocker
+parked there is one nothing will ever build, which is exactly the
+`blocker-unscheduled` case.
+
+Closed blockers are ignored: a resolved dependency constrains nothing.
+
+#### Soft `Depends on:` uses the same rule
+
+It does not stop the builder selecting the issue, but the ordering problem is
+identical — the thing it depends on is not scheduled — and a refusal is cheap
+while a stalled milestone is not.
+
+#### Refuse, never auto-bump
+
+A refusal leaves the issue **completely untouched**. Moving the blocker earlier
+and moving the subject later are both valid fixes, and which one is right is a
+planning decision about scope. The reply says so, and says that nothing was
+changed.
+
+#### It runs on `/milestone` too
+
+Setting a milestone is the other way to create an inversion. Gating only
+`/approve` would let `/milestone v0.0.1` quietly produce one, to be discovered
+at the next approval — or not at all, if the issue was already approved.
 
 ## Auto-revisit when a blocker clears
 
