@@ -217,12 +217,36 @@ The PR title becomes the squash commit message, which becomes the changelog
 entry, which is what release-please reads to decide the next version. So the
 title has to be a valid Conventional Commit before it can merge.
 
-Checks the type is one of the allowed set, that the scope (if present) is
-lowercase, that there's a subject, and that the subject isn't so long it gets
-truncated in a changelog. See [Versioning](versioning.md) for why each of those
-matters.
+Runs on `opened`, `edited`, `reopened`, and `synchronize`, so a title fixed
+after the fact re-checks itself.
 
-Red here is a thirty-second fix: edit the PR title. The check re-runs on edit.
+`.github/scripts/lint_pr_title.py` checks:
+
+| Rule | Why |
+| --- | --- |
+| type is one of `feat` `fix` `docs` `test` `refactor` `chore` `ci` `build` | anything else is a type release-please quietly ignores |
+| type is lowercase | `Feat:` parses as an unknown type, not as `feat:` |
+| scope, if present, is `[a-z0-9-]+` and non-empty | `feat():` is a scope that says nothing |
+| there is a subject after `: ` | a bare `feat:` is a changelog entry with no content |
+| no trailing full stop | changelog lines don't take one |
+| 100 characters or fewer | commitlint's default; stops an essay in the subject line |
+
+Every failure names the fix, and the output ends with *why* the title matters,
+because the check's whole job is to be understood by someone who thinks it is
+being pedantic.
+
+The `!` breaking-change marker is allowed, and prints a note rather than
+failing — pre-1.0 it releases `1.0.0`, which is worth seeing in the log.
+
+Red here is a thirty-second fix: edit the title. Note that the run is
+**cancel-in-progress** per PR, so only the newest title is ever reported on.
+
+The script is plain Python with 28 unit tests, run by `pipeline-tests`
+alongside the skills:
+
+```bash
+python3 .github/scripts/run_python_tests.py scripts
+```
 
 ### `ci-tests` — the two suites
 
