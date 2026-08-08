@@ -353,8 +353,15 @@ the only part of the body that survives a render.
 
 Which gives the rule: **edit the markers, never the rendered sections.** A hand
 edit to a rendered section disappears at the next render, and — worse — looks
-like it worked until it does. Setting focus via `/focus` writes the marker,
-which is the same thing done in the place that keeps it.
+like it worked until it does.
+
+`/focus` and `/cap` therefore persist **by re-rendering with an override**, not
+by editing the body. The gatekeeper passes the new value to the renderer, which
+writes it into the marker as part of the regenerated body. Hand-editing the
+marker directly would work exactly once — until the next render, which reads
+the marker it is about to overwrite and would find the old value if the write
+had raced. Going through the renderer means there is only ever one writer of
+that body.
 
 Markers rather than a config file in the repo because focus and cap are
 *operational* state that changes between merges. A PR to change which milestone
@@ -596,6 +603,33 @@ returns the issue to `ai-triage`, triage finds the analysis it wrote and repairs
 the label instead, reconcile returns it again. Neither side is wrong on its own
 terms, so nothing surfaces as an error — the issue just cycles. The side that
 writes the format owns the recognizer.
+
+### The I/O layer
+
+Everything with a decision in it is pure and tested without a network. Three
+thin modules wire those pieces to GitHub:
+
+| Module | Does |
+| --- | --- |
+| `_github_api.py` | REST helpers, and the shared dashboard re-render |
+| `run_comment_event.py` | one `issue_comment` event, end to end |
+| `run_sweep.py` | the board-wide revisit + reconcile pass |
+
+`run_comment_event.py` is: snapshot → parse → gate → apply → write labels, ack,
+and reaction → **re-render the dashboard once, after every label write.**
+Rendering in between would publish a board describing a half-applied command.
+`run_sweep.py` re-renders once at the end for the same reason, and takes
+`--events-only` to drop reconcile's two cron-only fixes on the 15-minute pass.
+
+**Authentication is `GITHUB_TOKEN`, never a PAT.** The workflow token is scoped
+to this repository and expires with the job; a personal access token would
+carry everything its owner can do into a job nobody is watching.
+
+**The owner check is repeated in the script.** The workflows already filter on
+the comment author, so this is redundant — deliberately. A script that is safe
+only because its caller filtered is one edited `if:` away from letting a
+stranger drive the pipeline, and the workflow trigger is exactly the kind of
+line that gets edited for an unrelated reason.
 
 ### Applying an action
 
