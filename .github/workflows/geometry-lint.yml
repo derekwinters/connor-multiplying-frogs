@@ -1,0 +1,48 @@
+name: geometry-lint
+
+# The backstop for the named-values rule in docs/engineering/tech-stack.md.
+# Ratchets against a committed baseline: a file may keep the literals it has
+# and may not gain more.
+#
+# Path-gated to the sources it checks and to the checker itself — including the
+# baseline, so a PR that only raises the baseline still runs the check that
+# would have failed.
+
+on:
+  pull_request:
+    paths:
+      - Assets/Scripts/**
+      - .github/scripts/check_geometry_literals.py
+      - .github/scripts/tests/test_check_geometry_literals.py
+      - .github/geometry_literals_baseline.txt
+      - .github/workflows/geometry-lint.yml
+  push:
+    branches: [main]
+    paths:
+      - Assets/Scripts/**
+      - .github/scripts/check_geometry_literals.py
+      - .github/geometry_literals_baseline.txt
+      - .github/workflows/geometry-lint.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: geometry-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The checker's own tests run first, in the same job. A gate nobody has
+      # tested is a gate whose verdict means nothing — and if the checker is
+      # broken, its "pass" is the dangerous outcome.
+      - name: Test the checker
+        run: python3 .github/scripts/run_python_tests.py scripts
+
+      - name: Check for new geometry literals
+        run: python3 .github/scripts/check_geometry_literals.py

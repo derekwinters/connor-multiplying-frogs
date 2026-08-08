@@ -74,9 +74,10 @@ build that finishes while you are still looking at it. Use it for "does the app
 launch and show the right screen", never for judging performance or for anything
 shipped.
 
-CI builds the device profile. The emulator profile is a local convenience, and
-a bug that reproduces only under it is a bug in the profile until proven
-otherwise.
+CI builds both: the device profile is what the release ships, and an
+emulator-targeted asset is attached alongside it so the release can be tried on
+a desktop without rebuilding. A bug that reproduces only under the emulator is a
+bug in the profile until proven otherwise.
 
 ### What is explicitly not a target
 
@@ -270,7 +271,19 @@ Deliberately narrow:
 - Unity's own required literals in serialization or attribute arguments, where a
   constant is not permitted by the language.
 
-Anything else needs a name. CI enforces this: the geometry lint fails a PR that
-adds a bare numeric literal to a method body outside those exemptions, with a
-ratcheting baseline so existing code does not have to be fixed all at once —
-but the count can only go down. See [CI/CD](ci-cd.md).
+Anything else needs a name.
+
+### The check is narrower than the rule
+
+`geometry-lint` flags **f-suffixed float literals of magnitude 3 or more** on a
+line that does not name them, ratcheting against a committed baseline so
+existing code need not be fixed all at once — but the count can only go down.
+
+That is deliberately narrower than the rule above. It does not see integer
+literals, magnitudes below 3, or values inside a named declaration's
+initialiser. A check with a high false-positive rate is one people learn to
+override, and then it catches nothing.
+
+**So passing the check is not the same as following the rule.** The rule is what
+review holds you to; the check is what stops the rule decaying while nobody is
+looking. See [CI/CD](ci-cd.md#geometry-lint-the-tuning-literal-check).

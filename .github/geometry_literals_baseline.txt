@@ -1,0 +1,4 @@
+# Geometry/tuning literals tolerated per file — a ratchet, not a target.
+# Counts may go down and the file is regenerated with --update-baseline.
+# They may never go up: see .github/scripts/check_geometry_literals.py.
+
