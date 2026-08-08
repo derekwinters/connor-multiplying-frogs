@@ -14,7 +14,7 @@ rule #2 points at, and the page the geometry lint in CI enforces.
 | Unity version | **6000.0.81f1** (Unity 6 LTS) |
 | Language | C# |
 | Test framework | NUnit, via Unity Test Framework |
-| Rendering | Universal Render Pipeline (URP), 2D |
+| Rendering | 2D, built-in render pipeline |
 
 ### The Unity version is pinned, and the pin is load-bearing
 
@@ -28,6 +28,18 @@ Unity 6 LTS because LTS means two years of patches without a forced upgrade
 mid-project, which matters far more here than any feature in a newer stream.
 This is a game built in evenings; an engine upgrade is not a thing to be doing
 by accident.
+
+### The render pipeline is built-in, for now
+
+URP is the usual choice for a new 2D Unity project, and it will probably be the
+right one here eventually. It is not the choice today, because URP needs a
+renderer-data asset and a pipeline asset configured in the editor, and adding
+the package without them leaves the project half-configured.
+
+With zero art committed, switching later costs nothing — no materials to remake,
+no lights to re-tune. So the pipeline is a decision deferred to the first issue
+that actually needs 2D lighting, made deliberately at that point rather than
+guessed at now.
 
 **Bumping it** is its own PR, and the checklist is:
 
@@ -80,22 +92,33 @@ The single most important structural rule in this repo.
 ### The shape
 
 ```text
-Assets/
+Assets/                       ← everything Unity compiles
   Scripts/
     Core/                     ← game logic. No UnityEngine. Ever.
-      Core.asmdef             ← no engine references, no auto-referenced assemblies
-      Frogs/
-      Rules/
+      Frogs.Core.asmdef       ← no engine references, no auto-referenced assemblies
     Unity/                    ← the shell. MonoBehaviours, scene wiring, input.
-      Unity.asmdef            ← references Core
-      Views/
-      Input/
+      Frogs.Unity.asmdef      ← references Frogs.Core
+  Tests/
+    EditMode/                 ← EditMode tests for the shell; needs the editor
+      Frogs.Unity.EditModeTests.asmdef
+  Editor/                     ← editor-only tooling; never ships in a build
+  Scenes/  Art/  Audio/  Prefabs/
 Tests/
-  Core/
-    Core.Tests.asmdef         ← references Core only; runs as a plain NUnit suite
-  Unity/
-    Unity.Tests.asmdef        ← EditMode tests for the shell; needs the editor
+  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
+                                and `dotnet test` can run it with no editor.
+ProjectSettings/              ← ProjectVersion.txt pins the editor version
+Packages/manifest.json        ← only the packages actually needed
 ```
+
+Two placements are worth explaining, because they look inconsistent and aren't:
+
+- **EditMode tests are inside `Assets/`** — Unity only compiles code under
+  `Assets/` and `Packages/`, so a Unity test assembly has nowhere else to live.
+- **Core tests are outside `Assets/`** — deliberately. Unity ignores everything
+  outside those two roots, which is exactly what lets `Tests/Core` be an
+  ordinary .NET test project that `dotnet test` runs with no editor involved.
+  Putting it under `Assets/` would drag it into Unity's compilation and cost it
+  the property that makes it useful.
 
 ### The rule
 
@@ -143,9 +166,31 @@ Tests substitute a fake clock and control time exactly. That is the whole point,
 and it is why "I'll just reference UnityEngine here" is never the shortcut it
 looks like.
 
+## Project settings are applied by code, not hand-edited
+
+`Assets/Editor/ProjectBootstrap.cs` sets the product and company name, the
+Android application identifier, the minimum API level, the target architecture,
+the scripting backend, and the orientation — through the typed `PlayerSettings`
+API.
+
+Nothing in `ProjectSettings/` is hand-authored. Unity's YAML deserializer
+silently ignores keys it doesn't recognise, so a hand-edited settings file with
+one wrong key builds fine and is wrong at runtime; the same mistake made through
+the C# API is a compile error. See
+[Unity serialization](unity-serialization.md).
+
+```bash
+Unity -batchmode -quit -projectPath . \
+      -executeMethod Frogs.EditorTools.ProjectBootstrap.Apply
+```
+
+It is idempotent, and whatever it changes under `ProjectSettings/` gets
+committed. The version fields are deliberately absent from it — `/VERSION` owns
+those, injected at build time ([Versioning](versioning.md)).
+
 ### Naming
 
-- Assemblies and their folders share a name: `Core`, `Unity`, `Core.Tests`.
+- Assemblies and their folders share a name: `Frogs.Core`, `Frogs.Unity`.
 - Core types are named for the game, not the engine — `Pond`, `FrogColony`,
   `SplitRule`. If a type name only makes sense to someone who knows Unity, it
   probably belongs in the shell.

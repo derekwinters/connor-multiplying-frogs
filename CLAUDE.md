@@ -259,5 +259,6 @@ entirely.
 | Naming, labels, milestones | [`docs/intro/conventions.md`](docs/intro/conventions.md) |
 | Game logic | `Assets/Scripts/Core/` — no UnityEngine |
 | Unity shell | `Assets/Scripts/Unity/` |
-| Core tests | `Tests/Core/` — plain NUnit, fast |
+| Core tests | `Tests/Core/` — plain NUnit, fast, no editor |
+| Unity tests | `Assets/Tests/EditMode/` — needs the editor, runs in CI |
 | The app's version | `/VERSION` — release-please only |
