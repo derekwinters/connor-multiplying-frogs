@@ -93,6 +93,8 @@ nav:
       - Future ideas: specs/future-ideas.md
       - UI:
           - specs/ui/index.md
+          - Shared components: specs/ui/shared-components.md
+          - Mockups: specs/ui/mockups/index.md
   - Engineering:
       - engineering/index.md
       - Tech stack: engineering/tech-stack.md
