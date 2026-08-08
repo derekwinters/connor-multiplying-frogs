@@ -893,6 +893,28 @@ Rendering is **deterministic and byte-stable**: the same state produces the
 same bytes. Without that, every hourly run would PATCH the issue and the
 dashboard would generate a stream of meaningless edits.
 
+#### No model renders the board
+
+Production rendering is `dashboard.yml` running `render_dashboard.py`. Nothing
+about the body is generated prose — every line comes out of a pure function of
+the state.
+
+The board is what Derek reads to decide what to approve next. A model-written
+summary can be subtly, fluently wrong in a way that reads perfectly; a table
+computed from labels either matches GitHub or has a bug someone can find.
+
+#### The render's write surface is one issue body
+
+The renderer reads the whole board and can modify **exactly one thing**: the
+dashboard issue's body, via a single `PATCH`, authenticated with `GITHUB_TOKEN`
+rather than a PAT. No labels, no comments, no milestones, no other issues. Run
+without `--write` it does not write at all — previewing is the default, because
+it is the common case and the safe option should not need a flag.
+
+That narrow surface is what makes an incorrect render cheap. A wrong board is
+replaced by the next render; if the renderer also applied labels, a bug in the
+star logic would be a bug that reorganises the pipeline.
+
 #### The focus pie always adds up
 
 The focus milestone is summarised as four slices:
