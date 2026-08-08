@@ -1665,6 +1665,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Serial delegated delivery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cap-bounds-the-round-not-the-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cap bounds the round, not the concurrency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2450,6 +2467,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Serial delegated delivery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cap-bounds-the-round-not-the-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cap bounds the round, not the concurrency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2708,7 +2742,7 @@ explain yourself in the same comment.</p>
 </tr>
 <tr>
 <td><code>/cap &lt;n&gt;</code></td>
-<td>set the max concurrent <code>in-progress</code> issues. <strong>Dashboard issue only.</strong></td>
+<td>set how many issues one build round takes on. <strong>Dashboard issue only.</strong></td>
 </tr>
 </tbody>
 </table>
@@ -2952,7 +2986,7 @@ thread rather than being a label that changed itself overnight.</p>
 <h2 id="focus-and-cap-live-on-the-dashboard-issue"><code>/focus</code> and <code>/cap</code> live on the dashboard issue<a class="headerlink" href="#focus-and-cap-live-on-the-dashboard-issue" title="Link to this section">&para;</a></h2>
 <p>Both are stored as HTML-comment markers in the body of the dashboard issue:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- pipeline:focus=v0.0.1 --&gt;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cm">&lt;!-- pipeline:cap=1 --&gt;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cm">&lt;!-- pipeline:cap=3 --&gt;</span>
 </code></pre></div>
 <p>The dashboard issue is the one carrying the <code>dashboard</code> label. There is exactly
 one; the reconciler flags it if there are two or none.</p>
@@ -3291,21 +3325,72 @@ to have it.</p>
 <p><strong>Eligibility</strong> — all of:</p>
 <ul>
 <li><code>ready-for-work</code>;</li>
-<li>in the focus milestone;</li>
-<li>not blocked by an open issue;</li>
+<li>in the focus milestone (no milestone is not the focus milestone);</li>
+<li>every hard blocker closed or merged;</li>
+<li>not <code>parked</code>;</li>
 <li>not a <code>type:epic</code> (epics are containers; their children are the work);</li>
-<li>has no open PR already referencing it.</li>
+<li>has no open PR <strong>closing</strong> it.</li>
 </ul>
-<p><strong>Ordering</strong> — a topological sort over the blocked-by graph, so an issue that
-unblocks others is worked before one that unblocks nothing. Ties break oldest
-first, so nothing starves. A cycle in the graph is reported, not resolved: a
-cycle is a triage mistake, and silently picking an entry point hides it.</p>
+<p>Two of those are narrower than they look.</p>
+<p><strong>Hard blockers are native edges unioned with <code>Blocked by #N</code> lines</strong>, merged by
+one helper. An issue can have one dependency recorded natively and another still
+written in prose, and reading either source alone releases work that is still
+half-blocked. A blocker the caller knows nothing about counts as unresolved:
+not knowing whether the thing you depend on is finished is precisely the case
+where starting is expensive.</p>
+<p><strong>An open PR only suppresses an issue if it <em>closes</em> it</strong> — a closing keyword,
+not a bare <code>#47</code>. PRs reference issues constantly for context, and treating a
+mention as "already being worked" would silently starve an issue that nobody is
+actually working. This is the same keyword rule reconcile uses to decide
+done-ness.</p>
+<p><strong>Ordering</strong> — a stable topological sort. At each step the lowest-numbered
+issue whose in-queue dependencies are already placed, so dependencies come
+first and ties break oldest-first with nothing starving. Soft <code>Depends on:</code>
+lines order here even though they never gate: a blocker closed this evening
+still says which of two ready issues was meant to come first.</p>
+<p>The sort places <strong>one issue per step</strong>, re-checking after each. Placing the
+whole ready set at once would scatter a dependent away from the thing it
+depends on — with a cap of 2, <code>#11, #12</code> rather than <code>#11, #10</code> — and a cap is
+far more useful when it cuts a coherent chain than an arbitrary slice.</p>
+<p>A cycle is a triage mistake, and reconcile flags it. The builder must not hang
+or drop issues on one, so it falls back to number order for the tangled set.</p>
 <h3 id="serial-delegated-delivery">Serial delegated delivery<a class="headerlink" href="#serial-delegated-delivery" title="Link to this section">&para;</a></h3>
 <p>Issues are worked <strong>one at a time</strong>, each delegated to its own agent session.</p>
 <p>Serial because parallel agents on one repository fight: two branches touching
 <code>ProjectSettings.asset</code>, two release-please runs, two PRs renumbering the same
-things. The <code>cap</code> marker exists to raise this above 1 if that ever stops being
-true, and its default is 1.</p>
+things. Nothing raises that above one at a time.</p>
+<h4 id="cap-bounds-the-round-not-the-concurrency"><code>cap</code> bounds the round, not the concurrency<a class="headerlink" href="#cap-bounds-the-round-not-the-concurrency" title="Link to this section">&para;</a></h4>
+<p>The two are separate knobs and it is worth keeping them apart.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Means</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concurrency</td>
+<td>issues worked at once</td>
+<td>always <strong>1</strong></td>
+</tr>
+<tr>
+<td><code>cap</code></td>
+<td>issues the round takes on at all</td>
+<td><strong>3</strong> by default</td>
+</tr>
+</tbody>
+</table>
+<p><code>select_queue.py</code> returns at most <code>cap</code> issues; the builder then works through
+them one after another. A night that picks up three issues and delivers them
+serially is entirely compatible with "parallel agents fight" — nothing is
+running in parallel.</p>
+<p>The cap is small on purpose. Three issues that land beat six that half-land,
+and it is the only thing standing between a quiet night and thirty open PRs.
+The cap applies <strong>after</strong> ordering, never before: capping first would take the
+three lowest-numbered issues and could admit a dependent without the thing it
+depends on.</p>
 <p>Delegated — a fresh session per issue — because context from the previous issue
 is a liability. The agent that just spent an hour on the audio system will find
 a way to make the next issue about audio.</p>
