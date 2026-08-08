@@ -173,9 +173,20 @@ Without one it is approved work no builder will ever select, because selection
 runs against the focus milestone. It leaves the queue silently, which is the
 worst way for work to disappear.
 
-The gatekeeper **refuses** and replies naming the open milestones and the
-`/milestone` command. It never picks one, not even when only one is open, and
-not even when the issue's siblings all sit in the same milestone.
+The gatekeeper **refuses** with an `approve-no-milestone` skip and a hand-back
+asking *which milestone?*. It never picks one — not when only one is open, and
+not when the issue's siblings all sit in the same milestone.
+
+It reads **only the issue's milestone field**. Triage sets that field, and
+scraping a `/milestone v0.1` out of the comment history would make the gate
+depend on what was said rather than what is true; the two disagree the moment
+anything is edited. An inline `/milestone` in the same comment does not feed
+this gate either — that command fires independently, and if it succeeds the
+next `/approve` sees the field it set.
+
+`/milestone` is deliberately **not** subject to this gate. It is the command
+that fixes a missing milestone, so gating it on having one would make the fix
+impossible.
 
 ### Gate 2: milestone order
 
