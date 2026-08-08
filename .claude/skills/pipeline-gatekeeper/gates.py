@@ -26,7 +26,10 @@ import re
 # what fixes a missing milestone, so gating it on having one would make the fix
 # impossible.
 GATES = {
-    "approve": ["milestone-presence"],
+    "approve": ["milestone-presence", "milestone-order"],
+    # Setting a milestone is the other way to create an inversion, so the order
+    # gate runs there too.
+    "milestone": ["milestone-order"],
 }
 
 VERSION_MILESTONE = re.compile(r"^v(\d+)\.(\d+)(?:\.(\d+))?$")
@@ -88,3 +91,72 @@ def milestone_present(issue: dict, comments=None) -> Verdict:
         "and approve again.",
         skip_reason="approve-no-milestone",
     )
+
+
+def _blocking_edges(issue: dict) -> list[dict]:
+    """Every open thing this issue waits on: hard blockers and soft ones.
+
+    Soft `Depends on:` gets the same refuse rule as a hard blocker. It does not
+    stop the builder selecting the issue, but the ordering problem is identical
+    — the thing it depends on is not scheduled to be built — and a refusal is
+    cheap while a stalled milestone is not.
+    """
+    edges = list(issue.get("blockers") or []) + list(issue.get("soft_dependencies") or [])
+    return [edge for edge in edges if (edge.get("state") or "open") == "open"]
+
+
+def milestone_order_ok(issue: dict, milestones=None) -> Verdict:
+    """No issue is scheduled earlier than something it waits on.
+
+    **Invariant:** for every open blocker edge A → B, `order(A) >= order(B)`,
+    and B must be scheduled.
+
+    Without this, an issue can sit in `v0.0.1` blocked by one in `v0.1`. The
+    builder correctly skips the dependent — but the blocker is not in the
+    focus milestone to be built either, so the work silently stalls while the
+    milestone reads "ready". Nothing else notices, because from every angle
+    each issue looks fine on its own.
+    """
+    subject_order = milestone_order(issue.get("milestone"))
+
+    if subject_order is None:
+        # An unscheduled or unordered subject is the presence gate's problem.
+        # Two gates reporting one mistake produces two acks for it.
+        return Verdict(True, "Not scheduled in a version milestone; nothing to order against.")
+
+    unscheduled = []
+    inverted = []
+
+    for edge in _blocking_edges(issue):
+        edge_order = milestone_order(edge.get("milestone"))
+
+        if edge_order is None:
+            unscheduled.append(edge)
+        elif edge_order > subject_order:
+            inverted.append(edge)
+
+    if unscheduled:
+        named = ", ".join(f"#{edge.get('number')}" for edge in unscheduled)
+        return Verdict(
+            False,
+            f"This is in **{issue['milestone']}**, but it waits on {named}, which "
+            "is not scheduled in a version milestone — so nothing will ever build it "
+            "and this issue would sit ready forever.\n\n"
+            "Give it a milestone at or before this one, then try again.",
+            skip_reason="blocker-unscheduled",
+        )
+
+    if inverted:
+        named = ", ".join(
+            f"#{edge.get('number')} ({edge.get('milestone')})" for edge in inverted)
+        return Verdict(
+            False,
+            f"This is in **{issue['milestone']}**, but it waits on {named} — later "
+            "milestones. The builder would skip this issue every night while the "
+            "milestone reads ready, and nothing would say why.\n\n"
+            "Move the blocker earlier, or move this issue later. **Nothing has been "
+            "changed here** — which way round is a planning decision.",
+            skip_reason="blocker-inversion",
+        )
+
+    return Verdict(True, "Everything this issue waits on is scheduled at or before it.")
