@@ -83,7 +83,9 @@ arrive.
 8. **Open the PR**, with:
    - a **Conventional Commit title** — it becomes the squash commit;
    - the **plain-English lead** (below);
-   - a **`**Docs:**` line**, always, `None` included;
+   - a **`**Docs:**` line**, always, `None` included. CI checks that a docs
+     file changed; the line is how a reader learns *what* changed in it, which
+     the gate cannot see ([CI/CD](ci-cd.md#the-reconciliation-gate-always-on));
    - a **closing keyword** — `Closes #12` — in the body, not just a mention.
      The pipeline reads issue state from GitHub, so an issue left open after its
      work merged is an issue that gets handed out again;
@@ -190,7 +192,7 @@ better.
 | | Answers | Doesn't answer |
 | --- | --- | --- |
 | The diff | what the text now says | what it said before, or why |
-| `**Docs:**` line | which pages changed | what changed in them |
+| `**Docs:**` line | which pages changed, and what changed in them | why the old rule was wrong |
 | Deviations and Decisions | where you departed from the issue | a change the issue *asked* for |
 | **How the spec is changing** | old rule → new rule, and why | — |
 

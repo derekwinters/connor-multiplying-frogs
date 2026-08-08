@@ -504,28 +504,55 @@ Never edit `gh-pages` by hand.
 
 ### The reconciliation gate — always on
 
-**Every PR must state what happened to the docs.** The gate checks the PR body
-for a `**Docs:**` line:
+**A PR that changes code changes the docs, in the same PR.** `/docs` is the
+design contract, and a contract that lags the code by three PRs is not one.
 
-```text
-**Docs:** docs/specs/frogs.md — updated the splitting rule to cap at 32.
-**Docs:** None — no behaviour the docs describe was changed.
-```
+`.github/scripts/docs_reconciliation_gate.py` decides:
 
-It is deliberately a *statement* requirement rather than a diff requirement. A
-check that demanded a docs change whenever code changed would be wrong most of
-the time and would train everyone to make token docs edits. A check that
-requires you to say "None" makes the author spend three seconds actually
-considering it, which is the behaviour we want.
+| PR | Verdict |
+| --- | --- |
+| touches anything under `docs/`, or `CLAUDE.md`, `README.md`, `mkdocs.yml` | pass |
+| code only, carrying `skip-docs` | pass |
+| code only, no label | **fail** |
+| the release PR | pass, always |
+| changes nothing | pass |
 
-The gate is **always on** — it does not skip based on which files changed,
+The gate is **always on**. It does not skip based on which files changed,
 because "this PR obviously doesn't affect the docs" is exactly the judgement it
 exists to make someone write down.
 
+#### What counts as documentation
+
+Not "any markdown file". A `SKILL.md` is documentation *of* a skill, but it is
+also the skill's behaviour — changing it changes what an agent does, so it does
+not excuse the docs. Neither does a `.md` file sitting next to some source.
+
+#### The release PR is exempt
+
+It contains the version bump and the changelog release-please generated, and
+nothing else. It cannot reconcile docs, and there is nobody driving it to apply
+a label. Matched **both** by its head branch and by its `autorelease: pending`
+label, so a change to either does not silently start failing every release.
+
+#### The grace poll
+
+A `skip-docs` label applied moments after the PR opens would otherwise produce a
+failing run that is already wrong by the time anyone reads it — and a red tick
+nobody should act on is worse than a slow one.
+
+So a would-be failure re-reads the PR's **live** labels for up to a minute
+(`GRACE_POLL_ATTEMPTS` × `GRACE_POLL_SECONDS`) before reporting. A label landing
+inside that window is observed by the same run: **no failing run is produced at
+all.** A passing PR never waits.
+
+If the label API cannot be read, the gate keeps failing. Unknown is not
+permission — a gate that passes when it cannot see the labels is a gate an
+outage switches off.
+
 #### The `skip-docs` escape hatch
 
-The `skip-docs` label bypasses the gate, for the genuinely doc-irrelevant PR —
-a dependency bump, a CI fix, a typo in a comment.
+For the genuinely doc-irrelevant PR — a dependency bump, a CI fix, a typo in a
+comment. Adding the label re-runs the check, so nothing needs pushing.
 
 Using it is a decision, so it goes in the PR's `## Deviations and Decisions`
 section with a reason. A `skip-docs` label with no justification is a review
