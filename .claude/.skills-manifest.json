@@ -29,6 +29,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation."
+    },
+    {
+      "name": "ci-watch",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Classifier written against this repo's check names and verified on PRs #130 and #123."
     }
   ]
 }
