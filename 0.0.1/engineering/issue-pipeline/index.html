@@ -1813,6 +1813,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#no-model-renders-the-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No model renders the board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-renders-write-surface-is-one-issue-body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The render's write surface is one issue body
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2741,6 +2763,28 @@
     <span class="md-ellipsis">
       
         Parked is listed, never queued
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-model-renders-the-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No model renders the board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-renders-write-surface-is-one-issue-body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The render's write surface is one issue body
       
     </span>
   </a>
@@ -3894,6 +3938,22 @@ remembered, so nothing on it can be stale.</p>
 <p>Rendering is <strong>deterministic and byte-stable</strong>: the same state produces the
 same bytes. Without that, every hourly run would PATCH the issue and the
 dashboard would generate a stream of meaningless edits.</p>
+<h4 id="no-model-renders-the-board">No model renders the board<a class="headerlink" href="#no-model-renders-the-board" title="Link to this section">&para;</a></h4>
+<p>Production rendering is <code>dashboard.yml</code> running <code>render_dashboard.py</code>. Nothing
+about the body is generated prose — every line comes out of a pure function of
+the state.</p>
+<p>The board is what Derek reads to decide what to approve next. A model-written
+summary can be subtly, fluently wrong in a way that reads perfectly; a table
+computed from labels either matches GitHub or has a bug someone can find.</p>
+<h4 id="the-renders-write-surface-is-one-issue-body">The render's write surface is one issue body<a class="headerlink" href="#the-renders-write-surface-is-one-issue-body" title="Link to this section">&para;</a></h4>
+<p>The renderer reads the whole board and can modify <strong>exactly one thing</strong>: the
+dashboard issue's body, via a single <code>PATCH</code>, authenticated with <code>GITHUB_TOKEN</code>
+rather than a PAT. No labels, no comments, no milestones, no other issues. Run
+without <code>--write</code> it does not write at all — previewing is the default, because
+it is the common case and the safe option should not need a flag.</p>
+<p>That narrow surface is what makes an incorrect render cheap. A wrong board is
+replaced by the next render; if the renderer also applied labels, a bug in the
+star logic would be a bug that reorganises the pipeline.</p>
 <h4 id="the-focus-pie-always-adds-up">The focus pie always adds up<a class="headerlink" href="#the-focus-pie-always-adds-up" title="Link to this section">&para;</a></h4>
 <p>The focus milestone is summarised as four slices:</p>
 <table>
