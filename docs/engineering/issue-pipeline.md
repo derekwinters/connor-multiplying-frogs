@@ -412,3 +412,46 @@ remembered, so nothing on it can be stale.
 The scripts inside them are ordinary Python with ordinary unit tests, run by the
 `pipeline-tests` workflow ([CI/CD](ci-cd.md#pipeline-workflows)). The pipeline is
 code, and a broken gatekeeper is a broken queue.
+
+## Skills here are local, and deliberately not synced
+
+**`.claude/skills/` is the source of truth in this repository.** Every skill was
+hand-ported from `derekwinters/lucas-doggiehood` and then diverged to fit this
+game — different release config, different milestones, a different label
+taxonomy.
+
+There is **no `skills-update` workflow**, no scheduled sync, and nothing here
+reads an upstream skills repository at runtime. No `AI_SKILLS_READ_TOKEN` secret
+is needed, and one should not be added.
+
+### Why not sync
+
+A sync would eventually revert local work. That is not a hypothetical: it is
+why the upstream project disabled its own sync. Once a skill has diverged —
+which it does the first time it mentions `.github/release-please/config.json`
+or `type:wireframe` — an upstream copy is not an update, it is a regression
+wearing an update's clothes. And it arrives on a schedule, so it lands when
+nobody is looking at it.
+
+### The manifest is a record, not a subscription
+
+`.claude/.skills-manifest.json` says where each skill came from and whether it
+has diverged, so a future reconciliation knows what was copied from where. It
+carries `"sync": "disabled"` and the reason, so nobody wires a workflow to it by
+assuming that a manifest implies a sync.
+
+Nothing reads it. It is documentation that happens to be JSON.
+
+### If a sync is ever wanted
+
+In this order, and not any other:
+
+1. **Reconcile the divergence first.** Diff every local skill against upstream
+   and decide, per difference, which side is right. A sync installed before
+   this step is a sync that silently makes those decisions by overwriting.
+2. Restore a `skills-update` workflow and its read token.
+3. Subscribe only the skills that genuinely have no local divergence, and record
+   in the manifest which those are.
+
+Steps 2 and 3 are an afternoon. Step 1 is the one that gets skipped, and it is
+the one that matters.
