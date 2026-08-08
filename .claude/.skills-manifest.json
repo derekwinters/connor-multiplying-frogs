@@ -36,6 +36,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Classifier written against this repo's check names and verified on PRs #130 and #123."
+    },
+    {
+      "name": "scaffold-core",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Namespaces, folder layout, and the no-meta-for-Tests/Core rule follow this repo's tech-stack.md."
     }
   ]
 }

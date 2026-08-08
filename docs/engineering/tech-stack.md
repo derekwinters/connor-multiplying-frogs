@@ -212,7 +212,16 @@ those, injected at build time ([Versioning](versioning.md)).
 
 ### Naming
 
+Use the `scaffold-core` skill to create a Core type; it applies all of this and
+leaves you with a failing test, which is where a new type should start.
+
+```bash
+python3 .claude/skills/scaffold-core/scaffold.py SplitRule --subfolder Rules
+```
+
 - Assemblies and their folders share a name: `Frogs.Core`, `Frogs.Unity`.
+- A subfolder under `Assets/Scripts/Core/` becomes a namespace segment:
+  `Rules/` is `Frogs.Core.Rules`, and its tests are `Frogs.Core.Tests.Rules`.
 - Core types are named for the game, not the engine — `Pond`, `FrogColony`,
   `SplitRule`. If a type name only makes sense to someone who knows Unity, it
   probably belongs in the shell.
