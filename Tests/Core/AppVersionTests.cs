@@ -40,5 +40,30 @@ namespace Frogs.Core.Tests
         {
             Assert.That(() => AppVersion.Parse(text), Throws.TypeOf<FormatException>());
         }
+
+        // /VERSION carries the release-please marker on the same line as the
+        // version, so every consumer has to strip from '#' onward. Doing that
+        // in one place beats each caller reinventing it slightly differently.
+        [TestCase("0.0.1 # x-release-please-version", 0, 0, 1)]
+        [TestCase("1.2.3 # x-release-please-version", 1, 2, 3)]
+        [TestCase("0.4.0#x-release-please-version", 0, 4, 0)]
+        [TestCase("  0.5.6   # trailing whitespace and a comment  ", 0, 5, 6)]
+        [TestCase("0.7.8\n", 0, 7, 8)]
+        public void ReadFrom_StripsTheMarkerComment(string contents, int major, int minor, int patch)
+        {
+            var version = AppVersion.ReadFrom(contents);
+
+            Assert.That(version.Major, Is.EqualTo(major));
+            Assert.That(version.Minor, Is.EqualTo(minor));
+            Assert.That(version.Patch, Is.EqualTo(patch));
+        }
+
+        [TestCase("# x-release-please-version")]
+        [TestCase("")]
+        [TestCase("   ")]
+        public void ReadFrom_RejectsAFileWithNoVersionOnIt(string contents)
+        {
+            Assert.That(() => AppVersion.ReadFrom(contents), Throws.TypeOf<FormatException>());
+        }
     }
 }

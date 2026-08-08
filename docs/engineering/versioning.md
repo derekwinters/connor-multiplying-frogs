@@ -5,13 +5,11 @@ commit messages you were writing anyway.
 
 ## `/VERSION` is the source of truth
 
-A single file at the repo root holds the version the app reports:
+A single file at the repo root holds the version the app reports. It is one
+line:
 
 ```text
-# The app's version. Owned by release-please — never hand-edit.
-# x-release-please-start-version
-0.0.1
-# x-release-please-end-version
+0.0.1 # x-release-please-version
 ```
 
 Everything that needs a version reads it from here. Unity's
@@ -50,9 +48,9 @@ there is still exactly one source and Unity still gets what it needs. See
 ### The `x-release-please-version` marker
 
 release-please's generic updater does not guess where the version is in a file.
-It looks for the annotation — either inline on the same line, or as the
-`x-release-please-start-version` / `x-release-please-end-version` block used
-above — and replaces what it finds there.
+It rewrites **only lines containing the `x-release-please-version` annotation**,
+which is why the marker shares the line with the version rather than sitting
+above it.
 
 **Without the marker, nothing fails loudly.** release-please runs, opens its
 release PR, writes the changelog, tags the release — and leaves `/VERSION` at
@@ -60,6 +58,32 @@ its old value. You get a `v0.2.0` tag on a build that reports `0.1.0`, and the
 first sign of it is someone asking why the version on the title screen never
 changes. That is why the marker is a build-checklist item and why
 [a Core guard test](#the-guard-test) asserts the file and the manifest agree.
+
+### Every consumer strips from `#` onward
+
+The marker lives on the version's own line, so **the file's contents are not the
+version** — anything reading `/VERSION` has to cut the comment off first, then
+trim.
+
+Do not reimplement that per caller. `Frogs.Core.AppVersion.ReadFrom(contents)`
+does it once, and is covered by the fast suite:
+
+```csharp
+var version = AppVersion.ReadFrom(File.ReadAllText("VERSION"));
+version.Major;                // 0
+version.AndroidVersionCode;   // 1
+```
+
+It throws `FormatException` on a file with only a marker and no version, and on
+anything that isn't three non-negative numbers — a malformed `/VERSION` has to
+fail at the point of reading rather than silently become `0.0.0` in a shipped
+APK.
+
+For shell consumers, the equivalent is:
+
+```bash
+VERSION=$(cut -d'#' -f1 VERSION | tr -d '[:space:]')
+```
 
 ## Conventional Commits drive the bump
 
