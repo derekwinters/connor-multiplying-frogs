@@ -43,6 +43,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Namespaces, folder layout, and the no-meta-for-Tests/Core rule follow this repo's tech-stack.md."
+    },
+    {
+      "name": "core-unity-split",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Reference only; defers to docs/engineering/tech-stack.md rather than restating the rule, so the two cannot drift."
     }
   ]
 }
