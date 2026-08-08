@@ -86,6 +86,7 @@ repository.
 | `actions/setup-python` | `5fda3b95a4ea91299a34e894583c3862153e4b97` | docs, pipeline, scripts |
 | `actions/setup-dotnet` | `a98b56852c35b8e3190ac28c8c2271da59106c68` | the Core suite |
 | `actions/upload-artifact` | `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` | APKs, test results |
+| `actions/cache` | `55cc8345863c7cc4c66a329aec7e433d2d1c52a9` | Unity's `Library/` |
 | `actions/download-artifact` | `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` | the release attach step |
 | `googleapis/release-please-action` | `45996ed1f6d02564a971a2fa1b5860e934307cf7` | `release-please` |
 | `game-ci/unity-builder` | `d829bfc901f2347c8fe18898f06712b66916ef42` | APK builds |
@@ -250,13 +251,54 @@ python3 .github/scripts/run_python_tests.py scripts
 
 ### `ci-tests` — the two suites
 
-Runs both, always, in one workflow:
+Two jobs, deliberately separate because they cost wildly different amounts:
 
-1. **Core** — plain NUnit via `dotnet test`. No editor, no licence, seconds.
-2. **EditMode** — Unity Test Framework, headless, in a GameCI container with the
-   Unity licence from the `UNITY_LICENSE` secret.
+| Job | Runs | Needs |
+| --- | --- | --- |
+| **Core (NUnit)** | `dotnet test` on `Tests/Core` | nothing — seconds |
+| **EditMode (Unity)** | headless Unity via GameCI | a licence, and minutes |
 
 See [Testing](testing.md) for what belongs in each.
+
+The Core job also runs `check_core_isolation.py` first. It costs nothing and it
+fails for a reason the test output would never explain: game logic that has
+grown a dependency on the engine.
+
+#### A missing licence fails, it does not skip
+
+The EditMode job's **first** step, before any checkout or container pull,
+asserts that `UNITY_LICENSE` is set — and fails the job if it isn't.
+
+Skipping would be the friendlier behaviour and the wrong one. A required check
+that goes green because the suite never ran is worse than no check at all: it
+reports "tested" on a PR nothing tested, and nobody looks twice at a green tick.
+
+Until the secret exists (#82), this job is red on every PR that touches the
+Unity project. That is the intended behaviour, and it is visible rather than
+quiet.
+
+#### Path-gating, and what it means for branch protection
+
+The workflow only runs when `Assets/`, `Tests/`, `ProjectSettings/`,
+`Packages/`, or its own files change. Most changes here are docs, skills, and
+workflows, and pulling a containerised editor to check a typo helps nobody.
+
+!!! warning "Path-gated workflows and required checks don't mix"
+    A path-gated workflow does not report *at all* on a PR that misses its
+    paths — it is not skipped, it is absent. If `ci-tests` is marked **required**
+    in branch protection, every docs-only PR blocks forever waiting for a check
+    that will never run.
+
+    When configuring branch protection (#80), either leave `ci-tests`
+    non-required, or add an always-running guard job that reports the required
+    name and the real jobs depend on. Don't mark the path-gated jobs required
+    and hope.
+
+#### Why the runner step is `continue-on-error`
+
+Because the exit code is not the verdict — see below. The runner is allowed to
+fail; the gate step decides, and the results XML is uploaded as an artifact
+either way, since a red run is the one you most want the XML for.
 
 #### The results-XML verdict rule
 
