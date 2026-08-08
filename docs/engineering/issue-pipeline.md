@@ -156,6 +156,29 @@ account**, and it skips any comment that already has one.
 
 To make the gatekeeper reconsider a comment, remove its 👀.
 
+**Only the gatekeeper's own 👀 counts.** A human reacting out of interest must
+not silence a command, so the watermark check matches on the reacting account.
+And if the reactions cannot be read at all, the comment is treated as *already
+claimed* — re-applying a command is worse than skipping one, and the sweep picks
+it up next time.
+
+### The snapshot
+
+`fetch_comment_event.py` turns the raw webhook payload into what the parser
+reads: the issue's number, labels, body, milestone, blockers (text ∪ native),
+whether it is the dashboard, and the comment itself. All the payload-shape
+guesswork lives there so the parser never has to know what GitHub's JSON looks
+like.
+
+It returns nothing at all for a comment on a pull request or from a bot —
+defence in depth, since the workflow filters those too, but a snapshot the
+parser *could* act on is one it eventually will.
+
+It also tolerates a partial payload rather than throwing. A failed
+dependency lookup in particular does not lose the event: the command is
+probably `/park`, which does not care, and the gates that *do* care see a
+smaller blocker list and refuse — which is the safe direction.
+
 ## The approval gates
 
 Both gates **refuse and explain**. Neither ever fixes the problem itself.
