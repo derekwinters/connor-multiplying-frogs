@@ -5,7 +5,7 @@
     "",
     "The skills in .claude/skills/ are the source of truth in this repository.",
     "They were hand-ported and then diverged to fit this game, so a sync from",
-    "upstream would revert local work — which is exactly why the upstream",
+    "upstream would revert local work \u2014 which is exactly why the upstream",
     "project disabled its own sync. See docs/engineering/issue-pipeline.md."
   ],
   "sync": "disabled",
@@ -22,6 +22,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Rewritten around this repo's release-please config paths and the pull-request-title-pattern set in .github/release-please/config.json."
+    },
+    {
+      "name": "run-tests",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation."
     }
   ]
 }

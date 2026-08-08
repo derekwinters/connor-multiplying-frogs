@@ -67,6 +67,14 @@ dotnet test Tests/Core/Frogs.Core.Tests.csproj
 dotnet test Tests/Core/Frogs.Core.Tests.csproj --filter FullyQualifiedName~AppVersion
 ```
 
+The `run-tests` skill wraps both, along with the non-test checks that also fail
+a PR, and fixes a report format — so "the tests pass" means the same thing every
+time it is said.
+
+One thing worth knowing when reading the output: **check `Total > 0` as well as
+`Failed: 0`.** A run that compiled nothing and executed nothing also reports
+zero failures.
+
 `Frogs.Core.Tests.csproj` compiles `Assets/Scripts/Core/**/*.cs` directly rather
 than referencing a built assembly. Unity owns that build and regenerates its
 `.csproj` on every import, so there is no stable project to reference — and
