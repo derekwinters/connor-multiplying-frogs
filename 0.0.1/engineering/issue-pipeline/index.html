@@ -1787,6 +1787,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-reconciles-flags-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How reconcile's flags surface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2671,6 +2688,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-reconciles-flags-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How reconcile's flags surface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3714,6 +3748,15 @@ human, and what the reconciler flagged. Plus <strong>unblocker stars</strong> �
 that would free the most other work, which are the ones worth approving next.</p>
 <p>Wholly regenerated every time, apart from the config markers. Nothing on it is
 remembered, so nothing on it can be stale.</p>
+<h4 id="how-reconciles-flags-surface">How reconcile's flags surface<a class="headerlink" href="#how-reconciles-flags-surface" title="Link to this section">&para;</a></h4>
+<p>The sweep's flag findings render into the board's <strong>⚠️ Reconcile</strong> section, and
+that is the only place they appear. They are regenerated with everything else,
+so a flag vanishes the moment its condition stops holding — and one still
+sitting there after several days is one nobody has dealt with.</p>
+<p>This is why a flag does not post a comment. A flag describes the board's state
+<em>right now</em>; a comment would outlive the state it described and turn into a
+false report of a problem that was fixed weeks ago. The dashboard can be wholly
+regenerated. A comment thread cannot.</p>
 <h2 id="skills-inventory">Skills inventory<a class="headerlink" href="#skills-inventory" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
