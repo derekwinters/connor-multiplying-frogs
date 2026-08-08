@@ -674,6 +674,15 @@ Serial because parallel agents on one repository fight: two branches touching
 `ProjectSettings.asset`, two release-please runs, two PRs renumbering the same
 things. Nothing raises that above one at a time.
 
+Delegated — a fresh session per issue — because context from the previous issue
+is a liability. The agent that just spent an hour on the audio system will find
+a way to make the next issue about audio.
+
+Each delegation is: mark `in-progress` **first**, so a crashed run leaves a
+visibly stuck issue rather than an invisible one; hand the issue to the
+development agent ([Agent workflow](agent-workflow.md)); let it open its own PR.
+The pipeline does not write code.
+
 #### `cap` bounds the round, not the concurrency
 
 The two are separate knobs and it is worth keeping them apart.
@@ -694,13 +703,52 @@ The cap applies **after** ordering, never before: capping first would take the
 three lowest-numbered issues and could admit a dependent without the thing it
 depends on.
 
-Delegated — a fresh session per issue — because context from the previous issue
-is a liability. The agent that just spent an hour on the audio system will find
-a way to make the next issue about audio.
+#### One branch, one PR, one issue
 
-Each delegation is: mark `in-progress`, hand the issue to the development agent
-([Agent workflow](agent-workflow.md)), and let it open its own PR. The pipeline
-does not write code, and it does not merge PRs.
+Never a combined PR, even for two small issues touching the same file.
+
+A combined PR cannot be partly rejected, carries an ambiguous closing keyword,
+and — the one that bites quietly — has to pick a single Conventional Commit
+type. release-please derives the version from that type, so a PR bundling a
+`feat:` with a `fix:` ships the wrong version number whichever label it takes.
+
+#### The builder never merges and never closes
+
+Not a green PR, not a one-line fix, not its own work.
+
+The pipeline's job is to get work to the point where Derek can look at it. A
+pipeline that also merged would make the review step optional in practice, and
+an agent that can approve its own output has no gate on it at all. Closing is
+the same rule from the other end: `Closes #N` in the PR body closes the issue
+when Derek merges, and closing it directly would mark work done that nobody
+accepted.
+
+#### `skip-docs` is applied immediately, or not at all
+
+A PR touching no files under `docs/` gets `skip-docs` **the moment it opens** —
+before anything else in the round.
+
+The reconciliation gate fails a code-only PR, and the label is the sanctioned
+escape hatch. Applying it late means the round's first visible output is a red
+X on a PR that was never wrong, which teaches everyone to skim past red. It
+still needs a written justification in `## Deviations and Decisions`, because
+the gate cannot distinguish "no docs needed" from "forgot the docs" — that is
+the whole reason a human has to say which it was.
+
+#### A failing issue is dropped, and the round continues
+
+If an issue cannot be completed — tests won't pass, the plan was wrong, a
+checklist box cannot be ticked — the branch is deleted and **no PR is opened**.
+No draft, no partial. A PR that does not close its issue still costs a review,
+and a partial implementation hides an untickable checklist box that is really a
+triage problem.
+
+The issue keeps `in-progress`, deliberately. Reconcile finds an open
+`in-progress` issue with no open PR and nothing on `main` and returns it to
+`ready-for-work`, so the failure self-heals by the next round and stays visible
+on the dashboard until it does.
+
+One failure never aborts the round — the other issues are unrelated.
 
 ### Reconciliation — drift
 
