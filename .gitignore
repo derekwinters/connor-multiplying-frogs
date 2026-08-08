@@ -97,6 +97,15 @@ google-services.json
 [Oo]bj/
 
 # =============================================================================
+# Python
+# =============================================================================
+# Bytecode from the skill scripts and the .github/scripts helpers.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# =============================================================================
 # Docs site
 # =============================================================================
 # `mkdocs build` output. The published site is built by CI from docs/, never
