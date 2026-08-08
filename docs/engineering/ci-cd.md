@@ -18,7 +18,8 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | `release-please` | push to `main` | no | the version, changelog, tag, release, and release APK |
 | `labels-sync` | push to `main` touching `labels.yml` | no | the label taxonomy matches the file |
 | `geometry-lint` | PR touching `Assets/Scripts/**` | yes | the named-values rule, ratcheting |
-| `pipeline-*` | schedule, issue comments | no | the issue pipeline itself |
+| `pipeline-tests` | PR/push touching the pipeline skills | fails the PR | the pipeline scripts' own unit tests |
+| `pipeline-*` (others) | schedule, issue comments | no | the issue pipeline itself |
 
 ## Every action is pinned to a commit SHA
 
@@ -617,10 +618,32 @@ does; this is where the workflows live.
 | `gatekeeper-comment` | issue comment created | parses commands (`/approve`, `/park`, …), applies label changes, acknowledges with a reaction |
 | `gatekeeper-sweep` | schedule | catches events the comment trigger missed, and auto-revisits blockers whose blocking issue has closed |
 | `dashboard` | schedule, and after pipeline runs | rewrites the live dashboard issue |
-| `pipeline-tests` | PR touching `.claude/skills/**` | runs the pipeline scripts' own unit tests |
+| `pipeline-tests` | PR/push touching the pipeline skills | runs the pipeline scripts' own unit tests |
 
-`pipeline-tests` is the one that blocks: the pipeline's scripts are code, they
-have tests, and a broken gatekeeper is a broken queue.
+### `pipeline-tests`
+
+The pipeline's scripts are code, they have tests, and a broken gatekeeper is a
+broken queue — so unlike the rest of the pipeline workflows, this one runs on
+pull requests and fails them.
+
+**Stdlib only. No Unity, no `pip install`, no lockfile.** These scripts decide
+what gets triaged, built, and requeued, and their tests must not be capable of
+breaking because the game toolchain did. The job needs nothing but the Python
+already on the runner, which is also why it finishes in seconds.
+
+It runs `run_python_tests.py` rather than `python3 -m unittest discover`,
+because discovery cannot find these tests at all: it only recurses into
+directories whose names are valid Python identifiers, and `.claude` starts with
+a dot. The runner also executes each suite in isolation — several skills have a
+package named `tests`, and in a shared interpreter the second silently resolves
+to the first's cached module and never runs.
+
+**It is path-gated, so it must not be marked required.** Same trap as
+[`ci-tests`](#path-gating-and-what-it-means-for-branch-protection): a
+path-gated workflow does not report at all on PRs that miss its paths, so a
+required check would block every unrelated PR forever waiting for a run that
+will never happen. "Fails the PRs it runs on" and "required in branch
+protection" are different things, and only the first is true here.
 
 ## When something is red
 
