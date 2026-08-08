@@ -2632,9 +2632,56 @@ Failing a PR over a comment teaches people that this check is pedantic, and a
 check people resent is one they route around.</p>
 <h3 id="keeping-pins-fresh">Keeping pins fresh<a class="headerlink" href="#keeping-pins-fresh" title="Link to this section">&para;</a></h3>
 <p>A pin that never moves is a pin that misses security fixes — the failure mode
-this convention trades <em>into</em>. Dependabot watches <code>github-actions</code> and opens a
-PR per action when a new version appears, updating the SHA <strong>and</strong> the trailing
-comment together.</p>
+this convention trades <em>into</em>. <code>.github/dependabot.yml</code> configures Dependabot
+to watch <code>github-actions</code> and open a PR per action when a new version appears,
+updating the SHA <strong>and</strong> the trailing comment together.</p>
+<p>That last part is why the comment convention is worth keeping tidy: because
+Dependabot rewrites both, its PRs <em>satisfy</em> the pin check rather than tripping
+it.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>directory</code></td>
+<td><code>/</code></td>
+<td>The ecosystem knows where workflows live; this is not a path to them.</td>
+</tr>
+<tr>
+<td><code>schedule</code></td>
+<td>weekly, Monday 09:00 Central</td>
+<td>A week's updates arrive together, as a task rather than an interruption.</td>
+</tr>
+<tr>
+<td><code>open-pull-requests-limit</code></td>
+<td>3</td>
+<td>See below.</td>
+</tr>
+<tr>
+<td><code>commit-message.prefix</code></td>
+<td><code>chore</code> + scope</td>
+<td>Produces <code>chore(deps): …</code> — a valid Conventional Commit.</td>
+</tr>
+<tr>
+<td><code>labels</code></td>
+<td><code>area:build</code>, <code>skip-docs</code></td>
+<td>Its PRs touch no docs, so the gate needs the escape hatch.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The PR limit is low on purpose.</strong> The failure this guards against is not
+missing an update; it is a wall of dependency PRs that nobody reads and
+everybody merges, which is strictly worse than not pinning because it looks
+like diligence. Three at a time stays reviewable.</p>
+<p><strong><code>skip-docs</code> is applied up front</strong> rather than left for a human. The docs
+reconciliation gate fails a code-only PR, and every Dependabot PR is code-only
+by construction — without the label each one arrives red and needs unsticking
+before it can merge.</p>
 <p>That is the intended way pins move. Treat those PRs as real changes — read the
 upstream release notes, don't merge on autopilot — but do not let them sit. A
 year of ignored Dependabot PRs is worse than no pinning at all, because it looks
