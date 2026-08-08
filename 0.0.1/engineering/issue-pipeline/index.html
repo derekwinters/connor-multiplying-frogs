@@ -2484,6 +2484,15 @@ without labels — and repairs it.</p>
 <p>The builder computes its ready queue from that graph. A dependency written as a
 sentence is a dependency it walks straight into. This is also why <code>/block</code> and
 <code>/unblock</code> exist as commands: recording one has to be as cheap as mentioning it.</p>
+<p><strong><code>Depends on:</code> is not a blocker.</strong> It is soft ordering — "this will go better
+afterwards" — and it deliberately has no native form. Converting one into a hard
+blocked-by turns a preference into a gate the builder refuses to pass, which is
+how a queue deadlocks on work that could have been done at any time.</p>
+<p>The <code>issue-blockers</code> skill is the write side, and its <code>audit</code> subcommand finds
+<code>Blocked by #N</code> lines that were never recorded natively. One trap it exists
+around: the dependencies <strong>write</strong> API takes the internal <code>issue_id</code>, not the
+issue number — and a wrong id does not fail, it links to whatever issue happens
+to have it.</p>
 <h3 id="development-the-ready-queue">Development — the ready queue<a class="headerlink" href="#development-the-ready-queue" title="Link to this section">&para;</a></h3>
 <p><code>select_queue.py</code> returns the issues to work, in the order to work them:</p>
 <p><strong>Eligibility</strong> — all of:</p>
