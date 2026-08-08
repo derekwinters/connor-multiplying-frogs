@@ -1,0 +1,43 @@
+version: 2
+
+# Pinning every action to a commit SHA freezes security fixes along with
+# everything else. That trade is only worth making if something moves the pins,
+# and this is that something.
+#
+# Dependabot understands SHA pins: it rewrites the SHA **and** the trailing
+# `# vX.Y.Z` comment together, so its PRs satisfy the pin check rather than
+# tripping it. That is why the comment convention is worth keeping tidy.
+
+updates:
+  - package-ecosystem: github-actions
+    # `/` covers .github/workflows/ — the ecosystem knows where workflows live,
+    # and this is not a filesystem path to point at the workflows directory.
+    directory: /
+
+    schedule:
+      interval: weekly
+      # Monday morning, Central. A week's updates arrive together at the start
+      # of a week rather than trickling in, which makes them a task rather than
+      # an interruption.
+      day: monday
+      time: "09:00"
+      timezone: America/Chicago
+
+    # Small on purpose. The failure mode this guards against is a wall of
+    # dependency PRs that nobody reads and everybody merges — which is strictly
+    # worse than not pinning, because it looks like diligence.
+    open-pull-requests-limit: 3
+
+    commit-message:
+      # `chore(deps): bump …` — a valid Conventional Commit, so the PR title
+      # lint passes and release-please classifies it as a chore rather than
+      # inventing a version bump from a dependency update.
+      prefix: chore
+      include: scope
+
+    labels:
+      - area:build
+      # Dependabot's PRs touch no docs, and the reconciliation gate fails a
+      # code-only PR. Applying the escape hatch up front means its PRs arrive
+      # green instead of needing a human to unstick each one.
+      - skip-docs
