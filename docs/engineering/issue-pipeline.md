@@ -339,7 +339,12 @@ board that does not render is worse than one with a default cap, and the next
 `/cap` fixes it.
 
 The dashboard issue is the one carrying the `dashboard` label. There is exactly
-one; the reconciler flags it if there are two or none.
+one — [**issue #163**](https://github.com/derekwinters/connor-multiplying-frogs/issues/163)
+— and the reconciler flags it if there are ever two or none.
+
+Nothing hard-codes that number. Every script finds the board by its label, so
+recreating it is a matter of moving the label rather than editing code; the
+number here is for people, not for programs.
 
 ### Why markers, and why re-rendering beats hand-editing
 
