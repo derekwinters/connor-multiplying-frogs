@@ -131,7 +131,7 @@ workflow exists for exactly that.
 ## Running the tests
 
 ```bash
-python3 .github/scripts/run_skill_tests.py release-flow
+python3 .github/scripts/run_python_tests.py release-flow
 ```
 
 Every check in `release_flow.py` is a pure function over a snapshot dict, so the

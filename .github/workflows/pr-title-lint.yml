@@ -1,0 +1,33 @@
+name: pr-title-lint
+
+# The repo squash-merges, so the PR title becomes the commit on main — which is
+# what release-please parses to decide the next version and write the changelog.
+# A title it does not recognise fails nowhere: the merge succeeds and the
+# version silently does not move. Hence a required check rather than discipline.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+# Only the newest title matters. Editing a title three times should not leave
+# two stale runs racing to report on the first two.
+concurrency:
+  group: pr-title-lint-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint the PR title
+        # Through the environment, never interpolated into the script line: a
+        # title is attacker-controlled text, and `${{ }}` inside a run block is
+        # substituted before the shell ever sees it.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python3 .github/scripts/lint_pr_title.py
