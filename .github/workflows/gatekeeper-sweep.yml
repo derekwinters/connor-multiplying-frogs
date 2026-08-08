@@ -1,0 +1,81 @@
+name: gatekeeper-sweep
+
+# The board-wide sweep: wake issues whose blockers cleared, and fix drift.
+#
+# Two paths, and the difference between them is the whole design:
+#
+#   event path   — runs on the events that can actually change the board.
+#                  `strip_labels` only.
+#   cron path    — every six hours, plus manual dispatch. Everything, including
+#                  the two requeue fixes.
+#
+# WHY `requeue` AND `requeue_triage` ARE CRON-ONLY
+#
+# Because the drift they detect is indistinguishable from work in flight.
+#
+# An issue the builder picked up ten seconds ago has `in-progress` and no PR
+# yet — exactly a stall's shape. On the event path, which fires the moment a
+# label changes, requeuing it would yank the issue out from under a running
+# agent, which then opens a PR for an issue the board says is merely ready.
+#
+# `requeue_triage` is the mirror image. Triage posts its analysis comment
+# BEFORE setting the state label, deliberately, so a crash leaves a plan on
+# `ai-triage` rather than an approval-pending issue with nothing to approve.
+# Between those two writes the issue legitimately has one and not the other.
+#
+# By the six-hourly run the transient has resolved. They are omitted entirely
+# rather than softened with a time threshold, because a threshold is a guess
+# about how long an agent takes and is wrong in both directions.
+#
+# See docs/engineering/issue-pipeline.md.
+
+on:
+  issues:
+    # `closed` clears blockers; `labeled` is how every state change arrives.
+    types: [closed, labeled]
+  pull_request:
+    types: [closed]
+  schedule:
+    # Every six hours. Frequent enough that a stall is caught the same day,
+    # rare enough that it is never racing a build.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: read
+  contents: read
+
+concurrency:
+  # ONE constant group, board-wide. Unlike the comment workflow, this sweep
+  # reads and rewrites the whole board — two overlapping runs would each act on
+  # a snapshot the other has already invalidated.
+  group: gatekeeper-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: Sweep the board
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Sweep
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PIPELINE_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+
+          # The flag is the safety catch, not an optimisation. Anything that is
+          # not the cron or a deliberate dispatch takes the event path.
+          if [ "${{ github.event_name }}" = "schedule" ] \
+            || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Cron path — all fixes, including requeue."
+            python3 .claude/skills/pipeline-gatekeeper/run_sweep.py --fetch
+          else
+            echo "Event path — strip_labels only."
+            python3 .claude/skills/pipeline-gatekeeper/run_sweep.py --fetch --events-only
+          fi

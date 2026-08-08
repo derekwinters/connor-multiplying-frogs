@@ -616,7 +616,7 @@ does; this is where the workflows live.
 | Workflow | Trigger | Does |
 | --- | --- | --- |
 | `gatekeeper-comment` | issue comment created | parses commands (`/approve`, `/park`, …), applies label changes, acknowledges with a reaction |
-| `gatekeeper-sweep` | schedule | catches events the comment trigger missed, and auto-revisits blockers whose blocking issue has closed |
+| `gatekeeper-sweep` | issue/PR events, 6-hourly cron, dispatch | auto-revisits blockers that have cleared, and applies reconcile's fixes |
 | `dashboard` | schedule, and after pipeline runs | rewrites the live dashboard issue |
 | `pipeline-tests` | PR/push touching the pipeline skills | runs the pipeline scripts' own unit tests |
 
@@ -646,6 +646,33 @@ no-recursion guard is precisely what prevents.
 The reactive-triage secrets (`AI_TRIAGE_URL`, `AI_TRIAGE_SECRET`, see #83) are
 surfaced as env vars. Absent, firing is a clean no-op: the nightly round picks
 the issue up, so a missing secret costs latency rather than correctness.
+
+### `gatekeeper-sweep`
+
+Runs on the events that can actually change the board picture — an issue
+closed or labelled, a PR closed — plus a six-hourly cron and manual dispatch.
+
+**Two paths, and the difference is the point.** The event path applies
+`strip_labels` only. The cron path applies everything, including reconcile's
+two requeue fixes.
+
+Those two are cron-only because **the drift they detect is indistinguishable
+from work in flight**. An issue the builder picked up ten seconds ago has
+`in-progress` and no PR yet — exactly a stall's shape — and requeuing it on the
+event path would yank the issue out from under a running agent. Triage's
+comment-before-label ordering creates the mirror-image window for
+`requeue_triage`. By the six-hourly run those transients have resolved.
+
+They are omitted entirely rather than softened with a time threshold: a
+threshold is a guess about how long an agent takes, and it is wrong in both
+directions — too short and it interrupts a slow build, too long and a stall
+sits there all day. `strip_labels` has no such problem and runs on every pass,
+because it only ever touches an already-closed issue.
+
+**Concurrency is one constant group, board-wide** — not per issue like
+`gatekeeper-comment`. This sweep reads and rewrites the whole board, so two
+overlapping runs would each be acting on a snapshot the other has already
+invalidated.
 
 ### `pipeline-tests`
 

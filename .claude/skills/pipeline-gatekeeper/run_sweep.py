@@ -108,13 +108,83 @@ def run(state: dict, api, events_only: bool = False, rerender=None) -> dict:
     return {"woken": woken, "fixed": fixed, "findings": findings}
 
 
+def fetch_state(api, focus=None) -> dict:  # pragma: no cover - network shape
+    """Build the sweep's snapshot from the API.
+
+    Separate from the dashboard's fetch because the sweep needs three things
+    the renderer does not: open PRs, recent merged commits on `main`, and the
+    state of every issue named as a blocker.
+    """
+    raw = api("GET", "/issues?state=all&per_page=100&filter=all") or []
+
+    issues = []
+    for item in raw:
+        if "pull_request" in item:
+            continue
+
+        number = item["number"]
+        issues.append({
+            "number": number,
+            "title": item.get("title", ""),
+            "state": item.get("state", "open"),
+            "labels": [label["name"] for label in item.get("labels") or []],
+            "milestone": (item.get("milestone") or {}).get("title"),
+            "body": item.get("body") or "",
+            "native_blockers": _blocked_by(api, number),
+            "comments": _comments(api, number),
+        })
+
+    by_number = {issue["number"]: issue for issue in issues}
+
+    return {
+        "issues": issues,
+        "pulls": [
+            {"number": p["number"], "state": p.get("state", "open"),
+             "body": p.get("body") or ""}
+            for p in api("GET", "/pulls?state=open&per_page=100") or []
+        ],
+        "merged_commits": [
+            {"body": c.get("commit", {}).get("message", "")}
+            for c in api("GET", "/commits?sha=main&per_page=100") or []
+        ],
+        # Every issue's own record doubles as the blocker snapshot.
+        "snapshot": by_number,
+        "focus": focus,
+    }
+
+
+def _blocked_by(api, number) -> list:  # pragma: no cover - network shape
+    try:
+        edges = api("GET", f"/issues/{number}/dependencies/blocked_by") or []
+    except Exception:  # noqa: BLE001 - unknown, not "none"
+        return []
+    return [edge["number"] for edge in edges if isinstance(edge.get("number"), int)]
+
+
+def _comments(api, number) -> list:  # pragma: no cover - network shape
+    return [
+        {"body": c.get("body") or "",
+         "author": (c.get("user") or {}).get("login", ""),
+         "created_at": c.get("created_at", "")}
+        for c in api("GET", f"/issues/{number}/comments?per_page=100") or []
+    ]
+
+
 def main(argv=None) -> int:  # pragma: no cover - the workflow entry point
     import json
+    import os
 
     argv = sys.argv[1:] if argv is None else argv
-    state = json.load(sys.stdin)
+    api = github_api()
 
-    result = run(state, github_api(), events_only="--events-only" in argv)
+    # `--fetch` is how the workflow runs it; stdin is how you rehearse a sweep
+    # against a snapshot you captured earlier.
+    if "--fetch" in argv:
+        state = fetch_state(api, focus=os.environ.get("PIPELINE_FOCUS"))
+    else:
+        state = json.load(sys.stdin)
+
+    result = run(state, api, events_only="--events-only" in argv)
 
     print(f"woke {len(result['woken'])}, fixed {len(result['fixed'])}, "
           f"flagged {sum(1 for f in result['findings'] if f['action'] == 'flag')}")
