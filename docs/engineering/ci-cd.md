@@ -112,6 +112,31 @@ If a new action is genuinely needed: check it is permitted by the repository's
 Actions policy (a denied action fails the run with a policy message, which is at
 least a loud failure), pin it, add it to this table, and say why in the PR.
 
+### The check that enforces it
+
+`check_action_pins.py` scans every file under `.github/workflows/` and **fails
+the PR** on any `uses:` whose ref is not a full 40-character hex SHA. Tags,
+branches, short SHAs, and a bare `owner/repo` with no ref are all rejected.
+
+It runs inside the `Gate tests` job rather than as its own workflow: that job
+already runs on every PR, so the check costs no extra run — and it is
+deliberately **not** path-filtered. A path filter would miss precisely the case
+this exists for, which is a tag slipping into a workflow that nothing happens
+to trigger. The platform's own policy would eventually reject it, mid-run,
+months later.
+
+Two things it deliberately does not flag:
+
+- **`./…`** — a local composite action or reusable workflow, versioned with
+  this repository. Pinning it to a SHA would pin the repo to itself.
+- **`docker://…`** — an image reference, governed by the registry rather than
+  by Actions.
+
+A missing `# vX.Y.Z` comment is a **warning, not a failure**. The pin is
+correct and the build is safe; what is missing is the human-readable part.
+Failing a PR over a comment teaches people that this check is pedantic, and a
+check people resent is one they route around.
+
 ### Keeping pins fresh
 
 A pin that never moves is a pin that misses security fixes — the failure mode

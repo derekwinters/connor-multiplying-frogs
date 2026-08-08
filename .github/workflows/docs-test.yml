@@ -33,6 +33,13 @@ jobs:
       - name: Test the CI scripts
         run: python3 .github/scripts/run_python_tests.py scripts
 
+      # Here rather than in its own workflow: it runs on every PR at no extra
+      # cost, and it must see every workflow file — a path filter would miss
+      # exactly the case it exists for, a tag slipping into a workflow that
+      # nothing happens to trigger.
+      - name: Every action is pinned to a commit SHA
+        run: python3 .github/scripts/check_action_pins.py
+
   build:
     name: Docs
     runs-on: ubuntu-latest
