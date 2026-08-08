@@ -1,8 +1,210 @@
 # Tech stack
 
-!!! note "Not written yet"
-    This page is a stub so the docs site builds and the navigation reflects
-    what the contract will cover. It is filled in by
-    [issue #16](https://github.com/derekwinters/connor-multiplying-frogs/issues/16).
+What we build with, what we build for, and the two structural rules that make
+the rest of the engineering handbook possible.
 
-Unity, the Core/Unity split, and the naming conventions that hold it together.
+This is the page [`CLAUDE.md`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md)
+rule #2 points at, and the page the geometry lint in CI enforces.
+
+## Engine and language
+
+| Thing | Choice |
+| --- | --- |
+| Engine | Unity |
+| Unity version | **6000.0.81f1** (Unity 6 LTS) |
+| Language | C# |
+| Test framework | NUnit, via Unity Test Framework |
+| Rendering | Universal Render Pipeline (URP), 2D |
+
+### The Unity version is pinned, and the pin is load-bearing
+
+`6000.0.81f1` is written in `ProjectSettings/ProjectVersion.txt`, and the same
+string appears in the CI workflows as the editor image tag. Those two have to
+agree: CI runs a containerised editor, and an editor that is newer than the
+project silently upgrades the project files, while an editor that is older
+refuses to open it.
+
+Unity 6 LTS because LTS means two years of patches without a forced upgrade
+mid-project, which matters far more here than any feature in a newer stream.
+This is a game built in evenings; an engine upgrade is not a thing to be doing
+by accident.
+
+**Bumping it** is its own PR, and the checklist is:
+
+1. Confirm a [GameCI](https://game.ci) editor image exists for the exact
+   version — `unityci/editor:<version>-android-<n>`. No image, no bump.
+2. Update `ProjectSettings/ProjectVersion.txt`, every workflow that names the
+   version, and the table above, together.
+3. Open the project in the local editor once and commit whatever it migrates,
+   in the same PR, so the migration is reviewed rather than discovered.
+
+## Target platform
+
+**Android phones.** That is the platform, singular. Connor plays on a phone;
+that is who the game is for.
+
+| | |
+| --- | --- |
+| Primary target | Android, ARM64 (`arm64-v8a`) |
+| Scripting backend | IL2CPP for device builds |
+| Minimum API level | 24 (Android 7.0) |
+| Orientation | Portrait |
+| Output | `.apk` for direct install; `.aab` only if the game is ever published |
+
+### Two build profiles
+
+**Device build** — ARM64, IL2CPP, what actually gets installed on a phone. This
+is what the release build produces, and what an RC build has to prove works.
+
+**Emulator build** — x86_64, Mono. IL2CPP cross-compiling to x86_64 is slow and
+buys nothing for a smoke test, so the emulator profile trades fidelity for a
+build that finishes while you are still looking at it. Use it for "does the app
+launch and show the right screen", never for judging performance or for anything
+shipped.
+
+CI builds the device profile. The emulator profile is a local convenience, and
+a bug that reproduces only under it is a bug in the profile until proven
+otherwise.
+
+### What is explicitly not a target
+
+iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
+if a choice is easier because Android is the only target, take the easier
+choice. Adding a platform later is a real project, and pre-paying for it now
+costs work we would rather spend on the game.
+
+## Code architecture: the Core/Unity split
+
+The single most important structural rule in this repo.
+
+### The shape
+
+```text
+Assets/
+  Scripts/
+    Core/                     ← game logic. No UnityEngine. Ever.
+      Core.asmdef             ← no engine references, no auto-referenced assemblies
+      Frogs/
+      Rules/
+    Unity/                    ← the shell. MonoBehaviours, scene wiring, input.
+      Unity.asmdef            ← references Core
+      Views/
+      Input/
+Tests/
+  Core/
+    Core.Tests.asmdef         ← references Core only; runs as a plain NUnit suite
+  Unity/
+    Unity.Tests.asmdef        ← EditMode tests for the shell; needs the editor
+```
+
+### The rule
+
+**`Core` never references `UnityEngine`.** No `using UnityEngine`, no
+`MonoBehaviour`, no `Vector3`, no `Time.deltaTime`, no `Debug.Log`, no
+coroutines, no `ScriptableObject`. `Core.asmdef` is configured with no engine
+references and `noEngineReferences: true`, so this is enforced by the compiler
+rather than by remembering.
+
+**The Unity layer is thin.** It reads input, hands it to Core, asks Core what the
+world looks like now, and draws that. A `MonoBehaviour` that contains a rule —
+how fast a frog moves, when it splits, what scores — is a rule in the wrong
+assembly.
+
+### Why
+
+Because it is the difference between a test suite that runs in two seconds and
+one that runs in two minutes.
+
+`Tests/Core` is a plain NUnit assembly. It compiles and runs without an editor,
+without a licence, without a display — `dotnet test` in CI, in a few seconds,
+on every push. That is what makes strict TDD (see [Testing](testing.md))
+practical rather than aspirational: a red-green loop you can run mid-thought.
+
+The moment one `Vector3` appears in Core, that assembly needs UnityEngine, which
+needs an editor, which needs a licence and two minutes of container startup —
+for every test run, forever. Five minutes saved once, paid back on every commit.
+
+### When you genuinely need engine behaviour in Core
+
+You need an **interface Core owns and the Unity layer implements**. Core
+declares what it needs in its own vocabulary; the shell provides it.
+
+```csharp
+// In Core — no engine types.
+public interface IClock { float SecondsSinceStart { get; } }
+
+// In the Unity layer.
+sealed class UnityClock : IClock {
+    public float SecondsSinceStart => UnityEngine.Time.time;
+}
+```
+
+Tests substitute a fake clock and control time exactly. That is the whole point,
+and it is why "I'll just reference UnityEngine here" is never the shortcut it
+looks like.
+
+### Naming
+
+- Assemblies and their folders share a name: `Core`, `Unity`, `Core.Tests`.
+- Core types are named for the game, not the engine — `Pond`, `FrogColony`,
+  `SplitRule`. If a type name only makes sense to someone who knows Unity, it
+  probably belongs in the shell.
+- Unity-layer types that exist to display a Core type are named `<Thing>View`
+  (`FrogView`), and ones that exist to feed input in are `<Thing>Input`.
+- One public type per file, file named for the type.
+
+## Geometry, layout, and tuning values are named variables
+
+**Every size, offset, margin, spacing, duration, speed, delay, threshold, count,
+and payout is a named constant or a serialized field. Never a bare literal in a
+method body.**
+
+```csharp
+// No.
+transform.position = new Vector3(1.5f, 0.25f, 0f);
+if (colony.Count > 32) { … }
+yield return new WaitForSeconds(0.4f);
+
+// Yes.
+const int MaxColonySize = 32;
+[SerializeField] float _spawnHeight = 0.25f;
+[SerializeField] float _splitAnimationSeconds = 0.4f;
+```
+
+### Why this is a rule and not a preference
+
+- **Tuning is the game.** Whether a frog splits after three seconds or four is
+  the difference between fun and not, and it is a question for Connor. A number
+  with a name is a number he can be asked about; `0.4f` on line 118 of a method
+  is not.
+- **A named value can be found.** Changing "the gap between lily pads" means
+  finding one constant, not grepping for `1.5f` and guessing which of the eleven
+  matches is the gap.
+- **A named value can be tested.** `MaxColonySize` can be asserted against;
+  `> 32` buried in a branch can only be re-typed into the test, where it will
+  agree with a bug just as happily as with correct code.
+- **The name is the documentation.** `_splitAnimationSeconds = 0.4f` says what
+  0.4 *is*. No comment required, and no comment to go stale.
+
+### This includes graybox
+
+Especially graybox. Placeholder layout is the code most likely to survive to
+release, because it works and nobody goes back to it. A graybox screen full of
+bare literals is a screen nobody can re-lay-out without rebuilding it.
+
+### The exemptions
+
+Deliberately narrow:
+
+- `0`, `1`, and `-1` used as arithmetic or sentinel values, not as measurements.
+  `count + 1` is fine; `width * 1` was never fine.
+- Loop bounds derived from a collection — `for (var i = 0; i < frogs.Count; i++)`.
+- Values inside a test that *are* the test's subject — a test asserting a frog
+  splits at 32 should say `32` where the reader can see it.
+- Unity's own required literals in serialization or attribute arguments, where a
+  constant is not permitted by the language.
+
+Anything else needs a name. CI enforces this: the geometry lint fails a PR that
+adds a bare numeric literal to a method body outside those exemptions, with a
+ratcheting baseline so existing code does not have to be fixed all at once —
+but the count can only go down. See [CI/CD](ci-cd.md).
