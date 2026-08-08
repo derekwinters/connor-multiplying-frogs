@@ -260,20 +260,46 @@ See [Testing](testing.md) for what belongs in each.
 
 #### The results-XML verdict rule
 
-**A green exit code is not a pass.** The Unity test runner has been known to
-exit 0 having run zero tests — a licence problem, a missing assembly, or a
-filter that matched nothing all look like success from the outside, and "0 tests
-passed" is the most dangerous green there is.
+**The exit code is not the verdict.** It is wrong in both directions:
 
-So the verdict comes from the results XML, not the exit code. A dedicated script
-parses it and fails the job unless:
+- **Falsely green.** The runner can exit 0 having run *zero* tests — a licence
+  problem, a missing assembly, or a filter that matched nothing all look like
+  success from the outside. "0 tests passed" is the most dangerous green there
+  is.
+- **Falsely red.** Unity's editor sometimes dies during *teardown*, after a
+  fully green run has written its results. Treating that as a failure produces a
+  red PR with nothing wrong in it, and the fix everyone reaches for is "re-run
+  until it's green" — which trains people to re-run real failures too.
 
-- the results file exists and parses;
-- the total number of tests run is **greater than zero**;
-- there are no failures, errors, or unexpected inconclusives.
+So `.github/scripts/verify_editmode_results.py` derives the verdict from the
+NUnit results XML. It passes only when:
+
+- the results file exists, parses, and is a `<test-run>` document;
+- `total` is **greater than zero**;
+- `failed` is zero, and nothing is inconclusive;
+- every count it needs is actually present — a missing `failed` attribute is a
+  failure, not a zero, because otherwise an unreadable file reads as a pass.
+
+Then, and only then, it looks at the exit code:
+
+| Exit code | Green results | Verdict |
+| --- | --- | --- |
+| `0` | yes | pass |
+| `139` (SIGSEGV in teardown) | yes | pass, and says so in the log |
+| anything else | yes | **fail** — something went wrong after the tests |
+| any, including `139` | no | **fail** |
+
+**Forgiveness is about teardown, never about results.** A failing test fails the
+gate whatever the exit code was. Adding a code to the forgiven list needs
+evidence — a run with complete, green results and a nonzero exit — and is done
+with `--forgive`, so it shows up in the workflow rather than being buried in the
+script.
 
 If the XML is missing, the job fails. "We couldn't tell" is a failure, not a
 pass — the whole point is to not accept an absence of evidence as evidence.
+
+The script is stdlib-only, so it needs no setup step, and it has 18 unit tests
+covering each failure mode.
 
 ### The geometry and tuning literal check
 
