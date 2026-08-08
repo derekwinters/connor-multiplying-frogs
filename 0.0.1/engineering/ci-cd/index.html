@@ -1149,6 +1149,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-check-that-enforces-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The check that enforces it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#keeping-pins-fresh" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1906,6 +1917,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-check-that-enforces-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The check that enforces it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#keeping-pins-fresh" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2587,6 +2609,27 @@ comment — are <code>gh</code> calls here for exactly that reason.</p>
 <p>If a new action is genuinely needed: check it is permitted by the repository's
 Actions policy (a denied action fails the run with a policy message, which is at
 least a loud failure), pin it, add it to this table, and say why in the PR.</p>
+<h3 id="the-check-that-enforces-it">The check that enforces it<a class="headerlink" href="#the-check-that-enforces-it" title="Link to this section">&para;</a></h3>
+<p><code>check_action_pins.py</code> scans every file under <code>.github/workflows/</code> and <strong>fails
+the PR</strong> on any <code>uses:</code> whose ref is not a full 40-character hex SHA. Tags,
+branches, short SHAs, and a bare <code>owner/repo</code> with no ref are all rejected.</p>
+<p>It runs inside the <code>Gate tests</code> job rather than as its own workflow: that job
+already runs on every PR, so the check costs no extra run — and it is
+deliberately <strong>not</strong> path-filtered. A path filter would miss precisely the case
+this exists for, which is a tag slipping into a workflow that nothing happens
+to trigger. The platform's own policy would eventually reject it, mid-run,
+months later.</p>
+<p>Two things it deliberately does not flag:</p>
+<ul>
+<li><strong><code>./…</code></strong> — a local composite action or reusable workflow, versioned with
+  this repository. Pinning it to a SHA would pin the repo to itself.</li>
+<li><strong><code>docker://…</code></strong> — an image reference, governed by the registry rather than
+  by Actions.</li>
+</ul>
+<p>A missing <code># vX.Y.Z</code> comment is a <strong>warning, not a failure</strong>. The pin is
+correct and the build is safe; what is missing is the human-readable part.
+Failing a PR over a comment teaches people that this check is pedantic, and a
+check people resent is one they route around.</p>
 <h3 id="keeping-pins-fresh">Keeping pins fresh<a class="headerlink" href="#keeping-pins-fresh" title="Link to this section">&para;</a></h3>
 <p>A pin that never moves is a pin that misses security fixes — the failure mode
 this convention trades <em>into</em>. Dependabot watches <code>github-actions</code> and opens a
