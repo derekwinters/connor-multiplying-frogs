@@ -457,6 +457,33 @@ The dispatcher (`pipeline-analysis`) is a thin loop over that list. It makes no
 decisions itself — the decisions are in `triage-issue`, one issue at a time,
 which keeps a bad triage contained to one issue instead of one batch.
 
+**The dispatcher writes nothing at all** — no labels, no comments, not even a
+summary of the round. Every write belongs to the single-issue skill. A round
+that made its own writes would be a second thing that can be wrong, wrong at
+batch scale across the whole queue, in a way no individual triage run could
+produce. It also keeps `triage-issue` genuinely standalone, which is what lets
+reactive triage invoke it with no dispatcher present.
+
+**Concurrency is set by the orchestration layer, not the script.**
+`select_triage.py` reports what needs triage and has no opinion on how fast to
+work through it: the right number depends on rate limits and runner capacity,
+which change without the eligibility rules changing. A limit baked into the
+discovery script is one nobody can adjust for a busy night without editing a
+file with tests pinned to it.
+
+A triage that fails is one issue's problem — it keeps `ai-triage` and the next
+round picks it up. The round does not abort for it.
+
+#### The scheduled round is the backstop, not the main path
+
+Reactive triage is how an issue normally gets triaged: the gatekeeper fires it
+the moment `ai-triage` appears, and the issue is analyzed within minutes.
+
+The 02:00 round exists for what reactive triage missed — a failed POST, secrets
+that were never configured, a label changed by hand instead of by a command, an
+issue carried back by the blocker sweep. On a healthy night it finds nothing.
+**An empty round is the system working**, not a wasted run.
+
 ### Triage — one issue
 
 `triage-issue` reads an issue and produces:
