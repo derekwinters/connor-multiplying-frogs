@@ -320,9 +320,23 @@ thread rather than being a label that changed itself overnight.
 Both are stored as HTML-comment markers in the body of the dashboard issue:
 
 ```html
-<!-- pipeline:focus=v0.0.1 -->
-<!-- pipeline:cap=3 -->
+<!-- pipeline-focus: v0.0.1 -->
+<!-- pipeline-cap: 3 -->
 ```
+
+Each setting resolves **override → marker → default**: an explicit `/focus` or
+`/cap` on this run wins, otherwise the marker currently in the body, otherwise
+the default (3 for `cap`; `focus` has no default and must come from one of the
+first two).
+
+A `/focus` naming **no live milestone is rejected, not stored.** A typo'd
+`v0.0.10` would otherwise render a board whose every section is empty — which
+looks exactly like a finished milestone, and is the most misleading output the
+renderer could produce. The refusal names the milestones that do exist.
+
+A malformed `cap` marker falls back to 3 rather than failing the render: a
+board that does not render is worse than one with a default cap, and the next
+`/cap` fixes it.
 
 The dashboard issue is the one carrying the `dashboard` label. There is exactly
 one; the reconciler flags it if there are two or none.
@@ -834,6 +848,34 @@ that would free the most other work, which are the ones worth approving next.
 
 Wholly regenerated every time, apart from the config markers. Nothing on it is
 remembered, so nothing on it can be stale.
+
+Rendering is **deterministic and byte-stable**: the same state produces the
+same bytes. Without that, every hourly run would PATCH the issue and the
+dashboard would generate a stream of meaningless edits.
+
+#### The focus pie always adds up
+
+The focus milestone is summarised as four slices:
+
+| Slice | What is in it |
+| --- | --- |
+| **Unplanned** | `parked`, or carrying no pipeline-state label at all |
+| **In Planning** | `ai-triage`, `pending-approval`, `needs-clarification` |
+| **Ready** | `ready-for-work`, `in-progress` |
+| **Done** | closed, whatever its labels say |
+
+Every issue in the milestone falls into **exactly one**, and the four counts
+sum to the milestone's issue total. That is the property worth protecting: it
+means an issue cannot quietly disappear from the board by ending up with an odd
+combination of labels. The slices are assigned by ordered checks rather than
+independent predicates, so there is no gap to fall through and no overlap to be
+counted twice.
+
+Parked and never-triaged share the Unplanned slice because they mean the same
+thing for planning — not being worked, and not waiting on anybody — even though
+they got there for different reasons. This is the **one** place a `parked`
+issue is counted; every active-work queue excludes it, because the board's
+Parked section is a listing, not a re-admission.
 
 #### How reconcile's flags surface
 
