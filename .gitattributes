@@ -1,0 +1,142 @@
+# Binary assets, and why there is no Git LFS here.
+#
+# Two problems this file solves:
+#
+#   1. Git guesses at whether a file is text. When it guesses wrong on a .tga or
+#      a .fbx it EOL-normalizes the contents on checkout and silently corrupts
+#      the asset. Marking a path `binary` turns that off for good.
+#   2. `binary` also implies `-diff`, so `git diff` reports "Binary files
+#      differ" instead of dumping megabytes of noise into a review.
+#
+# Decision: no Git LFS. This is a small game built by a father and an
+# eight-year-old, with art measured in kilobytes. LFS adds a bandwidth quota, a
+# second thing that has to be installed before a clone works, a class of
+# "pointer file committed by mistake" failures, and CI checkouts that need an
+# extra step. Plain blobs cost nothing at this size. Revisit only if the repo
+# gets genuinely large — and revisiting means a migration, so decide before
+# committing anything big rather than after.
+
+# Everything not named below is normalized as text with LF in the repo. Working
+# copies get native line endings.
+* text=auto eol=lf
+
+# ---------------------------------------------------------------- images
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.bmp   binary
+*.tga   binary
+*.tif   binary
+*.tiff  binary
+*.exr   binary
+*.hdr   binary
+*.psd   binary
+*.ai    binary
+*.webp  binary
+*.ico   binary
+*.cur   binary
+*.svgz  binary
+
+# ------------------------------------------------------------- 3D models
+*.fbx   binary
+*.FBX   binary
+*.obj   binary
+*.blend binary
+*.blend1 binary
+*.glb   binary
+*.gltf  binary
+*.dae   binary
+*.3ds   binary
+*.max   binary
+*.ma    binary
+*.mb    binary
+*.c4d   binary
+*.abc   binary
+*.ply   binary
+*.stl   binary
+
+# ------------------------------------------------------------------ audio
+*.wav   binary
+*.mp3   binary
+*.ogg   binary
+*.aif   binary
+*.aiff  binary
+*.flac  binary
+*.m4a   binary
+*.aac   binary
+*.it    binary
+*.mod   binary
+*.s3m   binary
+*.xm    binary
+
+# ------------------------------------------------------------------ video
+*.mp4   binary
+*.mov   binary
+*.avi   binary
+*.webm  binary
+*.mkv   binary
+*.m4v   binary
+*.ogv   binary
+
+# ------------------------------------------------------------------ fonts
+*.ttf   binary
+*.otf   binary
+*.ttc   binary
+*.woff  binary
+*.woff2 binary
+*.eot   binary
+
+# --------------------------------------------------------------- archives
+*.zip   binary
+*.7z    binary
+*.gz    binary
+*.tgz   binary
+*.bz2   binary
+*.xz    binary
+*.rar   binary
+*.tar   binary
+
+# ------------------------------------------------- Unity binary artifacts
+# .unitypackage is a gzipped tar; the rest are Unity's own binary formats and
+# the native libraries a plugin drags in.
+*.unitypackage binary
+*.cubemap      binary
+*.a            binary
+*.so           binary
+*.dylib        binary
+*.dll          binary
+*.pdb          binary
+*.bundle       binary
+*.aar          binary
+*.jar          binary
+
+# -------------------------------------------------------- Android / build
+*.apk   binary
+*.aab   binary
+*.keystore binary
+*.jks   binary
+
+# ------------------------------------------------------------------- misc
+*.pdf   binary
+*.bin   binary
+*.dat   binary
+*.sqlite binary
+*.db    binary
+
+# ------------------------------------------------ Unity text-ish formats
+# These are YAML when Asset Serialization is set to Force Text (it is), so they
+# stay diffable — but they are generated, and a review that scrolls through a
+# .unity scene diff is a review that stops reading. Mark them generated so
+# GitHub collapses them by default; `git diff` still works when you want it.
+*.unity      text eol=lf linguist-generated=true
+*.prefab     text eol=lf linguist-generated=true
+*.asset      text eol=lf linguist-generated=true
+*.mat        text eol=lf linguist-generated=true
+*.anim       text eol=lf linguist-generated=true
+*.controller text eol=lf linguist-generated=true
+*.meta       text eol=lf linguist-generated=true
+
+# Shell scripts must keep LF even on a Windows checkout or they will not run.
+*.sh text eol=lf
+gradlew text eol=lf
