@@ -1739,8 +1739,8 @@ follow, and what the PR they open has to contain.</p>
 This is the version you come back to when you want to know <em>why</em> a rule is
 shaped the way it is.</p>
 <h2 id="who-writes-the-code">Who writes the code<a class="headerlink" href="#who-writes-the-code" title="Link to this section">&para;</a></h2>
-<p><strong>A dedicated development agent</strong>, defined in <code>.claude/agents/</code>, not an ad-hoc
-chat session.</p>
+<p><strong>A dedicated development agent</strong> — <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.claude/agents/dev.md"><code>.claude/agents/dev.md</code></a> —
+not an ad-hoc chat session.</p>
 <p>That distinction is the point. An agent definition is a file: it is reviewed,
 versioned, and improved. When it gets something wrong twice, the fix goes in the
 file and every future run inherits it. A chat session that got the same thing
@@ -1759,6 +1759,11 @@ right is a chat session whose good judgement disappeared when the window closed.
 <p>None of these are things an agent will get right by being generally competent.
 They are things it gets right by being told, every session, in a file it cannot
 skip.</p>
+<p>It also carries one rule that overrides all of them, including finishing the
+issue it was given: <strong>never invent a design decision.</strong> If the issue and the
+docs do not say how something behaves, the agent opens a <code>type:question</code> issue
+and works something else. A guessed mechanic that ships is a game drifting away
+from being Connor's, which is the whole reason for building it this way.</p>
 <h3 id="supporting-skills">Supporting skills<a class="headerlink" href="#supporting-skills" title="Link to this section">&para;</a></h3>
 <p>The agent doesn't hold every procedure in its own definition. Repeatable
 procedures live in skills under <code>.claude/skills/</code>, so they can be invoked, read,
