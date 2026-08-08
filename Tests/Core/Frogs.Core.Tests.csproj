@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The Core test suite. Plain NUnit, no Unity: `dotnet test` runs it with no
+    editor, no licence, and no display, in a couple of seconds. That is what
+    makes strict TDD practical here — see docs/engineering/testing.md.
+
+    It lives outside Assets/ deliberately. Unity only compiles what is under
+    Assets/ and Packages/, so keeping this out of both is what stops it being
+    dragged into Unity's compilation.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Unity 6 compiles C# 9. Pinning the same version here means syntax
+         Unity would reject fails in this fast suite instead of in CI. -->
+    <LangVersion>9.0</LangVersion>
+    <!-- Match Unity's compilation context as closely as possible: nullable
+         reference types and implicit usings are both off in the Core assembly,
+         so code that compiles here compiles there. -->
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Frogs.Core.Tests</RootNamespace>
+
+    <!-- Warnings are failures here. This suite is small and fast; letting it
+         accumulate warnings is how it stops being read. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    Compile the Core sources directly rather than referencing a built assembly.
+    Unity owns the build of Assets/Scripts/Core and regenerates its .csproj on
+    every import, so there is no stable project file to reference. Globbing the
+    sources means this suite always tests exactly what Unity compiles.
+  -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)../../Assets/Scripts/Core/**/*.cs"
+             LinkBase="Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
+  </ItemGroup>
+
+</Project>
