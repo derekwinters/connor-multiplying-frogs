@@ -17,6 +17,7 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | `rc-build` | manual, tag | no | a release candidate someone can actually play |
 | `release-please` | push to `main` | no | the version, changelog, tag, release, and release APK |
 | `labels-sync` | push to `main` touching `labels.yml` | no | the label taxonomy matches the file |
+| `geometry-lint` | PR touching `Assets/Scripts/**` | yes | the named-values rule, ratcheting |
 | `pipeline-*` | schedule, issue comments | no | the issue pipeline itself |
 
 ## Every action is pinned to a commit SHA
@@ -446,25 +447,46 @@ pass — the whole point is to not accept an absence of evidence as evidence.
 The script is stdlib-only, so it needs no setup step, and it has 18 unit tests
 covering each failure mode.
 
-### The geometry and tuning literal check
+### `geometry-lint` — the tuning-literal check
 
-Enforces the named-values rule from [Tech stack](tech-stack.md): no bare numeric
-literals for sizes, offsets, margins, durations, speeds, thresholds, or payouts
-in method bodies.
+The backstop for the named-values rule in [Tech stack](tech-stack.md). A rule
+with no backstop decays one literal at a time, each individually defensible.
 
-**Ratcheting baseline.** A committed baseline file records how many violations
-exist per file today. The check fails if a file's count goes *up*; it does not
-demand that existing code be fixed before anything else can happen. When a file's
-count goes down, the baseline is updated in the same PR, and the new lower number
-becomes the ceiling.
+**What it flags:** f-suffixed float literals of magnitude 3 or more, on a line
+that does not give them a name.
 
-The ratchet is the whole design. A check that demanded the codebase be clean
-before it could be turned on is a check that never gets turned on; one that only
-says "not worse than yesterday" can be turned on today and still converges.
+```csharp
+Place(12f, 40f);                    // flagged
+const float PanelWidth = 280f;      // fine — named
+[SerializeField] float _gap = 12f;  // fine — named, and tunable
+var gap = 18f;                      // fine — named
+Fade(0.5f);                         // fine — below the magnitude floor
+```
 
-If a literal is genuinely fine, the answer is one of the documented exemptions,
-or naming it. Raising the baseline to make the check pass is not a fix and shows
-up in review as exactly what it is.
+**It is deliberately narrower than the rule.** It does not catch literals inside
+a named declaration's initialiser (`var spot = new Vector3(12f, 40f, 0f)` names
+the vector, not its components), integer literals, or magnitudes below 3. Those
+need a parser, or would produce more false positives than findings — and a check
+people learn to override catches nothing at all. **They are gaps in the check,
+not permission in the rule**; review catches them.
+
+**Ratcheting baseline.** `.github/geometry_literals_baseline.txt` records how
+many literals each file is allowed. A count going *up* fails. A count going down
+passes, with a note to run `--update-baseline` so the new lower number becomes
+the ceiling — an improvement must never fail a build, or the check gets turned
+off.
+
+The ratchet is the whole design. A check demanding a clean codebase before it
+could be switched on is a check that never gets switched on; one saying "not
+worse than yesterday" can be switched on today and still converges.
+
+Raising the baseline to make the check pass is not a fix, and the script says so
+in its own failure output. The workflow is path-gated to include the baseline
+file, so a PR that only raises it still runs the check it was trying to silence.
+
+**The checker's tests run in the same job, first.** A gate nobody has tested is
+a gate whose verdict means nothing — and a broken checker's dangerous outcome is
+the *pass*.
 
 ## Docs workflows
 
