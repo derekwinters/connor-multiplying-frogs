@@ -1590,6 +1590,34 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#re-fire-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-fire repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Re-fire repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2344,6 +2372,34 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#re-fire-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-fire repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Re-fire repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3144,12 +3200,57 @@ believes the issue is handled and it waits on a human who has nothing to read.</
 <p><code>ai-triage</code> is removed in the same write that adds the new state, so a hand-back
 rests in exactly one state. An issue carrying both gets triaged again by the
 next analysis round while it sits waiting for Derek.</p>
-<p><strong>Re-fire repair.</strong> Triage that runs twice on the same issue must not stack
-duplicate comments, duplicate checklists, or contradictory labels. Each triage
-comment carries a marker; a re-run finds its previous comment and <strong>edits</strong> it
-rather than adding another. <code>triage_repair.py</code> also detects the mess left by an
-older run that crashed mid-way — a label set without a comment, a comment
-without labels — and repairs it.</p>
+<h4 id="re-fire-repair">Re-fire repair<a class="headerlink" href="#re-fire-repair" title="Link to this section">&para;</a></h4>
+<p>Triage runs twice more often than you would think: a sweep catches a comment
+late, a Routine is poked twice, a run crashes after posting its analysis but
+before moving the label. <code>triage_repair.py</code> decides what happens, as a pure
+function rather than a judgement made afresh each time.</p>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An analysis comment is already there</td>
+<td><strong>repair</strong> — apply the missing label move, post nothing</td>
+</tr>
+<tr>
+<td>No analysis comment</td>
+<td>a normal triage run</td>
+</tr>
+<tr>
+<td>Analysis present, label already correct</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td>The owner left <code>/revise</code>, <code>/redo</code>, or <code>/propose</code></td>
+<td>re-analyze anyway</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Repair, not repeat.</strong> Triage is not deterministic: the same issue analyzed
+twice yields two different reasonable plans, and stacking the second on the
+first leaves Derek deciding which one an <code>/approve</code> refers to.</p>
+<p>The exception is the owner's note. <code>/revise</code> objects <em>to the plan</em> — repairing
+the label would apply the state the rejected plan asked for and silently discard
+the objection. The note travels with the issue from <code>select_triage.py</code>, so the
+rewrite answers the actual complaint.</p>
+<h5 id="one-recognizer-shared">One recognizer, shared<a class="headerlink" href="#one-recognizer-shared" title="Link to this section">&para;</a></h5>
+<p>"Does this comment look like triage wrote it" has exactly one implementation:
+<code>has_analysis_signature</code> in <code>triage_repair.py</code>. It matches a <code>## Build
+checklist</code> heading anchored at the start of a line, or the
+<code>❓ Needs from Derek/Connor:</code> marker allowing Markdown emphasis around the text.
+Prose mentioning either phrase does not match, and only comments authored by the
+bot count — a human pasting a checklist is not a triage run.</p>
+<p><code>reconcile.py</code> imports it rather than carrying a second copy. Two copies drift,
+and this particular drift is self-sustaining: reconcile finds no analysis and
+returns the issue to <code>ai-triage</code>, triage finds the analysis it wrote and repairs
+the label instead, reconcile returns it again. Neither side is wrong on its own
+terms, so nothing surfaces as an error — the issue just cycles. The side that
+writes the format owns the recognizer.</p>
 <h3 id="applying-an-action">Applying an action<a class="headerlink" href="#applying-an-action" title="Link to this section">&para;</a></h3>
 <p><code>apply_actions.py</code> computes the resulting label set, the acknowledgement, and
 whether to watermark. Three rules worth knowing:</p>
