@@ -798,6 +798,35 @@ still needs a written justification in `## Deviations and Decisions`, because
 the gate cannot distinguish "no docs needed" from "forgot the docs" — that is
 the whole reason a human has to say which it was.
 
+#### The owner-invoked alternative: `milestone-orchestration`
+
+When Derek hands over several issues at once and wants them *delivered*, the
+`milestone-orchestration` skill runs the same dev agent with one difference:
+the gate between issues is **merged**, not **PR opened**.
+
+| | Nightly builder | `milestone-orchestration` |
+| --- | --- | --- |
+| Gate between issues | PR opened | **PR merged** |
+| Invoked by | the 03:00 schedule | Derek, explicitly |
+| A failing issue | dropped, round continues | **halts the run** |
+
+Merging between issues is what makes a multi-issue run conflict-free by
+construction: every branch is cut from a `main` that already contains all
+previously delivered work, so two issues in one run cannot produce conflicting
+diffs. The nightly builder does not need this, because its PRs sit unmerged
+until Derek reviews them and he resolves any overlap by choosing what to merge.
+
+A failure **halts** rather than skipping, because the next issue would be built
+on a `main` that is missing work the handoff assumed was there. Whether that
+matters is unknowable without reading both issues, so the run stops and says
+which issue failed.
+
+**It is owner-invoked only, never scheduled.** Everything else in the pipeline
+stops at "PR opened" so a human sees the work before it becomes the game. This
+skill merges, and it exists because Derek sometimes applies that judgement up
+front to a set he chose. Wiring it to a trigger would convert a decision about
+six specific issues into a standing grant to merge anything.
+
 #### A failing issue is dropped, and the round continues
 
 If an issue cannot be completed — tests won't pass, the plan was wrong, a
