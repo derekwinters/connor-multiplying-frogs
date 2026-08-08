@@ -631,6 +631,21 @@ only because its caller filtered is one edited `if:` away from letting a
 stranger drive the pipeline, and the workflow trigger is exactly the kind of
 line that gets edited for an unrelated reason.
 
+#### Running either entry point by hand
+
+Both read JSON on **stdin**, which is what makes replaying a missed event or
+rehearsing a sweep possible without waiting for a trigger:
+
+| Entry point | Expects on stdin |
+| --- | --- |
+| `run_comment_event.py` | an `issue_comment` webhook payload |
+| `run_sweep.py` | a state snapshot — issues, pulls, merged commits, focus |
+
+`run_sweep.py --events-only` simulates the fifteen-minute pass by dropping
+reconcile's two cron-only fixes. Running it *without* that flag outside the
+nightly window will requeue whatever the builder currently has in flight, which
+is the one way to do real damage with these scripts by hand.
+
 ### Applying an action
 
 `apply_actions.py` computes the resulting label set, the acknowledgement, and
