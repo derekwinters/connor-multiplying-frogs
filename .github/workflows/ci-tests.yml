@@ -1,0 +1,127 @@
+name: ci-tests
+
+# The required test check. Two suites, deliberately separate:
+#
+#   core     — plain NUnit via dotnet test. No editor, no licence, seconds.
+#   editmode — a headless Unity editor. Minutes, and needs a licence.
+#
+# Path-gated, because most changes in this repo are docs, skills, and
+# workflows, and running a containerised editor for a typo helps nobody.
+#
+# NOTE for branch protection (#80): a path-gated workflow does not report at
+# all on PRs that miss its paths. If `ci-tests` is marked *required*, those PRs
+# block forever waiting for a check that will never run. Require the individual
+# jobs only if you also add an always-running guard job, or leave this
+# non-required and rely on review. See docs/engineering/ci-cd.md.
+
+on:
+  pull_request:
+    paths:
+      - Assets/**
+      - Tests/**
+      - ProjectSettings/**
+      - Packages/**
+      - .github/workflows/ci-tests.yml
+      - .github/scripts/verify_editmode_results.py
+  push:
+    branches: [main]
+    paths:
+      - Assets/**
+      - Tests/**
+      - ProjectSettings/**
+      - Packages/**
+      - .github/workflows/ci-tests.yml
+      - .github/scripts/verify_editmode_results.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core (NUnit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 8.0.x
+
+      # Cheap, and it fails for a reason the test output would not explain:
+      # game logic that has grown a dependency on the engine.
+      - name: Core is engine-free
+        run: python3 .github/scripts/check_core_isolation.py
+
+      - name: Run the Core suite
+        run: dotnet test Tests/Core/Frogs.Core.Tests.csproj --verbosity normal
+
+  editmode:
+    name: EditMode (Unity)
+    runs-on: ubuntu-latest
+    steps:
+      # Before anything expensive. A missing licence must fail the job loudly:
+      # a required check that goes green because the suite never ran is worse
+      # than no check at all.
+      - name: Require the Unity licence
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -z "$UNITY_LICENSE" ]; then
+            echo "::error::The UNITY_LICENSE secret is not set, so the EditMode suite" \
+                 "cannot run. This job fails rather than skipping — see issue #82."
+            exit 1
+          fi
+          echo "UNITY_LICENSE is present."
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: false
+
+      # Unity's Library/ is expensive to rebuild and safe to reuse for the same
+      # project state.
+      - name: Cache Unity's Library
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Library
+          key: Library-editmode-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-editmode-
+
+      # continue-on-error, because the exit code is not the verdict: Unity
+      # exits nonzero from a teardown crash after a fully green run. The gate
+      # below decides. See docs/engineering/ci-cd.md.
+      - name: Run the EditMode suite
+        id: tests
+        continue-on-error: true
+        uses: game-ci/unity-test-runner@0ff419b913a3630032cbe0de48a0099b5a9f0ed9 # v4.3.1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: 6000.0.81f1
+          testMode: EditMode
+          artifactsPath: artifacts
+          customParameters: -nographics
+          checkName: EditMode results
+
+      - name: Verify the results
+        env:
+          UNITY_EXIT_CODE: ${{ steps.tests.outputs.exitCode || '0' }}
+        run: |
+          python3 .github/scripts/verify_editmode_results.py \
+            --results artifacts/editmode-results.xml \
+            --exit-code "$UNITY_EXIT_CODE"
+
+      # Uploaded even on failure — a red EditMode run is the one you most want
+      # the XML for, and it is gone with the runner otherwise.
+      - name: Upload the results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: editmode-results
+          path: artifacts
+          if-no-files-found: warn
+          retention-days: 14
