@@ -841,10 +841,50 @@ each time.
 
 ### Dashboard
 
-`render_dashboard.py` rewrites the dashboard issue from live state: what is in
-focus, what is ready, what is in flight, what is blocked, what is waiting on a
-human, and what the reconciler flagged. Plus **unblocker stars** — the issues
-that would free the most other work, which are the ones worth approving next.
+`render_dashboard.py` rewrites the dashboard issue from live state. The
+sections, in order:
+
+| Section | Shows |
+| --- | --- |
+| 🎯 Focus | the four-slice pie for the focus milestone |
+| 🔨 Ready queue | `ready-for-work`, headed by the build cap |
+| 📥 Intake | `ai-triage` — waiting to be analyzed |
+| ✋ Waiting for you | `pending-approval` — waiting on Derek |
+| ❓ Needs clarification | blocked on a question |
+| ⏸️ Parked | set aside, listed so it can be found |
+| ⚠️ Reconcile | the sweep's flag findings |
+| 📅 Other milestones | progress elsewhere; finished milestones omitted |
+| 🎮 Commands | the command reference |
+
+Every issue table carries a **Milestone** column, so the milestone is visible
+at every stage rather than only where an issue is being scheduled, and a
+**Blocked by** column linking each hard blocker.
+
+#### Unblocker stars
+
+An issue is starred `⭐ unblocks #A, #B` when it appears in another open
+issue's hard-blocker set **and is not itself blocked**, and it sorts to the top
+of its table. Blocked rows carry `⛔ blocked` naming what they wait on.
+
+Both halves of that condition matter. Appearing in someone's blocker set is
+what makes an issue leverage — approving it frees work that is otherwise stuck.
+Not being blocked itself is what makes it *actionable*. Starring a blocked
+issue would point Derek at something nobody can start, which is worse than no
+star: it costs a click to find out the suggestion was useless, and a
+recommendation that is often useless stops being read.
+
+A closed blocker is never starred — it has already done its unblocking.
+
+#### Parked is listed, never queued
+
+The Parked section is read-only, and `parked` issues are excluded from every
+other queue and count on the board — including when an issue somehow carries
+both `parked` and `ready-for-work`.
+
+**The pie's Unplanned slice is the one deliberate exception**, because the pie
+has to add up. Excluding parked work there would make the slices sum to less
+than the milestone's issue count, and a total that does not reconcile is a
+board you stop trusting.
 
 Wholly regenerated every time, apart from the config markers. Nothing on it is
 remembered, so nothing on it can be stale.
