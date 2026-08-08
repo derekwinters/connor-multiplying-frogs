@@ -1737,6 +1737,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Reconciliation — drift">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-sweep-never-closes-an-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The sweep never closes an issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-two-of-the-auto-fixes-are-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why two of the auto-fixes are cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#done-ness-is-read-from-commit-bodies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Done-ness is read from commit bodies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2582,6 +2621,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Reconciliation — drift">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-sweep-never-closes-an-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The sweep never closes an issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-two-of-the-auto-fixes-are-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why two of the auto-fixes are cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#done-ness-is-read-from-commit-bodies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Done-ness is read from commit bodies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3526,25 +3604,109 @@ label, a run crashes between two API calls. <code>reconcile.py</code> compares w
 labels claim against what GitHub shows, and sorts each finding into
 <strong>auto-fixable</strong> or <strong>flag-only</strong>.</p>
 <p><strong>Auto-fixed</strong> — mechanical, single correct answer, no judgement:</p>
-<ul>
-<li>a closed issue still carrying a state label → remove it;</li>
-<li><code>in-progress</code> with no open PR and no recent activity → back to
-  <code>ready-for-work</code>;</li>
-<li>an issue with two state labels where one was clearly just applied → keep the
-  newest;</li>
-<li>a merged PR whose issue is still open, with a closing keyword that GitHub
-  missed → close the issue.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Condition</th>
+<th>Action</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strip_labels</code></td>
+<td>closed issue still carrying a pipeline-state label</td>
+<td>remove it</td>
+<td>every pass</td>
+</tr>
+<tr>
+<td><code>requeue</code></td>
+<td>open, <code>in-progress</code>, no open PR, not on <code>main</code></td>
+<td>→ <code>ready-for-work</code></td>
+<td><strong>cron only</strong></td>
+</tr>
+<tr>
+<td><code>requeue_triage</code></td>
+<td>a state label with no triage-authored analysis</td>
+<td>→ <code>ai-triage</code></td>
+<td><strong>cron only</strong></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Flagged, never touched</strong> — anything needing judgement:</p>
-<ul>
-<li><code>ready-for-work</code> with no milestone (the invariant is broken, but the fix is a
-  decision about which milestone);</li>
-<li>an issue in the focus milestone blocked by one in a later milestone;</li>
-<li>a dependency cycle;</li>
-<li>two dashboard issues, or none.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flag_merged_but_open</code></td>
+<td>the work is on <code>main</code> but the issue is still open</td>
+</tr>
+<tr>
+<td><code>flag_orphaned_analysis</code></td>
+<td>an analysis comment with no state label</td>
+</tr>
+<tr>
+<td><code>flag_orphaned_ready</code></td>
+<td><code>ready-for-work</code> with no milestone</td>
+</tr>
+<tr>
+<td><code>flag_prose_dependency</code></td>
+<td><code>Blocked by #N</code> in the body with no native edge</td>
+</tr>
+<tr>
+<td><code>flag_cycle</code></td>
+<td>a dependency cycle</td>
+</tr>
+<tr>
+<td><code>flag_dashboard_count</code></td>
+<td>two dashboard issues, or none</td>
+</tr>
+</tbody>
+</table>
 <p>The split is the design. A reconciler that guesses is a reconciler you have to
-audit, and one you have to audit is one you turn off.</p>
+audit, and one you have to audit is one you turn off — at which point it is
+worse than absent, because the dashboard still says it ran.</p>
+<h4 id="the-sweep-never-closes-an-issue">The sweep never closes an issue<a class="headerlink" href="#the-sweep-never-closes-an-issue" title="Link to this section">&para;</a></h4>
+<p>Not even when the work is demonstrably merged and the issue is demonstrably
+still open. That is <code>flag_merged_but_open</code>, and it stays a flag.</p>
+<p><code>Closes #N</code> in a PR body is what closes an issue, when Derek merges it. A sweep
+that also closed issues would be deciding that work is finished and accepted on
+evidence that it merely <em>landed</em> — and the two are not the same claim. Getting
+it wrong closes something nobody agreed was done, silently, at 01:00.</p>
+<h4 id="why-two-of-the-auto-fixes-are-cron-only">Why two of the auto-fixes are cron-only<a class="headerlink" href="#why-two-of-the-auto-fixes-are-cron-only" title="Link to this section">&para;</a></h4>
+<p><code>requeue</code> and <code>requeue_triage</code> are correct nightly and wrong on the event path,
+because <strong>the drift they detect is indistinguishable from work in flight.</strong></p>
+<ul>
+<li>An issue the builder picked up seconds ago has <code>in-progress</code> and no PR yet.
+  That is exactly <code>requeue</code>'s condition, and firing it would yank the issue out
+  from under a running agent.</li>
+<li>Triage posts its analysis comment <em>before</em> setting the state label. Between
+  those two writes an issue legitimately has neither; moments later it has both.
+  Mid-write, <code>requeue_triage</code>'s condition holds.</li>
+</ul>
+<p>By 01:00 the transient has resolved: an issue still looking stalled hours later
+genuinely is. So they are <strong>omitted entirely</strong> on the event path rather than
+softened with a time threshold — a threshold is a guess about how long an agent
+takes, and it would be wrong in both directions.</p>
+<p><code>strip_labels</code> has no such problem and runs on every pass. It acts only on an
+already-closed issue, and a closed issue is not transiently anything.</p>
+<h4 id="done-ness-is-read-from-commit-bodies">Done-ness is read from commit bodies<a class="headerlink" href="#done-ness-is-read-from-commit-bodies" title="Link to this section">&para;</a></h4>
+<p>Whether work landed is decided by a <strong>closing keyword in a merged commit's
+body</strong> — never the subject line, never a bare <code>#N</code> or <code>Refs #N</code>.</p>
+<p>The subject line is excluded because a squash merge appends <code>(#148)</code> to it, and
+that is a <em>PR</em> number. Bare references are excluded because PRs and commits
+mention issues constantly for context; treating a mention as completion would
+mark work done because somebody linked to it.</p>
+<p><strong><code>flag_merged_but_open</code> is checked before the stall rule</strong>, so an issue already
+on <code>main</code> never reads as a stall. Without that ordering it would be requeued,
+rebuilt, and requeued again every night — a loop that produces a duplicate PR
+each time.</p>
 <h3 id="dashboard">Dashboard<a class="headerlink" href="#dashboard" title="Link to this section">&para;</a></h3>
 <p><code>render_dashboard.py</code> rewrites the dashboard issue from live state: what is in
 focus, what is ready, what is in flight, what is blocked, what is waiting on a
