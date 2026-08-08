@@ -1,0 +1,27 @@
+{
+  "$comment": [
+    "PROVENANCE ONLY. This file records where each skill was originally ported",
+    "from. Nothing reads it at runtime, and no workflow syncs against it.",
+    "",
+    "The skills in .claude/skills/ are the source of truth in this repository.",
+    "They were hand-ported and then diverged to fit this game, so a sync from",
+    "upstream would revert local work — which is exactly why the upstream",
+    "project disabled its own sync. See docs/engineering/issue-pipeline.md."
+  ],
+  "sync": "disabled",
+  "sync_reason": "Skills here are local and hand-maintained. A scheduled sync would overwrite local divergence with an upstream copy that does not know about this game.",
+  "upstream": {
+    "repository": "derekwinters/lucas-doggiehood",
+    "role": "historical source, not a live dependency",
+    "read_at_runtime": false
+  },
+  "skills": [
+    {
+      "name": "release-flow",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Rewritten around this repo's release-please config paths and the pull-request-title-pattern set in .github/release-please/config.json."
+    }
+  ]
+}
