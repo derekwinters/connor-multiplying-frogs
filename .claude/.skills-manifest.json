@@ -64,6 +64,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Adds the FROZEN marker check from this repo's conventions, and refuses to close a milestone with open issues."
+    },
+    {
+      "name": "pipeline-gatekeeper",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Vocabulary and refusal reason codes follow issues #53-#61; the bad-actor gate and idempotency are enforced inside the parser."
     }
   ]
 }

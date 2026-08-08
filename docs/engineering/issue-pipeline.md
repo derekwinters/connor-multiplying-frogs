@@ -72,20 +72,45 @@ explain yourself in the same comment.
 
 | Command | Effect |
 | --- | --- |
-| `/approve` | `pending-approval` → `ready-for-work`. Subject to both approval gates. |
-| `/park [reason]` | any state → `parked`. The reason is recorded in the ack. |
-| `/unpark` | `parked` → `ai-triage`, so it gets re-triaged against current reality. |
-| `/retriage` | any state → `ai-triage`. Use after answering a `needs-clarification`. |
-| `/block #N` | record a native blocked-by relationship on issue N. |
-| `/unblock #N` | remove it. |
-| `/milestone <title>` | set the issue's milestone by title. |
-| `/focus <title>` | set the pipeline's focus milestone. Dashboard issue only. |
-| `/cap <n>` | set the max concurrent `in-progress` issues. Dashboard issue only. |
-| `/help` | reply with this vocabulary. Works anywhere. |
+| `/admit` | bring an issue into the pipeline — it becomes `ai-triage`. |
+| `/propose` | ask triage to produce a plan for it. |
+| `/approve` | the plan is right → `ready-for-work`. Subject to both approval gates. |
+| `/revise <notes>` | the plan is not right → back to `ai-triage`, with the notes. |
+| `/redo` | the built work is not right → queue it again. |
+| `/park` | set aside deliberately. |
+| `/unpark` | bring it back. |
+| `/milestone <title>` | set the issue's milestone, by title. |
+| `/focus <title>` | set the pipeline's focus milestone. **Dashboard issue only.** |
+| `/cap <n>` | set the max concurrent `in-progress` issues. **Dashboard issue only.** |
 
 Deliberately absent: anything that closes an issue, edits a body, or merges a
 PR. Those have perfectly good GitHub buttons, and a command vocabulary that can
 do irreversible things is a vocabulary that will eventually do one by accident.
+
+### Where each command is refused
+
+The parser refuses rather than guessing, and every refusal carries a reason
+code so the ack can say which rule applied:
+
+| Reason | When |
+| --- | --- |
+| `not-owner` | the comment is from anyone but the owner — dropped **silently** |
+| `already-applied` | the comment already carries the 👀 watermark |
+| `unknown-command` | `/aprove` — never guessed at; the reply names the closest match |
+| `not-dashboard` | `/focus` or `/cap` on an ordinary issue |
+| `cap-invalid` | `/cap lots`, `/cap 0`, `/cap -1` |
+| `epic-excluded` | `/admit`, `/propose`, `/approve`, `/revise`, `/redo` on a `type:epic` |
+
+**Epics are containers**, so the five commands that would put one in the
+builder's path are refused on them — their children are the work. `/park` and
+`/milestone` still apply to a whole epic, because both are reasonable things to
+want.
+
+Two parsing rules worth knowing:
+
+- **A command must start its line.** "see /approve for details" is a mention.
+- **A command inside a code fence is ignored**, or writing up this table in a
+  comment would execute it.
 
 ### Unknown commands
 
