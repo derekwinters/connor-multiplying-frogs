@@ -1,0 +1,132 @@
+name: rc-build
+
+# A release candidate for every push to the open release PR, so what is about
+# to be released can be played before the release is real.
+#
+# The rc number is derived, never chosen — see .github/scripts/next_rc_number.py.
+
+on:
+  push:
+    branches:
+      - release-please--branches--main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Reading this workflow's own past runs is how the rc number is derived.
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: rc-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Release candidate
+    runs-on: ubuntu-latest
+
+    steps:
+      # Warns and skips, like pr-build: an RC is something to play with, not a
+      # correctness gate, and failing the release branch over a missing secret
+      # would make the release PR look broken when it is not.
+      - name: Check for the Unity licence
+        id: licence
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -z "$UNITY_LICENSE" ]; then
+            echo "::warning::No UNITY_LICENSE secret, so no release candidate." \
+                 "See issue #82."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.licence.outputs.present == 'true'
+        with:
+          # The versionCode is the commit count; a shallow checkout would
+          # produce a number Android refuses to install over the last build.
+          fetch-depth: 0
+
+      # /VERSION on this branch is release-please's, already bumped to the
+      # version about to ship — which is exactly the version an RC should carry.
+      - name: Work out the version and the rc number
+        id: stamp
+        if: steps.licence.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          echo "version=$(cut -d'#' -f1 VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+          echo "version_code=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
+          PR_OPENED=$(gh pr list --head "$GITHUB_REF_NAME" --state open \
+            --json createdAt --jq '.[0].createdAt')
+
+          if [ -z "$PR_OPENED" ]; then
+            echo "::error::No open release PR for $GITHUB_REF_NAME, so there is nothing" \
+                 "to build a candidate of."
+            exit 1
+          fi
+
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/rc-build.yml/runs" \
+            --paginate \
+            --jq '{runs: [.workflow_runs[] | {id, created_at}]}' \
+            > runs.json
+
+          jq --arg opened "$PR_OPENED" --argjson run "$RUN_ID" \
+            '. + {pr_created_at: $opened, this_run_id: $run}' runs.json > snapshot.json
+
+          echo "rc=$(python3 .github/scripts/next_rc_number.py --snapshot snapshot.json)" \
+            >> "$GITHUB_OUTPUT"
+
+      - name: Cache Unity's Library
+        if: steps.licence.outputs.present == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Library
+          key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-android-
+
+      # Same debug signing and .debug suffix as a PR build. An RC is for trying
+      # the game, and release signing needs a secret this workflow should not be
+      # able to reach.
+      - name: Build the release candidate
+        if: steps.licence.outputs.present == 'true'
+        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
+          FROGS_RC_NUMBER: ${{ steps.stamp.outputs.rc }}
+          FROGS_APPLICATION_ID_SUFFIX: .debug
+        with:
+          unityVersion: 6000.0.81f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-rc${{ steps.stamp.outputs.rc }}
+          allowDirtyBuild: true
+
+      # Artifacts only. An RC is not a release: no tag, no GitHub release.
+      - name: Upload the release candidate
+        if: steps.licence.outputs.present == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: rc-apk-${{ steps.stamp.outputs.version }}-rc${{ steps.stamp.outputs.rc }}
+          path: build/Android/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Summarise
+        if: always()
+        run: |
+          if [ "${{ steps.licence.outputs.present }}" != "true" ]; then
+            echo "No release candidate: the UNITY_LICENSE secret is not set (#82)." \
+              >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Release candidate \`${{ steps.stamp.outputs.version }}-rc${{ steps.stamp.outputs.rc }}\`" \
+                 "(versionCode ${{ steps.stamp.outputs.version_code }})." >> "$GITHUB_STEP_SUMMARY"
+          fi

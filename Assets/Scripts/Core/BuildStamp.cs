@@ -33,7 +33,10 @@ namespace Frogs.Core
         /// </summary>
         public int VersionCode { get; }
 
-        /// <summary>The short commit sha, or empty for a release build.</summary>
+        /// <summary>
+        /// What distinguishes this build from the plain release of the same
+        /// version — a short commit sha, or an "rcN" — and empty for a release.
+        /// </summary>
         public string CommitSha { get; }
 
         /// <summary>
@@ -60,7 +63,33 @@ namespace Frogs.Core
             return new BuildStamp(version, commitCount, string.Empty);
         }
 
-        /// <summary>A debug or release-candidate build, identified by its commit.</summary>
+        /// <summary>
+        /// A release candidate: "0.1.0-rc2".
+        ///
+        /// Named by its position in the queue rather than by its commit,
+        /// because the question an RC has to answer is "is this newer than the
+        /// one I tried yesterday" — which a sha cannot answer by eye.
+        /// </summary>
+        public static BuildStamp ReleaseCandidate(AppVersion version, int commitCount, int rcNumber)
+        {
+            RequirePositive(commitCount);
+
+            if (rcNumber < 1)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(rcNumber),
+                    rcNumber,
+                    "Release candidates start at rc1. An rc0 means the counting went wrong, "
+                    + "and an RC nobody can order against its siblings is worse than no RC.");
+            }
+
+            return new BuildStamp(
+                version,
+                commitCount,
+                string.Format(CultureInfo.InvariantCulture, "rc{0}", rcNumber));
+        }
+
+        /// <summary>A debug build, identified by its commit.</summary>
         public static BuildStamp Debug(AppVersion version, int commitCount, string shortSha)
         {
             RequirePositive(commitCount);
