@@ -1741,6 +1741,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-owner-invoked-alternative-milestone-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The owner-invoked alternative: milestone-orchestration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-failing-issue-is-dropped-and-the-round-continues" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2719,6 +2730,17 @@
     <span class="md-ellipsis">
       
         skip-docs is applied immediately, or not at all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-owner-invoked-alternative-milestone-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The owner-invoked alternative: milestone-orchestration
       
     </span>
   </a>
@@ -3867,6 +3889,50 @@ X on a PR that was never wrong, which teaches everyone to skim past red. It
 still needs a written justification in <code>## Deviations and Decisions</code>, because
 the gate cannot distinguish "no docs needed" from "forgot the docs" — that is
 the whole reason a human has to say which it was.</p>
+<h4 id="the-owner-invoked-alternative-milestone-orchestration">The owner-invoked alternative: <code>milestone-orchestration</code><a class="headerlink" href="#the-owner-invoked-alternative-milestone-orchestration" title="Link to this section">&para;</a></h4>
+<p>When Derek hands over several issues at once and wants them <em>delivered</em>, the
+<code>milestone-orchestration</code> skill runs the same dev agent with one difference:
+the gate between issues is <strong>merged</strong>, not <strong>PR opened</strong>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Nightly builder</th>
+<th><code>milestone-orchestration</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gate between issues</td>
+<td>PR opened</td>
+<td><strong>PR merged</strong></td>
+</tr>
+<tr>
+<td>Invoked by</td>
+<td>the 03:00 schedule</td>
+<td>Derek, explicitly</td>
+</tr>
+<tr>
+<td>A failing issue</td>
+<td>dropped, round continues</td>
+<td><strong>halts the run</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Merging between issues is what makes a multi-issue run conflict-free by
+construction: every branch is cut from a <code>main</code> that already contains all
+previously delivered work, so two issues in one run cannot produce conflicting
+diffs. The nightly builder does not need this, because its PRs sit unmerged
+until Derek reviews them and he resolves any overlap by choosing what to merge.</p>
+<p>A failure <strong>halts</strong> rather than skipping, because the next issue would be built
+on a <code>main</code> that is missing work the handoff assumed was there. Whether that
+matters is unknowable without reading both issues, so the run stops and says
+which issue failed.</p>
+<p><strong>It is owner-invoked only, never scheduled.</strong> Everything else in the pipeline
+stops at "PR opened" so a human sees the work before it becomes the game. This
+skill merges, and it exists because Derek sometimes applies that judgement up
+front to a set he chose. Wiring it to a trigger would convert a decision about
+six specific issues into a standing grant to merge anything.</p>
 <h4 id="a-failing-issue-is-dropped-and-the-round-continues">A failing issue is dropped, and the round continues<a class="headerlink" href="#a-failing-issue-is-dropped-and-the-round-continues" title="Link to this section">&para;</a></h4>
 <p>If an issue cannot be completed — tests won't pass, the plan was wrong, a
 checklist box cannot be ticked — the branch is deleted and <strong>no PR is opened</strong>.
