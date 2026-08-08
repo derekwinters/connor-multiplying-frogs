@@ -181,12 +181,26 @@ manifest-file: .github/release-please/manifest.json
 
 ### The guard test
 
-A Core test asserts that `/VERSION` and
-`.github/release-please/manifest.json` agree.
-It is a plain NUnit test, so it runs in seconds on every push, and it catches
-the whole class of "the marker was removed", "someone hand-edited one of them",
-and "a merge resolved the conflict wrongly" failures at the point they are
-introduced rather than at the next release.
+`/VERSION` and `.github/release-please/manifest.json` hold the same number in
+two places, and **nothing in release-please notices when they stop agreeing.**
+A damaged marker leaves `/VERSION` behind while the manifest advances; releases
+keep shipping; the first symptom is a build reporting a version from three
+releases ago.
+
+`Tests/Core/VersionDriftTests.cs` closes that hole with three assertions:
+
+| Assertion | Catches |
+| --- | --- |
+| `/VERSION` parses as bare semver once `#…` is stripped | a hand-edit, a bad merge resolution |
+| `/VERSION` still contains `x-release-please-version` | the marker being removed — the usual *cause* |
+| `/VERSION` equals the manifest's `"."` entry | the drift itself |
+
+The middle one earns its place by failing on the cause rather than waiting for
+the symptom: the run that removes the marker fails, instead of the release two
+months later.
+
+It is a plain NUnit test in the ordinary Core suite, so it costs milliseconds
+and runs on every push, with no editor and no network.
 
 ### The release flow
 
