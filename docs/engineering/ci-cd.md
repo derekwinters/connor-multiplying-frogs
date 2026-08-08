@@ -19,6 +19,103 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | `labels-sync` | push to `main` touching `labels.yml` | no | the label taxonomy matches the file |
 | `pipeline-*` | schedule, issue comments | no | the issue pipeline itself |
 
+## Every action is pinned to a commit SHA
+
+**Repository policy: every `uses:` is a full 40-character commit SHA. Never a
+tag, never a branch.** A workflow written as `actions/checkout@v4` is rejected.
+
+```yaml
+# No — a tag is a mutable pointer.
+- uses: actions/checkout@v7
+
+# Yes.
+- uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+```
+
+A tag is a label the action's owner can move. Pinning to one means every
+workflow run fetches whatever that label points at *today*, and a compromised or
+merely careless upstream re-tag runs with this repository's `GITHUB_TOKEN`. A
+commit SHA cannot be moved, so what ran yesterday is what runs tomorrow.
+
+### The trailing comment is required
+
+`# v7.0.1` after the SHA. Not optional, and not decoration — a hex string tells
+a reviewer nothing, so without it nobody can tell a two-year-old pin from
+yesterday's, and "bump the actions" becomes a research project.
+
+The comment is a claim about the SHA, so it has to be true. Re-resolve rather
+than editing the version comment and hoping.
+
+### Resolving a tag to its SHA
+
+```bash
+.github/scripts/resolve_action_pin.sh actions/checkout v7.0.1
+# → actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+```
+
+It prints the line to paste. Use it rather than reading a SHA off the GitHub UI,
+because of one trap: an **annotated** tag's ref points at a tag object, not a
+commit, so `git ls-remote refs/tags/v1.2.3` can hand you a SHA that resolves to
+nothing when a workflow tries to check it out. The script asks for the peeled
+ref (`refs/tags/v1.2.3^{}`) first and falls back to the plain ref for
+lightweight tags.
+
+**Re-resolve on every bump.** A SHA is never inferable from a version number —
+not by incrementing, not by analogy with another action, not by remembering. If
+you are changing the version comment, you are re-running the script.
+
+### The same rule applies to reusable workflows
+
+A `uses:` that points at a workflow file is pinned identically:
+
+```yaml
+jobs:
+  build:
+    uses: derekwinters/connor-multiplying-frogs/.github/workflows/thing.yml@<sha> # v1.0.0
+```
+
+A reusable workflow runs with the caller's permissions, so it is the same
+exposure as an action — and the same rule, including for workflows in this
+repository.
+
+### The actions this project uses
+
+| Action | Pin | Used by |
+| --- | --- | --- |
+| `actions/checkout` | `3d3c42e5aac5ba805825da76410c181273ba90b1` | everything |
+| `actions/setup-python` | `5fda3b95a4ea91299a34e894583c3862153e4b97` | docs, pipeline, scripts |
+| `actions/setup-dotnet` | `a98b56852c35b8e3190ac28c8c2271da59106c68` | the Core suite |
+| `actions/upload-artifact` | `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` | APKs, test results |
+| `actions/download-artifact` | `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` | the release attach step |
+| `googleapis/release-please-action` | `45996ed1f6d02564a971a2fa1b5860e934307cf7` | `release-please` |
+| `game-ci/unity-builder` | `d829bfc901f2347c8fe18898f06712b66916ef42` | APK builds |
+| `game-ci/unity-test-runner` | `0ff419b913a3630032cbe0de48a0099b5a9f0ed9` | the EditMode suite |
+| `actions/configure-pages` | `45bfe0192ca1faeb007ade9deae92b16b8254a0d` | `docs-publish` |
+| `actions/upload-pages-artifact` | `fc324d3547104276b827a68afc52ff2a11cc49c9` | `docs-publish` |
+| `actions/deploy-pages` | `cd2ce8fcbc39b97be8ca5fce6e763baed58fa128` | `docs-publish` |
+
+**Adding an action that isn't on this list is a decision, not a detail.** Every
+one is third-party code running with a token; the bar is "there is no reasonable
+way to do this with `run:` and the GitHub CLI". Several things that would
+normally be an action — creating a release, uploading an asset, posting a
+comment — are `gh` calls here for exactly that reason.
+
+If a new action is genuinely needed: check it is permitted by the repository's
+Actions policy (a denied action fails the run with a policy message, which is at
+least a loud failure), pin it, add it to this table, and say why in the PR.
+
+### Keeping pins fresh
+
+A pin that never moves is a pin that misses security fixes — the failure mode
+this convention trades *into*. Dependabot watches `github-actions` and opens a
+PR per action when a new version appears, updating the SHA **and** the trailing
+comment together.
+
+That is the intended way pins move. Treat those PRs as real changes — read the
+upstream release notes, don't merge on autopilot — but do not let them sit. A
+year of ignored Dependabot PRs is worse than no pinning at all, because it looks
+deliberate.
+
 ## Build workflows
 
 ### `pr-build` — a debug APK for every PR
