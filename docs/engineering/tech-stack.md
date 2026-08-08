@@ -124,9 +124,30 @@ Two placements are worth explaining, because they look inconsistent and aren't:
 
 **`Core` never references `UnityEngine`.** No `using UnityEngine`, no
 `MonoBehaviour`, no `Vector3`, no `Time.deltaTime`, no `Debug.Log`, no
-coroutines, no `ScriptableObject`. `Core.asmdef` is configured with no engine
-references and `noEngineReferences: true`, so this is enforced by the compiler
-rather than by remembering.
+coroutines, no `ScriptableObject`. `Frogs.Core.asmdef` sets
+`noEngineReferences: true` and has no references, so this is enforced by the
+compiler rather than by remembering.
+
+`Frogs.Core` is also `autoReferenced: false`: nothing picks it up implicitly, so
+an assembly that wants Core has to say so. `Frogs.Unity` says so.
+
+#### Two layers of enforcement
+
+The asmdef flag is the real enforcement, but it only fires inside Unity —
+minutes later, in CI, and only while the flag is still set. So there is a second
+check that runs anywhere in under a second, with no editor and no .NET:
+
+```bash
+python .github/scripts/check_core_isolation.py
+```
+
+It fails if `Frogs.Core.asmdef` loses `noEngineReferences`, if it gains an engine
+or editor reference, or if any `.cs` under `Assets/Scripts/Core/` imports —
+or fully-qualifies a type from — `UnityEngine` or `UnityEditor`. That last case
+is the one the asmdef flag and a grep for `using UnityEngine` both miss:
+`UnityEngine.Debug.Log(…)` needs no using directive.
+
+Run it before pushing. CI runs it too ([CI/CD](ci-cd.md)).
 
 **The Unity layer is thin.** It reads input, hands it to Core, asks Core what the
 world looks like now, and draws that. A `MonoBehaviour` that contains a rule —
