@@ -1523,6 +1523,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#applying-an-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Applying an action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#recording-dependencies" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2196,6 +2207,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#applying-an-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Applying an action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#recording-dependencies" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2572,6 +2594,10 @@ account</strong>, and it skips any comment that already has one.</p>
   state change nobody asked for. Prefer visible-and-stuck to silent-and-doubled.</li>
 <li>It is a <strong>claim</strong>, so the outcome gets its own reaction: 🚀 applied, 😕
   refused or not understood.</li>
+<li>A <strong>refused</strong> comment is watermarked too. It was considered, and without the
+  mark the sweep reconsiders it every run and re-posts the same refusal. A
+  stranger's comment is <em>not</em> watermarked — reacting to it would itself be
+  letting them make the bot act.</li>
 </ul>
 <p>To make the gatekeeper reconsider a comment, remove its 👀.</p>
 <p><strong>Only the gatekeeper's own 👀 counts.</strong> A human reacting out of interest must
@@ -2846,6 +2872,23 @@ comment carries a marker; a re-run finds its previous comment and <strong>edits<
 rather than adding another. <code>triage_repair.py</code> also detects the mess left by an
 older run that crashed mid-way — a label set without a comment, a comment
 without labels — and repairs it.</p>
+<h3 id="applying-an-action">Applying an action<a class="headerlink" href="#applying-an-action" title="Link to this section">&para;</a></h3>
+<p><code>apply_actions.py</code> computes the resulting label set, the acknowledgement, and
+whether to watermark. Three rules worth knowing:</p>
+<ul>
+<li><strong>A state change replaces, never adds.</strong> Exactly one of the state labels is
+  on an open issue at a time. Everything else — <code>area:*</code>, <code>type:*</code>,
+  <code>skip-docs</code> — is untouched, because a state change that dropped them would
+  throw away the whole triage decision.</li>
+<li><strong>The ack says what happens next</strong>, not which label changed. "the nightly
+  builder can pick it up next" is the consequence; the label is a means.</li>
+<li><strong>A refusal's ack says nothing was changed</strong> — not the labels, not the
+  milestone — because "your command was refused" and "your command was partly
+  applied" need very different responses.</li>
+</ul>
+<p>Reactive triage fires <strong>only when <code>ai-triage</code> is newly present</strong>. An idempotent
+re-add — a replay, or a second <code>/admit</code> on an already-admitted issue — must not
+fire it again, or one stuck comment becomes a triage run every sweep.</p>
 <h3 id="recording-dependencies">Recording dependencies<a class="headerlink" href="#recording-dependencies" title="Link to this section">&para;</a></h3>
 <p>Dependencies are <strong>native GitHub relationships</strong>, never prose:</p>
 <ul>
