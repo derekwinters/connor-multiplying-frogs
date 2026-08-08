@@ -544,12 +544,44 @@ believes the issue is handled and it waits on a human who has nothing to read.
 rests in exactly one state. An issue carrying both gets triaged again by the
 next analysis round while it sits waiting for Derek.
 
-**Re-fire repair.** Triage that runs twice on the same issue must not stack
-duplicate comments, duplicate checklists, or contradictory labels. Each triage
-comment carries a marker; a re-run finds its previous comment and **edits** it
-rather than adding another. `triage_repair.py` also detects the mess left by an
-older run that crashed mid-way — a label set without a comment, a comment
-without labels — and repairs it.
+#### Re-fire repair
+
+Triage runs twice more often than you would think: a sweep catches a comment
+late, a Routine is poked twice, a run crashes after posting its analysis but
+before moving the label. `triage_repair.py` decides what happens, as a pure
+function rather than a judgement made afresh each time.
+
+| Situation | What happens |
+| --- | --- |
+| An analysis comment is already there | **repair** — apply the missing label move, post nothing |
+| No analysis comment | a normal triage run |
+| Analysis present, label already correct | nothing |
+| The owner left `/revise`, `/redo`, or `/propose` | re-analyze anyway |
+
+**Repair, not repeat.** Triage is not deterministic: the same issue analyzed
+twice yields two different reasonable plans, and stacking the second on the
+first leaves Derek deciding which one an `/approve` refers to.
+
+The exception is the owner's note. `/revise` objects *to the plan* — repairing
+the label would apply the state the rejected plan asked for and silently discard
+the objection. The note travels with the issue from `select_triage.py`, so the
+rewrite answers the actual complaint.
+
+##### One recognizer, shared
+
+"Does this comment look like triage wrote it" has exactly one implementation:
+`has_analysis_signature` in `triage_repair.py`. It matches a `## Build
+checklist` heading anchored at the start of a line, or the
+`❓ Needs from Derek/Connor:` marker allowing Markdown emphasis around the text.
+Prose mentioning either phrase does not match, and only comments authored by the
+bot count — a human pasting a checklist is not a triage run.
+
+`reconcile.py` imports it rather than carrying a second copy. Two copies drift,
+and this particular drift is self-sustaining: reconcile finds no analysis and
+returns the issue to `ai-triage`, triage finds the analysis it wrote and repairs
+the label instead, reconcile returns it again. Neither side is wrong on its own
+terms, so nothing surfaces as an error — the issue just cycles. The side that
+writes the format owns the recognizer.
 
 ### Applying an action
 
