@@ -41,6 +41,22 @@ STATE_LABELS = PLANNING_LABELS | ACTIVE_LABELS | {PARKED}
 FOCUS_MARKER = re.compile(r"<!--\s*pipeline-focus:\s*(.+?)\s*-->")
 CAP_MARKER = re.compile(r"<!--\s*pipeline-cap:\s*(.+?)\s*-->")
 
+TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$",
+                          re.IGNORECASE | re.MULTILINE)
+
+COMMANDS = [
+    ("/admit", "bring an issue into the pipeline"),
+    ("/approve", "the plan is right — build it"),
+    ("/revise <notes>", "the plan is not right, here is why"),
+    ("/redo", "the build is not right — build it again"),
+    ("/propose", "no spec for this yet; design it and show me"),
+    ("/park", "set aside, do not pick this up"),
+    ("/unpark", "back into the pipeline"),
+    ("/milestone <title>", "set the issue's milestone"),
+    ("/focus <title>", "set the focus milestone (this issue only)"),
+    ("/cap <n>", "issues per build round (this issue only)"),
+]
+
 
 def _labels(issue) -> set:
     return set(issue.get("labels") or [])
@@ -140,12 +156,103 @@ def ready_queue(data: dict, focus=None) -> list:
     """
     focus = focus or resolve_focus(data)
 
+    return _sorted_rows(_active(data, focus, READY), data)
+
+
+def blockers_of(issue) -> list:
+    """Hard blockers — native edges unioned with `Blocked by #N` lines."""
+    from_native = {int(n) for n in (issue.get("native_blockers") or [])}
+    from_text = {int(n) for n in TEXT_BLOCKER.findall(issue.get("body") or "")}
+    return sorted(from_native | from_text)
+
+
+def _open_issues(data) -> dict:
+    return {
+        issue["number"]: issue for issue in data.get("issues") or []
+        if issue.get("state") != "closed"
+    }
+
+
+def compute_unblockers(data: dict) -> dict:
+    """`{issue number: [issues it unblocks]}` — the highest-leverage picks.
+
+    An issue earns a star when it appears in another open issue's hard-blocker
+    set **and is not itself blocked**. Both halves matter: the first is what
+    makes it leverage, and the second is what makes it actionable. Starring a
+    blocked issue would point Derek at work nobody can start, which is worse
+    than no star at all — it costs a click to discover the suggestion was
+    useless.
+
+    A closed blocker is never starred: it has already done its unblocking.
+    """
+    issues = _open_issues(data)
+    unblocks = {}
+
+    for number, issue in issues.items():
+        for blocker in blockers_of(issue):
+            if blocker in issues:
+                unblocks.setdefault(blocker, []).append(number)
+
+    return {
+        blocker: sorted(blocked)
+        for blocker, blocked in unblocks.items()
+        if not blockers_of(issues[blocker])
+    }
+
+
+def _is_blocked(issue, data) -> bool:
+    issues = _open_issues(data)
+    return any(blocker in issues for blocker in blockers_of(issue))
+
+
+def _active(data, focus, label):
+    """Open, in focus, carrying `label`, and **not** parked.
+
+    Parked is excluded from every active queue. The Parked section is a
+    listing, not a re-admission — an issue set aside by `/park` must not
+    reappear in a table that says "here is what to do next".
+    """
+    return [
+        issue for issue in _focus_issues(data, focus)
+        if issue.get("state") != "closed"
+        and label in _labels(issue)
+        and PARKED not in _labels(issue)
+    ]
+
+
+def _sorted_rows(issues, data):
+    """Unblockers first (most unblocked first), then by number."""
+    stars = compute_unblockers(data)
+    return sorted(
+        issues,
+        key=lambda issue: (
+            -len(stars.get(issue["number"], [])),
+            issue.get("number", 0),
+        ),
+    )
+
+
+def intake(data: dict, focus=None) -> list:
+    focus = focus or resolve_focus(data)
+    return _sorted_rows(_active(data, focus, TRIAGE), data)
+
+
+def pending(data: dict, focus=None) -> list:
+    focus = focus or resolve_focus(data)
+    return _sorted_rows(_active(data, focus, PENDING), data)
+
+
+def needs_clarification(data: dict, focus=None) -> list:
+    focus = focus or resolve_focus(data)
+    return _sorted_rows(_active(data, focus, NEEDS_CLARIFICATION), data)
+
+
+def parked(data: dict, focus=None) -> list:
+    focus = focus or resolve_focus(data)
     return sorted(
         (
             issue for issue in _focus_issues(data, focus)
-            if issue.get("state") != "closed"
-            and READY in _labels(issue)
-            and PARKED not in _labels(issue)
+            if issue.get("state") != "closed" and PARKED in _labels(issue)
         ),
         key=lambda issue: issue.get("number", 0),
     )
@@ -186,29 +293,115 @@ def render(data: dict, focus_override=None, cap_override=None) -> str:
     for slice_name, count in pie.items():
         lines.append(f"| {slice_name} | {count} | `{_bar(count, total)}` |")
 
-    queue = ready_queue(data, focus)
+    stars = compute_unblockers(data)
 
-    lines += [
-        "",
-        f"## 🔨 Ready queue (cap {cap})",
-        "",
-    ]
+    def table(heading, issues, empty):
+        lines.extend(["", heading, ""])
 
-    if queue:
-        lines += [
-            "| Issue | Title | Milestone |",
-            "| --- | --- | --- |",
-        ]
-        for issue in queue:
+        if not issues:
+            lines.append(empty)
+            return
+
+        lines.extend([
+            "| Issue | Title | Milestone | Blocked by |",
+            "| --- | --- | --- | --- |",
+        ])
+
+        for issue in issues:
+            number = issue["number"]
+            title = issue.get("title", "")
+
+            if number in stars:
+                unblocked = ", ".join(f"#{n}" for n in stars[number])
+                title = f"⭐ unblocks {unblocked} — {title}"
+
+            blocking = [b for b in blockers_of(issue) if b in _open_issues(data)]
+            blocked = (
+                "⛔ blocked: " + ", ".join(f"#{b}" for b in blocking)
+                if blocking else "—"
+            )
+
             lines.append(
-                f"| #{issue['number']} | {issue.get('title', '')} "
-                f"| {issue.get('milestone') or '—'} |")
+                f"| #{number} | {title} | {issue.get('milestone') or '—'} | {blocked} |")
+
+    table(f"## 🔨 Ready queue (cap {cap})", ready_queue(data, focus),
+          "Nothing is ready to build.")
+    table("## 📥 Intake", intake(data, focus), "Nothing waiting for triage.")
+    table("## ✋ Waiting for you", pending(data, focus),
+          "Nothing waiting for approval.")
+    table("## ❓ Needs clarification", needs_clarification(data, focus),
+          "Nothing blocked on a question.")
+
+    # Read-only: parked work stays visible so it can be found and unparked,
+    # but it is deliberately not a queue.
+    lines += ["", "## ⏸️ Parked", ""]
+    parked_issues = parked(data, focus)
+    if parked_issues:
+        for issue in parked_issues:
+            lines.append(f"- #{issue['number']} {issue.get('title', '')} — `/unpark`")
     else:
-        lines.append("Nothing is ready to build.")
+        lines.append("Nothing parked.")
+
+    # Only flags. Auto-fixes have already been applied by the time this
+    # renders, so listing them would report problems that no longer exist.
+    lines += ["", "## ⚠️ Reconcile", ""]
+    flags = [
+        finding for finding in data.get("reconcile_findings") or []
+        if finding.get("action") == "flag"
+    ]
+    if flags:
+        lines += ["| Finding | Issue |", "| --- | --- |"]
+        for finding in flags:
+            target = finding.get("issue")
+            lines.append(
+                f"| `{finding.get('kind')}` | "
+                f"{f'#{target}' if target else '—'} |")
+    else:
+        lines.append("Nothing flagged.")
+
+    lines += ["", "## 📅 Other milestones", ""]
+    others = _other_milestones(data, focus)
+    if others:
+        lines += ["| Milestone | Done | Open |", "| --- | ---: | ---: |"]
+        for title, done, open_count in others:
+            lines.append(f"| {title} | {done} | {open_count} |")
+    else:
+        lines.append("Nothing else in flight.")
+
+    lines += ["", "## 🎮 Commands", "", "| Command | Does |", "| --- | --- |"]
+    for command, description in COMMANDS:
+        lines.append(f"| `{command}` | {description} |")
 
     lines.append("")
 
     return "\n".join(lines) + "\n"
+
+
+def _other_milestones(data, focus) -> list:
+    """Progress on every other milestone that still has open work.
+
+    A milestone with nothing open is **omitted**. It is finished, and a row
+    reading 100% is a line of the board spent saying "nothing to do here" —
+    on a page whose whole job is showing what to do next.
+    """
+    rows = []
+
+    for milestone in data.get("milestones") or []:
+        title = milestone.get("title")
+        if title == focus:
+            continue
+
+        issues = [i for i in data.get("issues") or [] if i.get("milestone") == title]
+        if not issues:
+            continue
+
+        open_count = sum(1 for i in issues if i.get("state") != "closed")
+        if not open_count:
+            continue
+
+        rows.append((title, len(issues) - open_count, open_count))
+
+    return rows
 
 
 def write_dashboard(data: dict, body: str, token=None, repository=None):  # pragma: no cover

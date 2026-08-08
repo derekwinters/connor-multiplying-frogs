@@ -19,8 +19,55 @@ a hand edit to a rendered section disappears at the next render._
 
 ## 🔨 Ready queue (cap 2)
 
-| Issue | Title | Milestone |
-| --- | --- | --- |
-| #10 | Add the frog splitting rule | v0.0.1 |
-| #11 | Cap the pond at 32 | v0.0.1 |
+| Issue | Title | Milestone | Blocked by |
+| --- | --- | --- | --- |
+| #10 | Add the frog splitting rule | v0.0.1 | — |
+| #11 | Cap the pond at 32 | v0.0.1 | — |
+
+## 📥 Intake
+
+Nothing waiting for triage.
+
+## ✋ Waiting for you
+
+| Issue | Title | Milestone | Blocked by |
+| --- | --- | --- | --- |
+| #14 | Frog hop animation | v0.0.1 | — |
+
+## ❓ Needs clarification
+
+| Issue | Title | Milestone | Blocked by |
+| --- | --- | --- | --- |
+| #13 | Decide the pond background | v0.0.1 | — |
+
+## ⏸️ Parked
+
+- #15 Splash screen — `/unpark`
+
+## ⚠️ Reconcile
+
+| Finding | Issue |
+| --- | --- |
+| `flag_prose_dependency` | #11 |
+
+## 📅 Other milestones
+
+| Milestone | Done | Open |
+| --- | ---: | ---: |
+| v0.0.2 | 0 | 1 |
+
+## 🎮 Commands
+
+| Command | Does |
+| --- | --- |
+| `/admit` | bring an issue into the pipeline |
+| `/approve` | the plan is right — build it |
+| `/revise <notes>` | the plan is not right, here is why |
+| `/redo` | the build is not right — build it again |
+| `/propose` | no spec for this yet; design it and show me |
+| `/park` | set aside, do not pick this up |
+| `/unpark` | back into the pipeline |
+| `/milestone <title>` | set the issue's milestone |
+| `/focus <title>` | set the focus milestone (this issue only) |
+| `/cap <n>` | issues per build round (this issue only) |
 

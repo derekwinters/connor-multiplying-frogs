@@ -1,44 +1,152 @@
 {
   "focus": "v0.0.1",
   "milestones": [
-    {"title": "v0.0.1", "description": "Repo, pipeline, and the first build."},
-    {"title": "v0.0.2", "description": "The first frog on screen."},
-    {"title": "Direct Involvement Needed", "description": "Tasks only Derek or Connor can do."}
+    {
+      "title": "v0.0.1",
+      "description": "Repo, pipeline, and the first build."
+    },
+    {
+      "title": "v0.0.2",
+      "description": "The first frog on screen."
+    },
+    {
+      "title": "Direct Involvement Needed",
+      "description": "Tasks only Derek or Connor can do."
+    }
   ],
   "dashboard_issue": {
     "number": 78,
     "body": "# Pipeline\n\n<!-- pipeline-focus: v0.0.1 -->\n<!-- pipeline-cap: 2 -->\n\nold rendered content that must not survive\n"
   },
   "issues": [
-    {"number": 10, "title": "Add the frog splitting rule", "state": "open",
-     "labels": ["ready-for-work", "area:gameplay", "type:task"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 11, "title": "Cap the pond at 32", "state": "open",
-     "labels": ["ready-for-work", "area:gameplay"], "milestone": "v0.0.1",
-     "body": "Depends on: #10", "native_blockers": []},
-    {"number": 12, "title": "Tapping a frog splits it", "state": "open",
-     "labels": ["in-progress", "area:gameplay"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 13, "title": "Decide the pond background", "state": "open",
-     "labels": ["needs-clarification", "area:art"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 14, "title": "Frog hop animation", "state": "open",
-     "labels": ["pending-approval", "area:art"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 15, "title": "Splash screen", "state": "open",
-     "labels": ["parked", "area:ui"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 16, "title": "Nobody has triaged this yet", "state": "open",
-     "labels": ["area:ui"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 17, "title": "Set up the repo", "state": "closed",
-     "labels": ["area:build"], "milestone": "v0.0.1",
-     "body": "", "native_blockers": []},
-    {"number": 18, "title": "A later-milestone issue", "state": "open",
-     "labels": ["ai-triage"], "milestone": "v0.0.2",
-     "body": "", "native_blockers": []},
-    {"number": 78, "title": "Pipeline dashboard", "state": "open",
-     "labels": ["dashboard"], "milestone": null,
-     "body": "", "native_blockers": []}
+    {
+      "number": 10,
+      "title": "Add the frog splitting rule",
+      "state": "open",
+      "labels": [
+        "ready-for-work",
+        "area:gameplay",
+        "type:task"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 11,
+      "title": "Cap the pond at 32",
+      "state": "open",
+      "labels": [
+        "ready-for-work",
+        "area:gameplay"
+      ],
+      "milestone": "v0.0.1",
+      "body": "Depends on: #10",
+      "native_blockers": []
+    },
+    {
+      "number": 12,
+      "title": "Tapping a frog splits it",
+      "state": "open",
+      "labels": [
+        "in-progress",
+        "area:gameplay"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 13,
+      "title": "Decide the pond background",
+      "state": "open",
+      "labels": [
+        "needs-clarification",
+        "area:art"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 14,
+      "title": "Frog hop animation",
+      "state": "open",
+      "labels": [
+        "pending-approval",
+        "area:art"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 15,
+      "title": "Splash screen",
+      "state": "open",
+      "labels": [
+        "parked",
+        "area:ui"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 16,
+      "title": "Nobody has triaged this yet",
+      "state": "open",
+      "labels": [
+        "area:ui"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 17,
+      "title": "Set up the repo",
+      "state": "closed",
+      "labels": [
+        "area:build"
+      ],
+      "milestone": "v0.0.1",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 18,
+      "title": "A later-milestone issue",
+      "state": "open",
+      "labels": [
+        "ai-triage"
+      ],
+      "milestone": "v0.0.2",
+      "body": "",
+      "native_blockers": []
+    },
+    {
+      "number": 78,
+      "title": "Pipeline dashboard",
+      "state": "open",
+      "labels": [
+        "dashboard"
+      ],
+      "milestone": null,
+      "body": "",
+      "native_blockers": []
+    }
+  ],
+  "reconcile_findings": [
+    {
+      "kind": "flag_prose_dependency",
+      "action": "flag",
+      "issue": 11
+    },
+    {
+      "kind": "strip_labels",
+      "action": "auto-fix",
+      "issue": 17
+    }
   ]
 }

@@ -162,6 +162,181 @@ class ReadyQueueTests(unittest.TestCase):
         self.assertNotIn(20, [i["number"] for i in dash.ready_queue(data)])
 
 
+class UnblockerTests(unittest.TestCase):
+    def test_an_issue_blocking_another_is_an_unblocker(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Blocked on 10", "state": "open",
+            "labels": ["pending-approval"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": [10]})
+
+        stars = dash.compute_unblockers(data)
+        self.assertEqual(stars.get(10), [30])
+
+    def test_an_issue_blocking_nothing_gets_no_star(self):
+        self.assertEqual(dash.compute_unblockers(state()), {})
+
+    def test_a_blocked_issue_is_not_itself_an_unblocker(self):
+        """Starring a blocked issue would point at work nobody can start."""
+        data = state()
+        data["issues"] += [
+            {"number": 30, "title": "Middle", "state": "open", "labels": ["ai-triage"],
+             "milestone": "v0.0.1", "body": "", "native_blockers": [31]},
+            {"number": 31, "title": "Root", "state": "open", "labels": ["ai-triage"],
+             "milestone": "v0.0.1", "body": "", "native_blockers": []},
+            {"number": 32, "title": "Leaf", "state": "open", "labels": ["ai-triage"],
+             "milestone": "v0.0.1", "body": "", "native_blockers": [30]},
+        ]
+
+        stars = dash.compute_unblockers(data)
+        self.assertIn(31, stars)
+        self.assertNotIn(30, stars)
+
+    def test_a_closed_blocker_is_not_starred(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Blocked on a closed issue", "state": "open",
+            "labels": ["ai-triage"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": [17]})
+        self.assertNotIn(17, dash.compute_unblockers(data))
+
+    def test_text_blockers_count_towards_stars(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Blocked in prose", "state": "open",
+            "labels": ["ai-triage"], "milestone": "v0.0.1",
+            "body": "Blocked by #10", "native_blockers": []})
+        self.assertEqual(dash.compute_unblockers(data).get(10), [30])
+
+    def test_a_star_lists_every_issue_it_unblocks(self):
+        data = state()
+        for number in (30, 31):
+            data["issues"].append({
+                "number": number, "title": f"Blocked {number}", "state": "open",
+                "labels": ["ai-triage"], "milestone": "v0.0.1",
+                "body": "", "native_blockers": [10]})
+        self.assertEqual(dash.compute_unblockers(data).get(10), [30, 31])
+
+    def test_starred_issues_sort_to_the_top_of_their_table(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Blocked on 11", "state": "open",
+            "labels": ["ai-triage"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": [11]})
+
+        queue = dash.ready_queue(data)
+        self.assertEqual([i["number"] for i in queue], [11, 10])
+
+    def test_the_star_renders_with_what_it_unblocks(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Blocked on 10", "state": "open",
+            "labels": ["ai-triage"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": [10]})
+        self.assertIn("⭐ unblocks #30", dash.render(data))
+
+    def test_a_blocked_row_is_flagged(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Blocked on 10", "state": "open",
+            "labels": ["pending-approval"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": [10]})
+        self.assertIn("⛔ blocked", dash.render(data))
+
+
+class SectionTests(unittest.TestCase):
+    def test_the_intake_table_lists_ai_triage_issues(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Fresh intake", "state": "open",
+            "labels": ["ai-triage"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": []})
+        self.assertIn("Fresh intake", dash.render(data))
+
+    def test_pending_approval_issues_are_listed(self):
+        self.assertIn("Frog hop animation", dash.render(state()))
+
+    def test_needs_clarification_issues_are_listed(self):
+        self.assertIn("Decide the pond background", dash.render(state()))
+
+    def test_the_parked_section_lists_parked_work(self):
+        rendered = dash.render(state())
+        self.assertIn("⏸️ Parked", rendered)
+        self.assertIn("Splash screen", rendered)
+
+    def test_every_issue_table_has_a_milestone_column(self):
+        rendered = dash.render(state())
+        self.assertEqual(rendered.count("| Issue | Title | Milestone | Blocked by |"), 3)
+
+    def test_the_reconcile_section_lists_flag_findings(self):
+        data = state()
+        data["reconcile_findings"] = [
+            {"kind": "flag_orphaned_ready", "action": "flag", "issue": 10}]
+        rendered = dash.render(data)
+
+        self.assertIn("⚠️ Reconcile", rendered)
+        self.assertIn("flag_orphaned_ready", rendered)
+
+    def test_the_reconcile_section_says_so_when_clean(self):
+        data = state()
+        data["reconcile_findings"] = []
+        self.assertIn("Nothing flagged.", dash.render(data))
+
+    def test_auto_fix_findings_are_not_listed(self):
+        """Auto-fixes are already fixed; listing them is noise."""
+        data = state()
+        data["reconcile_findings"] = [
+            {"kind": "strip_labels", "action": "auto-fix", "issue": 17}]
+        self.assertNotIn("strip_labels", dash.render(data))
+
+    def test_other_milestones_show_progress(self):
+        rendered = dash.render(state())
+        self.assertIn("v0.0.2", rendered)
+
+    def test_a_fully_done_milestone_is_omitted(self):
+        data = state()
+        data["issues"] = [i for i in data["issues"] if i["number"] != 18]
+        data["issues"].append({
+            "number": 40, "title": "All done here", "state": "closed",
+            "labels": [], "milestone": "v0.0.2", "body": "", "native_blockers": []})
+
+        rendered = dash.render(data)
+        self.assertNotIn("| v0.0.2 |", rendered)
+
+    def test_the_command_reference_is_rendered(self):
+        rendered = dash.render(state())
+        self.assertIn("/approve", rendered)
+        self.assertIn("/park", rendered)
+
+
+class ParkedExclusionTests(unittest.TestCase):
+    def parked_ready(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Parked but labelled ready", "state": "open",
+            "labels": ["ready-for-work", "parked"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": []})
+        return data
+
+    def test_parked_is_excluded_from_the_ready_queue(self):
+        numbers = [i["number"] for i in dash.ready_queue(self.parked_ready())]
+        self.assertNotIn(30, numbers)
+
+    def test_parked_is_excluded_from_intake_and_planning_tables(self):
+        data = state()
+        data["issues"].append({
+            "number": 30, "title": "Parked mid-triage", "state": "open",
+            "labels": ["ai-triage", "parked"], "milestone": "v0.0.1",
+            "body": "", "native_blockers": []})
+        self.assertEqual(dash.intake(data), [])
+
+    def test_parked_still_counts_in_the_unplanned_slice(self):
+        """The one deliberate exception — otherwise the pie stops adding up."""
+        counts = dash.focus_pie(self.parked_ready())
+        self.assertEqual(sum(counts.values()), 9)
+        self.assertEqual(counts["Unplanned"], 3)
+
+
 class PurityTests(unittest.TestCase):
     def test_render_does_not_mutate_its_input(self):
         data = state()
