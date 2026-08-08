@@ -1791,6 +1791,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The focus pie always adds up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-reconciles-flags-surface" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2693,6 +2704,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The focus pie always adds up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-reconciles-flags-surface" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3185,9 +3207,20 @@ comment naming the cleared blockers — so the transition is visible in the
 thread rather than being a label that changed itself overnight.</p>
 <h2 id="focus-and-cap-live-on-the-dashboard-issue"><code>/focus</code> and <code>/cap</code> live on the dashboard issue<a class="headerlink" href="#focus-and-cap-live-on-the-dashboard-issue" title="Link to this section">&para;</a></h2>
 <p>Both are stored as HTML-comment markers in the body of the dashboard issue:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- pipeline:focus=v0.0.1 --&gt;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cm">&lt;!-- pipeline:cap=3 --&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- pipeline-focus: v0.0.1 --&gt;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cm">&lt;!-- pipeline-cap: 3 --&gt;</span>
 </code></pre></div>
+<p>Each setting resolves <strong>override → marker → default</strong>: an explicit <code>/focus</code> or
+<code>/cap</code> on this run wins, otherwise the marker currently in the body, otherwise
+the default (3 for <code>cap</code>; <code>focus</code> has no default and must come from one of the
+first two).</p>
+<p>A <code>/focus</code> naming <strong>no live milestone is rejected, not stored.</strong> A typo'd
+<code>v0.0.10</code> would otherwise render a board whose every section is empty — which
+looks exactly like a finished milestone, and is the most misleading output the
+renderer could produce. The refusal names the milestones that do exist.</p>
+<p>A malformed <code>cap</code> marker falls back to 3 rather than failing the render: a
+board that does not render is worse than one with a default cap, and the next
+<code>/cap</code> fixes it.</p>
 <p>The dashboard issue is the one carrying the <code>dashboard</code> label. There is exactly
 one; the reconciler flags it if there are two or none.</p>
 <h3 id="why-markers-and-why-re-rendering-beats-hand-editing">Why markers, and why re-rendering beats hand-editing<a class="headerlink" href="#why-markers-and-why-re-rendering-beats-hand-editing" title="Link to this section">&para;</a></h3>
@@ -3748,6 +3781,48 @@ human, and what the reconciler flagged. Plus <strong>unblocker stars</strong> �
 that would free the most other work, which are the ones worth approving next.</p>
 <p>Wholly regenerated every time, apart from the config markers. Nothing on it is
 remembered, so nothing on it can be stale.</p>
+<p>Rendering is <strong>deterministic and byte-stable</strong>: the same state produces the
+same bytes. Without that, every hourly run would PATCH the issue and the
+dashboard would generate a stream of meaningless edits.</p>
+<h4 id="the-focus-pie-always-adds-up">The focus pie always adds up<a class="headerlink" href="#the-focus-pie-always-adds-up" title="Link to this section">&para;</a></h4>
+<p>The focus milestone is summarised as four slices:</p>
+<table>
+<thead>
+<tr>
+<th>Slice</th>
+<th>What is in it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unplanned</strong></td>
+<td><code>parked</code>, or carrying no pipeline-state label at all</td>
+</tr>
+<tr>
+<td><strong>In Planning</strong></td>
+<td><code>ai-triage</code>, <code>pending-approval</code>, <code>needs-clarification</code></td>
+</tr>
+<tr>
+<td><strong>Ready</strong></td>
+<td><code>ready-for-work</code>, <code>in-progress</code></td>
+</tr>
+<tr>
+<td><strong>Done</strong></td>
+<td>closed, whatever its labels say</td>
+</tr>
+</tbody>
+</table>
+<p>Every issue in the milestone falls into <strong>exactly one</strong>, and the four counts
+sum to the milestone's issue total. That is the property worth protecting: it
+means an issue cannot quietly disappear from the board by ending up with an odd
+combination of labels. The slices are assigned by ordered checks rather than
+independent predicates, so there is no gap to fall through and no overlap to be
+counted twice.</p>
+<p>Parked and never-triaged share the Unplanned slice because they mean the same
+thing for planning — not being worked, and not waiting on anybody — even though
+they got there for different reasons. This is the <strong>one</strong> place a <code>parked</code>
+issue is counted; every active-work queue excludes it, because the board's
+Parked section is a listing, not a re-admission.</p>
 <h4 id="how-reconciles-flags-surface">How reconcile's flags surface<a class="headerlink" href="#how-reconciles-flags-surface" title="Link to this section">&para;</a></h4>
 <p>The sweep's flag findings render into the board's <strong>⚠️ Reconcile</strong> section, and
 that is the only place they appear. They are regenerated with everything else,
