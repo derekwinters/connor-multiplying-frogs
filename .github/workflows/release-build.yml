@@ -1,0 +1,165 @@
+name: release-build
+
+# Builds the release APKs and attaches them to a GitHub release.
+#
+# Called two ways, and the distinction matters:
+#
+#   workflow_call      from release-please.yml, in the same run that created
+#                      the release. This is the normal path.
+#   workflow_dispatch  the manual backfill, for a release whose attach step
+#                      failed or was never run.
+#
+# Why not `on: release: published`? GitHub deliberately suppresses workflow
+# runs from events initiated by GITHUB_TOKEN, to stop workflows triggering
+# themselves forever. release-please creates the release with that token, so a
+# release-triggered workflow silently never fires — no error, no run, just a
+# release with no APK on it. Hence the call from inside the run that made it.
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: The release tag to build and attach to, e.g. v0.1.0
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag to build and attach to, e.g. v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-build-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-attach:
+    name: Release APKs for ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Upload assets onto the release.
+      contents: write
+
+    steps:
+      # Same graceful-skip contract as pr-build and rc-build: a missing licence
+      # warns rather than failing. A release without its APK is a gap to
+      # backfill — this workflow is the backfill — not a reason to mark a
+      # completed release as failed.
+      - name: Check for the Unity licence
+        id: licence
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -z "$UNITY_LICENSE" ]; then
+            echo "::warning::No UNITY_LICENSE secret, so ${{ inputs.tag }} gets no APK." \
+                 "See issue #82. Re-run this workflow once the secret exists."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The tag, not a branch: the release must be built from exactly what was
+      # released, and full depth because the versionCode is the commit count.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.licence.outputs.present == 'true'
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+
+      - name: Work out the build stamp
+        id: stamp
+        if: steps.licence.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          VERSION=$(cut -d'#' -f1 VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_code=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
+          # The tag and /VERSION at that tag must agree. If they do not, the
+          # release is mislabelled and attaching an APK to it would make the
+          # mislabelling permanent.
+          if [ "v$VERSION" != "${{ inputs.tag }}" ]; then
+            echo "::error::${{ inputs.tag }} was tagged, but /VERSION at that tag says" \
+                 "$VERSION. Refusing to attach an APK to a mislabelled release."
+            exit 1
+          fi
+
+      - name: Cache Unity's Library
+        if: steps.licence.outputs.present == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Library
+          key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-android-
+
+      # No FROGS_BUILD_SHA and no FROGS_RC_NUMBER: this is the release, so the
+      # version name is bare. No applicationId suffix either — this is the app.
+      - name: Build the device APK
+        if: steps.licence.outputs.present == 'true'
+        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
+          FROGS_ANDROID_PROFILE: device
+        with:
+          unityVersion: 6000.0.81f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildsPath: build/device
+          buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}
+          allowDirtyBuild: true
+
+      # Its own build path, so the two APKs cannot be confused with each other —
+      # they have the same version and differ only in architecture, which is not
+      # visible from a filename in a shared directory.
+      - name: Build the emulator APK
+        if: steps.licence.outputs.present == 'true'
+        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
+          FROGS_ANDROID_PROFILE: emulator
+        with:
+          unityVersion: 6000.0.81f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildsPath: build/emulator
+          buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-emulator
+          allowDirtyBuild: true
+
+      - name: Attach the APKs to the release
+        if: steps.licence.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          assets=(build/device/*.apk build/emulator/*.apk)
+
+          if [ ${#assets[@]} -eq 0 ]; then
+            echo "::error::Neither build produced an APK, so there is nothing to attach."
+            exit 1
+          fi
+
+          # --clobber so a backfill re-run replaces the asset instead of failing
+          # on "already exists" — the whole point of the backfill is re-running.
+          gh release upload "$TAG" "${assets[@]}" --clobber
+
+          echo "Attached to $TAG:" >> "$GITHUB_STEP_SUMMARY"
+          for asset in "${assets[@]}"; do
+            echo "- \`$(basename "$asset")\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Summarise a skip
+        if: steps.licence.outputs.present != 'true'
+        run: |
+          echo "No APKs attached to ${{ inputs.tag }}: the UNITY_LICENSE secret is not" \
+               "set (#82). Re-run this workflow with the tag once it exists." \
+               >> "$GITHUB_STEP_SUMMARY"

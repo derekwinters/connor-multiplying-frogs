@@ -75,8 +75,13 @@ jobs:
 ```
 
 A reusable workflow runs with the caller's permissions, so it is the same
-exposure as an action — and the same rule, including for workflows in this
-repository.
+exposure as an action — and the same rule.
+
+**Workflows in this repository are referenced by local path** —
+`uses: ./.github/workflows/release-build.yml` — which is pinned by
+construction: it resolves to the calling workflow's own commit. That is
+stricter than a SHA, because there is no pin anyone has to remember to update
+and no way for the two to drift apart.
 
 ### The actions this project uses
 
@@ -243,24 +248,70 @@ attempt to open the PR.
 
 ### Release builds
 
-The APK is attached from inside `release-please.yml` rather than by a separate
-workflow that listens for the release — see [Versioning](versioning.md) for the
-release flow. On the run where `release_created` is true, it also:
+#### Why not `on: release: published`
 
-- Builds the release APK, signed with the release keystore, device profile
-  (ARM64, IL2CPP).
-- **Attaches it to the GitHub release**, so the tag and the artifact are one
-  thing. A release whose APK lives in an expiring workflow artifact is a release
-  you cannot re-install in six months.
-- **Attaches an emulator-targeted asset** as well — x86_64, Mono — so the
-  release can be run on a desktop emulator without rebuilding. Clearly named as
-  the emulator asset; it is for trying the game, not for judging it.
+Because it would never run.
 
-Keeping this inside `release-please.yml` avoids the failure mode where a
-separate release-triggered workflow doesn't fire (a `GITHUB_TOKEN`-created
-release does not trigger `release` events) and the release sits there with no
-APK. A manual backfill workflow exists for the case where the attach step
-itself fails.
+**GitHub deliberately suppresses workflow runs from events initiated by
+`GITHUB_TOKEN`.** The rule exists to stop workflows triggering themselves
+forever, and it is unconditional: it does not warn, and it does not appear
+anywhere in the Actions UI. release-please creates the release with that token,
+so a workflow listening for `release: published` simply never fires. Every
+release would sit there with no APK, and the only symptom would be the absence
+of a run nobody was watching for.
+
+So the build is called **from inside the run that created the release**, gated
+on `release_created`. The token that made the release is the token in the job,
+and no event is involved.
+
+The usual workaround — a personal access token or a GitHub App, so the event is
+attributed to something other than `GITHUB_TOKEN` — is a credential to store,
+rotate, and scope. Calling the workflow directly needs none of that.
+
+#### `release-build.yml`
+
+One reusable workflow, called two ways:
+
+| Called by | When |
+| --- | --- |
+| `release-please.yml` (`workflow_call`) | in the run that created the release — the normal path |
+| a human (`workflow_dispatch`, with a `tag` input) | the backfill, when the attach failed or never ran |
+
+Both paths run the same steps, so the backfill cannot drift from the thing it
+backfills. `gh release upload --clobber` means re-running it replaces the asset
+rather than failing on "already exists", which is the entire point of a
+backfill.
+
+It refuses to attach anything if `/VERSION` at the tag disagrees with the tag
+name — attaching an APK to a mislabelled release makes the mislabelling
+permanent.
+
+#### Two APKs, in two build paths
+
+| Asset | Profile | For |
+| --- | --- | --- |
+| `multiplying-frogs-0.2.0.apk` | ARM64, IL2CPP | the phone |
+| `multiplying-frogs-0.2.0-emulator.apk` | x86_64, Mono | a desktop emulator |
+
+They are built into `build/device/` and `build/emulator/` rather than a shared
+directory. The two have the same version and differ only in architecture, which
+is not visible from a filename sitting next to another filename — separate
+paths make it impossible for the wrong one to be picked up by a glob.
+
+The profile is applied by `BuildStampPreprocessor` from `FROGS_ANDROID_PROFILE`,
+and an unrecognised value fails the build rather than defaulting: guessing here
+ships the wrong architecture, which looks fine until someone installs it.
+
+Both are **attached to the GitHub release** rather than left as workflow
+artifacts, so the tag and the thing you install are one object. A release whose
+APK lives in an expiring artifact is a release you cannot re-install in six
+months, which defeats the point of tagging it.
+
+The emulator asset is for *trying* the game on a desktop, not for judging it —
+see [Tech stack](tech-stack.md#two-build-profiles).
+
+Neither build carries a `.debug` suffix or a sha in its version name. This is
+the app.
 
 ## Correctness workflows
 

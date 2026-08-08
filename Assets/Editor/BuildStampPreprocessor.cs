@@ -23,6 +23,7 @@ namespace Frogs.EditorTools
     ///     FROGS_BUILD_SHA               set for a PR build, absent otherwise
     ///     FROGS_RC_NUMBER               set for a release candidate
     ///     FROGS_APPLICATION_ID_SUFFIX   ".debug" for a PR or RC build
+    ///     FROGS_ANDROID_PROFILE         "device" or "emulator"
     ///
     /// See docs/engineering/versioning.md.
     /// </summary>
@@ -31,6 +32,7 @@ namespace Frogs.EditorTools
         const string ApplicationIdSuffixVariable = "FROGS_APPLICATION_ID_SUFFIX";
         const string BuildShaVariable = "FROGS_BUILD_SHA";
         const string RcNumberVariable = "FROGS_RC_NUMBER";
+        const string AndroidProfileVariable = "FROGS_ANDROID_PROFILE";
 
         /// <summary>Early, so later pre-processors see the stamped values.</summary>
         public int callbackOrder => -100;
@@ -58,6 +60,50 @@ namespace Frogs.EditorTools
             }
 
             ApplyApplicationIdSuffix();
+            ApplyAndroidProfile();
+        }
+
+        /// <summary>
+        /// The device/emulator split from docs/engineering/tech-stack.md.
+        ///
+        /// Left alone when unset, so a build that does not ask for a profile
+        /// gets whatever the project is configured with — the editor's own
+        /// Build button keeps working.
+        /// </summary>
+        static void ApplyAndroidProfile()
+        {
+            var profile = Environment.GetEnvironmentVariable(AndroidProfileVariable);
+
+            if (string.IsNullOrWhiteSpace(profile))
+            {
+                return;
+            }
+
+            switch (profile.Trim().ToLowerInvariant())
+            {
+                case "device":
+                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                    PlayerSettings.SetScriptingBackend(
+                        NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+                    break;
+
+                case "emulator":
+                    // x86_64 and Mono. IL2CPP cross-compiling to x86_64 is slow
+                    // and buys nothing for a smoke test — this profile trades
+                    // fidelity for a build that finishes while you are still
+                    // looking at it.
+                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.X86_64;
+                    PlayerSettings.SetScriptingBackend(
+                        NamedBuildTarget.Android, ScriptingImplementation.Mono2x);
+                    break;
+
+                default:
+                    throw new ArgumentException(
+                        $"{AndroidProfileVariable} is '{profile}'. It must be 'device' or "
+                        + "'emulator'; guessing would silently ship the wrong architecture.");
+            }
+
+            Debug.Log($"Android build profile: {profile}.");
         }
 
         static void ApplyApplicationIdSuffix()
