@@ -250,6 +250,26 @@ entirely.
 
 ---
 
+## The commands you need
+
+```bash
+# The Core suite. No editor, no licence, ~2 seconds. Run this constantly.
+dotnet test Tests/Core/Frogs.Core.Tests.csproj
+
+# One test, while you are in a red-green loop.
+dotnet test Tests/Core/Frogs.Core.Tests.csproj --filter FullyQualifiedName~AppVersion
+
+# Core has not gained a Unity dependency.
+python .github/scripts/check_core_isolation.py
+
+# The docs site still builds the way CI builds it.
+mkdocs build --strict
+```
+
+All four run in an agent environment. The EditMode suite does not — it needs an
+editor, so it runs in CI
+([why](docs/engineering/testing.md#known-limitation-editmode-tests-run-in-ci-not-in-agent-environments)).
+
 ## Quick reference
 
 | Thing | Where |

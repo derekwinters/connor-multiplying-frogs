@@ -55,9 +55,26 @@ An agent that cannot say this did not do step 2.
 
 ### Core tests — plain NUnit, no engine
 
-`Tests/Core` compiles the Core sources and nothing else. It compiles and runs with
-`dotnet test`: no editor, no licence, no display, no container. This is where
-essentially all the tests are, because this is where all the game logic is.
+`Tests/Core` compiles the Core sources and nothing else. It runs with no editor,
+no licence, no display, and no container. This is where essentially all the
+tests are, because this is where all the game logic is.
+
+```bash
+# The whole suite.
+dotnet test Tests/Core/Frogs.Core.Tests.csproj
+
+# One test or one fixture, for a tight red-green loop.
+dotnet test Tests/Core/Frogs.Core.Tests.csproj --filter FullyQualifiedName~AppVersion
+```
+
+`Frogs.Core.Tests.csproj` compiles `Assets/Scripts/Core/**/*.cs` directly rather
+than referencing a built assembly. Unity owns that build and regenerates its
+`.csproj` on every import, so there is no stable project to reference — and
+globbing the sources means this suite always tests exactly what Unity compiles.
+
+It deliberately matches Unity's compilation context: `LangVersion 9.0`, nullable
+reference types off, implicit usings off. Syntax Unity would reject fails here,
+in two seconds, instead of in CI ten minutes later.
 
 Fast enough to run on every save. That is the whole design goal — a red-green
 loop you can run mid-thought is a loop you actually use, and one that takes two

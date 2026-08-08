@@ -18,11 +18,13 @@
 /[Aa]ssets/[Aa]ssetStoreTools*
 /[Rr]ecordings/
 
-# Generated solution and project files. The IDE rewrites these from the
-# .asmdef files every time it regenerates, so they are pure churn.
-*.csproj
-*.sln
-*.unityproj
+# Generated solution and project files. Unity rewrites these at the project
+# root from the .asmdef files every time it regenerates, so they are pure
+# churn. Anchored with a leading slash: hand-written project files elsewhere —
+# Tests/Core/Frogs.Core.Tests.csproj — are tracked.
+/*.csproj
+/*.sln
+/*.unityproj
 *.pidb
 *.booproj
 *.svd
@@ -85,6 +87,14 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# =============================================================================
+# .NET build output
+# =============================================================================
+# From `dotnet build`/`dotnet test` on Tests/Core. Unanchored: these appear
+# next to whichever project produced them.
+[Bb]in/
+[Oo]bj/
 
 # =============================================================================
 # Docs site
