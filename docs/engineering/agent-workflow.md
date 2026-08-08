@@ -10,8 +10,8 @@ shaped the way it is.
 
 ## Who writes the code
 
-**A dedicated development agent**, defined in `.claude/agents/`, not an ad-hoc
-chat session.
+**A dedicated development agent** — [`.claude/agents/dev.md`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.claude/agents/dev.md) —
+not an ad-hoc chat session.
 
 That distinction is the point. An agent definition is a file: it is reviewed,
 versioned, and improved. When it gets something wrong twice, the fix goes in the
@@ -32,6 +32,12 @@ The agent carries the rules that are easy to drop under pressure:
 None of these are things an agent will get right by being generally competent.
 They are things it gets right by being told, every session, in a file it cannot
 skip.
+
+It also carries one rule that overrides all of them, including finishing the
+issue it was given: **never invent a design decision.** If the issue and the
+docs do not say how something behaves, the agent opens a `type:question` issue
+and works something else. A guessed mechanic that ships is a game drifting away
+from being Connor's, which is the whole reason for building it this way.
 
 ### Supporting skills
 
