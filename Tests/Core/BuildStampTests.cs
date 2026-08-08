@@ -109,6 +109,26 @@ namespace Frogs.Core.Tests
         }
 
         [Test]
+        public void ReleaseCandidate_NamesItselfRcN()
+        {
+            var stamp = BuildStamp.ReleaseCandidate(Version, commitCount: 147, rcNumber: 2);
+
+            Assert.That(stamp.VersionName, Is.EqualTo("0.2.3-rc2"));
+            Assert.That(stamp.VersionCode, Is.EqualTo(147));
+        }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void ReleaseCandidate_RejectsAnRcNumberBelowOne(int rcNumber)
+        {
+            // rc0 would mean the counting went wrong, and an RC nobody can
+            // order against its siblings is worse than a failed build.
+            Assert.That(
+                () => BuildStamp.ReleaseCandidate(Version, 147, rcNumber),
+                Throws.TypeOf<ArgumentOutOfRangeException>());
+        }
+
+        [Test]
         public void Debug_AcceptsAFullLengthShaAndShortensIt()
         {
             var stamp = BuildStamp.Debug(Version, 147, "abc1234def5678901234567890abcdef12345678");

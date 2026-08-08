@@ -173,14 +173,38 @@ because it lives in the Unity layer. Read the build log, not the test log.
 An RC is a build of what is *about* to be released, produced so someone can play
 it before the release is real.
 
-- Triggered manually, or by a pre-release tag.
-- **The `rcN` number is derived, not chosen.** It counts the existing RC
-  artifacts for the current `/VERSION` and adds one, so the first RC of `0.2.0`
-  is `0.2.0-rc1` and the next is `rc2`. Nobody has to remember where they got to,
-  and two people cannot both produce `rc3`.
-- Release-signed and built with the device profile — an RC that differs from the
-  release in signing or backend is an RC that proves less than it appears to.
-- Artifacts only. An RC is not a release; it gets no tag and no GitHub release.
+- **Triggered by a push to the open release PR's branch**
+  (`release-please--branches--main`), so every change to what is about to ship
+  produces something playable. Also `workflow_dispatch`.
+- **The version comes from `/VERSION` on that branch**, which release-please has
+  already bumped to the version about to ship — exactly the version an RC should
+  carry.
+- **Same debug signing and `.debug` suffix as a PR build.** An RC is for trying
+  the game; release signing needs a keystore secret this workflow should not be
+  able to reach.
+- **Artifacts only.** An RC is not a release: no tag, no GitHub release.
+
+#### The `rcN` number is derived, not chosen
+
+`N` is the number of `rc-build` runs on the release branch **since that PR
+opened**. Nobody has to remember where they got to, and two pushes cannot both
+claim `rc3`.
+
+Counting from the PR's open time is what makes a fresh release PR restart at
+`rc1` instead of continuing the last release's numbering — the release branch
+itself is rewritten on every release, so there is nothing on it to count.
+
+release-please's own prerelease support cannot do this: it bumps on *releases*,
+not on pushes to an open PR.
+
+`.github/scripts/next_rc_number.py` does the arithmetic, from a snapshot of the
+workflow's runs, and it handles the two cases that would otherwise produce two
+artifacts claiming the same number:
+
+- **A re-run of an older build** counts only runs at or before itself, so it
+  cannot renumber above a newer sibling.
+- **A run that cannot see itself yet** — the Actions API lags — counts what is
+  there and adds one, rather than reporting a number already taken.
 
 ### `release-please` — the version, the tag, and the release
 

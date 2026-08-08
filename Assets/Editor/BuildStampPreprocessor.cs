@@ -20,8 +20,9 @@ namespace Frogs.EditorTools
     /// checkout has no history to count:
     ///
     ///     FROGS_VERSION_CODE            the Android versionCode
-    ///     FROGS_BUILD_SHA               set for a debug/RC build, absent for a release
-    ///     FROGS_APPLICATION_ID_SUFFIX   ".debug" for a PR build
+    ///     FROGS_BUILD_SHA               set for a PR build, absent otherwise
+    ///     FROGS_RC_NUMBER               set for a release candidate
+    ///     FROGS_APPLICATION_ID_SUFFIX   ".debug" for a PR or RC build
     ///
     /// See docs/engineering/versioning.md.
     /// </summary>
@@ -29,22 +30,31 @@ namespace Frogs.EditorTools
     {
         const string ApplicationIdSuffixVariable = "FROGS_APPLICATION_ID_SUFFIX";
         const string BuildShaVariable = "FROGS_BUILD_SHA";
+        const string RcNumberVariable = "FROGS_RC_NUMBER";
 
         /// <summary>Early, so later pre-processors see the stamped values.</summary>
         public int callbackOrder => -100;
 
         public void OnPreprocessBuild(BuildReport report)
         {
-            // A build sha means "this is not the release" — a PR build or an RC.
+            // Which kind of build this is, decided by which variable CI set.
+            // An rc number wins over a sha: a release candidate is identified
+            // by its position in the queue, because "is this newer than the one
+            // I tried yesterday" is not a question a sha answers by eye.
+            var rcNumber = Environment.GetEnvironmentVariable(RcNumberVariable);
             var sha = Environment.GetEnvironmentVariable(BuildShaVariable);
 
-            if (string.IsNullOrWhiteSpace(sha))
+            if (!string.IsNullOrWhiteSpace(rcNumber))
             {
-                BuildStampApplier.ApplyRelease();
+                BuildStampApplier.ApplyReleaseCandidate();
+            }
+            else if (!string.IsNullOrWhiteSpace(sha))
+            {
+                BuildStampApplier.ApplyDebug();
             }
             else
             {
-                BuildStampApplier.ApplyDebug();
+                BuildStampApplier.ApplyRelease();
             }
 
             ApplyApplicationIdSuffix();

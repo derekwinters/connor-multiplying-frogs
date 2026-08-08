@@ -31,13 +31,18 @@ namespace Frogs.EditorTools
         const string VersionFileName = "VERSION";
         const string VersionCodeVariable = "FROGS_VERSION_CODE";
         const string BuildShaVariable = "FROGS_BUILD_SHA";
+        const string RcNumberVariable = "FROGS_RC_NUMBER";
 
         /// <summary>A release build: PlayerSettings shows the bare version.</summary>
         public static void ApplyRelease() => Apply(BuildStamp.Release(ReadVersion(), ReadCommitCount()));
 
-        /// <summary>A PR or RC build: the version name carries the commit sha.</summary>
+        /// <summary>A PR build: the version name carries the commit sha.</summary>
         public static void ApplyDebug() =>
             Apply(BuildStamp.Debug(ReadVersion(), ReadCommitCount(), ReadCommitSha()));
+
+        /// <summary>A release candidate: the version name carries "rcN".</summary>
+        public static void ApplyReleaseCandidate() =>
+            Apply(BuildStamp.ReleaseCandidate(ReadVersion(), ReadCommitCount(), ReadRcNumber()));
 
         public static void Apply(BuildStamp stamp)
         {
@@ -81,6 +86,20 @@ namespace Frogs.EditorTools
             }
 
             return int.Parse(Git("rev-list --count HEAD"));
+        }
+
+        static int ReadRcNumber()
+        {
+            var value = Environment.GetEnvironmentVariable(RcNumberVariable);
+
+            if (string.IsNullOrWhiteSpace(value) || !int.TryParse(value, out var parsed))
+            {
+                throw new FormatException(
+                    $"{RcNumberVariable} is '{value}', which is not a release-candidate "
+                    + "number. It is derived by .github/scripts/next_rc_number.py.");
+            }
+
+            return parsed;
         }
 
         static string ReadCommitSha()
