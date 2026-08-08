@@ -2385,9 +2385,18 @@ and ten seconds; a wrong auto-fix costs a milestone's worth of misordered work.<
 <p>Without one it is approved work no builder will ever select, because selection
 runs against the focus milestone. It leaves the queue silently, which is the
 worst way for work to disappear.</p>
-<p>The gatekeeper <strong>refuses</strong> and replies naming the open milestones and the
-<code>/milestone</code> command. It never picks one, not even when only one is open, and
-not even when the issue's siblings all sit in the same milestone.</p>
+<p>The gatekeeper <strong>refuses</strong> with an <code>approve-no-milestone</code> skip and a hand-back
+asking <em>which milestone?</em>. It never picks one — not when only one is open, and
+not when the issue's siblings all sit in the same milestone.</p>
+<p>It reads <strong>only the issue's milestone field</strong>. Triage sets that field, and
+scraping a <code>/milestone v0.1</code> out of the comment history would make the gate
+depend on what was said rather than what is true; the two disagree the moment
+anything is edited. An inline <code>/milestone</code> in the same comment does not feed
+this gate either — that command fires independently, and if it succeeds the
+next <code>/approve</code> sees the field it set.</p>
+<p><code>/milestone</code> is deliberately <strong>not</strong> subject to this gate. It is the command
+that fixes a missing milestone, so gating it on having one would make the fix
+impossible.</p>
 <h3 id="gate-2-milestone-order">Gate 2: milestone order<a class="headerlink" href="#gate-2-milestone-order" title="Link to this section">&para;</a></h3>
 <p><strong>Invariant:</strong> work is approved in milestone order. An issue in a later
 milestone cannot become <code>ready-for-work</code> while the focus milestone still has
