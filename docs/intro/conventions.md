@@ -4,6 +4,27 @@ How this repo names, labels, and organises things. The AI issue pipeline reads
 these conventions as rules, not suggestions — an issue with the wrong labels is
 an issue the pipeline will route wrongly.
 
+## GitHub is the source of truth; this page is the summary
+
+Decisions are made in GitHub — in an issue body, in a comment thread, in a PR
+review — and that is where they live. This site is the **distillation**: the
+settled shape of those decisions, written up so nobody has to reconstruct them
+from a fifty-comment thread.
+
+Two consequences worth being explicit about:
+
+- **When this page and GitHub disagree, GitHub wins.** A comment from Derek
+  three days ago beats a paragraph here from three weeks ago. If you notice a
+  disagreement, the fix is to update this page — in the PR you noticed it in,
+  not in a follow-up issue.
+- **This page never records live state.** No lists of current milestones, no
+  counts of open issues, no "we are currently working on…". State is queried
+  from the API; conventions are written down. A page that mixes the two is a
+  page that is always slightly wrong.
+
+The reverse holds too: a decision that only exists in this site and was never
+agreed in an issue is a decision nobody made. Write it up in an issue first.
+
 ## Milestones
 
 Milestones are how work is *planned*. Labels say what an issue is; the
@@ -131,6 +152,25 @@ The normal path is `ai-triage` → `pending-approval` → `ready-for-work` →
 `in-progress` → closed. `needs-clarification` and `parked` are the two ways out
 of that path, and both need a human to get back on it.
 
+#### The invariant: `ready-for-work` ⇒ has a milestone
+
+**An issue labelled `ready-for-work` always has a milestone.** No exceptions.
+
+This is the one label rule the tooling enforces rather than merely assumes. The
+nightly builder picks work from the focus milestone, so a `ready-for-work` issue
+with no milestone is work that has been approved and will then never be picked
+up by anything — it falls out of the pipeline silently, which is the worst
+failure mode a queue can have.
+
+Two places hold the line:
+
+- The gatekeeper refuses `/approve` on an issue with no milestone, and says so
+  in its reply rather than failing quietly.
+- The reconciler treats `ready-for-work` without a milestone as drift, and flags
+  it on the dashboard.
+
+If you are labelling by hand, set the milestone first.
+
 ### CI escape hatches
 
 | Label | Colour | Meaning |
@@ -159,3 +199,93 @@ python .github/scripts/sync_labels.py --dry-run
 GITHUB_TOKEN=... GITHUB_REPOSITORY=derekwinters/connor-multiplying-frogs \
   python .github/scripts/sync_labels.py
 ```
+
+## Issues
+
+### Every issue names the spec pages it touches
+
+Every issue body ends with a line naming the pages in `/docs` it affects:
+
+```
+**Spec pages touched:** docs/specs/frogs.md, docs/specs/ui/hud.md
+**Spec pages touched:** none — repo config.
+```
+
+`none` is a legitimate answer and has to be written out; a missing line is not
+the same as `none`, because a missing line usually means nobody checked.
+
+This line does real work. It is what the reviewer checks the PR's `**Docs:**`
+line against, it is how you find out that two queued issues are about to edit
+the same spec page, and it is the earliest point at which "this issue changes
+the contract" becomes visible — which is the point at which it is cheapest to
+argue about.
+
+### Epics and sub-issues
+
+Anything too big to finish in one PR is a `type:epic`, and it is split into
+`type:task` children using **native GitHub sub-issues** — not a checklist of
+links in the body.
+
+- The epic carries the *why* and the shape of the whole thing. It does not carry
+  a build checklist of its own beyond "all children done".
+- Each child is one PR's worth of work, with its own build checklist, its own
+  spec-pages line, and its own labels.
+- The children hold the `area:*` label that fits them, which may differ from the
+  epic's.
+- An epic is never `ready-for-work`. Agents work children; a `ready-for-work`
+  epic is a mislabelled epic.
+- The epic closes when its last child closes. Closing an epic with open children
+  is how work gets lost.
+
+Sub-issues are native because the pipeline computes the ready queue from the
+real graph. A dependency written in prose is a dependency the builder cannot
+see. The same goes for ordering: when child B cannot start until child A is
+done, that is a **blocked-by relationship**, not a sentence.
+
+### When a question issue closes, and when it stays open
+
+A `type:question` issue is a decision that has to be made before something can
+be specified. They are the one issue type that does not follow the ordinary
+"work it, close it" path, so:
+
+**It closes when** the decision is made *and* recorded somewhere durable — the
+relevant spec page is updated, or a task issue exists that carries the decision
+into work. The question's own comment thread is not durable enough on its own,
+because nobody reads a closed issue's thread. Close it with a comment stating
+what was decided, in one sentence, so the thread has an answer at the bottom.
+
+**It stays open when** the decision is made but nothing has been written down
+yet, when it was answered partially ("splitting caps at 32" — but not what
+happens at the cap), or when the answer was "not yet". A question that was
+answered "not now" is a question that gets asked again later, and reopening a
+closed issue loses the thread.
+
+**It becomes a task** — closed as a duplicate, with the task linked — when the
+answer turns out to be small enough to just build. Do not quietly retitle a
+question into a task; the distinction is what makes the question queue
+meaningful.
+
+Questions Connor has to answer get the `Direct Involvement Needed` milestone and
+no version milestone, because they are not shippable work.
+
+## Docs versioning
+
+The site is published with [mike](https://github.com/jimporter/mike), which
+keeps one built copy of the docs per version alias in the `gh-pages` branch.
+
+- **`latest`** is the default alias and the one the site opens on. It tracks the
+  most recent release.
+- Each release publishes under its own version, so the docs for a version you
+  can still build are docs you can still read.
+- The version selector in the header is Material's, wired to mike via
+  `extra.version.provider: mike` in `mkdocs.yml`.
+
+Two rules that follow from this:
+
+- **Never edit `gh-pages` by hand.** It is entirely generated; mike rewrites it
+  on every publish, and a hand edit disappears at the next release without
+  warning.
+- **Docs land with the change they describe**, in the same PR. The version alias
+  a page appears under is decided by when it was *published*, so a doc update
+  that trails its code by a release is a doc that is wrong in exactly the
+  version someone is reading it for.
