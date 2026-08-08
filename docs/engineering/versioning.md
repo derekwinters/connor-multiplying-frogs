@@ -89,25 +89,37 @@ VERSION=$(cut -d'#' -f1 VERSION | tr -d '[:space:]')
 
 The version moves because of what the commits say. Nobody decides it.
 
-| Commit prefix | Effect pre-1.0 | Effect post-1.0 |
-| --- | --- | --- |
-| `fix:` | patch — `0.1.0` → `0.1.1` | patch |
-| `feat:` | patch — `0.1.0` → `0.1.1` | minor |
-| `feat!:` or `BREAKING CHANGE:` | minor — `0.1.0` → `0.2.0` | major |
-| `docs:` `chore:` `ci:` `test:` `refactor:` `build:` | none | none |
+| Commit prefix | Effect |
+| --- | --- |
+| `fix:` | patch — `0.1.0` → `0.1.1` |
+| `feat:` | minor — `0.1.0` → `0.2.0` |
+| `feat!:` or `BREAKING CHANGE:` | major — `0.1.0` → **`1.0.0`** |
+| `docs:` `chore:` `ci:` `test:` `refactor:` `build:` | none |
 
-The pre-1.0 column is deliberate, configured by two release-please flags:
+**Plain semver, with no pre-1.0 special-casing.** Both of release-please's
+pre-major flags are off:
 
-- **`bump-minor-pre-major: true`** — a breaking change bumps the minor version
-  rather than taking us to `1.0.0`. Reaching 1.0 should be a decision, not an
-  accident of a commit message.
-- **`bump-patch-for-minor-pre-major: true`** — a feature bumps the patch. Before
-  1.0 the game is changing constantly; if every feature bumped the minor we'd be
-  at `0.40.0` by the time it was playable, and the number would mean nothing.
+- **`bump-minor-pre-major: false`** — a `feat:` bumps the minor version even
+  before 1.0. The alternative folds features into patch bumps, which makes the
+  version number stop distinguishing "we fixed something" from "there is a new
+  thing in the game" during exactly the period when new things are all that
+  happens.
+- **`bump-patch-for-minor-pre-major: false`** — same reason, from the other
+  direction.
+
+!!! warning "`feat!:` pre-1.0 goes straight to 1.0.0"
+    With `bump-minor-pre-major` off, a breaking-change marker takes the version
+    to `1.0.0` — not `0.2.0`. There is no undo: the tag and the release are
+    created by the same merge.
+
+    So before writing `!` or a `BREAKING CHANGE:` footer on a pre-1.0 project,
+    be sure you mean it. Almost nothing in a game nobody has installed yet is
+    genuinely a breaking change; there is no API and no save format anyone
+    depends on. If in doubt, it's a `feat:`.
 
 This is why the commit prefix is a rule and not a style preference: a `feat:`
 that should have been a `fix:` ships a version number that lies about what
-changed.
+changed, and a stray `!` ships 1.0.
 
 ## Milestone versions and the shipped version are different things
 
@@ -134,33 +146,43 @@ other. See [Conventions](../intro/conventions.md) for the milestone model.
 ### Config lives at non-default paths
 
 ```text
-.github/release-please-config.json
-.github/.release-please-manifest.json
+.github/release-please/config.json
+.github/release-please/manifest.json
 ```
 
 Not the repo root. The root of a Unity project is already crowded with
 directories Unity owns and files a human is expected to notice — `/VERSION`
-earns its place there, two pieces of tool config do not. The workflow passes
-both paths explicitly.
+earns its place there, two pieces of tool config do not. Grouping them in one
+directory also means the whole release configuration is one thing to find. The
+workflow passes both paths explicitly:
+
+```yaml
+config-file: .github/release-please/config.json
+manifest-file: .github/release-please/manifest.json
+```
 
 ### Config summary
 
 - **`release-type: simple`** — this is not an npm package or a Go module. There
   is no manifest with a version field for release-please to understand; there is
   a text file and a changelog. `simple` does exactly that and nothing else.
-- **`extra-files`** — the entry that makes release-please update `/VERSION` via
-  the generic updater and its marker. This is the line that connects the tool to
-  the source of truth; without it the two drift silently.
-- **`bump-minor-pre-major: true`** and **`bump-patch-for-minor-pre-major: true`**
-  — the pre-1.0 behaviour described above.
-- **The manifest** (`.release-please-manifest.json`) records the last released
-  version per package. It is generated: release-please updates it in its own
-  release PR, and a hand edit tells the tool it already released something it
-  didn't.
+- **`extra-files: [{ "type": "generic", "path": "VERSION" }]`** — the entry that
+  makes release-please rewrite `/VERSION` via the generic updater and its
+  marker. This is the line that connects the tool to the source of truth;
+  without it the two drift silently.
+- **`bump-minor-pre-major: false`** and **`bump-patch-for-minor-pre-major:
+  false`** — plain semver, as described above.
+- **`include-component-in-tag: false`** — one package, so tags are `v0.2.0`
+  rather than `multiplying-frogs-v0.2.0`.
+- **The manifest** (`.github/release-please/manifest.json`) records the last
+  released version per package — `{".": "0.0.1"}`. It is generated:
+  release-please updates it in its own release PR, and a hand edit tells the
+  tool it already released something it didn't.
 
 ### The guard test
 
-A Core test asserts that `/VERSION` and `.release-please-manifest.json` agree.
+A Core test asserts that `/VERSION` and
+`.github/release-please/manifest.json` agree.
 It is a plain NUnit test, so it runs in seconds on every push, and it catches
 the whole class of "the marker was removed", "someone hand-edited one of them",
 and "a merge resolved the conflict wrongly" failures at the point they are
@@ -213,9 +235,10 @@ versionCode = major * 10000 + minor * 100 + patch
 | `1.0.0` | 10000 |
 
 The constraint the formula carries: **minor and patch must each stay below
-100.** Given the pre-1.0 bump flags, patch is the component that moves fastest,
-so `0.1.99` → `0.1.100` is the case that would break monotonicity — at `0.1.90`,
-bump the minor deliberately rather than riding it out.
+100.** With `feat:` bumping the minor, the minor is the component that moves
+fastest here, so `0.99.0` → `0.100.0` is the case that would break
+monotonicity. That is a long way off, and the answer when it approaches is to
+go to 1.0 rather than to widen the formula.
 
 Two properties this buys:
 
