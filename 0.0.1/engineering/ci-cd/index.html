@@ -1539,6 +1539,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#gatekeeper-comment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gatekeeper-comment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#pipeline-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2244,6 +2255,17 @@
   
     <nav class="md-nav" aria-label="Pipeline workflows">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gatekeeper-comment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gatekeeper-comment
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#pipeline-tests" class="md-nav__link">
@@ -3062,6 +3084,27 @@ does; this is where the workflows live.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="gatekeeper-comment"><code>gatekeeper-comment</code><a class="headerlink" href="#gatekeeper-comment" title="Link to this section">&para;</a></h3>
+<p><code>on: issue_comment: [created]</code>, so a command applies seconds after it is typed
+rather than waiting for a scheduled round.</p>
+<p><strong>Concurrency is per issue, with <code>cancel-in-progress: false</code>.</strong> Two commands on
+one issue have to apply in the order they were written; cancelling the first
+run would drop a command Derek typed and acknowledge only the second. Grouping
+per issue rather than globally keeps unrelated issues from queueing behind each
+other.</p>
+<p>The workflow-level <code>if:</code> filters to a non-bot comment from the repository owner
+on an issue rather than a PR, and starting with <code>/</code>. That is a cost filter —
+the script re-checks the author itself, because a script that is safe only
+because a workflow's <code>if:</code> filtered for it is one careless edit away from not
+being safe at all.</p>
+<p><strong><code>GITHUB_TOKEN</code> only, never a PAT</strong>, and here the usual scoping argument is
+the <em>less</em> important one. GitHub suppresses workflow runs from events initiated
+by <code>GITHUB_TOKEN</code>. A PAT-authored acknowledgement would look like a new comment
+and re-trigger this same workflow — an unbounded loop that the platform's
+no-recursion guard is precisely what prevents.</p>
+<p>The reactive-triage secrets (<code>AI_TRIAGE_URL</code>, <code>AI_TRIAGE_SECRET</code>, see #83) are
+surfaced as env vars. Absent, firing is a clean no-op: the nightly round picks
+the issue up, so a missing secret costs latency rather than correctness.</p>
 <h3 id="pipeline-tests"><code>pipeline-tests</code><a class="headerlink" href="#pipeline-tests" title="Link to this section">&para;</a></h3>
 <p>The pipeline's scripts are code, they have tests, and a broken gatekeeper is a
 broken queue — so unlike the rest of the pipeline workflows, this one runs on
