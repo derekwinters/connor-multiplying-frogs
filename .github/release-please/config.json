@@ -1,6 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "simple",
+  "group-pull-request-title-pattern": "chore(${branch}): release ${version}",
+  "pull-request-title-pattern": "chore(${branch}): release ${version}",
   "bump-minor-pre-major": false,
   "bump-patch-for-minor-pre-major": false,
   "include-component-in-tag": false,
