@@ -153,11 +153,46 @@ it before the release is real.
   release in signing or backend is an RC that proves less than it appears to.
 - Artifacts only. An RC is not a release; it gets no tag and no GitHub release.
 
+### `release-please` — the version, the tag, and the release
+
+Runs on every push to `main`, plus `workflow_dispatch`. Two outcomes:
+
+- **Usually**: it rewrites the open release PR with the pending changelog and
+  the next version, and stops. The PR title is `chore(main): release X.Y.Z`.
+- **When that PR merges**: it applies the version bump, creates the tag and the
+  GitHub release, and sets `release_created: true`.
+
+Downstream jobs gate on the workflow's outputs:
+
+| Output | Is |
+| --- | --- |
+| `release_created` | `true` only on the run that created a release |
+| `tag_name` | e.g. `v0.2.0` |
+| `version` | e.g. `0.2.0` |
+
+Two details worth knowing if you touch it:
+
+- **It reads each output twice** — `release_created` and `.--release_created`.
+  release-please emits top-level outputs for a single package and path-prefixed
+  ones in manifest mode, and which you get has changed across versions. Reading
+  both costs nothing, and means a version bump can't silently turn every
+  downstream `if:` false — which looks identical to "there was nothing to
+  release".
+- **`cancel-in-progress: false`.** Two concurrent runs would both rewrite the
+  release branch; cancelling one mid-tag is how a tag ends up existing without
+  a release.
+
+Permissions are `contents: write` (the tag, the release, the release branch) and
+`pull-requests: write` (the release PR), granted on the job rather than the
+workflow. It also needs **"Allow GitHub Actions to create and approve pull
+requests"** enabled on the repository, without which it fails on its first
+attempt to open the PR.
+
 ### Release builds
 
-Handled inside `release-please.yml` rather than by a separate workflow that
-listens for the release — see [Versioning](versioning.md) for the release flow.
-Merging the release PR creates the tag and the release, and the same run then:
+The APK is attached from inside `release-please.yml` rather than by a separate
+workflow that listens for the release — see [Versioning](versioning.md) for the
+release flow. On the run where `release_created` is true, it also:
 
 - Builds the release APK, signed with the release keystore, device profile
   (ARM64, IL2CPP).

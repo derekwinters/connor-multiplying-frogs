@@ -1,0 +1,68 @@
+name: release-please
+
+# Maintains the release PR on every push to main, and — when that PR is merged —
+# creates the tag and the GitHub release.
+#
+# Merging the release PR *is* the release. See docs/engineering/versioning.md.
+#
+# The APK is attached from inside this workflow (#40) rather than from a
+# separate workflow triggered by the `release` event: a release created with
+# GITHUB_TOKEN does not fire `release` events, so a listener workflow would
+# silently never run and the release would sit there with no artifact.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One at a time. Two concurrent runs would both try to rewrite the release
+# branch, and the loser leaves a half-written release PR behind. Never cancel a
+# run in progress — cancelling one mid-tag is how a tag exists without a
+# release.
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Create the tag, the release, and the commit on the release branch.
+      contents: write
+      # Open and update the release PR.
+      pull-requests: write
+
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created || steps.release.outputs['.--release_created'] }}
+      tag_name: ${{ steps.release.outputs.tag_name || steps.release.outputs['.--tag_name'] }}
+      version: ${{ steps.release.outputs.version || steps.release.outputs['.--version'] }}
+
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # Non-default paths — the repo root is crowded enough. See
+          # docs/engineering/versioning.md.
+          config-file: .github/release-please/config.json
+          manifest-file: .github/release-please/manifest.json
+          target-branch: main
+
+      # release-please's outputs are top-level for a single package and
+      # path-prefixed ('.--release_created') in manifest mode, and which you get
+      # has changed between versions. Reading both above costs nothing and means
+      # a version bump cannot silently turn every downstream `if:` false —
+      # which would look exactly like "there was nothing to release".
+      - name: Summarise
+        env:
+          RELEASE_CREATED: ${{ steps.release.outputs.release_created || steps.release.outputs['.--release_created'] }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name || steps.release.outputs['.--tag_name'] }}
+        run: |
+          if [ "$RELEASE_CREATED" = "true" ]; then
+            echo "Released $TAG_NAME." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No release this run — the release PR was updated instead." >> "$GITHUB_STEP_SUMMARY"
+          fi
