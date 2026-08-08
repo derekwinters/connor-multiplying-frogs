@@ -492,9 +492,29 @@ the *pass*.
 
 ### `docs-test`
 
-Builds the site with `mkdocs build --strict`, so a broken nav entry, a dead
-internal link, or a page that isn't in the nav fails the PR rather than shipping
-a broken site.
+Two jobs, on **every** pull request with no path filter.
+
+| Job | Does |
+| --- | --- |
+| `gate-tests` | runs the CI scripts' own unit tests |
+| `Docs` | builds the site if docs changed; runs the reconciliation gate if they didn't |
+
+**No path filter, deliberately.** A path-gated workflow is *absent* on PRs that
+miss its paths rather than skipped, so it can never report on them — and a
+code-only PR is exactly what the reconciliation gate exists to catch. It is
+therefore also the one workflow here that is safe to mark required in branch
+protection.
+
+When docs changed, it builds with `mkdocs build --strict`, so a broken nav
+entry, a dead internal link, or a page missing from the nav fails the PR rather
+than shipping a broken site. No deploy — publishing is `docs-publish`'s job.
+
+When they didn't, it runs the gate below. `pull-requests: read` is granted for
+the gate's live-label fetch, and nothing more.
+
+`gate-tests` runs on every PR because a gate nobody has tested is a gate whose
+verdict means nothing — and a broken gate's dangerous outcome is the *pass*,
+which is also the quiet one.
 
 ### `docs-publish`
 
