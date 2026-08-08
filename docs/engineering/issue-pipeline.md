@@ -239,28 +239,54 @@ at the next approval — or not at all, if the issue was already approved.
 
 ## Auto-revisit when a blocker clears
 
-An issue parked *because it was blocked* should not need a human to remember it.
-The sweep looks for issues whose recorded blockers have all closed, and returns
-them to `ai-triage` with a comment saying which blocker cleared.
+An issue parked in `needs-clarification` **because it was blocked** has nothing
+to wake it. Analysis only acts on `ai-triage`, and the gatekeeper otherwise only
+acts on comments — so without this the issue waits for a human to remember it,
+which is the same as waiting forever.
 
-Conditions, all required:
+This is a **state-derived transition, not a command**. The sweep computes it.
 
-- the issue is `parked` or `needs-clarification`;
-- it has at least one native blocked-by relationship;
-- every blocking issue is closed;
-- it was not parked by an explicit `/park` with a reason unrelated to blocking —
-  a park the owner chose is a park the owner un-chooses.
+### What counts as a blocker
+
+Structured text lines (`Blocked by #42`) **unioned** with native GitHub
+relationships. Union rather than either-or: an issue can have one recorded
+natively and another still in prose, and waking it when only half have cleared
+is worse than not waking it at all.
+
+An unstructured mention — "this is similar to #42" — is not a dependency, and
+is deliberately not matched.
+
+### When a blocker resolves
+
+| Blocker state | Resolved? |
+| --- | --- |
+| closed, or merged | yes |
+| open, `ready-for-work` or `in-progress` | yes — it is scheduled and will be built |
+| open, anything else | no |
+| not in the snapshot | **no** — not knowing is not knowing it is done |
+
+An issue with several blockers is revisited **once every one** resolves.
 
 ### The `type:wireframe` carve-out
 
-**`type:wireframe` issues are never auto-revisited.**
+**A `type:wireframe` blocker resolves only when it is closed.** Being scheduled
+is not enough.
 
-Unblocking a wireframe doesn't make it agreeable. What a wireframe needs is a
-person looking at a picture and saying yes — usually Connor. Waking one up
-automatically produces an issue that says "ready" and isn't, and the pipeline
-would then hand it to a builder that has no wireframe to build against.
+Closing a wireframe issue is what "agreed" means, and a wireframe marked
+`ready-for-work` is still a picture nobody has said yes to. Without the
+carve-out the sweep wakes the dependent on every run and triage sets it aside
+again on every run — forever, and noisily.
 
-They surface on the dashboard as waiting-on-a-human instead.
+### What it never touches
+
+- **`parked` issues.** Parking is a decision the owner made; only the owner
+  un-makes it.
+- **Anything not in `needs-clarification`** — an issue already
+  `pending-approval` or `ready-for-work` is not waiting on a blocker.
+
+A revisit adds `ai-triage`, removes `needs-clarification`, and posts a short
+comment naming the cleared blockers — so the transition is visible in the
+thread rather than being a label that changed itself overnight.
 
 ## `/focus` and `/cap` live on the dashboard issue
 
