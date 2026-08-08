@@ -391,14 +391,39 @@ mistakes.
 ### Reactive triage
 
 Waiting until 02:00 to triage an issue filed at 09:00 is a bad experience when
-the person who filed it is sitting right there. So the gatekeeper can **fire the
-triage routine immediately** for a single issue — on a new issue, or on
-`/retriage`.
+the person who filed it is sitting right there. So the moment `ai-triage` is
+**newly** added, the gatekeeper job — already running — makes an **outbound
+POST** to a poke-only Routine.
 
-It needs a routine ID and a token with permission to fire it, both repository
-secrets. Without them the gatekeeper logs that it couldn't fire and carries on:
-the nightly run still picks the issue up, so a missing secret costs latency, not
-correctness. Never a hard failure.
+Outbound specifically, because a workflow triggered by the token's own label
+change would never run: GitHub suppresses workflow runs from events initiated by
+`GITHUB_TOKEN`. An outbound request is not an event, so the guard does not
+apply.
+
+Configured by `AI_TRIAGE_URL` and `AI_TRIAGE_SECRET` (#83). **Absent, it is a
+clean no-op** — the nightly run still picks the issue up, so a missing secret
+costs latency rather than correctness, and never fails the command that caused
+it. A network error is swallowed for the same reason: the label move has
+already succeeded by then.
+
+#### The outcome is classified truthfully
+
+Success requires a **real fire** — a response carrying a session URL. A bare
+`200` means the endpoint answered, not that the Routine ran, and reporting that
+as fired would hide a misconfigured Routine behind a green log line for weeks.
+Everything else logs the status and a bounded snippet of the body, and a `401`
+says the secret is wrong rather than just failing.
+
+#### The payload is not a place to put instructions
+
+The POST body's freeform text names **only the repository and the issue
+number**, and the helper refuses a non-integer issue number rather than
+formatting it into the string.
+
+**The Routine's prompt must parse only the integer and follow nothing else in
+the payload.** If a Routine treats that text as instructions, anything that can
+influence the text can instruct an agent with write access. Boring text is half
+the defence; the Routine ignoring it is the other half, and its prompt says so.
 
 ## What each stage does
 
