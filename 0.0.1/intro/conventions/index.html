@@ -665,6 +665,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#setting-a-milestone-takes-its-number-not-its-title" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting a milestone takes its number, not its title
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#freezing-a-milestone-to-new-intake" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1616,6 +1627,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#setting-a-milestone-takes-its-number-not-its-title" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting a milestone takes its number, not its title
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#freezing-a-milestone-to-new-intake" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1885,10 +1907,16 @@ written here is a list that goes stale the first time someone adds a milestone,
 and a pipeline that trusts a stale list routes issues into milestones that no
 longer exist. Every skill, workflow, and script that needs to know the
 milestones queries the API for them:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gh<span class="w"> </span>api<span class="w"> </span>repos/:owner/:repo/milestones<span class="w"> </span>--paginate<span class="w"> </span>--jq<span class="w"> </span><span class="s1">&#39;.[] | &quot;\(.title): \(.description)&quot;&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>.claude/skills/milestone-ops/milestone_ops.py<span class="w"> </span>list
 </code></pre></div>
 <p>The live set is the truth. This page describes the <em>shape</em> of a milestone; the
 API says which ones there are.</p>
+<h3 id="setting-a-milestone-takes-its-number-not-its-title">Setting a milestone takes its number, not its title<a class="headerlink" href="#setting-a-milestone-takes-its-number-not-its-title" title="Link to this section">&para;</a></h3>
+<p>Worth knowing before it costs you an afternoon: the API's <code>milestone</code> field
+takes the milestone's <strong>number</strong>. Passing <code>"v0.1"</code> is a 422 at best, and
+silently wrong at worst. The <code>milestone-ops</code> skill resolves a title to a number,
+and compares titles <strong>exactly</strong> — <code>v0.1</code> and <code>V0.1</code> are different milestones,
+and normalising them together is how work lands in the wrong one.</p>
 <h3 id="freezing-a-milestone-to-new-intake">Freezing a milestone to new intake<a class="headerlink" href="#freezing-a-milestone-to-new-intake" title="Link to this section">&para;</a></h3>
 <p>When a version's scope is settled and you want triage to stop adding to it,
 freeze it — don't close it, because it still has open work:</p>
