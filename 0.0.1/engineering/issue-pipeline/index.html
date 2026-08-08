@@ -1235,6 +1235,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Idempotency: the 👀 watermark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1891,6 +1908,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Idempotency: the 👀 watermark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2540,6 +2574,24 @@ account</strong>, and it skips any comment that already has one.</p>
   refused or not understood.</li>
 </ul>
 <p>To make the gatekeeper reconsider a comment, remove its 👀.</p>
+<p><strong>Only the gatekeeper's own 👀 counts.</strong> A human reacting out of interest must
+not silence a command, so the watermark check matches on the reacting account.
+And if the reactions cannot be read at all, the comment is treated as <em>already
+claimed</em> — re-applying a command is worse than skipping one, and the sweep picks
+it up next time.</p>
+<h3 id="the-snapshot">The snapshot<a class="headerlink" href="#the-snapshot" title="Link to this section">&para;</a></h3>
+<p><code>fetch_comment_event.py</code> turns the raw webhook payload into what the parser
+reads: the issue's number, labels, body, milestone, blockers (text ∪ native),
+whether it is the dashboard, and the comment itself. All the payload-shape
+guesswork lives there so the parser never has to know what GitHub's JSON looks
+like.</p>
+<p>It returns nothing at all for a comment on a pull request or from a bot —
+defence in depth, since the workflow filters those too, but a snapshot the
+parser <em>could</em> act on is one it eventually will.</p>
+<p>It also tolerates a partial payload rather than throwing. A failed
+dependency lookup in particular does not lose the event: the command is
+probably <code>/park</code>, which does not care, and the gates that <em>do</em> care see a
+smaller blocker list and refuse — which is the safe direction.</p>
 <h2 id="the-approval-gates">The approval gates<a class="headerlink" href="#the-approval-gates" title="Link to this section">&para;</a></h2>
 <p>Both gates <strong>refuse and explain</strong>. Neither ever fixes the problem itself.</p>
 <p>That posture is deliberate. Auto-correcting at an approval gate means the
