@@ -1791,6 +1791,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#unblocker-stars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unblocker stars
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parked-is-listed-never-queued" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parked is listed, never queued
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2702,6 +2724,28 @@
   
     <nav class="md-nav" aria-label="Dashboard">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unblocker-stars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unblocker stars
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parked-is-listed-never-queued" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parked is listed, never queued
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
@@ -3775,10 +3819,76 @@ on <code>main</code> never reads as a stall. Without that ordering it would be r
 rebuilt, and requeued again every night — a loop that produces a duplicate PR
 each time.</p>
 <h3 id="dashboard">Dashboard<a class="headerlink" href="#dashboard" title="Link to this section">&para;</a></h3>
-<p><code>render_dashboard.py</code> rewrites the dashboard issue from live state: what is in
-focus, what is ready, what is in flight, what is blocked, what is waiting on a
-human, and what the reconciler flagged. Plus <strong>unblocker stars</strong> — the issues
-that would free the most other work, which are the ones worth approving next.</p>
+<p><code>render_dashboard.py</code> rewrites the dashboard issue from live state. The
+sections, in order:</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🎯 Focus</td>
+<td>the four-slice pie for the focus milestone</td>
+</tr>
+<tr>
+<td>🔨 Ready queue</td>
+<td><code>ready-for-work</code>, headed by the build cap</td>
+</tr>
+<tr>
+<td>📥 Intake</td>
+<td><code>ai-triage</code> — waiting to be analyzed</td>
+</tr>
+<tr>
+<td>✋ Waiting for you</td>
+<td><code>pending-approval</code> — waiting on Derek</td>
+</tr>
+<tr>
+<td>❓ Needs clarification</td>
+<td>blocked on a question</td>
+</tr>
+<tr>
+<td>⏸️ Parked</td>
+<td>set aside, listed so it can be found</td>
+</tr>
+<tr>
+<td>⚠️ Reconcile</td>
+<td>the sweep's flag findings</td>
+</tr>
+<tr>
+<td>📅 Other milestones</td>
+<td>progress elsewhere; finished milestones omitted</td>
+</tr>
+<tr>
+<td>🎮 Commands</td>
+<td>the command reference</td>
+</tr>
+</tbody>
+</table>
+<p>Every issue table carries a <strong>Milestone</strong> column, so the milestone is visible
+at every stage rather than only where an issue is being scheduled, and a
+<strong>Blocked by</strong> column linking each hard blocker.</p>
+<h4 id="unblocker-stars">Unblocker stars<a class="headerlink" href="#unblocker-stars" title="Link to this section">&para;</a></h4>
+<p>An issue is starred <code>⭐ unblocks #A, #B</code> when it appears in another open
+issue's hard-blocker set <strong>and is not itself blocked</strong>, and it sorts to the top
+of its table. Blocked rows carry <code>⛔ blocked</code> naming what they wait on.</p>
+<p>Both halves of that condition matter. Appearing in someone's blocker set is
+what makes an issue leverage — approving it frees work that is otherwise stuck.
+Not being blocked itself is what makes it <em>actionable</em>. Starring a blocked
+issue would point Derek at something nobody can start, which is worse than no
+star: it costs a click to find out the suggestion was useless, and a
+recommendation that is often useless stops being read.</p>
+<p>A closed blocker is never starred — it has already done its unblocking.</p>
+<h4 id="parked-is-listed-never-queued">Parked is listed, never queued<a class="headerlink" href="#parked-is-listed-never-queued" title="Link to this section">&para;</a></h4>
+<p>The Parked section is read-only, and <code>parked</code> issues are excluded from every
+other queue and count on the board — including when an issue somehow carries
+both <code>parked</code> and <code>ready-for-work</code>.</p>
+<p><strong>The pie's Unplanned slice is the one deliberate exception</strong>, because the pie
+has to add up. Excluding parked work there would make the slices sum to less
+than the milestone's issue count, and a total that does not reconcile is a
+board you stop trusting.</p>
 <p>Wholly regenerated every time, apart from the config markers. Nothing on it is
 remembered, so nothing on it can be stale.</p>
 <p>Rendering is <strong>deterministic and byte-stable</strong>: the same state produces the
