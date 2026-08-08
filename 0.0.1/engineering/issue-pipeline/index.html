@@ -1624,6 +1624,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-io-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The I/O layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#applying-an-action" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2581,6 +2592,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-io-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The I/O layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#applying-an-action" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3320,8 +3342,14 @@ current body, and writes them back verbatim into the new one. The markers are
 the only part of the body that survives a render.</p>
 <p>Which gives the rule: <strong>edit the markers, never the rendered sections.</strong> A hand
 edit to a rendered section disappears at the next render, and — worse — looks
-like it worked until it does. Setting focus via <code>/focus</code> writes the marker,
-which is the same thing done in the place that keeps it.</p>
+like it worked until it does.</p>
+<p><code>/focus</code> and <code>/cap</code> therefore persist <strong>by re-rendering with an override</strong>, not
+by editing the body. The gatekeeper passes the new value to the renderer, which
+writes it into the marker as part of the regenerated body. Hand-editing the
+marker directly would work exactly once — until the next render, which reads
+the marker it is about to overwrite and would find the old value if the write
+had raced. Going through the renderer means there is only ever one writer of
+that body.</p>
 <p>Markers rather than a config file in the repo because focus and cap are
 <em>operational</em> state that changes between merges. A PR to change which milestone
 is in focus is friction in exactly the wrong place.</p>
@@ -3606,6 +3634,44 @@ returns the issue to <code>ai-triage</code>, triage finds the analysis it wrote 
 the label instead, reconcile returns it again. Neither side is wrong on its own
 terms, so nothing surfaces as an error — the issue just cycles. The side that
 writes the format owns the recognizer.</p>
+<h3 id="the-io-layer">The I/O layer<a class="headerlink" href="#the-io-layer" title="Link to this section">&para;</a></h3>
+<p>Everything with a decision in it is pure and tested without a network. Three
+thin modules wire those pieces to GitHub:</p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_github_api.py</code></td>
+<td>REST helpers, and the shared dashboard re-render</td>
+</tr>
+<tr>
+<td><code>run_comment_event.py</code></td>
+<td>one <code>issue_comment</code> event, end to end</td>
+</tr>
+<tr>
+<td><code>run_sweep.py</code></td>
+<td>the board-wide revisit + reconcile pass</td>
+</tr>
+</tbody>
+</table>
+<p><code>run_comment_event.py</code> is: snapshot → parse → gate → apply → write labels, ack,
+and reaction → <strong>re-render the dashboard once, after every label write.</strong>
+Rendering in between would publish a board describing a half-applied command.
+<code>run_sweep.py</code> re-renders once at the end for the same reason, and takes
+<code>--events-only</code> to drop reconcile's two cron-only fixes on the 15-minute pass.</p>
+<p><strong>Authentication is <code>GITHUB_TOKEN</code>, never a PAT.</strong> The workflow token is scoped
+to this repository and expires with the job; a personal access token would
+carry everything its owner can do into a job nobody is watching.</p>
+<p><strong>The owner check is repeated in the script.</strong> The workflows already filter on
+the comment author, so this is redundant — deliberately. A script that is safe
+only because its caller filtered is one edited <code>if:</code> away from letting a
+stranger drive the pipeline, and the workflow trigger is exactly the kind of
+line that gets edited for an unrelated reason.</p>
 <h3 id="applying-an-action">Applying an action<a class="headerlink" href="#applying-an-action" title="Link to this section">&para;</a></h3>
 <p><code>apply_actions.py</code> computes the resulting label set, the acknowledgement, and
 whether to watermark. Three rules worth knowing:</p>
