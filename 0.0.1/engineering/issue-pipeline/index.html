@@ -1339,10 +1339,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-counts-as-a-blocker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as a blocker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-blocker-resolves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a blocker resolves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-typewireframe-carve-out" class="md-nav__link">
     <span class="md-ellipsis">
       
         The type:wireframe carve-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-never-touches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it never touches
       
     </span>
   </a>
@@ -1962,10 +1995,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-counts-as-a-blocker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as a blocker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-blocker-resolves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a blocker resolves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-typewireframe-carve-out" class="md-nav__link">
     <span class="md-ellipsis">
       
         The type:wireframe carve-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-never-touches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it never touches
       
     </span>
   </a>
@@ -2546,24 +2612,63 @@ changed.</p>
 <code>/approve</code> would let <code>/milestone v0.0.1</code> quietly produce one, to be discovered
 at the next approval — or not at all, if the issue was already approved.</p>
 <h2 id="auto-revisit-when-a-blocker-clears">Auto-revisit when a blocker clears<a class="headerlink" href="#auto-revisit-when-a-blocker-clears" title="Link to this section">&para;</a></h2>
-<p>An issue parked <em>because it was blocked</em> should not need a human to remember it.
-The sweep looks for issues whose recorded blockers have all closed, and returns
-them to <code>ai-triage</code> with a comment saying which blocker cleared.</p>
-<p>Conditions, all required:</p>
-<ul>
-<li>the issue is <code>parked</code> or <code>needs-clarification</code>;</li>
-<li>it has at least one native blocked-by relationship;</li>
-<li>every blocking issue is closed;</li>
-<li>it was not parked by an explicit <code>/park</code> with a reason unrelated to blocking —
-  a park the owner chose is a park the owner un-chooses.</li>
-</ul>
+<p>An issue parked in <code>needs-clarification</code> <strong>because it was blocked</strong> has nothing
+to wake it. Analysis only acts on <code>ai-triage</code>, and the gatekeeper otherwise only
+acts on comments — so without this the issue waits for a human to remember it,
+which is the same as waiting forever.</p>
+<p>This is a <strong>state-derived transition, not a command</strong>. The sweep computes it.</p>
+<h3 id="what-counts-as-a-blocker">What counts as a blocker<a class="headerlink" href="#what-counts-as-a-blocker" title="Link to this section">&para;</a></h3>
+<p>Structured text lines (<code>Blocked by #42</code>) <strong>unioned</strong> with native GitHub
+relationships. Union rather than either-or: an issue can have one recorded
+natively and another still in prose, and waking it when only half have cleared
+is worse than not waking it at all.</p>
+<p>An unstructured mention — "this is similar to #42" — is not a dependency, and
+is deliberately not matched.</p>
+<h3 id="when-a-blocker-resolves">When a blocker resolves<a class="headerlink" href="#when-a-blocker-resolves" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Blocker state</th>
+<th>Resolved?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>closed, or merged</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>open, <code>ready-for-work</code> or <code>in-progress</code></td>
+<td>yes — it is scheduled and will be built</td>
+</tr>
+<tr>
+<td>open, anything else</td>
+<td>no</td>
+</tr>
+<tr>
+<td>not in the snapshot</td>
+<td><strong>no</strong> — not knowing is not knowing it is done</td>
+</tr>
+</tbody>
+</table>
+<p>An issue with several blockers is revisited <strong>once every one</strong> resolves.</p>
 <h3 id="the-typewireframe-carve-out">The <code>type:wireframe</code> carve-out<a class="headerlink" href="#the-typewireframe-carve-out" title="Link to this section">&para;</a></h3>
-<p><strong><code>type:wireframe</code> issues are never auto-revisited.</strong></p>
-<p>Unblocking a wireframe doesn't make it agreeable. What a wireframe needs is a
-person looking at a picture and saying yes — usually Connor. Waking one up
-automatically produces an issue that says "ready" and isn't, and the pipeline
-would then hand it to a builder that has no wireframe to build against.</p>
-<p>They surface on the dashboard as waiting-on-a-human instead.</p>
+<p><strong>A <code>type:wireframe</code> blocker resolves only when it is closed.</strong> Being scheduled
+is not enough.</p>
+<p>Closing a wireframe issue is what "agreed" means, and a wireframe marked
+<code>ready-for-work</code> is still a picture nobody has said yes to. Without the
+carve-out the sweep wakes the dependent on every run and triage sets it aside
+again on every run — forever, and noisily.</p>
+<h3 id="what-it-never-touches">What it never touches<a class="headerlink" href="#what-it-never-touches" title="Link to this section">&para;</a></h3>
+<ul>
+<li><strong><code>parked</code> issues.</strong> Parking is a decision the owner made; only the owner
+  un-makes it.</li>
+<li><strong>Anything not in <code>needs-clarification</code></strong> — an issue already
+  <code>pending-approval</code> or <code>ready-for-work</code> is not waiting on a blocker.</li>
+</ul>
+<p>A revisit adds <code>ai-triage</code>, removes <code>needs-clarification</code>, and posts a short
+comment naming the cleared blockers — so the transition is visible in the
+thread rather than being a label that changed itself overnight.</p>
 <h2 id="focus-and-cap-live-on-the-dashboard-issue"><code>/focus</code> and <code>/cap</code> live on the dashboard issue<a class="headerlink" href="#focus-and-cap-live-on-the-dashboard-issue" title="Link to this section">&para;</a></h2>
 <p>Both are stored as HTML-comment markers in the body of the dashboard issue:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- pipeline:focus=v0.0.1 --&gt;</span>
