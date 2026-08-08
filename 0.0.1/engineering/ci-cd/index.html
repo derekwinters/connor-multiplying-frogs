@@ -1550,6 +1550,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#gatekeeper-sweep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gatekeeper-sweep
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#pipeline-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2261,6 +2272,17 @@
     <span class="md-ellipsis">
       
         gatekeeper-comment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gatekeeper-sweep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gatekeeper-sweep
       
     </span>
   </a>
@@ -3069,8 +3091,8 @@ does; this is where the workflows live.</p>
 </tr>
 <tr>
 <td><code>gatekeeper-sweep</code></td>
-<td>schedule</td>
-<td>catches events the comment trigger missed, and auto-revisits blockers whose blocking issue has closed</td>
+<td>issue/PR events, 6-hourly cron, dispatch</td>
+<td>auto-revisits blockers that have cleared, and applies reconcile's fixes</td>
 </tr>
 <tr>
 <td><code>dashboard</code></td>
@@ -3105,6 +3127,27 @@ no-recursion guard is precisely what prevents.</p>
 <p>The reactive-triage secrets (<code>AI_TRIAGE_URL</code>, <code>AI_TRIAGE_SECRET</code>, see #83) are
 surfaced as env vars. Absent, firing is a clean no-op: the nightly round picks
 the issue up, so a missing secret costs latency rather than correctness.</p>
+<h3 id="gatekeeper-sweep"><code>gatekeeper-sweep</code><a class="headerlink" href="#gatekeeper-sweep" title="Link to this section">&para;</a></h3>
+<p>Runs on the events that can actually change the board picture — an issue
+closed or labelled, a PR closed — plus a six-hourly cron and manual dispatch.</p>
+<p><strong>Two paths, and the difference is the point.</strong> The event path applies
+<code>strip_labels</code> only. The cron path applies everything, including reconcile's
+two requeue fixes.</p>
+<p>Those two are cron-only because <strong>the drift they detect is indistinguishable
+from work in flight</strong>. An issue the builder picked up ten seconds ago has
+<code>in-progress</code> and no PR yet — exactly a stall's shape — and requeuing it on the
+event path would yank the issue out from under a running agent. Triage's
+comment-before-label ordering creates the mirror-image window for
+<code>requeue_triage</code>. By the six-hourly run those transients have resolved.</p>
+<p>They are omitted entirely rather than softened with a time threshold: a
+threshold is a guess about how long an agent takes, and it is wrong in both
+directions — too short and it interrupts a slow build, too long and a stall
+sits there all day. <code>strip_labels</code> has no such problem and runs on every pass,
+because it only ever touches an already-closed issue.</p>
+<p><strong>Concurrency is one constant group, board-wide</strong> — not per issue like
+<code>gatekeeper-comment</code>. This sweep reads and rewrites the whole board, so two
+overlapping runs would each be acting on a snapshot the other has already
+invalidated.</p>
 <h3 id="pipeline-tests"><code>pipeline-tests</code><a class="headerlink" href="#pipeline-tests" title="Link to this section">&para;</a></h3>
 <p>The pipeline's scripts are code, they have tests, and a broken gatekeeper is a
 broken queue — so unlike the rest of the pipeline workflows, this one runs on
