@@ -50,6 +50,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Reference only; defers to docs/engineering/tech-stack.md rather than restating the rule, so the two cannot drift."
+    },
+    {
+      "name": "issue-blockers",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Adds an audit subcommand that finds prose blockers with no native relationship; keeps 'Depends on:' as soft ordering."
     }
   ]
 }
