@@ -115,7 +115,12 @@ def fetch_state(api, focus=None) -> dict:  # pragma: no cover - network shape
     the renderer does not: open PRs, recent merged commits on `main`, and the
     state of every issue named as a blocker.
     """
-    raw = api("GET", "/issues?state=all&per_page=100&filter=all") or []
+    from _github_api import paged  # noqa: PLC0415
+
+    get_all = paged()
+    # Paginated: a single page is 100 items and GitHub says nothing when it
+    # truncates, so an unpaginated sweep would simply not see older issues.
+    raw = get_all("/issues?state=all&per_page=100")
 
     issues = []
     for item in raw:
@@ -141,8 +146,12 @@ def fetch_state(api, focus=None) -> dict:  # pragma: no cover - network shape
         "pulls": [
             {"number": p["number"], "state": p.get("state", "open"),
              "body": p.get("body") or ""}
-            for p in api("GET", "/pulls?state=open&per_page=100") or []
+            for p in get_all("/pulls?state=open&per_page=100")
         ],
+        # Deliberately ONE page, unlike the lists above. This answers "did this
+        # land recently", and the whole history of `main` cannot change that
+        # answer — an issue whose commit is 500 merges back was reconciled long
+        # ago. Paginating here would grow without bound for no new information.
         "merged_commits": [
             {"body": c.get("commit", {}).get("message", "")}
             for c in api("GET", "/commits?sha=main&per_page=100") or []

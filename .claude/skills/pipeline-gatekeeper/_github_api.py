@@ -54,6 +54,65 @@ def github_api(token=None, repository=None):
     return api
 
 
+PER_PAGE = 100
+
+# A backstop, not a limit anyone should reach: 100 pages is 10,000 items. It
+# exists so a bug in the stop condition cannot spin forever against the API.
+MAX_PAGES = 100
+
+
+def collect_pages(fetch_page, per_page: int = PER_PAGE, max_pages: int = MAX_PAGES) -> list:
+    """Every item across every page, given a `fetch_page(n)` returning one page.
+
+    **Every list endpoint in this pipeline must go through this.** GitHub caps
+    a page at 100 items and says nothing when it truncates — the response is a
+    well-formed list that happens to be missing everything after the hundredth
+    item.
+
+    On this repository that is not hypothetical. `/issues?state=all` returns
+    100 items of which most are pull requests, so a single-page read saw 28
+    issues out of far more. A board rendered from that is quietly, plausibly
+    wrong, and the pie still adds up — against the wrong total.
+
+    Stops on the first short page. Page numbers rather than the `Link` header's
+    `next` URL, because that URL uses an opaque `/repositories/{id}/` form and
+    keeping every request on `/repos/{owner}/{repo}/` is both simpler to reason
+    about and easier to fake in a test.
+    """
+    items: list = []
+
+    for page in range(1, max_pages + 1):
+        batch = fetch_page(page) or []
+        items.extend(batch)
+
+        if len(batch) < per_page:
+            return items
+
+    return items
+
+
+def paged(token=None, repository=None):
+    """A `get_all(path)` that reads every page of a list endpoint."""
+    token = token or os.environ["GITHUB_TOKEN"]
+    repository = repository or os.environ["GITHUB_REPOSITORY"]
+
+    def get_all(path: str) -> list:
+        separator = "&" if "?" in path else "?"
+
+        def fetch_page(page: int):
+            url = f"{API_ROOT}/repos/{repository}{path}{separator}page={page}"
+            request = urllib.request.Request(url, method="GET")
+            request.add_header("Authorization", f"Bearer {token}")
+            request.add_header("Accept", "application/vnd.github+json")
+
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.loads(response.read().decode() or "[]")
+
+        return collect_pages(fetch_page)
+
+    return get_all
+
+
 def set_labels(api, issue_number: int, labels) -> None:
     api("PUT", f"/issues/{issue_number}/labels", {"labels": sorted(set(labels))})
 
@@ -92,10 +151,16 @@ def rerender_dashboard(api, focus_override=None, cap_override=None) -> None:
     api("PATCH", f"/issues/{state['dashboard_issue']['number']}", {"body": body})
 
 
-def _fetch_state(api) -> dict:  # pragma: no cover - network shape
-    """Everything the renderer needs, in the shape it expects."""
-    raw_issues = api("GET", "/issues?state=all&per_page=100") or []
-    milestones = api("GET", "/milestones?state=open&per_page=100") or []
+def _fetch_state(api, get_all=None) -> dict:  # pragma: no cover - network shape
+    """Everything the renderer needs, in the shape it expects.
+
+    Paginated. A single-page read of `/issues` on this repository returns 100
+    items of which most are pull requests, so the board would silently be
+    missing everything past the first page.
+    """
+    get_all = get_all or paged()
+    raw_issues = get_all("/issues?state=all&per_page=100")
+    milestones = get_all("/milestones?state=open&per_page=100")
 
     issues = [
         {
