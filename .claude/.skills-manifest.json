@@ -57,6 +57,13 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Adds an audit subcommand that finds prose blockers with no native relationship; keeps 'Depends on:' as soft ordering."
+    },
+    {
+      "name": "milestone-ops",
+      "ported_from": "derekwinters/lucas-doggiehood",
+      "ported_at": "v0.0.1",
+      "diverged": true,
+      "notes": "Adds the FROZEN marker check from this repo's conventions, and refuses to close a milestone with open issues."
     }
   ]
 }
