@@ -135,6 +135,17 @@ It has a second effect: an agent that cannot write the lead usually doesn't
 understand the issue yet. That's worth finding out before the code is written,
 not after.
 
+### Triage hand-backs open with it too
+
+The rule is not PR-specific. **A `triage-issue` hand-back comment opens with the
+same two or three sentences**, before any diagnosis, plan, or file detail.
+
+The argument is if anything stronger there. A PR's wrong plan has already cost
+the work; a triage hand-back is the moment *before* anything is built, and
+`/approve` on a plan nobody skim-checked is how a whole issue gets built wrong.
+The lead is what makes "that's not what I meant" visible in five seconds,
+which is the only speed at which it reliably gets said.
+
 ## Specs state rules, not only outcomes
 
 A spec page that only lists outcomes can be satisfied by code that is wrong in

@@ -462,7 +462,7 @@ which keeps a bad triage contained to one issue instead of one batch.
 `triage-issue` reads an issue and produces:
 
 - an **`area:*` and `type:*` label**;
-- a **milestone proposal**, resolved against the live list;
+- the **milestone**, set as a field by matching the live milestone descriptions;
 - a **build checklist** — the acceptance criteria, as checkboxes;
 - a **spec-pages line** naming what in `/docs` it touches;
 - **dependencies**, recorded natively (below);
@@ -470,7 +470,52 @@ which keeps a bad triage contained to one issue instead of one batch.
   question that blocks it.
 
 It writes one comment containing its reasoning, so an `/approve` is a human
-agreeing with something they can read rather than rubber-stamping a label.
+agreeing with something they can read rather than rubber-stamping a label. That
+comment **opens with the plain-English lead** — the same two or three skimmable
+sentences a PR body opens with, and for the same reason: a wrong plan has to be
+catchable on a skim.
+
+**It never sets `ready-for-work`, and it never invents a mechanic.** Every route
+ends with the issue waiting on a human. The label that means "build this" is
+only ever applied by `/approve`.
+
+#### The four routes
+
+| Route | When | Ends at |
+| --- | --- | --- |
+| Bug | behaviour contradicts what `/docs` says | `pending-approval` + `type:bug` |
+| Spec-covered feature | `/docs` already says how this behaves | `pending-approval` |
+| Needs a design call | `/docs` doesn't say, or UI with no wireframe | `needs-clarification` |
+| `/propose` authorized | Derek asked for a design | `pending-approval`, marked PROPOSAL |
+
+Two of these are worth spelling out.
+
+**A bug whose root cause is a missing rule** gets an invariant, not just a
+patch. When the code does what someone intended and the real fault is that
+nobody wrote the rule down, the plan proposes the missing invariant in plain
+English and the checklist gains an item that tests it. Patching the code alone
+guarantees the same class of bug reappears elsewhere. If the rule is a genuinely
+new choice about how the game plays, it is a design call instead — and when it
+is unclear which, it is a design call.
+
+**The design-call route writes no plan at all** — no checklist, no milestone,
+just one concrete question and `needs-clarification`. A plan attached to an
+undecided question is an answer smuggled in as paperwork, and half of it
+survives into the build because it was already written down.
+
+#### Write ordering: comment first, then the label
+
+The analysis comment is posted **before** the state label is set, always.
+
+This is what makes the bad state structurally impossible rather than merely
+unlikely. A run that dies between the two writes leaves either a plan still
+sitting on `ai-triage` — untriaged, which the next round simply redoes — or
+`pending-approval` with nothing to approve, which is silent: the pipeline
+believes the issue is handled and it waits on a human who has nothing to read.
+
+`ai-triage` is removed in the same write that adds the new state, so a hand-back
+rests in exactly one state. An issue carrying both gets triaged again by the
+next analysis round while it sits waiting for Derek.
 
 **Re-fire repair.** Triage that runs twice on the same issue must not stack
 duplicate comments, duplicate checklists, or contradictory labels. Each triage
