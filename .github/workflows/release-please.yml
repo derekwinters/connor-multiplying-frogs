@@ -66,3 +66,21 @@ jobs:
           else
             echo "No release this run — the release PR was updated instead." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  # The APK is built and attached from inside this run, not by a workflow
+  # listening for `release: published`. GitHub suppresses workflow runs from
+  # events initiated by GITHUB_TOKEN, so a release-triggered workflow would
+  # silently never fire and every release would sit there with no APK.
+  #
+  # A local `./` reference is pinned by construction: it resolves to this
+  # workflow file's own commit, which is stricter than a SHA someone has to
+  # remember to update. See docs/engineering/ci-cd.md.
+  build-and-attach:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/release-build.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    permissions:
+      contents: write
+    secrets: inherit
