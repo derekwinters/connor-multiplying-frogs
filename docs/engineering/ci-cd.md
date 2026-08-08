@@ -620,6 +620,33 @@ does; this is where the workflows live.
 | `dashboard` | schedule, and after pipeline runs | rewrites the live dashboard issue |
 | `pipeline-tests` | PR/push touching the pipeline skills | runs the pipeline scripts' own unit tests |
 
+### `gatekeeper-comment`
+
+`on: issue_comment: [created]`, so a command applies seconds after it is typed
+rather than waiting for a scheduled round.
+
+**Concurrency is per issue, with `cancel-in-progress: false`.** Two commands on
+one issue have to apply in the order they were written; cancelling the first
+run would drop a command Derek typed and acknowledge only the second. Grouping
+per issue rather than globally keeps unrelated issues from queueing behind each
+other.
+
+The workflow-level `if:` filters to a non-bot comment from the repository owner
+on an issue rather than a PR, and starting with `/`. That is a cost filter —
+the script re-checks the author itself, because a script that is safe only
+because a workflow's `if:` filtered for it is one careless edit away from not
+being safe at all.
+
+**`GITHUB_TOKEN` only, never a PAT**, and here the usual scoping argument is
+the *less* important one. GitHub suppresses workflow runs from events initiated
+by `GITHUB_TOKEN`. A PAT-authored acknowledgement would look like a new comment
+and re-trigger this same workflow — an unbounded loop that the platform's
+no-recursion guard is precisely what prevents.
+
+The reactive-triage secrets (`AI_TRIAGE_URL`, `AI_TRIAGE_SECRET`, see #83) are
+surfaced as env vars. Absent, firing is a clean no-op: the nightly round picks
+the issue up, so a missing secret costs latency rather than correctness.
+
 ### `pipeline-tests`
 
 The pipeline's scripts are code, they have tests, and a broken gatekeeper is a
