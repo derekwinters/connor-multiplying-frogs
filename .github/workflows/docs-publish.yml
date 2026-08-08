@@ -1,0 +1,89 @@
+name: docs-publish
+
+# Publishes the docs site to GitHub Pages with mike, which keeps one built copy
+# per version in the gh-pages branch and adds the version selector in the
+# header.
+#
+# Never edit gh-pages by hand: mike rewrites it on every publish, so a hand edit
+# disappears at the next one — without warning, and after looking like it worked.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/**
+      - mkdocs.yml
+      - .github/workflows/docs-publish.yml
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Serialised, and never cancelled: two mike runs would both rewrite gh-pages,
+# and the loser leaves the published site in whatever state it got to.
+concurrency:
+  group: docs-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # mike commits the built site to the gh-pages branch.
+      contents: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # mike needs the gh-pages history to add a version to it rather than
+          # replace what is there.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install the docs toolchain
+        run: python3 -m pip install --quiet -r docs/requirements.txt
+
+      - name: Work out the version to publish under
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION=$(cut -d'#' -f1 VERSION | tr -d '[:space:]')
+
+          if [ -z "$VERSION" ]; then
+            echo "::error::/VERSION is empty after stripping the marker comment."
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # mike commits, so it needs an identity. The bot, because these commits
+      # are generated output rather than anyone's work.
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch the published site
+        run: git fetch origin gh-pages --depth=1 || echo "No gh-pages yet; mike will create it."
+
+      # --update-aliases so `latest` moves to this version rather than failing
+      # because it already points somewhere.
+      - name: Publish
+        run: |
+          mike deploy --push --update-aliases \
+            "${{ steps.version.outputs.version }}" latest
+          mike set-default --push latest
+
+      - name: Summarise
+        run: |
+          echo "Published docs for \`${{ steps.version.outputs.version }}\`, aliased \`latest\`." \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "https://derekwinters.github.io/connor-multiplying-frogs/" >> "$GITHUB_STEP_SUMMARY"
