@@ -70,8 +70,8 @@ does it once, and is covered by the fast suite:
 
 ```csharp
 var version = AppVersion.ReadFrom(File.ReadAllText("VERSION"));
-version.Major;                // 0
-version.AndroidVersionCode;   // 1
+version.Major;      // 0
+version.ToString(); // "0.0.1"
 ```
 
 It throws `FormatException` on a file with only a marker and no version, and on
@@ -231,38 +231,62 @@ which is a changelog nobody reads and therefore a changelog nobody maintains.
 This is also why work-in-progress commits on a branch don't need to be
 Conventional Commits — they are squashed away. Only the PR title survives.
 
-## Android `versionCode`
+## What a build calls itself
 
-Android needs a monotonically increasing integer, separate from the display
-version. It is derived from `/VERSION` at build time — never stored, never
-hand-set:
+Two different things, from two different sources, both applied at build time and
+never stored in `ProjectSettings.asset`:
+
+| | Source | Example |
+| --- | --- | --- |
+| **Version name** (`PlayerSettings.bundleVersion`) | `/VERSION`, plus the commit sha on non-release builds | `0.2.3`, `0.2.3-abc1234` |
+| **`versionCode`** (Android) | `git rev-list --count main` | `147` |
+
+`Frogs.Core.BuildStamp` composes both and enforces the rules; the editor script
+`BuildStampApplier` reads the file, the environment, and git, and hands the
+values over. The split is the usual one — the arithmetic is in Core where the
+fast suite covers it, and the I/O is in the shell.
+
+### The version name
+
+`0.2.3` for a release. `0.2.3-abc1234` for anything built from a PR or as a
+release candidate, because a phone with four test builds on it needs to say
+which is which, and "the one from Tuesday" is not an answer.
+
+### `versionCode` is the commit count, not the version
 
 ```text
-versionCode = major * 10000 + minor * 100 + patch
+versionCode = git rev-list --count main
 ```
 
-| `/VERSION` | `versionCode` |
-| --- | --- |
-| `0.0.1` | 1 |
-| `0.1.0` | 100 |
-| `0.2.3` | 203 |
-| `1.0.0` | 10000 |
+Android orders installs by this integer and **refuses to install an APK whose
+code is not greater than the installed one.**
 
-The constraint the formula carries: **minor and patch must each stay below
-100.** With `feat:` bumping the minor, the minor is the component that moves
-fastest here, so `0.99.0` → `0.100.0` is the case that would break
-monotonicity. That is a long way off, and the answer when it approaches is to
-go to 1.0 rather than to widen the formula.
+Deriving it from the semantic version does not survive that rule. Several builds
+share a version between releases — every PR build of `0.2.3` would produce the
+same code, so installing today's test build over yesterday's would fail, and
+the two would be indistinguishable to the system. The commit count moves with
+every commit, which is exactly the granularity the constraint needs.
 
-Two properties this buys:
+What it buys:
 
-- **Reproducible.** The same `/VERSION` always yields the same `versionCode`, so
-  a rebuild of a tag produces an identical artifact rather than a new number.
-- **Legible.** `versionCode` 203 is `0.2.3`, readable by eye, which matters when
-  someone reports a bug from a phone showing only the code.
+- **Monotonic between releases, not just across them.** Every commit gets a
+  higher number than its parent.
+- **Reproducible.** The same commit always yields the same count, for everyone.
+  A rebuild of a tag produces the same code rather than a new one.
+- **Independent of CI.** No run numbers, no counters in workflow state, nothing
+  that resets when a workflow is renamed or a repository is migrated.
 
-A build counter appended to the low digits would allow multiple builds per
-version, and is deliberately not used: two APKs with the same version and
-different code is exactly the ambiguity this is meant to prevent. RC builds are
-identified by their artifact name and the commit they were built from, not by a
-different `versionCode`.
+The cost is legibility: `147` doesn't tell you the version at a glance the way a
+derived number would. That's the right trade — the version *name* is what a
+human reads, and it's on the same screen.
+
+### It is never hand-set
+
+`ProjectSettings.asset`'s version fields are not edited, ever — not by a person,
+not by a tool. They are overwritten at build time from the values above. A
+number typed into that file is a number that disagrees with `/VERSION` on the
+first release after someone forgets it.
+
+CI passes `FROGS_VERSION_CODE` and `FROGS_BUILD_SHA` rather than letting the
+editor shell out to git, because a checkout with `fetch-depth: 1` has no history
+to count. Locally both fall back to git, and a failure says so.

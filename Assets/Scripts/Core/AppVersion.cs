@@ -6,17 +6,17 @@ namespace Frogs.Core
     /// <summary>
     /// The app's version, as read from /VERSION.
     ///
-    /// Lives in Core rather than in an editor script so the parsing and the
-    /// versionCode derivation are covered by the fast NUnit suite. The Unity
-    /// side reads /VERSION and hands the string to <see cref="Parse"/>; it does
-    /// not do arithmetic on version numbers itself.
+    /// Lives in Core rather than in an editor script so the parsing is covered
+    /// by the fast NUnit suite. The Unity side reads the file and hands the
+    /// string to <see cref="Parse"/>; it does not pick versions apart itself.
+    ///
+    /// What a build calls itself — the display name and the Android
+    /// versionCode — is <see cref="BuildStamp"/>.
     ///
     /// See docs/engineering/versioning.md.
     /// </summary>
     public readonly struct AppVersion : IEquatable<AppVersion>
     {
-        const int MajorMultiplier = 10000;
-        const int MinorMultiplier = 100;
         const int ComponentCount = 3;
 
         public int Major { get; }
@@ -29,16 +29,6 @@ namespace Frogs.Core
             Minor = minor;
             Patch = patch;
         }
-
-        /// <summary>
-        /// Android's monotonically increasing build number, derived rather than
-        /// stored, so a rebuild of a tag produces an identical artifact rather
-        /// than a new number.
-        ///
-        /// The formula carries a constraint: minor and patch must each stay
-        /// below 100. See docs/engineering/versioning.md.
-        /// </summary>
-        public int AndroidVersionCode => (Major * MajorMultiplier) + (Minor * MinorMultiplier) + Patch;
 
         /// <summary>
         /// Reads the version out of the contents of /VERSION.
