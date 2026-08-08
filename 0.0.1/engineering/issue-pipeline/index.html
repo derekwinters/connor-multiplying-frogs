@@ -1679,6 +1679,50 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#one-branch-one-pr-one-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One branch, one PR, one issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-builder-never-merges-and-never-closes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The builder never merges and never closes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip-docs-is-applied-immediately-or-not-at-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skip-docs is applied immediately, or not at all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-failing-issue-is-dropped-and-the-round-continues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A failing issue is dropped, and the round continues
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2475,6 +2519,50 @@
     <span class="md-ellipsis">
       
         cap bounds the round, not the concurrency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-branch-one-pr-one-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One branch, one PR, one issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-builder-never-merges-and-never-closes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The builder never merges and never closes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip-docs-is-applied-immediately-or-not-at-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skip-docs is applied immediately, or not at all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-failing-issue-is-dropped-and-the-round-continues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A failing issue is dropped, and the round continues
       
     </span>
   </a>
@@ -3359,6 +3447,13 @@ or drop issues on one, so it falls back to number order for the tangled set.</p>
 <p>Serial because parallel agents on one repository fight: two branches touching
 <code>ProjectSettings.asset</code>, two release-please runs, two PRs renumbering the same
 things. Nothing raises that above one at a time.</p>
+<p>Delegated — a fresh session per issue — because context from the previous issue
+is a liability. The agent that just spent an hour on the audio system will find
+a way to make the next issue about audio.</p>
+<p>Each delegation is: mark <code>in-progress</code> <strong>first</strong>, so a crashed run leaves a
+visibly stuck issue rather than an invisible one; hand the issue to the
+development agent (<a href="../agent-workflow/">Agent workflow</a>); let it open its own PR.
+The pipeline does not write code.</p>
 <h4 id="cap-bounds-the-round-not-the-concurrency"><code>cap</code> bounds the round, not the concurrency<a class="headerlink" href="#cap-bounds-the-round-not-the-concurrency" title="Link to this section">&para;</a></h4>
 <p>The two are separate knobs and it is worth keeping them apart.</p>
 <table>
@@ -3391,12 +3486,40 @@ and it is the only thing standing between a quiet night and thirty open PRs.
 The cap applies <strong>after</strong> ordering, never before: capping first would take the
 three lowest-numbered issues and could admit a dependent without the thing it
 depends on.</p>
-<p>Delegated — a fresh session per issue — because context from the previous issue
-is a liability. The agent that just spent an hour on the audio system will find
-a way to make the next issue about audio.</p>
-<p>Each delegation is: mark <code>in-progress</code>, hand the issue to the development agent
-(<a href="../agent-workflow/">Agent workflow</a>), and let it open its own PR. The pipeline
-does not write code, and it does not merge PRs.</p>
+<h4 id="one-branch-one-pr-one-issue">One branch, one PR, one issue<a class="headerlink" href="#one-branch-one-pr-one-issue" title="Link to this section">&para;</a></h4>
+<p>Never a combined PR, even for two small issues touching the same file.</p>
+<p>A combined PR cannot be partly rejected, carries an ambiguous closing keyword,
+and — the one that bites quietly — has to pick a single Conventional Commit
+type. release-please derives the version from that type, so a PR bundling a
+<code>feat:</code> with a <code>fix:</code> ships the wrong version number whichever label it takes.</p>
+<h4 id="the-builder-never-merges-and-never-closes">The builder never merges and never closes<a class="headerlink" href="#the-builder-never-merges-and-never-closes" title="Link to this section">&para;</a></h4>
+<p>Not a green PR, not a one-line fix, not its own work.</p>
+<p>The pipeline's job is to get work to the point where Derek can look at it. A
+pipeline that also merged would make the review step optional in practice, and
+an agent that can approve its own output has no gate on it at all. Closing is
+the same rule from the other end: <code>Closes #N</code> in the PR body closes the issue
+when Derek merges, and closing it directly would mark work done that nobody
+accepted.</p>
+<h4 id="skip-docs-is-applied-immediately-or-not-at-all"><code>skip-docs</code> is applied immediately, or not at all<a class="headerlink" href="#skip-docs-is-applied-immediately-or-not-at-all" title="Link to this section">&para;</a></h4>
+<p>A PR touching no files under <code>docs/</code> gets <code>skip-docs</code> <strong>the moment it opens</strong> —
+before anything else in the round.</p>
+<p>The reconciliation gate fails a code-only PR, and the label is the sanctioned
+escape hatch. Applying it late means the round's first visible output is a red
+X on a PR that was never wrong, which teaches everyone to skim past red. It
+still needs a written justification in <code>## Deviations and Decisions</code>, because
+the gate cannot distinguish "no docs needed" from "forgot the docs" — that is
+the whole reason a human has to say which it was.</p>
+<h4 id="a-failing-issue-is-dropped-and-the-round-continues">A failing issue is dropped, and the round continues<a class="headerlink" href="#a-failing-issue-is-dropped-and-the-round-continues" title="Link to this section">&para;</a></h4>
+<p>If an issue cannot be completed — tests won't pass, the plan was wrong, a
+checklist box cannot be ticked — the branch is deleted and <strong>no PR is opened</strong>.
+No draft, no partial. A PR that does not close its issue still costs a review,
+and a partial implementation hides an untickable checklist box that is really a
+triage problem.</p>
+<p>The issue keeps <code>in-progress</code>, deliberately. Reconcile finds an open
+<code>in-progress</code> issue with no open PR and nothing on <code>main</code> and returns it to
+<code>ready-for-work</code>, so the failure self-heals by the next round and stays visible
+on the dashboard until it does.</p>
+<p>One failure never aborts the round — the other issues are unrelated.</p>
 <h3 id="reconciliation-drift">Reconciliation — drift<a class="headerlink" href="#reconciliation-drift" title="Link to this section">&para;</a></h3>
 <p>Reality drifts: a PR merges without its closing keyword, someone hand-edits a
 label, a run crashes between two API calls. <code>reconcile.py</code> compares what the
