@@ -1537,6 +1537,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Analysis — find what needs triage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-scheduled-round-is-the-backstop-not-the-main-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The scheduled round is the backstop, not the main path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2277,6 +2294,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Analysis — find what needs triage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-scheduled-round-is-the-backstop-not-the-main-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The scheduled round is the backstop, not the main path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -3016,6 +3050,27 @@ re-read the thread to find out why it is running again.</p>
 <p>The dispatcher (<code>pipeline-analysis</code>) is a thin loop over that list. It makes no
 decisions itself — the decisions are in <code>triage-issue</code>, one issue at a time,
 which keeps a bad triage contained to one issue instead of one batch.</p>
+<p><strong>The dispatcher writes nothing at all</strong> — no labels, no comments, not even a
+summary of the round. Every write belongs to the single-issue skill. A round
+that made its own writes would be a second thing that can be wrong, wrong at
+batch scale across the whole queue, in a way no individual triage run could
+produce. It also keeps <code>triage-issue</code> genuinely standalone, which is what lets
+reactive triage invoke it with no dispatcher present.</p>
+<p><strong>Concurrency is set by the orchestration layer, not the script.</strong>
+<code>select_triage.py</code> reports what needs triage and has no opinion on how fast to
+work through it: the right number depends on rate limits and runner capacity,
+which change without the eligibility rules changing. A limit baked into the
+discovery script is one nobody can adjust for a busy night without editing a
+file with tests pinned to it.</p>
+<p>A triage that fails is one issue's problem — it keeps <code>ai-triage</code> and the next
+round picks it up. The round does not abort for it.</p>
+<h4 id="the-scheduled-round-is-the-backstop-not-the-main-path">The scheduled round is the backstop, not the main path<a class="headerlink" href="#the-scheduled-round-is-the-backstop-not-the-main-path" title="Link to this section">&para;</a></h4>
+<p>Reactive triage is how an issue normally gets triaged: the gatekeeper fires it
+the moment <code>ai-triage</code> appears, and the issue is analyzed within minutes.</p>
+<p>The 02:00 round exists for what reactive triage missed — a failed POST, secrets
+that were never configured, a label changed by hand instead of by a command, an
+issue carried back by the blocker sweep. On a healthy night it finds nothing.
+<strong>An empty round is the system working</strong>, not a wasted run.</p>
 <h3 id="triage-one-issue">Triage — one issue<a class="headerlink" href="#triage-one-issue" title="Link to this section">&para;</a></h3>
 <p><code>triage-issue</code> reads an issue and produces:</p>
 <ul>
