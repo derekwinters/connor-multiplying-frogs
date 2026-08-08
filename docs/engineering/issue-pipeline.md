@@ -153,6 +153,10 @@ account**, and it skips any comment that already has one.
   state change nobody asked for. Prefer visible-and-stuck to silent-and-doubled.
 - It is a **claim**, so the outcome gets its own reaction: 🚀 applied, 😕
   refused or not understood.
+- A **refused** comment is watermarked too. It was considered, and without the
+  mark the sweep reconsiders it every run and re-posts the same refusal. A
+  stranger's comment is *not* watermarked — reacting to it would itself be
+  letting them make the bot act.
 
 To make the gatekeeper reconsider a comment, remove its 👀.
 
@@ -430,6 +434,25 @@ comment carries a marker; a re-run finds its previous comment and **edits** it
 rather than adding another. `triage_repair.py` also detects the mess left by an
 older run that crashed mid-way — a label set without a comment, a comment
 without labels — and repairs it.
+
+### Applying an action
+
+`apply_actions.py` computes the resulting label set, the acknowledgement, and
+whether to watermark. Three rules worth knowing:
+
+- **A state change replaces, never adds.** Exactly one of the state labels is
+  on an open issue at a time. Everything else — `area:*`, `type:*`,
+  `skip-docs` — is untouched, because a state change that dropped them would
+  throw away the whole triage decision.
+- **The ack says what happens next**, not which label changed. "the nightly
+  builder can pick it up next" is the consequence; the label is a means.
+- **A refusal's ack says nothing was changed** — not the labels, not the
+  milestone — because "your command was refused" and "your command was partly
+  applied" need very different responses.
+
+Reactive triage fires **only when `ai-triage` is newly present**. An idempotent
+re-add — a replay, or a second `/admit` on an already-admitted issue — must not
+fire it again, or one stuck comment becomes a triage run every sweep.
 
 ### Recording dependencies
 
