@@ -1632,6 +1632,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The I/O layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-either-entry-point-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running either entry point by hand
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2599,6 +2616,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="The I/O layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-either-entry-point-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running either entry point by hand
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3672,6 +3706,31 @@ the comment author, so this is redundant — deliberately. A script that is safe
 only because its caller filtered is one edited <code>if:</code> away from letting a
 stranger drive the pipeline, and the workflow trigger is exactly the kind of
 line that gets edited for an unrelated reason.</p>
+<h4 id="running-either-entry-point-by-hand">Running either entry point by hand<a class="headerlink" href="#running-either-entry-point-by-hand" title="Link to this section">&para;</a></h4>
+<p>Both read JSON on <strong>stdin</strong>, which is what makes replaying a missed event or
+rehearsing a sweep possible without waiting for a trigger:</p>
+<table>
+<thead>
+<tr>
+<th>Entry point</th>
+<th>Expects on stdin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_comment_event.py</code></td>
+<td>an <code>issue_comment</code> webhook payload</td>
+</tr>
+<tr>
+<td><code>run_sweep.py</code></td>
+<td>a state snapshot — issues, pulls, merged commits, focus</td>
+</tr>
+</tbody>
+</table>
+<p><code>run_sweep.py --events-only</code> simulates the fifteen-minute pass by dropping
+reconcile's two cron-only fixes. Running it <em>without</em> that flag outside the
+nightly window will requeue whatever the builder currently has in flight, which
+is the one way to do real damage with these scripts by hand.</p>
 <h3 id="applying-an-action">Applying an action<a class="headerlink" href="#applying-an-action" title="Link to this section">&para;</a></h3>
 <p><code>apply_actions.py</code> computes the resulting label set, the acknowledgement, and
 whether to watermark. Three rules worth knowing:</p>
