@@ -1,0 +1,36 @@
+name: labels-sync
+
+# The label taxonomy is the pipeline's state machine, so it lives in git
+# (.github/labels.yml) and is applied from there rather than clicked into the
+# GitHub UI. Runs on every change to the taxonomy, and on demand.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/labels.yml
+      - .github/scripts/sync_labels.py
+      - .github/workflows/labels-sync.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: labels-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: Apply the label taxonomy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/sync_labels.py
