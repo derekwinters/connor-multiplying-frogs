@@ -1561,6 +1561,34 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dashboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-timestamp-and-how-it-avoids-defeating-byte-stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The timestamp, and how it avoids defeating byte-stability
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#pipeline-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2286,6 +2314,34 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dashboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-timestamp-and-how-it-avoids-defeating-byte-stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The timestamp, and how it avoids defeating byte-stability
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3096,7 +3152,7 @@ does; this is where the workflows live.</p>
 </tr>
 <tr>
 <td><code>dashboard</code></td>
-<td>schedule, and after pipeline runs</td>
+<td>human label changes, daily schedules, dispatch</td>
 <td>rewrites the live dashboard issue</td>
 </tr>
 <tr>
@@ -3148,6 +3204,33 @@ because it only ever touches an already-closed issue.</p>
 <code>gatekeeper-comment</code>. This sweep reads and rewrites the whole board, so two
 overlapping runs would each be acting on a snapshot the other has already
 invalidated.</p>
+<h3 id="dashboard"><code>dashboard</code><a class="headerlink" href="#dashboard" title="Link to this section">&para;</a></h3>
+<p>Renders the board on <code>issues: [labeled, unlabeled]</code>, on three daily schedules
+offset after the nightly routines, and on dispatch.</p>
+<p><strong>Why the gatekeeper also re-renders inline.</strong> GitHub suppresses workflow runs
+from events initiated by <code>GITHUB_TOKEN</code>, and the gatekeeper's label moves use
+that token — so they do <em>not</em> fire the <code>labeled</code> trigger here. This workflow
+would never see the very changes it most needs to reflect. That is why
+<code>run_comment_event.py</code> and <code>run_sweep.py</code> call the renderer directly after
+their label writes. The trigger here catches label changes a human makes in the
+GitHub UI; the schedule is the backstop for everything else.</p>
+<p><strong>Concurrency is one group with <code>cancel-in-progress: false</code>,</strong> so a burst of
+label changes collapses to one final render on the latest state. Cancelling
+would also be safe — the render is idempotent — but queueing guarantees the
+last render in a burst is the one that sees everything.</p>
+<h4 id="the-timestamp-and-how-it-avoids-defeating-byte-stability">The timestamp, and how it avoids defeating byte-stability<a class="headerlink" href="#the-timestamp-and-how-it-avoids-defeating-byte-stability" title="Link to this section">&para;</a></h4>
+<p>The "as of" line is computed in the workflow (<code>TZ=America/Chicago</code>) and passed
+in as an environment variable. <strong>The renderer never reads a clock</strong>, which is
+what keeps <code>render()</code> a pure function of its arguments and the golden test
+possible.</p>
+<p>A timestamp makes every render textually different, which would undo what
+byte-stability was for: the scheduled runs would PATCH the issue every time and
+the board's history would become a wall of edits that changed nothing. So
+<code>write_dashboard</code> compares the new body against the current one <strong>with the
+timestamp line excluded</strong>, and skips the write when nothing else moved.</p>
+<p>The board therefore says when it was last <em>rendered</em>, while its edit history
+records only when it last <em>changed</em> — which are two genuinely different
+questions, and both worth being able to answer.</p>
 <h3 id="pipeline-tests"><code>pipeline-tests</code><a class="headerlink" href="#pipeline-tests" title="Link to this section">&para;</a></h3>
 <p>The pipeline's scripts are code, they have tests, and a broken gatekeeper is a
 broken queue — so unlike the rest of the pipeline workflows, this one runs on
