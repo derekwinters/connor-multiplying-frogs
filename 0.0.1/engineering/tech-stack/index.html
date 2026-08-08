@@ -2028,8 +2028,14 @@ the C# API is a compile error. See
 committed. The version fields are deliberately absent from it — <code>/VERSION</code> owns
 those, injected at build time (<a href="../versioning/">Versioning</a>).</p>
 <h3 id="naming">Naming<a class="headerlink" href="#naming" title="Link to this section">&para;</a></h3>
+<p>Use the <code>scaffold-core</code> skill to create a Core type; it applies all of this and
+leaves you with a failing test, which is where a new type should start.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>SplitRule<span class="w"> </span>--subfolder<span class="w"> </span>Rules
+</code></pre></div>
 <ul>
 <li>Assemblies and their folders share a name: <code>Frogs.Core</code>, <code>Frogs.Unity</code>.</li>
+<li>A subfolder under <code>Assets/Scripts/Core/</code> becomes a namespace segment:
+  <code>Rules/</code> is <code>Frogs.Core.Rules</code>, and its tests are <code>Frogs.Core.Tests.Rules</code>.</li>
 <li>Core types are named for the game, not the engine — <code>Pond</code>, <code>FrogColony</code>,
   <code>SplitRule</code>. If a type name only makes sense to someone who knows Unity, it
   probably belongs in the shell.</li>
@@ -2041,15 +2047,15 @@ those, injected at build time (<a href="../versioning/">Versioning</a>).</p>
 <p><strong>Every size, offset, margin, spacing, duration, speed, delay, threshold, count,
 and payout is a named constant or a serialized field. Never a bare literal in a
 method body.</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// No.</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1">// Yes.</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// No.</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1">// Yes.</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="why-this-is-a-rule-and-not-a-preference">Why this is a rule and not a preference<a class="headerlink" href="#why-this-is-a-rule-and-not-a-preference" title="Link to this section">&para;</a></h3>
 <ul>
