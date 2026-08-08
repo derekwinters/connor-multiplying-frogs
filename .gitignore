@@ -1,4 +1,57 @@
-# Gradle files
+# =============================================================================
+# Unity
+# =============================================================================
+# Everything Unity regenerates from Assets/ + ProjectSettings/ + Packages/.
+# A fresh clone opened in the Editor rebuilds all of it; committing any of it
+# only produces conflicts. Leading slashes anchor these to the repo root so a
+# folder an artist names "Logs" inside Assets/ is not swallowed by accident.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]serSettings/
+/[Mm]emoryCaptures/
+
+# Unity's package manager cache and the recorder's output.
+/[Aa]ssets/[Aa]ssetStoreTools*
+/[Rr]ecordings/
+
+# Generated solution and project files. The IDE rewrites these from the
+# .asmdef files every time it regenerates, so they are pure churn.
+*.csproj
+*.sln
+*.unityproj
+*.pidb
+*.booproj
+*.svd
+*.suo
+*.user
+*.userprefs
+*.tmp
+.vs/
+.vscode/
+.consulo/
+
+# Crash dumps and build artifacts Unity leaves behind.
+sysinfo.txt
+*.stackdump
+crashlytics-build.properties
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# IMPORTANT: .meta files are NOT ignored. Unity stores every asset's GUID,
+# import settings, and the references other assets make to it in the sibling
+# .meta file. Dropping one re-imports the asset under a fresh GUID and detaches
+# every reference to it — the classic "all my prefabs lost their sprites"
+# breakage. If you ever add a broad ignore above, re-check it with:
+#     git check-ignore -v Assets/Art/frog.png.meta
+# which must print nothing.
+
+# =============================================================================
+# Gradle / Android — the exported build
+# =============================================================================
 .gradle/
 build/
 
@@ -32,3 +85,12 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# =============================================================================
+# OS and editor cruft
+# =============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.swp
