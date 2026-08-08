@@ -60,6 +60,54 @@ namespace Frogs.Core.Tests
                 Throws.InstanceOf<ArgumentException>());
         }
 
+        // A debug build has to install alongside the release build, so Connor
+        // keeps the game he plays and the build being tested at the same time.
+        [Test]
+        public void ApplicationIdWithSuffix_AppendsTheSuffix()
+        {
+            Assert.That(
+                BuildStamp.ApplicationIdWithSuffix("com.derekwinters.multiplyingfrogs", ".debug"),
+                Is.EqualTo("com.derekwinters.multiplyingfrogs.debug"));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("   ")]
+        public void ApplicationIdWithSuffix_LeavesTheIdAloneWhenThereIsNoSuffix(string suffix)
+        {
+            Assert.That(
+                BuildStamp.ApplicationIdWithSuffix("com.derekwinters.multiplyingfrogs", suffix),
+                Is.EqualTo("com.derekwinters.multiplyingfrogs"));
+        }
+
+        [Test]
+        public void ApplicationIdWithSuffix_IsNotAppliedTwice()
+        {
+            var once = BuildStamp.ApplicationIdWithSuffix("com.frogs", ".debug");
+
+            Assert.That(BuildStamp.ApplicationIdWithSuffix(once, ".debug"), Is.EqualTo(once));
+        }
+
+        [TestCase("debug")]
+        [TestCase(".Debug")]
+        [TestCase(".deb ug")]
+        [TestCase(".")]
+        public void ApplicationIdWithSuffix_RejectsASuffixAndroidWouldNotAccept(string suffix)
+        {
+            Assert.That(
+                () => BuildStamp.ApplicationIdWithSuffix("com.frogs", suffix),
+                Throws.InstanceOf<ArgumentException>());
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        public void ApplicationIdWithSuffix_RejectsAMissingApplicationId(string applicationId)
+        {
+            Assert.That(
+                () => BuildStamp.ApplicationIdWithSuffix(applicationId, ".debug"),
+                Throws.InstanceOf<ArgumentException>());
+        }
+
         [Test]
         public void Debug_AcceptsAFullLengthShaAndShortensIt()
         {
