@@ -2281,8 +2281,31 @@ The device cannot tell who is holding it, so restricting the exit to a
 particular player was never enforceable — what protects a game in progress is
 that the confirm names the cost before it acts. See
 <a href="../ui/end-game-confirm/">end-game confirm</a>.</p>
-<p>One thing this still leaves for whoever specifies it: whether the game also ends
-<em>on its own</em> once every frog is home. Same issue; not settled.</p>
+<p><strong>The game also ends on its own once every frog is home.</strong> The last frog to
+reach its End log finishes the game, and the results appear without anyone
+choosing to stop. Derek's call in the same issue.</p>
+<p>Together those two decisions describe the whole of how a game finishes:</p>
+<table>
+<thead>
+<tr>
+<th>How a game ends</th>
+<th>Who caused it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every frog reaches its End log</td>
+<td>Nobody — the game ends itself</td>
+</tr>
+<tr>
+<td>Somebody ends it early, with a confirm</td>
+<td>Any player, on any turn</td>
+</tr>
+</tbody>
+</table>
+<p>There is no third way, and in particular there is no state where a finished
+game sits waiting to be dismissed. That is what makes the ordinary two-player
+game work without anyone ever opening the settings.</p>
 
 
 

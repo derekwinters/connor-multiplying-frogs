@@ -2150,12 +2150,13 @@ right.</p>
 <td>Only one frog left going</td>
 <td><code>One frog is still swimming. Ending it now stops the game for all four players and shows the results.</code></td>
 </tr>
-<tr>
-<td>Every frog home</td>
-<td><code>Everybody is home. Ending it now shows the results.</code></td>
-</tr>
 </tbody>
 </table>
+<p>There is no everybody-is-home wording, and there does not need to be:
+<a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">the game ends itself</a>
+the moment the last frog lands on its End log, so this dialog can never open
+on a finished game. At least one frog is always still swimming when it
+appears — which is exactly why it has something to warn about.</p>
 </li>
 <li>
 <p><strong><code>End the game</code></strong> — destructive <a href="../shared-components/#button">button</a>. Goes
@@ -2189,12 +2190,7 @@ this dialog telling you, before you act, how many frogs you are about to stop.</
 string. It is the whole of the protection, so it has to say something true and
 specific every time.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
-<ul>
-<li><strong>Does the game also end on its own when every frog is home?</strong> Still
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">issue #186</a>.
-  If yes, the everybody-is-home body sentence above is a state almost nobody
-  will see, because the game will have ended itself first.</li>
-</ul>
+<p>None.</p>
 
 
 

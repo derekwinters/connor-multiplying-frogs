@@ -2159,15 +2159,36 @@ tax on the thing they most want to do. Changing who is playing is one extra tap
 through the title screen.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
-<li>Reached two ways: every frog home (if that ends the game — see the open
-  question), or <code>End the game</code> confirmed from
-  <a href="../end-game-confirm/">end-game confirm</a>.</li>
-<li>Entering: rows appear in place, top to bottom, over <code>StandingsRevealDuration</code>
-  (0.4 s total). No suspense reveal — everyone watched it happen.</li>
-<li>Hardware back does what <code>Back to the title</code> does.</li>
-<li>The finished game is not recoverable from here, and nothing warns about that,
+<li>
+<p>Reached two ways, and only two:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>What the headline says</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The last frog reaches its End log, and the game ends itself</td>
+<td><code>&lt;Colour&gt; frog wins!</code></td>
+</tr>
+<tr>
+<td><code>End the game</code> confirmed from <a href="../end-game-confirm/">end-game confirm</a></td>
+<td><code>&lt;Colour&gt; frog wins!</code> if anyone got home, otherwise <code>Game over</code></td>
+</tr>
+</tbody>
+</table>
+<p>The first route needs no input from anybody. When the last frog lands on its
+End log, the hop finishes, and this screen follows — see
+<a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">how a game ends</a>.
+- Entering: rows appear in place, top to bottom, over <code>StandingsRevealDuration</code>
+  (0.4 s total). No suspense reveal — everyone watched it happen.
+- Hardware back does what <code>Back to the title</code> does.
+- The finished game is not recoverable from here, and nothing warns about that,
   because a game that has been ended deliberately is not an accident to guard
-  against twice.</li>
+  against twice.</p>
+</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
 <p><a href="../mockups/game-over.html"><code>mockups/game-over.html</code></a> — four frogs, one home, drawn
@@ -2175,10 +2196,6 @@ in the state where the game was ended before the others finished, which is the
 one that has to look fair.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>Does the game end itself once every frog is home?</strong>
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">Issue #186</a>.
-  This screen works either way; what changes is how often it is reached without
-  anyone choosing to end anything.</li>
 <li><strong>Is finishing order the right ranking for frogs that did not finish?</strong>
   Ranking by lily pads is the only fact available, and ties are possible. Two
   frogs on the same pad currently share a place number. Say if they should be
