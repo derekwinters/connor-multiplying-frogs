@@ -107,21 +107,6 @@ jobs:
           buildMethod: Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
           allowDirtyBuild: true
 
-      - name: Show what Unity wrote
-        if: always()
-        run: |
-          ls -la Assets/Scenes ProjectSettings || true
-          for file in \
-            Assets/Scenes/HelloWorld.unity \
-            Assets/Scenes/HelloWorld.unity.meta \
-            Assets/Scripts/Unity/HelloWorldProbe.cs.meta \
-            ProjectSettings/EditorBuildSettings.asset
-          do
-            echo "vvvvv $file vvvvv"
-            cat "$file" 2>&1 || true
-            echo "^^^^^ $file ^^^^^"
-          done
-
       # The version name, versionCode, and .debug suffix are applied by
       # BuildStampPreprocessor from these variables — a build pre-processor, so
       # no build can be produced without them. See docs/engineering/versioning.md.
@@ -164,3 +149,20 @@ jobs:
                  "(versionCode ${{ steps.stamp.outputs.version_code }}), installs alongside the" \
                  "release build as \`.debug\`." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # TEMPORARY — remove before merge. Last, so it lands at the end of the
+      # log where it can be read back. See PR #179.
+      - name: Show what Unity wrote
+        if: always()
+        run: |
+          ls -la Assets/Scenes ProjectSettings || true
+          for file in \
+            Assets/Scenes/HelloWorld.unity \
+            Assets/Scenes/HelloWorld.unity.meta \
+            Assets/Scripts/Unity/HelloWorldProbe.cs.meta \
+            ProjectSettings/EditorBuildSettings.asset
+          do
+            echo "vvvvv $file vvvvv"
+            cat "$file" 2>&1 || true
+            echo "^^^^^ $file ^^^^^"
+          done
