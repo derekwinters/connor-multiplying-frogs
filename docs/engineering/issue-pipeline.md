@@ -1036,6 +1036,9 @@ regenerated. A comment thread cannot.
 
 ## Skills inventory
 
+The skills the pipeline itself runs. `.claude/skills/` holds more than these —
+see [Skills here are local](#skills-here-are-local-and-deliberately-not-synced).
+
 | Skill | Owns |
 | --- | --- |
 | `pipeline-gatekeeper` | comment parsing, the gates, label application, acks, reactive fire |
@@ -1052,10 +1055,51 @@ code, and a broken gatekeeper is a broken queue.
 
 ## Skills here are local, and deliberately not synced
 
-**`.claude/skills/` is the source of truth in this repository.** Every skill was
-hand-ported from `derekwinters/lucas-doggiehood` and then diverged to fit this
-game — different release config, different milestones, a different label
-taxonomy.
+**`.claude/skills/` is the source of truth in this repository.** Nothing here
+subscribes to an upstream. Two kinds of skill live in the directory, and the
+difference decides what a future reconciliation is allowed to do.
+
+**Ported skills** — the pipeline skills, `release-flow`, `run-tests`,
+`ci-watch`, `scaffold-core`, `core-unity-split`, `issue-blockers`,
+`milestone-ops` — were hand-ported from `derekwinters/lucas-doggiehood` and then
+diverged to fit this game: different release config, different milestones, a
+different label taxonomy.
+
+**Vendored skills** are verbatim third-party copies pinned to an upstream
+commit, with no local divergence. Today that is the 25 skills from
+[`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT, license kept
+at `.claude/skills/LICENSE.mattpocock-skills`) — `grilling`, `wayfinder`,
+`tdd`, `to-spec`, `to-tickets`, `code-review` and the rest. They are vendored
+rather than installed with `/plugin install`, because a plugin is per-user
+machine state: it would be present for whoever ran the command and absent for
+everyone else who clones the repo, and it would not be pinned to a reviewed
+commit.
+
+Re-vendoring one is a clean diff while `diverged` stays `false` in the manifest.
+It is still a manual, reviewed act — see [Why not sync](#why-not-sync), which
+applies to both kinds for different reasons.
+
+### Vendored skills do not outrank this repo
+
+Several vendored skills cover ground `/docs` already specifies, and where they
+disagree, this repo wins:
+
+| Vendored skill | Defers to |
+| --- | --- |
+| `tdd` | CLAUDE.md rule 1 and [testing](testing.md) |
+| `code-review`, `implement` | the [agent workflow](agent-workflow.md) |
+| `triage` | this repo's own `triage-issue` skill, which the pipeline calls |
+| `resolving-merge-conflicts` | CLAUDE.md rule 7 — this repo rebases |
+| `to-tickets`, `to-spec` | the label and milestone [conventions](../intro/conventions.md) |
+
+`triage` and `triage-issue` are different skills with similar names. The
+pipeline calls `triage-issue`; substituting the vendored one silently drops the
+label taxonomy, the milestone rules, and the hand-back-to-Derek step.
+
+Two vendored names — `grilling` and `code-review` — can also collide with a
+personal or built-in skill of the same name. Which one a session resolves is
+harness precedence, not something this repo controls, so check which
+description you got before relying on one.
 
 There is **no `skills-update` workflow**, no scheduled sync, and nothing here
 reads an upstream skills repository at runtime. No `AI_SKILLS_READ_TOKEN` secret
@@ -1063,12 +1107,21 @@ is needed, and one should not be added.
 
 ### Why not sync
 
-A sync would eventually revert local work. That is not a hypothetical: it is
-why the upstream project disabled its own sync. Once a skill has diverged —
-which it does the first time it mentions `.github/release-please/config.json`
-or `type:wireframe` — an upstream copy is not an update, it is a regression
-wearing an update's clothes. And it arrives on a schedule, so it lands when
-nobody is looking at it.
+For **ported** skills: a sync would eventually revert local work. That is not a
+hypothetical: it is why the upstream project disabled its own sync. Once a skill
+has diverged — which it does the first time it mentions
+`.github/release-please/config.json` or `type:wireframe` — an upstream copy is
+not an update, it is a regression wearing an update's clothes. And it arrives on
+a schedule, so it lands when nobody is looking at it.
+
+For **vendored** skills the risk is the other way round. There is no divergence
+to lose; what a sync would do is pull unreviewed third-party instructions
+straight into the agent's context on a timer. A skill file is not a library —
+it is a standing instruction to an agent working on this repo, and an upstream
+edit could contradict CLAUDE.md, reach for a tool this project has ruled out, or
+just quietly change what `/grilling` does mid-session. That is a change someone
+should read before it takes effect, which is exactly what a pinned commit and a
+reviewed bump give you.
 
 ### The manifest is a record, not a subscription
 
@@ -1076,6 +1129,13 @@ nobody is looking at it.
 has diverged, so a future reconciliation knows what was copied from where. It
 carries `"sync": "disabled"` and the reason, so nobody wires a workflow to it by
 assuming that a manifest implies a sync.
+
+Each ported skill carries `ported_from`; each vendored skill carries
+`vendored_from` and its `source_path` in the upstream tree. The
+`vendored_upstreams` list holds the part that makes a re-vendor reproducible —
+repository, licence, and the exact `pinned_commit` the current copies came from.
+Bumping a vendored skill means moving that pin in the same commit as the files,
+so the record and the copies cannot drift apart.
 
 Nothing reads it. It is documentation that happens to be JSON.
 
