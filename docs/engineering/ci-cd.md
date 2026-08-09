@@ -412,9 +412,15 @@ Two jobs, deliberately separate because they cost wildly different amounts:
 
 See [Testing](testing.md) for what belongs in each.
 
-The Core job also runs `check_core_isolation.py` first. It costs nothing and it
-fails for a reason the test output would never explain: game logic that has
-grown a dependency on the engine.
+The Core job also runs two static checks first. Both cost nothing and both fail
+for reasons the test output would never explain:
+
+- `check_core_isolation.py` — game logic that has grown a dependency on the
+  engine.
+- `check_assembly_references.py` — a `using` of a project namespace from an
+  assembly that cannot see it. Unity gives the same verdict, but only inside an
+  editor, minutes into a build, after a licence has been sorted out. See
+  [the Core/Unity split](tech-stack.md#the-check-that-catches-it).
 
 #### A missing licence fails, it does not skip
 

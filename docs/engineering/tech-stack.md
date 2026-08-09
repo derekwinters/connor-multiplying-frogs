@@ -103,6 +103,7 @@ Assets/                       ← everything Unity compiles
     EditMode/                 ← EditMode tests for the shell; needs the editor
       Frogs.Unity.EditModeTests.asmdef
   Editor/                     ← editor-only tooling; never ships in a build
+    Frogs.EditorTools.asmdef  ← references Frogs.Core; Editor-only platform
   Scenes/  Art/  Audio/  Prefabs/
 Tests/
   Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
@@ -131,6 +132,29 @@ compiler rather than by remembering.
 
 `Frogs.Core` is also `autoReferenced: false`: nothing picks it up implicitly, so
 an assembly that wants Core has to say so. `Frogs.Unity` says so.
+
+**Which means every folder of `.cs` needs an asmdef, including `Editor/`.** A
+file in a folder no asmdef covers compiles into a *predefined* assembly —
+`Assembly-CSharp` or `Assembly-CSharp-Editor` — and a predefined assembly has no
+references list anyone can edit. It sees `autoReferenced: true` assemblies and
+nothing else, so `using Frogs.Core;` there cannot compile, whatever the file
+does. `Assets/Editor/` therefore has `Frogs.EditorTools.asmdef`.
+
+That asmdef sets `includePlatforms: ["Editor"]`, and it has to. The `Editor`
+folder name only makes code editor-only while the folder is part of a predefined
+assembly; once it has an asmdef of its own, the folder convention no longer
+applies and the platform list is what keeps build tooling out of the player.
+
+#### The check that catches it
+
+```bash
+python .github/scripts/check_assembly_references.py
+```
+
+It reads every `using` under `Assets/`, works out which assembly the file
+compiles into, and fails if that assembly cannot see the one the namespace
+belongs to — the same verdict Unity gives, without an editor or a licence. CI
+runs it beside `check_core_isolation.py` ([CI/CD](ci-cd.md)).
 
 #### Two layers of enforcement
 
