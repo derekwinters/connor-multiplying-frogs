@@ -67,7 +67,7 @@ dotnet test Tests/Core/Frogs.Core.Tests.csproj
 dotnet test Tests/Core/Frogs.Core.Tests.csproj --filter FullyQualifiedName~AppVersion
 ```
 
-The `run-tests` skill wraps both, along with the non-test checks that also fail
+The `dw-run-tests` skill wraps both, along with the non-test checks that also fail
 a PR, and fixes a report format — so "the tests pass" means the same thing every
 time it is said.
 

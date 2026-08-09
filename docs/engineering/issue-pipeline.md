@@ -480,14 +480,14 @@ re-read the thread to find out why it is running again.
 Results are sorted by issue number, oldest first.
 
 The dispatcher (`pipeline-analysis`) is a thin loop over that list. It makes no
-decisions itself — the decisions are in `triage-issue`, one issue at a time,
+decisions itself — the decisions are in `dw-triage-issue`, one issue at a time,
 which keeps a bad triage contained to one issue instead of one batch.
 
 **The dispatcher writes nothing at all** — no labels, no comments, not even a
 summary of the round. Every write belongs to the single-issue skill. A round
 that made its own writes would be a second thing that can be wrong, wrong at
 batch scale across the whole queue, in a way no individual triage run could
-produce. It also keeps `triage-issue` genuinely standalone, which is what lets
+produce. It also keeps `dw-triage-issue` genuinely standalone, which is what lets
 reactive triage invoke it with no dispatcher present.
 
 **Concurrency is set by the orchestration layer, not the script.**
@@ -512,7 +512,7 @@ issue carried back by the blocker sweep. On a healthy night it finds nothing.
 
 ### Triage — one issue
 
-`triage-issue` reads an issue and produces:
+`dw-triage-issue` reads an issue and produces:
 
 - an **`area:*` and `type:*` label**;
 - the **milestone**, set as a field by matching the live milestone descriptions;
@@ -1043,7 +1043,7 @@ see [Skills here are local](#skills-here-are-local-and-deliberately-not-synced).
 | --- | --- |
 | `pipeline-gatekeeper` | comment parsing, the gates, label application, acks, reactive fire |
 | `pipeline-analysis` | finding what needs triage and dispatching it |
-| `triage-issue` | triaging one issue, and repairing a re-fire |
+| `dw-triage-issue` | triaging one issue, and repairing a re-fire |
 | `pipeline-dev` | the ready queue and serial delegated delivery |
 | `pipeline-reconcile` | drift detection, auto-fix, and flagging |
 | `pipeline-dashboard` | rendering the live dashboard issue |
@@ -1059,7 +1059,7 @@ code, and a broken gatekeeper is a broken queue.
 subscribes to an upstream. Two kinds of skill live in the directory, and the
 difference decides what a future reconciliation is allowed to do.
 
-**Ported skills** — the pipeline skills, `release-flow`, `run-tests`,
+**Ported skills** — the pipeline skills, `release-flow`, `dw-run-tests`,
 `ci-watch`, `scaffold-core`, `core-unity-split`, `issue-blockers`,
 `milestone-ops` — were hand-ported from `derekwinters/lucas-doggiehood` and then
 diverged to fit this game: different release config, different milestones, a
@@ -1081,6 +1081,11 @@ applies to both kinds for different reasons.
 
 ### Vendored skills do not outrank this repo
 
+Where one of our skill names would be confused with a vendored one, ours carries a
+`dw-` prefix — `dw-triage-issue`, not `triage-issue`. The prefix marks a
+collision, not ownership, so most of our skills do not have one. See
+[Skill names](../intro/conventions.md#skill-names).
+
 Several vendored skills cover ground `/docs` already specifies, and where they
 disagree, this repo wins:
 
@@ -1088,18 +1093,22 @@ disagree, this repo wins:
 | --- | --- |
 | `tdd` | CLAUDE.md rule 1 and [testing](testing.md) |
 | `code-review`, `implement` | the [agent workflow](agent-workflow.md) |
-| `triage` | this repo's own `triage-issue` skill, which the pipeline calls |
+| `triage` | this repo's own `dw-triage-issue` skill, which the pipeline calls |
 | `resolving-merge-conflicts` | CLAUDE.md rule 7 — this repo rebases |
 | `to-tickets`, `to-spec` | the label and milestone [conventions](../intro/conventions.md) |
 
-`triage` and `triage-issue` are different skills with similar names. The
-pipeline calls `triage-issue`; substituting the vendored one silently drops the
-label taxonomy, the milestone rules, and the hand-back-to-Derek step.
+`triage` and `dw-triage-issue` are the pair to watch. The pipeline calls
+`dw-triage-issue`; the vendored `triage` knows nothing about our label taxonomy,
+the milestone rules, or the hand-back-to-Derek step, so substituting it drops all
+three silently. This is the collision the `dw-` prefix exists to prevent, and it
+only works if you read the prefix.
 
-Two vendored names — `grilling` and `code-review` — can also collide with a
-personal or built-in skill of the same name. Which one a session resolves is
-harness precedence, not something this repo controls, so check which
-description you got before relying on one.
+The prefix cannot help where the clash is between two names the repo does not
+both own. Two vendored names — `grilling` and `code-review` — also exist as a
+personal or built-in skill, and which one a session resolves is harness
+precedence, not something the repo controls. Check the description you got before
+relying on either. Renaming the vendored copy is not the fix: it would break the
+`/code-review`-style cross-references inside its siblings.
 
 There is **no `skills-update` workflow**, no scheduled sync, and nothing here
 reads an upstream skills repository at runtime. No `AI_SKILLS_READ_TOKEN` secret

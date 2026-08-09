@@ -48,11 +48,11 @@
       "notes": "Rewritten around this repo's release-please config paths and the pull-request-title-pattern set in .github/release-please/config.json."
     },
     {
-      "name": "run-tests",
+      "name": "dw-run-tests",
       "ported_from": "derekwinters/lucas-doggiehood",
       "ported_at": "v0.0.1",
       "diverged": true,
-      "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation."
+      "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation. Prefixed dw- because a bare 'run-tests' is a near-miss for the built-in 'run' skill."
     },
     {
       "name": "ci-watch",
@@ -226,7 +226,7 @@
       "vendored_from": "mattpocock/skills",
       "source_path": "skills/engineering/triage",
       "diverged": false,
-      "notes": "Distinct from this repo's triage-issue skill, which is the one the nightly pipeline uses. Do not substitute one for the other."
+      "notes": "Distinct from this repo's dw-triage-issue skill, which is the one the nightly pipeline uses. Do not substitute one for the other."
     },
     {
       "name": "wait-what",
