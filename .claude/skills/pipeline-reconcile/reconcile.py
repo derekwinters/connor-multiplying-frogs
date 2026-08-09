@@ -36,6 +36,16 @@ if str(_TRIAGE_SKILL) not in sys.path:
 
 from triage_repair import has_analysis_signature, is_triage_author  # noqa: E402
 
+# Same rule, same reason, for `Blocked by #N`: the skill that documents the
+# format owns the recognizer. A copy here that drifted would report an issue as
+# prose-only, or flag a cycle, on a reading nobody else in the pipeline shares.
+# See #147.
+_BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
+if str(_BLOCKERS_SKILL) not in sys.path:
+    sys.path.insert(0, str(_BLOCKERS_SKILL))
+
+from blocker_refs import blockers_of, text_blockers  # noqa: E402
+
 TRIAGE_LABEL = "ai-triage"
 READY_LABEL = "ready-for-work"
 IN_PROGRESS_LABEL = "in-progress"
@@ -56,9 +66,6 @@ STATE_LABELS = {
 # overrule a human.
 ANALYZED_STATES = {"pending-approval", "needs-clarification", READY_LABEL,
                    IN_PROGRESS_LABEL}
-
-TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$",
-                          re.IGNORECASE | re.MULTILINE)
 
 # Done-ness comes from a closing keyword in a commit **body**. Never a title:
 # a squash merge puts `(#148)` in the subject and that is a PR number, not a
@@ -84,7 +91,7 @@ def _labels(issue) -> set:
 
 
 def _text_blockers(issue) -> list:
-    return sorted({int(n) for n in TEXT_BLOCKER.findall(issue.get("body") or "")})
+    return sorted(text_blockers(issue.get("body")))
 
 
 def _closed_by_body(body: str) -> set:
@@ -127,8 +134,7 @@ def find_cycles(issues) -> list:
     graph = {}
     for issue in issues:
         number = issue["number"]
-        blockers = set(issue.get("native_blockers") or []) | set(_text_blockers(issue))
-        graph[number] = blockers
+        graph[number] = set(blockers_of(issue))
 
     cycles = []
     seen = set()

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Read and write **native** GitHub blocked-by relationships.
 
-A blocker written as prose — `Blocked by #42` in an issue body — is invisible to
-everything that matters. The nightly builder computes its ready queue from the
-real dependency graph, the dashboard's blocked section reads the same graph, and
-the revisit sweep watches it to know when to wake an issue up. None of them read
-prose. An issue "blocked" in a sentence is an issue the builder walks straight
-into.
+A blocker written as prose — `Blocked by #42` in an issue body — is a sentence,
+not a relationship. The nightly builder, the dashboard's blocked section and the
+revisit sweep all read the real dependency graph and **union** a structured
+`Blocked by #N` line into it, so prose is honoured on a best-effort basis and
+nothing more: it is invisible to GitHub's own dependency view, it cannot be
+listed or removed, and one typo makes it vanish with nothing reporting it.
+Record it natively; `audit` finds the ones still written as prose.
+
+The recognizer for that line lives in `blocker_refs.py` beside this file, and
+every reader in the pipeline imports it from there.
 
     python3 set_blocker.py list   --issue 28
     python3 set_blocker.py add    --issue 28 --blocked-by 82
@@ -21,15 +25,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 import urllib.error
 import urllib.request
 
-# "Blocked by #42", "blocked by: #42". Deliberately NOT "Depends on: #42" —
-# that is soft ordering with no native form, and converting it would turn a
-# preference into a hard gate the builder refuses to pass.
-PROSE_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$", re.IGNORECASE | re.MULTILINE)
+# The one definition of the format this skill documents. Its sibling, so a
+# plain import — every other reader in the pipeline inserts this directory on
+# sys.path and imports the same names.
+from blocker_refs import text_blockers
 
 
 class BlockerError(Exception):
@@ -99,7 +102,7 @@ def remove_blocker(api, blocked: int, blocked_by: int):
 
 def prose_blockers(body: str) -> list[int]:
     """Issue numbers named as blockers in prose — which is the wrong place."""
-    return [int(match) for match in PROSE_BLOCKER.findall(body or "")]
+    return sorted(text_blockers(body))
 
 
 def audit(api, issue_number: int) -> list[str]:
