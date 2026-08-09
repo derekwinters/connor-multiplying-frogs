@@ -1929,6 +1929,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#vendored-skills-do-not-outrank-this-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vendored skills do not outrank this repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#why-not-sync" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2925,6 +2936,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#vendored-skills-do-not-outrank-this-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vendored skills do not outrank this repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#why-not-sync" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3547,13 +3569,13 @@ bad-actor gate. Carrying the note here means the triage run does not have to
 re-read the thread to find out why it is running again.</p>
 <p>Results are sorted by issue number, oldest first.</p>
 <p>The dispatcher (<code>pipeline-analysis</code>) is a thin loop over that list. It makes no
-decisions itself — the decisions are in <code>triage-issue</code>, one issue at a time,
+decisions itself — the decisions are in <code>dw-triage-issue</code>, one issue at a time,
 which keeps a bad triage contained to one issue instead of one batch.</p>
 <p><strong>The dispatcher writes nothing at all</strong> — no labels, no comments, not even a
 summary of the round. Every write belongs to the single-issue skill. A round
 that made its own writes would be a second thing that can be wrong, wrong at
 batch scale across the whole queue, in a way no individual triage run could
-produce. It also keeps <code>triage-issue</code> genuinely standalone, which is what lets
+produce. It also keeps <code>dw-triage-issue</code> genuinely standalone, which is what lets
 reactive triage invoke it with no dispatcher present.</p>
 <p><strong>Concurrency is set by the orchestration layer, not the script.</strong>
 <code>select_triage.py</code> reports what needs triage and has no opinion on how fast to
@@ -3571,7 +3593,7 @@ that were never configured, a label changed by hand instead of by a command, an
 issue carried back by the blocker sweep. On a healthy night it finds nothing.
 <strong>An empty round is the system working</strong>, not a wasted run.</p>
 <h3 id="triage-one-issue">Triage — one issue<a class="headerlink" href="#triage-one-issue" title="Link to this section">&para;</a></h3>
-<p><code>triage-issue</code> reads an issue and produces:</p>
+<p><code>dw-triage-issue</code> reads an issue and produces:</p>
 <ul>
 <li>an <strong><code>area:*</code> and <code>type:*</code> label</strong>;</li>
 <li>the <strong>milestone</strong>, set as a field by matching the live milestone descriptions;</li>
@@ -4198,6 +4220,8 @@ sitting there after several days is one nobody has dealt with.</p>
 false report of a problem that was fixed weeks ago. The dashboard can be wholly
 regenerated. A comment thread cannot.</p>
 <h2 id="skills-inventory">Skills inventory<a class="headerlink" href="#skills-inventory" title="Link to this section">&para;</a></h2>
+<p>The skills the pipeline itself runs. <code>.claude/skills/</code> holds more than these —
+see <a href="#skills-here-are-local-and-deliberately-not-synced">Skills here are local</a>.</p>
 <table>
 <thead>
 <tr>
@@ -4215,7 +4239,7 @@ regenerated. A comment thread cannot.</p>
 <td>finding what needs triage and dispatching it</td>
 </tr>
 <tr>
-<td><code>triage-issue</code></td>
+<td><code>dw-triage-issue</code></td>
 <td>triaging one issue, and repairing a re-fire</td>
 </tr>
 <tr>
@@ -4240,25 +4264,103 @@ regenerated. A comment thread cannot.</p>
 <code>pipeline-tests</code> workflow (<a href="../ci-cd/#pipeline-workflows">CI/CD</a>). The pipeline is
 code, and a broken gatekeeper is a broken queue.</p>
 <h2 id="skills-here-are-local-and-deliberately-not-synced">Skills here are local, and deliberately not synced<a class="headerlink" href="#skills-here-are-local-and-deliberately-not-synced" title="Link to this section">&para;</a></h2>
-<p><strong><code>.claude/skills/</code> is the source of truth in this repository.</strong> Every skill was
-hand-ported from <code>derekwinters/lucas-doggiehood</code> and then diverged to fit this
-game — different release config, different milestones, a different label
-taxonomy.</p>
+<p><strong><code>.claude/skills/</code> is the source of truth in this repository.</strong> Nothing here
+subscribes to an upstream. Two kinds of skill live in the directory, and the
+difference decides what a future reconciliation is allowed to do.</p>
+<p><strong>Ported skills</strong> — the pipeline skills, <code>release-flow</code>, <code>dw-run-tests</code>,
+<code>ci-watch</code>, <code>scaffold-core</code>, <code>core-unity-split</code>, <code>issue-blockers</code>,
+<code>milestone-ops</code> — were hand-ported from <code>derekwinters/lucas-doggiehood</code> and then
+diverged to fit this game: different release config, different milestones, a
+different label taxonomy.</p>
+<p><strong>Vendored skills</strong> are verbatim third-party copies pinned to an upstream
+commit, with no local divergence. Today that is the 25 skills from
+<a href="https://github.com/mattpocock/skills"><code>mattpocock/skills</code></a> (MIT, license kept
+at <code>.claude/skills/LICENSE.mattpocock-skills</code>) — <code>grilling</code>, <code>wayfinder</code>,
+<code>tdd</code>, <code>to-spec</code>, <code>to-tickets</code>, <code>code-review</code> and the rest. They are vendored
+rather than installed with <code>/plugin install</code>, because a plugin is per-user
+machine state: it would be present for whoever ran the command and absent for
+everyone else who clones the repo, and it would not be pinned to a reviewed
+commit.</p>
+<p>Re-vendoring one is a clean diff while <code>diverged</code> stays <code>false</code> in the manifest.
+It is still a manual, reviewed act — see <a href="#why-not-sync">Why not sync</a>, which
+applies to both kinds for different reasons.</p>
+<h3 id="vendored-skills-do-not-outrank-this-repo">Vendored skills do not outrank this repo<a class="headerlink" href="#vendored-skills-do-not-outrank-this-repo" title="Link to this section">&para;</a></h3>
+<p>Where one of our skill names would be confused with a vendored one, ours carries a
+<code>dw-</code> prefix — <code>dw-triage-issue</code>, not <code>triage-issue</code>. The prefix marks a
+collision, not ownership, so most of our skills do not have one. See
+<a href="../../intro/conventions/#skill-names">Skill names</a>.</p>
+<p>Several vendored skills cover ground <code>/docs</code> already specifies, and where they
+disagree, this repo wins:</p>
+<table>
+<thead>
+<tr>
+<th>Vendored skill</th>
+<th>Defers to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tdd</code></td>
+<td>CLAUDE.md rule 1 and <a href="../testing/">testing</a></td>
+</tr>
+<tr>
+<td><code>code-review</code>, <code>implement</code></td>
+<td>the <a href="../agent-workflow/">agent workflow</a></td>
+</tr>
+<tr>
+<td><code>triage</code></td>
+<td>this repo's own <code>dw-triage-issue</code> skill, which the pipeline calls</td>
+</tr>
+<tr>
+<td><code>resolving-merge-conflicts</code></td>
+<td>CLAUDE.md rule 7 — this repo rebases</td>
+</tr>
+<tr>
+<td><code>to-tickets</code>, <code>to-spec</code></td>
+<td>the label and milestone <a href="../../intro/conventions/">conventions</a></td>
+</tr>
+</tbody>
+</table>
+<p><code>triage</code> and <code>dw-triage-issue</code> are the pair to watch. The pipeline calls
+<code>dw-triage-issue</code>; the vendored <code>triage</code> knows nothing about our label taxonomy,
+the milestone rules, or the hand-back-to-Derek step, so substituting it drops all
+three silently. This is the collision the <code>dw-</code> prefix exists to prevent, and it
+only works if you read the prefix.</p>
+<p>The prefix cannot help where the clash is between two names the repo does not
+both own. Two vendored names — <code>grilling</code> and <code>code-review</code> — also exist as a
+personal or built-in skill, and which one a session resolves is harness
+precedence, not something the repo controls. Check the description you got before
+relying on either. Renaming the vendored copy is not the fix: it would break the
+<code>/code-review</code>-style cross-references inside its siblings.</p>
 <p>There is <strong>no <code>skills-update</code> workflow</strong>, no scheduled sync, and nothing here
 reads an upstream skills repository at runtime. No <code>AI_SKILLS_READ_TOKEN</code> secret
 is needed, and one should not be added.</p>
 <h3 id="why-not-sync">Why not sync<a class="headerlink" href="#why-not-sync" title="Link to this section">&para;</a></h3>
-<p>A sync would eventually revert local work. That is not a hypothetical: it is
-why the upstream project disabled its own sync. Once a skill has diverged —
-which it does the first time it mentions <code>.github/release-please/config.json</code>
-or <code>type:wireframe</code> — an upstream copy is not an update, it is a regression
-wearing an update's clothes. And it arrives on a schedule, so it lands when
-nobody is looking at it.</p>
+<p>For <strong>ported</strong> skills: a sync would eventually revert local work. That is not a
+hypothetical: it is why the upstream project disabled its own sync. Once a skill
+has diverged — which it does the first time it mentions
+<code>.github/release-please/config.json</code> or <code>type:wireframe</code> — an upstream copy is
+not an update, it is a regression wearing an update's clothes. And it arrives on
+a schedule, so it lands when nobody is looking at it.</p>
+<p>For <strong>vendored</strong> skills the risk is the other way round. There is no divergence
+to lose; what a sync would do is pull unreviewed third-party instructions
+straight into the agent's context on a timer. A skill file is not a library —
+it is a standing instruction to an agent working on this repo, and an upstream
+edit could contradict CLAUDE.md, reach for a tool this project has ruled out, or
+just quietly change what <code>/grilling</code> does mid-session. That is a change someone
+should read before it takes effect, which is exactly what a pinned commit and a
+reviewed bump give you.</p>
 <h3 id="the-manifest-is-a-record-not-a-subscription">The manifest is a record, not a subscription<a class="headerlink" href="#the-manifest-is-a-record-not-a-subscription" title="Link to this section">&para;</a></h3>
 <p><code>.claude/.skills-manifest.json</code> says where each skill came from and whether it
 has diverged, so a future reconciliation knows what was copied from where. It
 carries <code>"sync": "disabled"</code> and the reason, so nobody wires a workflow to it by
 assuming that a manifest implies a sync.</p>
+<p>Each ported skill carries <code>ported_from</code>; each vendored skill carries
+<code>vendored_from</code> and its <code>source_path</code> in the upstream tree. The
+<code>vendored_upstreams</code> list holds the part that makes a re-vendor reproducible —
+repository, licence, and the exact <code>pinned_commit</code> the current copies came from.
+Bumping a vendored skill means moving that pin in the same commit as the files,
+so the record and the copies cannot drift apart.</p>
 <p>Nothing reads it. It is documentation that happens to be JSON.</p>
 <h3 id="if-a-sync-is-ever-wanted">If a sync is ever wanted<a class="headerlink" href="#if-a-sync-is-ever-wanted" title="Link to this section">&para;</a></h3>
 <p>In this order, and not any other:</p>

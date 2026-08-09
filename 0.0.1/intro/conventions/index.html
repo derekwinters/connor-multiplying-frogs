@@ -714,6 +714,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#skill-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#labels" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1676,6 +1687,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#skill-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#labels" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1943,6 +1965,51 @@ rights, a secret, an external account, a purchase, a device in hand, a Unity
 Editor session, or a taste call that is Connor's to make.</p>
 <p>It never closes. Issues leave it by a human doing them, or by being re-scoped
 into a version milestone once the human-only part is unblocked.</p>
+<h2 id="skill-names">Skill names<a class="headerlink" href="#skill-names" title="Link to this section">&para;</a></h2>
+<p><strong>A skill takes the <code>dw-</code> prefix only when its name would otherwise be confused
+with a skill from outside this repo.</strong> Most of our skills need no prefix:
+<code>pipeline-gatekeeper</code>, <code>release-flow</code>, <code>scaffold-core</code> and the rest are named
+unambiguously already, and a prefix on a name nobody could mistake is noise in
+every directory listing.</p>
+<p>Two skills carry it today, and both earned it by colliding:</p>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Would be confused with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dw-triage-issue</code></td>
+<td><code>triage</code>, vendored from <code>mattpocock/skills</code></td>
+</tr>
+<tr>
+<td><code>dw-run-tests</code></td>
+<td><code>run</code>, a built-in skill</td>
+</tr>
+</tbody>
+</table>
+<p>Neither is an exact name clash — both are the <em>near</em> miss, which is the one that
+actually bites. Asked to "run the tests" or to "triage this issue", an agent
+picking by name alone can reach for the wrong one, and the wrong one does not
+know about our labels, our milestones, or our Core suite.</p>
+<p><strong>Before naming a new skill, check for collisions</strong> — against the vendored names
+in <code>.claude/.skills-manifest.json</code> and against the skills the harness already
+offers. An exact match or a shared-prefix near-miss earns a <code>dw-</code>; anything else
+does not. Vendored skills never take the prefix: renaming a third-party copy
+breaks the cross-references inside its siblings and makes every re-vendor a
+manual fixup.</p>
+<p>Renaming an existing skill is never just a <code>git mv</code> — the name is load-bearing in
+three places:</p>
+<ul>
+<li><strong>Workflow paths.</strong> <code>dashboard.yml</code>, <code>gatekeeper-comment.yml</code> and
+  <code>gatekeeper-sweep.yml</code> invoke scripts by path, and <code>pipeline-tests.yml</code>
+  path-gates on <code>.claude/skills/pipeline-*/**</code>. A missed glob is a workflow
+  that silently stops running rather than one that fails.</li>
+<li><strong>The frontmatter <code>name:</code></strong>, which must match the directory name.</li>
+<li><strong>The manifest</strong>, where the record's <code>name</code> is the directory.</li>
+</ul>
 <h2 id="labels">Labels<a class="headerlink" href="#labels" title="Link to this section">&para;</a></h2>
 <p>Labels are the pipeline's state machine. The list below is mirrored by
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.yml"><code>.github/labels.yml</code></a>,
