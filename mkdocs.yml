@@ -95,6 +95,12 @@ nav:
           - specs/ui/index.md
           - Shared components: specs/ui/shared-components.md
           - Mockups: specs/ui/mockups/index.md
+  - Decisions:
+      - adr/index.md
+      - 0001 Rules sacred, presentation ours: adr/0001-rules-sacred-presentation-ours.md
+      - 0002 The working-out grid: adr/0002-structured-working-out-grid.md
+      - 0003 The network boundary: adr/0003-network-boundary.md
+      - 0004 Core owns the save format: adr/0004-core-owns-the-save-format.md
   - Engineering:
       - engineering/index.md
       - Tech stack: engineering/tech-stack.md
