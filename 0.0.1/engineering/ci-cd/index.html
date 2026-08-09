@@ -3796,7 +3796,7 @@ does; this is where the workflows live.</p>
 <tr>
 <td><code>gatekeeper-sweep</code></td>
 <td>issue/PR events, 6-hourly cron, dispatch</td>
-<td>auto-revisits blockers that have cleared, and applies reconcile's fixes</td>
+<td>replays comment commands the comment workflow missed, auto-revisits blockers that have cleared, and applies reconcile's fixes</td>
 </tr>
 <tr>
 <td><code>dashboard</code></td>
@@ -3835,11 +3835,21 @@ the issue up, so a missing secret costs latency rather than correctness.</p>
 <p>Runs on the events that can actually change the board picture — an issue
 closed or labelled, a PR closed — plus a six-hourly cron and manual dispatch.</p>
 <p><strong>Two paths, and the difference is the point.</strong> The event path applies
-<code>strip_labels</code> only. The cron path applies everything, including reconcile's
-two requeue fixes.</p>
-<p>Those two are cron-only because <strong>the drift they detect is indistinguishable
-from work in flight</strong>. An issue the builder picked up ten seconds ago has
-<code>in-progress</code> and no PR yet — exactly a stall's shape — and requeuing it on the
+<code>strip_labels</code> only. The cron path applies everything: the comment replay, and
+reconcile's two requeue fixes.</p>
+<p><strong>The comment replay is cron-path only, and for a different reason from the
+other two.</strong> <code>gatekeeper-comment</code> can lose a command outright — a webhook that
+is never delivered, a workflow that fails to start — so the cron re-reads the
+last week of comments and re-applies anything not already carrying the bot's
+👀. It cannot run on the event path, because this workflow's event triggers
+include <code>issues: [labeled]</code> and an applied command <em>changes a label</em>: the
+replay would wake up and re-apply the very comment <code>gatekeeper-comment</code> is
+applying at that moment. The two are in different concurrency groups, so
+nothing serialises them. See
+<a href="../issue-pipeline/#replaying-the-comments-the-webhook-lost">Issue pipeline</a>.</p>
+<p>The two requeue fixes are cron-only because <strong>the drift they detect is
+indistinguishable from work in flight</strong>. An issue the builder picked up ten
+seconds ago has <code>in-progress</code> and no PR yet — exactly a stall's shape — and requeuing it on the
 event path would yank the issue out from under a running agent. Triage's
 comment-before-label ordering creates the mirror-image window for
 <code>requeue_triage</code>. By the six-hourly run those transients have resolved.</p>

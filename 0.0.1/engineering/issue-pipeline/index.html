@@ -1771,6 +1771,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#replaying-the-comments-the-webhook-lost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replaying the comments the webhook lost
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Replaying the comments the webhook lost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-is-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay is cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-writes-its-labels-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay writes its labels back
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-render-last-override-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One render, last override wins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-replay-raises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a replay raises
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-approval-gates" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2822,6 +2883,67 @@
     <span class="md-ellipsis">
       
         The snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#replaying-the-comments-the-webhook-lost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replaying the comments the webhook lost
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Replaying the comments the webhook lost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-is-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay is cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-writes-its-labels-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay writes its labels back
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-render-last-override-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One render, last override wins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-replay-raises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a replay raises
       
     </span>
   </a>
@@ -3904,6 +4026,68 @@ parser <em>could</em> act on is one it eventually will.</p>
 dependency lookup in particular does not lose the event: the command is
 probably <code>/park</code>, which does not care, and the gates that <em>do</em> care see a
 smaller blocker list and refuse — which is the safe direction.</p>
+<h2 id="replaying-the-comments-the-webhook-lost">Replaying the comments the webhook lost<a class="headerlink" href="#replaying-the-comments-the-webhook-lost" title="Link to this section">&para;</a></h2>
+<p><code>gatekeeper-comment</code> fires on <code>issue_comment: created</code>. When that delivery is
+dropped — a webhook that never arrives, a workflow that fails to start, a run
+cancelled mid-flight — the command is simply gone. Derek types <code>/approve</code>,
+nothing happens, and <strong>nothing anywhere reports that nothing happened.</strong></p>
+<p>So the sweep re-reads recent comments and feeds anything unclaimed back through
+the ordinary path. This is the second pass the 👀 watermark was designed for.</p>
+<p>Four properties, and every one of them is load-bearing:</p>
+<ul>
+<li><strong>It reuses <code>run_comment_event.run</code>, the same function the live workflow
+  calls.</strong> Not a second implementation of parse → gate → apply. The owner
+  re-check, the gates, the acknowledgement wording and above all the watermark
+  rule are <em>inherited</em> rather than re-derived — and a second copy that got the
+  watermark's failure direction backwards would re-apply every command in the
+  window on every sweep, six times a day, forever.</li>
+<li><strong>It is cron-path only.</strong> See below.</li>
+<li><strong>The window is bounded</strong> — seven days, <code>REPLAY_WINDOW_DAYS</code> in
+  <code>run_sweep.py</code>, gathered by one repo-wide <code>since</code>-filtered call rather than
+  one request per open issue. Seven days is far more than the six-hourly cron
+  needs for a single dropped webhook; the width is there for a multi-day
+  Actions outage, and costs nothing because re-reading a claimed comment is a
+  no-op. It is bounded rather than unlimited because an unbounded scan of the
+  whole comment history is both slow and a far larger surface for a watermark
+  bug to act on.</li>
+<li><strong>A replayed command updates the sweep's own snapshot</strong> before reconcile
+  reads it, and the board is re-rendered <strong>once</strong>, at the end of the sweep.</li>
+</ul>
+<h3 id="why-the-replay-is-cron-only">Why the replay is cron-only<a class="headerlink" href="#why-the-replay-is-cron-only" title="Link to this section">&para;</a></h3>
+<p><code>gatekeeper-sweep</code> has two triggers, and on the event path one of them is
+<code>issues: [labeled]</code>. An applied command <em>changes a label</em>. So an event-path
+replay would wake this workflow up to re-apply the very comment
+<code>gatekeeper-comment</code> is applying at that moment — and nothing serialises the
+two, because they are in different concurrency groups.</p>
+<p>The six-hourly cron has no such relationship to the comment workflow, which is
+why the replay lives there, alongside reconcile's two cron-only fixes.</p>
+<h3 id="why-the-replay-writes-its-labels-back">Why the replay writes its labels back<a class="headerlink" href="#why-the-replay-writes-its-labels-back" title="Link to this section">&para;</a></h3>
+<p>Reconcile runs after the replay, and derives its fixes from the labels on the
+sweep's in-memory snapshot. If the replay moved an issue from <code>in-progress</code> to
+<code>parked</code> and reconcile then read the pre-replay list, it would see an
+<code>in-progress</code> issue with no open PR, call it a stall, and requeue it to
+<code>ready-for-work</code> — <strong>silently undoing the command it was replayed to honour</strong>,
+and reporting a successful auto-fix while doing it.</p>
+<p>So <code>run_comment_event.Result</code> carries the label set the command left behind,
+and the replay writes it onto the snapshot issue. A refused command reports no
+labels at all, rather than "the labels unchanged", so the snapshot is left
+exactly as it was instead of being overwritten with a guess.</p>
+<h3 id="one-render-last-override-wins">One render, last override wins<a class="headerlink" href="#one-render-last-override-wins" title="Link to this section">&para;</a></h3>
+<p><code>run_comment_event.run</code> re-renders the dashboard itself, which is right for one
+webhook and wrong for a sweep: six replayed commands would publish six boards,
+five of them describing a half-finished sweep. The replay hands it a collector
+instead, and the sweep renders once at the end.</p>
+<p>If two replayed comments both set a <code>/focus</code>, <strong>the later one wins</strong> — the
+candidates are fetched oldest-first for exactly that reason. Refusing both as
+ambiguous was the alternative; last-wins is what would have happened had the
+webhooks arrived normally, and matching the undropped case is the less
+surprising rule.</p>
+<h3 id="when-a-replay-raises">When a replay raises<a class="headerlink" href="#when-a-replay-raises" title="Link to this section">&para;</a></h3>
+<p>One malformed comment does not take the sweep down with it. The failure is
+counted, named in the workflow log, and the sweep carries on — reconcile is the
+backstop for the entire board, and losing it because a single comment blew up
+trades a missed command for a missed sweep, which is the more expensive of the
+two.</p>
 <h2 id="the-approval-gates">The approval gates<a class="headerlink" href="#the-approval-gates" title="Link to this section">&para;</a></h2>
 <p>Both gates <strong>refuse and explain</strong>. Neither ever fixes the problem itself.</p>
 <p>That posture is deliberate. Auto-correcting at an approval gate means the
@@ -4123,8 +4307,8 @@ to normalise and hope.</p>
 </tr>
 <tr>
 <td><code>gatekeeper-sweep</code> workflow</td>
-<td>every 15 minutes</td>
-<td>catch missed comments; auto-revisit cleared blockers</td>
+<td>issue/PR events, and a six-hourly cron</td>
+<td>auto-revisit cleared blockers, apply reconcile's fixes; on the cron, also replay missed comments</td>
 </tr>
 <tr>
 <td><code>pipeline-analysis</code> routine</td>
@@ -4480,7 +4664,7 @@ thin modules wire those pieces to GitHub:</p>
 </tr>
 <tr>
 <td><code>run_sweep.py</code></td>
-<td>the board-wide revisit + reconcile pass</td>
+<td>the board-wide replay + revisit + reconcile pass</td>
 </tr>
 </tbody>
 </table>
@@ -4488,7 +4672,9 @@ thin modules wire those pieces to GitHub:</p>
 and reaction → <strong>re-render the dashboard once, after every label write.</strong>
 Rendering in between would publish a board describing a half-applied command.
 <code>run_sweep.py</code> re-renders once at the end for the same reason, and takes
-<code>--events-only</code> to drop reconcile's two cron-only fixes on the 15-minute pass.</p>
+<code>--events-only</code> to drop the comment replay and reconcile's two cron-only fixes
+on the <strong>event path</strong>. That flag names the trigger, not a clock: both paths run
+the same script, and the cron is six-hourly.</p>
 <p><strong>Authentication is <code>GITHUB_TOKEN</code>, never a PAT.</strong> The workflow token is scoped
 to this repository and expires with the job; a personal access token would
 carry everything its owner can do into a job nobody is watching.</p>
@@ -4514,14 +4700,20 @@ rehearsing a sweep possible without waiting for a trigger:</p>
 </tr>
 <tr>
 <td><code>run_sweep.py</code></td>
-<td>a state snapshot — issues, pulls, merged commits, focus</td>
+<td>a state snapshot — issues, pulls, merged commits, recent comments, focus</td>
 </tr>
 </tbody>
 </table>
-<p><code>run_sweep.py --events-only</code> simulates the fifteen-minute pass by dropping
-reconcile's two cron-only fixes. Running it <em>without</em> that flag outside the
-nightly window will requeue whatever the builder currently has in flight, which
-is the one way to do real damage with these scripts by hand.</p>
+<p><code>run_sweep.py --events-only</code> simulates the <strong>event path</strong> by dropping the
+comment replay and reconcile's two cron-only fixes. Running it <em>without</em> that
+flag outside the nightly window will requeue whatever the builder currently has
+in flight, which is the one way to do real damage with these scripts by hand.</p>
+<p>The rehearsal snapshot's <code>recent_comments</code> are raw <code>/issues/comments</code> items,
+exactly as GitHub returns them — the replay hands them to the same
+<code>fetch_comment_event.build</code> the live path uses, so it must be given the same
+shape rather than a second one. <code>PIPELINE_OWNER</code> names the account whose
+comments count; without it the replay does nothing at all, because an empty
+owner would match an empty author.</p>
 <h3 id="applying-an-action">Applying an action<a class="headerlink" href="#applying-an-action" title="Link to this section">&para;</a></h3>
 <p><code>apply_actions.py</code> computes the resulting label set, the acknowledgement, and
 whether to watermark. Three rules worth knowing:</p>
