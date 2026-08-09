@@ -79,16 +79,15 @@ namespace Frogs.Unity.EditModeTests
 
             new BuildStampPreprocessor().OnPreprocessBuild(null);
 
-            Assert.Multiple(() =>
-            {
-                Assert.That(
-                    PlayerSettings.defaultInterfaceOrientation,
-                    Is.EqualTo(UIOrientation.Portrait));
-                Assert.That(PlayerSettings.allowedAutorotateToPortrait, Is.True);
-                Assert.That(PlayerSettings.allowedAutorotateToPortraitUpsideDown, Is.False);
-                Assert.That(PlayerSettings.allowedAutorotateToLandscapeLeft, Is.False);
-                Assert.That(PlayerSettings.allowedAutorotateToLandscapeRight, Is.False);
-            });
+            // Sequential rather than Assert.Multiple: the NUnit that ships
+            // inside the Unity Test Framework has no Assert.Multiple.
+            Assert.That(
+                PlayerSettings.defaultInterfaceOrientation,
+                Is.EqualTo(UIOrientation.Portrait));
+            Assert.That(PlayerSettings.allowedAutorotateToPortrait, Is.True);
+            Assert.That(PlayerSettings.allowedAutorotateToPortraitUpsideDown, Is.False);
+            Assert.That(PlayerSettings.allowedAutorotateToLandscapeLeft, Is.False);
+            Assert.That(PlayerSettings.allowedAutorotateToLandscapeRight, Is.False);
         }
 
         [Test]
