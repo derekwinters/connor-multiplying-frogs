@@ -57,15 +57,60 @@ That distribution is what the problem generator has to reproduce.
 
 ## What the photograph does not settle
 
-Tracked in
-[issue #170](https://github.com/derekwinters/connor-multiplying-frogs/issues/170):
+Two of these were confirmed by Derek in
+[issue #170](https://github.com/derekwinters/connor-multiplying-frogs/issues/170)
+after the photograph was taken. They are rules of the classroom game, recorded
+here because the board alone does not show them.
 
-- Whether frogs are truly independent — one lane each, never sharing or
-  interacting. Strongly implied by eight lanes and eight frogs.
-- What happens on a wrong answer while on the Start log.
-- Whether play continues after the first frog reaches the End log.
+### Frogs are independent
 
-The full card deck is also not photographed. The game generates problems rather
-than shipping the classroom deck, and the generator's constraints have to come
-from the real cards —
-[issue #171](https://github.com/derekwinters/connor-multiplying-frogs/issues/171).
+Every player keeps their own lane for the whole game. Frogs never share a lane,
+never pass one another, and never interact. Eight lanes, eight frogs, one each.
+
+A player's entire state is therefore one number — how far up their own lane they
+are. There is no board state beyond that: no collisions, no blocking, no ordering
+between frogs.
+
+### The Start log is a floor, not a special space
+
+A wrong answer moves you back one lily pad, exactly as the rules card says. The
+Start log is simply the bottom of the lane, so a wrong answer there leaves you
+where you are.
+
+| Outcome | Effect |
+| --- | --- |
+| Correct | Forward one lily pad |
+| Wrong, anywhere above the Start log | Back one lily pad |
+| Wrong, on the Start log | Stay |
+
+A clamp at the bottom rather than a special case. Worth stating precisely,
+because "move back one" written without a floor is an off-by-one waiting to
+happen.
+
+## Still unsettled
+
+- **What the classroom game does after the first frog finishes.** The card says
+  only "First one to the end wins!" and stops there. Whether Connor's class keeps
+  playing for second place is not recorded on the board or the card, and has not
+  been recalled — so it stays unknown. v1 does not wait on it; see below.
+- **The full card deck is not photographed.** The game generates problems rather
+  than shipping the classroom deck, and the generator's constraints have to be
+  derived from the real cards —
+  [issue #171](https://github.com/derekwinters/connor-multiplying-frogs/issues/171).
+
+## Where v1 fills a gap the board leaves open
+
+Recorded here so nobody later mistakes it for something the classroom game says.
+
+**Play continues after the first frog reaches the End log.** The first frog home
+wins; the others keep taking turns. Derek's provisional call — *"for now"* — made
+because the board does not settle it, not because the board says so.
+
+**A game can be ended deliberately.** Because play continues past the winner,
+a session needs a way to stop that isn't "everyone eventually finishes": a quit
+or end-game flow. This is purely ours — a cardboard game ends when you close the
+box, so there is nothing to be faithful to.
+
+Two things this leaves for whoever specifies it: whether the game also ends *on
+its own* once every frog is home, and who may trigger a quit when four players
+share one device. Neither is settled here.
