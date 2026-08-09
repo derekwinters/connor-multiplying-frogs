@@ -93,6 +93,15 @@ lanes-across** after seeing both drawn.
 | `Roll` button height | `RollButtonHeight` | 144 px |
 | `Roll` label size | `RollButtonLabelSize` | 56 px |
 | Positions in a lane | `LanePositionCount` | 9 |
+| Correct answers needed to win | `LaneWinningPosition` | 8 |
+
+`LanePositionCount` is 9 because a lane is the Start log, seven lily pads, and
+the End log, and **the End log is the winning space** — a frog has to land on
+it. Confirmed by Derek in
+[issue #185](https://github.com/derekwinters/connor-multiplying-frogs/issues/185);
+recorded in
+[the reference material](../reference/index.md#the-end-log-is-the-winning-space).
+That is what the `of 8` in every chip's pad count refers to.
 
 The lane:
 
@@ -169,11 +178,6 @@ decided against; keeping a mockup of a layout nobody is building is how a
 
 ## Open questions
 
-- **Nine positions or eight?** The mockups draw the End log as a space a frog
-  lands on, making a lane nine positions and a win eight correct answers.
-  Whether that is what the classroom game does is
-  [issue #185](https://github.com/derekwinters/connor-multiplying-frogs/issues/185),
-  and it is a rule, so Connor answers it.
 - **Do the unused lanes show?** The classroom board always has eight lanes,
   whoever is playing. The mockups draw only the lanes in play, because empty
   lanes on a screen this size cost the ones in play their height. Presentation,
