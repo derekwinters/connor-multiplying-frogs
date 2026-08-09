@@ -67,16 +67,32 @@ jobs:
       # Before anything expensive. A missing licence must fail the job loudly:
       # a required check that goes green because the suite never ran is worse
       # than no check at all.
+      #
+      # All three secrets, not just the licence. GameCI never passes
+      # UNITY_LICENSE into the Unity container — it parses the serial out of the
+      # .ulf and activates with `unity-editor -serial -username -password`, so a
+      # licence without the account credentials dies inside the container with
+      # "License activation strategy could not be determined". Catching that
+      # here costs a second; catching it in there costs the image pull first.
       - name: Require the Unity licence
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
-          if [ -z "$UNITY_LICENSE" ]; then
-            echo "::error::The UNITY_LICENSE secret is not set, so the EditMode suite" \
-                 "cannot run. This job fails rather than skipping — see issue #82."
+          missing=
+          for secret in UNITY_LICENSE UNITY_EMAIL UNITY_PASSWORD; do
+            if [ -z "${!secret}" ]; then
+              missing="$missing $secret"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::These secrets are not set —$missing — so the EditMode" \
+                 "suite cannot run. This job fails rather than skipping — see" \
+                 "issue #82."
             exit 1
           fi
-          echo "UNITY_LICENSE is present."
+          echo "The Unity licence secrets are all present."
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -100,6 +116,8 @@ jobs:
         uses: game-ci/unity-test-runner@0ff419b913a3630032cbe0de48a0099b5a9f0ed9 # v4.3.1
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: 6000.0.81f1
           testMode: EditMode
