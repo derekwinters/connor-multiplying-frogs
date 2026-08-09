@@ -1,15 +1,15 @@
 ---
-name: triage-issue
+name: dw-triage-issue
 description: Triage exactly one admitted issue — diagnose it, plan it, and hand it back to Derek for approval. Use when an issue carries ai-triage, when a triage run needs redoing, or when asked to work out what an issue actually involves.
 ---
 
-# triage-issue
+# dw-triage-issue
 
 ```bash
 export GITHUB_REPOSITORY=derekwinters/connor-multiplying-frogs
 
 # Triage one issue. That is the whole interface.
-#   triage-issue 47
+#   dw-triage-issue 47
 ```
 
 One issue in, one hand-back out. Runnable standalone on a single issue number —
@@ -217,7 +217,7 @@ run that crashed after commenting but before labelling. `triage_repair.py`
 decides what to do about it, deterministically:
 
 ```python
-# .claude/skills/triage-issue/triage_repair.py — a module, not a CLI
+# .claude/skills/dw-triage-issue/triage_repair.py — a module, not a CLI
 plan = plan_repair(labels, comments, intended_state="pending-approval", note=note)
 ```
 
@@ -260,7 +260,7 @@ the analysis the issue is actually waiting for.
 ## Running the tests
 
 ```bash
-python3 .github/scripts/run_python_tests.py triage-issue
+python3 .github/scripts/run_python_tests.py dw-triage-issue
 ```
 
 23 tests over `triage_repair.py`: what the recognizer matches and — more

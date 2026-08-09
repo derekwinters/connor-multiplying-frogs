@@ -1,20 +1,44 @@
 {
   "$comment": [
-    "PROVENANCE ONLY. This file records where each skill was originally ported",
-    "from. Nothing reads it at runtime, and no workflow syncs against it.",
+    "PROVENANCE ONLY. This file records where each skill came from. Nothing reads",
+    "it at runtime, and no workflow syncs against it.",
     "",
     "The skills in .claude/skills/ are the source of truth in this repository.",
-    "They were hand-ported and then diverged to fit this game, so a sync from",
-    "upstream would revert local work \u2014 which is exactly why the upstream",
-    "project disabled its own sync. See docs/engineering/issue-pipeline.md."
+    "Two kinds live here, and the difference matters:",
+    "",
+    "  - PORTED skills were hand-copied from derekwinters/lucas-doggiehood and",
+    "    then diverged to fit this game. A sync would revert local work, which is",
+    "    exactly why the upstream project disabled its own sync.",
+    "",
+    "  - VENDORED skills are verbatim third-party copies, pinned to an upstream",
+    "    commit. They have no local divergence yet, so re-vendoring them is a",
+    "    clean diff — but it is still a manual, reviewed act, not a schedule.",
+    "",
+    "See docs/engineering/issue-pipeline.md."
   ],
   "sync": "disabled",
-  "sync_reason": "Skills here are local and hand-maintained. A scheduled sync would overwrite local divergence with an upstream copy that does not know about this game.",
+  "sync_reason": "Skills here are local and hand-maintained. A scheduled sync would overwrite local divergence with an upstream copy that does not know about this game, and would pull unreviewed third-party instructions into the agent's context on a timer.",
   "upstream": {
     "repository": "derekwinters/lucas-doggiehood",
     "role": "historical source, not a live dependency",
     "read_at_runtime": false
   },
+  "vendored_upstreams": [
+    {
+      "repository": "mattpocock/skills",
+      "url": "https://github.com/mattpocock/skills",
+      "license": "MIT",
+      "license_file": ".claude/skills/LICENSE.mattpocock-skills",
+      "pinned_commit": "84fdeffd12f2ee307994d1eb6feb48173b6e0502",
+      "pinned_at": "2026-08-06T20:49:51+01:00",
+      "plugin_version": "1.2.3",
+      "vendored_on": "2026-08-09",
+      "role": "vendored verbatim, not a live dependency",
+      "read_at_runtime": false,
+      "selection": "The 25 skills listed in the upstream .claude-plugin/plugin.json, flattened out of its skills/<category>/ tree. The misc/ and in-progress/ trees are deliberately excluded upstream from that plugin manifest, and are excluded here too.",
+      "notes": "Vendored rather than installed as a plugin because Claude Code plugins are per-user machine state, and this repo needs the skills to be present, reviewable, and pinned for anyone who clones it."
+    }
+  ],
   "skills": [
     {
       "name": "release-flow",
@@ -24,11 +48,11 @@
       "notes": "Rewritten around this repo's release-please config paths and the pull-request-title-pattern set in .github/release-please/config.json."
     },
     {
-      "name": "run-tests",
+      "name": "dw-run-tests",
       "ported_from": "derekwinters/lucas-doggiehood",
       "ported_at": "v0.0.1",
       "diverged": true,
-      "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation."
+      "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation. Prefixed dw- because a bare 'run-tests' is a near-miss for the built-in 'run' skill."
     },
     {
       "name": "ci-watch",
@@ -71,6 +95,163 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Vocabulary and refusal reason codes follow issues #53-#61; the bad-actor gate and idempotency are enforced inside the parser."
+    },
+    {
+      "name": "ask-matt",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/ask-matt",
+      "diverged": false
+    },
+    {
+      "name": "code-review",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/code-review",
+      "diverged": false,
+      "notes": "Name collides with the built-in code-review skill in some harnesses. Kept verbatim so the /code-review references inside the other vendored skills still resolve."
+    },
+    {
+      "name": "codebase-design",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/codebase-design",
+      "diverged": false
+    },
+    {
+      "name": "diagnosing-bugs",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/diagnosing-bugs",
+      "diverged": false
+    },
+    {
+      "name": "domain-modeling",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/domain-modeling",
+      "diverged": false
+    },
+    {
+      "name": "grill-me",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/grill-me",
+      "diverged": false
+    },
+    {
+      "name": "grill-with-docs",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/grill-with-docs",
+      "diverged": false
+    },
+    {
+      "name": "grilling",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/grilling",
+      "diverged": false,
+      "notes": "Derek also has a shorter personal skill of the same name; which one wins is harness precedence, not something this repo controls."
+    },
+    {
+      "name": "handoff",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/handoff",
+      "diverged": false
+    },
+    {
+      "name": "implement",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/implement",
+      "diverged": false
+    },
+    {
+      "name": "improve-codebase-architecture",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/improve-codebase-architecture",
+      "diverged": false
+    },
+    {
+      "name": "prototype",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/prototype",
+      "diverged": false
+    },
+    {
+      "name": "research",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/research",
+      "diverged": false
+    },
+    {
+      "name": "resolving-merge-conflicts",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/resolving-merge-conflicts",
+      "diverged": false,
+      "notes": "Describes merge-conflict resolution generically. This repo rebases rather than merges (CLAUDE.md rule 7), so the rebase path is the one that applies."
+    },
+    {
+      "name": "setup-matt-pocock-skills",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/setup-matt-pocock-skills",
+      "diverged": false,
+      "notes": "Generates the docs/agents/ files the other vendored skills look for. Not run yet — it writes repo docs and picks an issue tracker, which is Derek's call."
+    },
+    {
+      "name": "tdd",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/tdd",
+      "diverged": false,
+      "notes": "General TDD reference. This repo's binding rule is still CLAUDE.md rule 1 and docs/engineering/testing.md."
+    },
+    {
+      "name": "teach",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/teach",
+      "diverged": false
+    },
+    {
+      "name": "to-questionnaire",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/to-questionnaire",
+      "diverged": false
+    },
+    {
+      "name": "to-spec",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/to-spec",
+      "diverged": false
+    },
+    {
+      "name": "to-tickets",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/to-tickets",
+      "diverged": false
+    },
+    {
+      "name": "triage",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/triage",
+      "diverged": false,
+      "notes": "Distinct from this repo's dw-triage-issue skill, which is the one the nightly pipeline uses. Do not substitute one for the other."
+    },
+    {
+      "name": "wait-what",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/wait-what",
+      "diverged": false
+    },
+    {
+      "name": "wayfinder",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/wayfinder",
+      "diverged": false
+    },
+    {
+      "name": "wizard",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/engineering/wizard",
+      "diverged": false,
+      "notes": "Good fit for the Direct Involvement Needed milestone — it generates a bash walkthrough for steps only Derek can do."
+    },
+    {
+      "name": "writing-for-agents",
+      "vendored_from": "mattpocock/skills",
+      "source_path": "skills/productivity/writing-for-agents",
+      "diverged": false
     }
   ]
 }

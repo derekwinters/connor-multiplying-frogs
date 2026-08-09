@@ -107,6 +107,43 @@ Editor session, or a taste call that is Connor's to make.
 It never closes. Issues leave it by a human doing them, or by being re-scoped
 into a version milestone once the human-only part is unblocked.
 
+## Skill names
+
+**A skill takes the `dw-` prefix only when its name would otherwise be confused
+with a skill from outside this repo.** Most of our skills need no prefix:
+`pipeline-gatekeeper`, `release-flow`, `scaffold-core` and the rest are named
+unambiguously already, and a prefix on a name nobody could mistake is noise in
+every directory listing.
+
+Two skills carry it today, and both earned it by colliding:
+
+| Skill | Would be confused with |
+| --- | --- |
+| `dw-triage-issue` | `triage`, vendored from `mattpocock/skills` |
+| `dw-run-tests` | `run`, a built-in skill |
+
+Neither is an exact name clash — both are the *near* miss, which is the one that
+actually bites. Asked to "run the tests" or to "triage this issue", an agent
+picking by name alone can reach for the wrong one, and the wrong one does not
+know about our labels, our milestones, or our Core suite.
+
+**Before naming a new skill, check for collisions** — against the vendored names
+in `.claude/.skills-manifest.json` and against the skills the harness already
+offers. An exact match or a shared-prefix near-miss earns a `dw-`; anything else
+does not. Vendored skills never take the prefix: renaming a third-party copy
+breaks the cross-references inside its siblings and makes every re-vendor a
+manual fixup.
+
+Renaming an existing skill is never just a `git mv` — the name is load-bearing in
+three places:
+
+- **Workflow paths.** `dashboard.yml`, `gatekeeper-comment.yml` and
+  `gatekeeper-sweep.yml` invoke scripts by path, and `pipeline-tests.yml`
+  path-gates on `.claude/skills/pipeline-*/**`. A missed glob is a workflow
+  that silently stops running rather than one that fails.
+- **The frontmatter `name:`**, which must match the directory name.
+- **The manifest**, where the record's `name` is the directory.
+
 ## Labels
 
 Labels are the pipeline's state machine. The list below is mirrored by

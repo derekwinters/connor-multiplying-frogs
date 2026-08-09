@@ -1,9 +1,9 @@
 ---
-name: run-tests
+name: dw-run-tests
 description: Run the Multiplying Frogs test suites and report the result. Use during a red-green loop, before committing, before opening a PR, or whenever asked whether the tests pass.
 ---
 
-# run-tests
+# dw-run-tests
 
 Run the suites the same way every time, and report the result the same way
 every time. Improvising a command per session is how "the tests pass" comes to

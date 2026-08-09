@@ -6,9 +6,9 @@ part of the repo, versioned with it, and reviewable like any other code.
 This section fills in as the tooling lands during `v0.0.1`:
 
 - The development agent under `.claude/agents/`, and the skills it can reach
-  for — `run-tests`, `ci-watch`, `scaffold-core`, `release-flow`, and the rest.
+  for — `dw-run-tests`, `ci-watch`, `scaffold-core`, `release-flow`, and the rest.
 - The issue-pipeline skills — `pipeline-gatekeeper`, `pipeline-analysis`,
-  `triage-issue`, `pipeline-dev`, `pipeline-reconcile`, and
+  `dw-triage-issue`, `pipeline-dev`, `pipeline-reconcile`, and
   `pipeline-dashboard`.
 - Where each skill came from, and the rule that this repo's copies are
   **isolated** — they are not synced from another repo, so a fix made here
