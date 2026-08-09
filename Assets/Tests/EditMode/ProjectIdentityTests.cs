@@ -69,13 +69,17 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void ABuildStaysInPortrait()
+        public void ABuildStaysInLandscape()
         {
-            // Not just the default orientation: the three rotations we do not
-            // want have to be off, or Android rotates anyway. This is the check
-            // that would have caught the first APK, which auto-rotated.
-            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
-            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            // Not just the default orientation: the rotations we do not want
+            // have to be off, or Android rotates anyway. This is the check that
+            // would have caught the first APK, which auto-rotated.
+            //
+            // Both landscape rotations are allowed, because a tablet gets
+            // picked up either way up and neither is upside down. Both portrait
+            // rotations are off until a portrait layout exists to rotate into.
+            PlayerSettings.allowedAutorotateToPortrait = true;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = true;
 
             new BuildStampPreprocessor().OnPreprocessBuild(null);
 
@@ -83,11 +87,11 @@ namespace Frogs.Unity.EditModeTests
             // inside the Unity Test Framework has no Assert.Multiple.
             Assert.That(
                 PlayerSettings.defaultInterfaceOrientation,
-                Is.EqualTo(UIOrientation.Portrait));
-            Assert.That(PlayerSettings.allowedAutorotateToPortrait, Is.True);
+                Is.EqualTo(UIOrientation.LandscapeLeft));
+            Assert.That(PlayerSettings.allowedAutorotateToLandscapeLeft, Is.True);
+            Assert.That(PlayerSettings.allowedAutorotateToLandscapeRight, Is.True);
+            Assert.That(PlayerSettings.allowedAutorotateToPortrait, Is.False);
             Assert.That(PlayerSettings.allowedAutorotateToPortraitUpsideDown, Is.False);
-            Assert.That(PlayerSettings.allowedAutorotateToLandscapeLeft, Is.False);
-            Assert.That(PlayerSettings.allowedAutorotateToLandscapeRight, Is.False);
         }
 
         [Test]
