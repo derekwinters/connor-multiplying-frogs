@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Frogs.Unity;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Frogs.EditorTools
 {
@@ -68,36 +68,66 @@ namespace Frogs.EditorTools
 
             Directory.CreateDirectory(Path.GetDirectoryName(AssetPath));
 
-            // Additive, so an editor session with work open keeps it. A single
-            // NewScene would close whatever is loaded.
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            // Anything unsaved is offered to whoever is at the keyboard first,
+            // because the new scene replaces what is open. In batch mode there
+            // is nothing open and this returns immediately.
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                throw new InvalidOperationException(
+                    "The open scene has unsaved changes and they were not saved, so the "
+                    + "Hello World scene was not created.");
+            }
+
+            // Single, so the new scene is the active one and objects created
+            // below land in it. Additive would need each object moving across,
+            // which is more moving parts for no gain.
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+            // A camera, so the app renders a screen rather than nothing, and the
+            // probe, which is the only thing in the scene that does anything.
+            // Everything about how the screen *looks* is deliberately absent —
+            // see the note in docs/engineering/tech-stack.md.
+            new GameObject(CameraName, typeof(Camera));
+            new GameObject(ProbeName, typeof(HelloWorldProbe));
+
+            if (!EditorSceneManager.SaveScene(scene, AssetPath))
+            {
+                throw new InvalidOperationException(
+                    $"Unity would not save the scene to {AssetPath}.");
+            }
+
+            Debug.Log($"Created {AssetPath}. Commit it, and its .meta file, together.");
+        }
+
+        /// <summary>
+        /// TEMPORARY — remove before merge. The CI entry point, which reports
+        /// what happened into a file the workflow can print, because a headless
+        /// Unity's own log is thousands of lines and only its tail is readable
+        /// from outside. See PR #179.
+        /// </summary>
+        public static void CreateForCi()
+        {
+            var report = new StringBuilder();
+
+            report.AppendLine($"working directory: {Directory.GetCurrentDirectory()}");
+            report.AppendLine($"batch mode: {Application.isBatchMode}");
+            report.AppendLine($"scene present before: {File.Exists(AssetPath)}");
 
             try
             {
-                // A camera, so the app renders a screen rather than nothing, and
-                // the probe, which is the only thing in the scene that does
-                // anything. Everything about how the screen *looks* is
-                // deliberately absent — see the note in
-                // docs/engineering/tech-stack.md.
-                // New GameObjects land in the active scene, which the additive
-                // one deliberately is not, so each is moved across.
-                SceneManager.MoveGameObjectToScene(
-                    new GameObject(CameraName, typeof(Camera)), scene);
-                SceneManager.MoveGameObjectToScene(
-                    new GameObject(ProbeName, typeof(HelloWorldProbe)), scene);
-
-                if (!EditorSceneManager.SaveScene(scene, AssetPath))
-                {
-                    throw new InvalidOperationException(
-                        $"Unity would not save the scene to {AssetPath}.");
-                }
-
-                Debug.Log($"Created {AssetPath}. Commit it, and its .meta file, together.");
+                EnsureReadyToBuild();
+                report.AppendLine("EnsureReadyToBuild returned without throwing.");
             }
-            finally
+            catch (Exception error)
             {
-                EditorSceneManager.CloseScene(scene, removeScene: true);
+                report.AppendLine("EnsureReadyToBuild threw:");
+                report.AppendLine(error.ToString());
             }
+
+            report.AppendLine($"scene present after: {File.Exists(AssetPath)}");
+            report.AppendLine($"scenes in build settings: {EditorBuildSettings.scenes.Length}");
+
+            File.WriteAllText("scene-bootstrap.log", report.ToString());
         }
 
         static void EnsureRegisteredInBuildSettings()

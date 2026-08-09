@@ -104,7 +104,7 @@ jobs:
         with:
           unityVersion: 6000.0.81f1
           targetPlatform: Android
-          buildMethod: Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+          buildMethod: Frogs.EditorTools.HelloWorldScene.CreateForCi
           allowDirtyBuild: true
 
       # The version name, versionCode, and .debug suffix are applied by
@@ -157,6 +157,7 @@ jobs:
         run: |
           ls -la Assets/Scenes ProjectSettings || true
           for file in \
+            scene-bootstrap.log \
             Assets/Scenes/HelloWorld.unity \
             Assets/Scenes/HelloWorld.unity.meta \
             Assets/Scripts/Unity/HelloWorldProbe.cs.meta \
