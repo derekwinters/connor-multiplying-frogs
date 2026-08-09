@@ -412,22 +412,45 @@ Two jobs, deliberately separate because they cost wildly different amounts:
 
 See [Testing](testing.md) for what belongs in each.
 
-The Core job also runs `check_core_isolation.py` first. It costs nothing and it
-fails for a reason the test output would never explain: game logic that has
-grown a dependency on the engine.
+The Core job also runs two static checks first. Both cost nothing and both fail
+for reasons the test output would never explain:
+
+- `check_core_isolation.py` — game logic that has grown a dependency on the
+  engine.
+- `check_assembly_references.py` — a `using` of a project namespace from an
+  assembly that cannot see it. Unity gives the same verdict, but only inside an
+  editor, minutes into a build, after a licence has been sorted out. See
+  [the Core/Unity split](tech-stack.md#the-check-that-catches-it).
 
 #### A missing licence fails, it does not skip
 
 The EditMode job's **first** step, before any checkout or container pull,
-asserts that `UNITY_LICENSE` is set — and fails the job if it isn't.
+asserts that `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` are all set —
+and fails the job if any is missing.
 
 Skipping would be the friendlier behaviour and the wrong one. A required check
 that goes green because the suite never ran is worse than no check at all: it
 reports "tested" on a PR nothing tested, and nobody looks twice at a green tick.
 
-Until the secret exists (#82), this job is red on every PR that touches the
+Until the secrets exist (#82), this job is red on every PR that touches the
 Unity project. That is the intended behaviour, and it is visible rather than
 quiet.
+
+#### Three secrets, not one
+
+A Unity Personal licence needs **all three** of `UNITY_LICENSE`, `UNITY_EMAIL`,
+and `UNITY_PASSWORD`, in every workflow that starts a Unity container.
+
+The name of the first one is misleading. GameCI never passes `UNITY_LICENSE`
+into the container at all — it parses the serial out of the `.ulf` on the runner
+and activates inside the container with
+`unity-editor -serial … -username … -password …`. A licence on its own gets as
+far as producing a valid serial and then dies with *"License activation strategy
+could not be determined"*, several minutes and one image pull later.
+
+So the licence gates check all three up front. The secrets are the raw contents
+of `Unity_lic.ulf` — the XML, verbatim, not base64 and not flattened onto one
+line — plus the Unity ID that licence belongs to.
 
 #### Path-gating, and what it means for branch protection
 

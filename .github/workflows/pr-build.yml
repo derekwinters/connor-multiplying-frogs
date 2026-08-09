@@ -36,15 +36,27 @@ jobs:
       # is a lie. This one is a convenience: no APK is an absent convenience,
       # not a false claim, and failing every PR over it would train everyone to
       # ignore a red check.
+      #
+      # All three secrets, not just the licence: GameCI activates with
+      # `unity-editor -serial -username -password`, never with the .ulf itself.
+      # See the same gate in ci-tests.yml.
       - name: Check for the Unity licence
         id: licence
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
-          if [ -z "$UNITY_LICENSE" ]; then
-            echo "::warning::No UNITY_LICENSE secret, so no debug APK for this PR." \
-                 "See issue #82. Skipping rather than failing — this build is a" \
-                 "convenience, not a correctness gate."
+          missing=
+          for secret in UNITY_LICENSE UNITY_EMAIL UNITY_PASSWORD; do
+            if [ -z "${!secret}" ]; then
+              missing="$missing $secret"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning::These secrets are not set —$missing — so no debug APK" \
+                 "for this PR. See issue #82. Skipping rather than failing — this" \
+                 "build is a convenience, not a correctness gate."
             echo "present=false" >> "$GITHUB_OUTPUT"
           else
             echo "present=true" >> "$GITHUB_OUTPUT"
@@ -86,6 +98,8 @@ jobs:
         uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
           FROGS_BUILD_SHA: ${{ steps.stamp.outputs.build_sha }}
           FROGS_APPLICATION_ID_SUFFIX: .debug
