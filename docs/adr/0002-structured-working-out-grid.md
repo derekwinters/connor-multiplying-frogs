@@ -60,10 +60,17 @@ player in whatever state the last one left it.
 - The grid must be **sized to the card**, not to the largest possible problem, or
   `68 × 5` looks like homework. Which cells exist for a given problem is game
   logic and belongs in `Core`; only drawing them belongs in the Unity shell.
-- `331 × 41` in portrait — two partial-product rows, a sum row, and carry boxes
-  above them — is the tightest layout in the game and the project's biggest
-  unknown. It gets a `type:wireframe` issue and is drawn before any UI code
-  exists.
+- `331 × 41` — two partial-product rows, a sum row, and carry boxes above them —
+  is the tightest layout in the game. It gets a `type:wireframe` issue and is
+  drawn before any UI code exists.
+
+    This was written when the target was a portrait phone, and it called
+    `331 × 41` the project's biggest layout unknown. The target then
+    [became a landscape tablet](../engineering/tech-stack.md#target-platform),
+    and the unknown largely went away with it: side by side, the grid takes the
+    left of the screen and the keypad the right, and the worst case fits with
+    room to spare. See
+    [the working-out grid wireframe](../specs/ui/working-out-grid.md).
 - Revealing the *worked solution* on a wrong answer is ruled out by the same
   reasoning: showing one method's partial products would quietly make that method
   canonical. The correct answer is revealed; the working is not.

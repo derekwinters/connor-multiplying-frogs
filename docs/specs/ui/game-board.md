@@ -55,12 +55,14 @@ rather than by the space available. A shorter screen loses height from `pond`
 and nothing else; the header and the controls do not shrink, because a smaller
 `Roll` button is the wrong thing to trade away.
 
-## The two variants
+## Why the lanes run across
 
-There is a real choice here and no way to argue it in words, so there are two
-mockups.
+The classroom board's lanes run bottom to top. This one's run left to right, and
+that is a deliberate rotation rather than an oversight.
 
-| | **A — lanes across** | **B — lanes up** |
+Both were drawn and compared:
+
+| | **Lanes across** (built) | **Lanes up** (rejected) |
 | --- | --- | --- |
 | Lane runs | Left to right | Bottom to top |
 | Lily pad diameter | **112 px** | **64 px** |
@@ -69,19 +71,16 @@ mockups.
 | Reads as progress | Yes — left to right, like a race | Less so on a wide screen |
 | Space used | Fills a 16:10 screen | Four tall columns with wide margins |
 
-**A is the proposal.** The reason is the pad size in that table: turning a
-portrait board sideways onto a landscape screen buys a lily pad nearly twice as
-wide, and the lily pad is the thing a child looks at to see how they are doing.
-B keeps the classroom board's shape, and the cost of that faithfulness is
-paid in the size of every pad on screen.
+The deciding number is the pad size. Nine positions have to fit along the lane;
+laid out across a 1920-wide screen that gives a 112 px lily pad, and stood up
+against a 1200-tall one it gives 64 px. The lily pad is the thing a child looks
+at to see how they are doing, and standing the board up costs nearly half of it.
 
-Under [ADR-0001](../../adr/0001-rules-sacred-presentation-ours.md) this is
-presentation, so it is ours to choose — but it is exactly the kind of choice
-Connor should be shown two pictures of.
+Under [ADR-0001](../../adr/0001-rules-sacred-presentation-ours.md) the board's
+orientation is presentation, not a rule, so it is ours to change. **Derek chose
+lanes-across** after seeing both drawn.
 
 ## Named constants
-
-Shared by both variants:
 
 | Element | Constant | Value |
 | --- | --- | --- |
@@ -95,7 +94,7 @@ Shared by both variants:
 | `Roll` label size | `RollButtonLabelSize` | 56 px |
 | Positions in a lane | `LanePositionCount` | 9 |
 
-Variant A — lanes across:
+The lane:
 
 | Element | Constant | Value |
 | --- | --- | --- |
@@ -112,18 +111,6 @@ That arithmetic is exact and worth keeping exact: two logs at 176, seven pads at
 112 and eight gaps at 48 is 1520 px of track; plus a 256 px chip gutter, a 48 px
 gap and two 48 px margins, that is 1920 px on the nose. If a constant here
 changes, one of the others has to move with it.
-
-Variant B — lanes up:
-
-| Element | Constant | Value |
-| --- | --- | --- |
-| Lane column width | `LaneColumnWidth` | 432 px |
-| Gap between columns | `LaneColumnGap` | 32 px |
-| Lily pad diameter | `LilyPadDiameterUp` | 64 px |
-| Frog piece diameter | `FrogPieceDiameterUp` | 52 px |
-| Log height | `LogHeightUp` | 88 px |
-| Gap between positions | `LanePositionGapUp` | 20 px |
-| Gap between chip and track | `LaneChipGapUp` | 16 px |
 
 ## Elements
 
@@ -171,12 +158,14 @@ Variant B — lanes up:
 
 ## Mockup
 
-- **A — lanes across:** [`mockups/game-board-lanes-across.html`](mockups/game-board-lanes-across.html)
-- **B — lanes up:** [`mockups/game-board-lanes-up.html`](mockups/game-board-lanes-up.html)
+[`mockups/game-board.html`](mockups/game-board.html)
 
-Both are drawn with the same game state — four frogs, one home, one on the Start
-log, one mid-lane, Green to roll — so the only difference between the two
-pictures is the thing being decided.
+Drawn in the state that exercises every case at once: four frogs, one home on
+the End log, one still on its Start log, two mid-lane, Green to roll.
+
+The rejected lanes-up variant is not committed. It was drawn, compared, and
+decided against; keeping a mockup of a layout nobody is building is how a
+`mockups/` folder stops being trustworthy.
 
 ## Open questions
 

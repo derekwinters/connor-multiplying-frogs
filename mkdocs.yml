@@ -95,6 +95,15 @@ nav:
       - UI:
           - specs/ui/index.md
           - Shared components: specs/ui/shared-components.md
+          - Title screen: specs/ui/title-screen.md
+          - Game setup: specs/ui/game-setup.md
+          - Game board: specs/ui/game-board.md
+          - Roll and card: specs/ui/roll-and-card.md
+          - Working-out grid: specs/ui/working-out-grid.md
+          - Answer result: specs/ui/answer-result.md
+          - Settings dialog: specs/ui/settings-dialog.md
+          - End-game confirm: specs/ui/end-game-confirm.md
+          - Game over: specs/ui/game-over.md
           - Mockups: specs/ui/mockups/index.md
   - Decisions:
       - adr/index.md
