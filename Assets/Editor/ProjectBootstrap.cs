@@ -33,12 +33,34 @@ namespace Frogs.EditorTools
         [MenuItem("Frogs/Apply project settings")]
         public static void Apply()
         {
-            ApplyIdentity();
+            ApplyToBuild();
             ApplyAndroidTarget();
-            ApplyOrientation();
 
             AssetDatabase.SaveAssets();
             Debug.Log("Project settings applied. Commit the changes under ProjectSettings/.");
+        }
+
+        /// <summary>
+        /// The settings a build must have, applied by the build itself.
+        ///
+        /// <c>ProjectSettings/ProjectSettings.asset</c> is not in the repository,
+        /// so every CI build starts from whatever Unity generates in the
+        /// container — which named the first APK <c>workspace</c>, after the
+        /// working directory, and let it rotate. Relying on someone having run
+        /// the menu item above is what produced that.
+        ///
+        /// So <see cref="BuildStampPreprocessor"/> calls this on every build,
+        /// for the same reason it stamps the version there: a step that can be
+        /// forgotten will be.
+        ///
+        /// Architecture and scripting backend are deliberately NOT here — those
+        /// are the device/emulator profile's, and it runs after this.
+        /// </summary>
+        public static void ApplyToBuild()
+        {
+            ApplyIdentity();
+            ApplyMinimumApiLevel();
+            ApplyOrientation();
         }
 
         static void ApplyIdentity()
@@ -53,9 +75,13 @@ namespace Frogs.EditorTools
             // version — see docs/engineering/versioning.md.
         }
 
-        static void ApplyAndroidTarget()
+        static void ApplyMinimumApiLevel()
         {
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+        }
+
+        static void ApplyAndroidTarget()
+        {
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
 

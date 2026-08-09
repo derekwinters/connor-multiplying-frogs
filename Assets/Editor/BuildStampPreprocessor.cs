@@ -39,6 +39,12 @@ namespace Frogs.EditorTools
 
         public void OnPreprocessBuild(BuildReport report)
         {
+            // First, and before the profile below: the project's own identity —
+            // name, company, application id, minimum API, portrait-only. CI
+            // builds from a container that has no ProjectSettings.asset, so
+            // without this the app is called after the working directory.
+            ProjectBootstrap.ApplyToBuild();
+
             // Which kind of build this is, decided by which variable CI set.
             // An rc number wins over a sha: a release candidate is identified
             // by its position in the queue, because "is this newer than the one

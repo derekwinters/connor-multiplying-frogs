@@ -79,6 +79,32 @@ emulator-targeted asset is attached alongside it so the release can be tried on
 a desktop without rebuilding. A bug that reproduces only under the emulator is a
 bug in the profile until proven otherwise.
 
+### The settings above are applied by the build, not stored in the repo
+
+`ProjectSettings/ProjectSettings.asset` is **not committed**. Unity generates a
+default one in the CI container on every build, which means every value in the
+tables above — product name, application id, minimum API level, orientation —
+starts as whatever Unity happens to default to.
+
+That is not theoretical. The first APK ever installed on a phone was called
+**`workspace`**, after the container's working directory, and it rotated freely
+in spite of this page promising portrait.
+
+So `ProjectBootstrap.ApplyToBuild()` applies them, and
+`BuildStampPreprocessor` calls it on **every** build — the same mechanism, and
+the same reasoning, as the version stamp: a step that can be forgotten will be.
+The order inside that pre-processor matters and is deliberate:
+
+1. `ProjectBootstrap.ApplyToBuild()` — identity, minimum API, portrait-only.
+2. The `.debug` application-id suffix, so it appends to the real id rather than
+   to `com.DefaultCompany.workspace`.
+3. The device/emulator profile, so it can still override architecture and
+   scripting backend. Those two are deliberately *not* in `ApplyToBuild`.
+
+Committing a reviewed `ProjectSettings.asset` is still worth doing — it would
+make the settings a diffable source file rather than something reconstructed
+each build — but it needs an editor session to generate honestly.
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
