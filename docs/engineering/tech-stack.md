@@ -52,21 +52,41 @@ guessed at now.
 
 ## Target platform
 
-**Android phones.** That is the platform, singular. Connor plays on a phone;
-that is who the game is for.
+**Android tablets, held landscape.** Phones still run it — same OS, same
+architecture, same APK — but the tablet is the device the game is designed
+around, because that is what kids play on.
 
 | | |
 | --- | --- |
-| Primary target | Android, ARM64 (`arm64-v8a`) |
+| Primary target | Android tablets, ARM64 (`arm64-v8a`) |
+| Also runs on | Android phones |
 | Scripting backend | IL2CPP for device builds |
 | Minimum API level | 24 (Android 7.0) |
-| Orientation | Portrait |
+| Orientation | Landscape only (both ways up) |
+| Reference resolution | 1920 × 1200 (16:10) |
 | Output | `.apk` for direct install; `.aab` only if the game is ever published |
+
+This page previously said *"Android phones. That is the platform, singular"*
+and specified portrait, on the reasoning that the game is played one-handed on
+a phone. **Derek changed it**: the game is primarily for kids' tablets, and a
+tablet is held in landscape. The old rule's reasoning did not survive the
+change of device, so both the device and the orientation moved together.
+
+Portrait is not ruled out forever — but supporting it means designing a second
+layout for every screen, which is the same argument the portrait-only rule used
+to make in reverse. It stays off until a wireframe specifies one.
+
+**1920 × 1200 is the resolution every layout is designed at.** It is 16:10,
+which is the common kids'-tablet shape, and it is the viewport every UI mockup
+is drawn at — see [the UI design process](ui-design-process.md). Devices that
+are not exactly this still run the game; the number exists so that layouts are
+designed against one agreed canvas instead of each being guessed at separately.
 
 ### Two build profiles
 
-**Device build** — ARM64, IL2CPP, what actually gets installed on a phone. This
-is what the release build produces, and what an RC build has to prove works.
+**Device build** — ARM64, IL2CPP, what actually gets installed on a tablet or a
+phone. This is what the release build produces, and what an RC build has to
+prove works.
 
 **Emulator build** — x86_64, Mono. IL2CPP cross-compiling to x86_64 is slow and
 buys nothing for a smoke test, so the emulator profile trades fidelity for a
@@ -78,6 +98,32 @@ CI builds both: the device profile is what the release ships, and an
 emulator-targeted asset is attached alongside it so the release can be tried on
 a desktop without rebuilding. A bug that reproduces only under the emulator is a
 bug in the profile until proven otherwise.
+
+### The settings above are applied by the build, not stored in the repo
+
+`ProjectSettings/ProjectSettings.asset` is **not committed**. Unity generates a
+default one in the CI container on every build, which means every value in the
+tables above — product name, application id, minimum API level, orientation —
+starts as whatever Unity happens to default to.
+
+That is not theoretical. The first APK ever installed on a phone was called
+**`workspace`**, after the container's working directory, and it rotated freely
+in spite of this page promising a fixed orientation.
+
+So `ProjectBootstrap.ApplyToBuild()` applies them, and
+`BuildStampPreprocessor` calls it on **every** build — the same mechanism, and
+the same reasoning, as the version stamp: a step that can be forgotten will be.
+The order inside that pre-processor matters and is deliberate:
+
+1. `ProjectBootstrap.ApplyToBuild()` — identity, minimum API, landscape-only.
+2. The `.debug` application-id suffix, so it appends to the real id rather than
+   to `com.DefaultCompany.workspace`.
+3. The device/emulator profile, so it can still override architecture and
+   scripting backend. Those two are deliberately *not* in `ApplyToBuild`.
+
+Committing a reviewed `ProjectSettings.asset` is still worth doing — it would
+make the settings a diffable source file rather than something reconstructed
+each build — but it needs an editor session to generate honestly.
 
 ### What is explicitly not a target
 

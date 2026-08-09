@@ -2,6 +2,11 @@
 
 **No UI gets built without an approved wireframe. Not even graybox.**
 
+**Every layout and every dialog.** Not just the big screens — a confirm box, a
+toast, an end-of-turn panel each get their own wireframe. A dialog is the
+easiest thing to slip in without one and, being small, the easiest to get
+wrong in a way nobody notices until Connor is holding it.
+
 UI is the part of this game Connor has the strongest opinions about and the part
 that is most expensive to redo. A layout argued about as a picture costs an
 evening; the same argument had about working code costs the code.
@@ -55,10 +60,14 @@ Vertical stack, centred, over a dimmed copy of the playfield.
 A **1:1 HTML mockup**: a static page sized to the target device, laying out the
 real elements at the real proportions.
 
+- **1920 × 1200, landscape.** That is the target device — a kids' Android
+  tablet — and it is the viewport every mockup is drawn at. See
+  [target platform](tech-stack.md#target-platform).
 - 1:1 because "roughly this" is how a button ends up too small for an
-  eight-year-old's thumb. Sized to a real phone viewport, in the real units.
-- HTML because it opens in a browser on a phone. Connor can look at the actual
-  thing at the actual size, on the device he plays on, and say it's wrong.
+  eight-year-old's thumb. Real viewport, real units.
+- HTML because it opens in a browser on the tablet itself. Connor can look at
+  the actual thing at the actual size, on the device he plays on, and say it's
+  wrong.
 - Static. No behaviour, no framework, no build step. It is a picture that
   happens to be made of divs.
 

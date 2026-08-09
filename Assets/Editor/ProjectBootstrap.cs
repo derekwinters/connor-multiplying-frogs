@@ -33,12 +33,34 @@ namespace Frogs.EditorTools
         [MenuItem("Frogs/Apply project settings")]
         public static void Apply()
         {
-            ApplyIdentity();
+            ApplyToBuild();
             ApplyAndroidTarget();
-            ApplyOrientation();
 
             AssetDatabase.SaveAssets();
             Debug.Log("Project settings applied. Commit the changes under ProjectSettings/.");
+        }
+
+        /// <summary>
+        /// The settings a build must have, applied by the build itself.
+        ///
+        /// <c>ProjectSettings/ProjectSettings.asset</c> is not in the repository,
+        /// so every CI build starts from whatever Unity generates in the
+        /// container — which named the first APK <c>workspace</c>, after the
+        /// working directory, and let it rotate. Relying on someone having run
+        /// the menu item above is what produced that.
+        ///
+        /// So <see cref="BuildStampPreprocessor"/> calls this on every build,
+        /// for the same reason it stamps the version there: a step that can be
+        /// forgotten will be.
+        ///
+        /// Architecture and scripting backend are deliberately NOT here — those
+        /// are the device/emulator profile's, and it runs after this.
+        /// </summary>
+        public static void ApplyToBuild()
+        {
+            ApplyIdentity();
+            ApplyMinimumApiLevel();
+            ApplyOrientation();
         }
 
         static void ApplyIdentity()
@@ -53,9 +75,13 @@ namespace Frogs.EditorTools
             // version — see docs/engineering/versioning.md.
         }
 
-        static void ApplyAndroidTarget()
+        static void ApplyMinimumApiLevel()
         {
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+        }
+
+        static void ApplyAndroidTarget()
+        {
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
 
@@ -67,14 +93,21 @@ namespace Frogs.EditorTools
 
         static void ApplyOrientation()
         {
-            // Portrait only. The game is played one-handed on a phone; letting
-            // it rotate would mean specifying a landscape layout for every
-            // screen, which is a second design nobody asked for.
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-            PlayerSettings.allowedAutorotateToPortrait = true;
+            // Landscape only. The game is built for kids' tablets, which are
+            // held landscape — Derek's call, overriding the portrait-only rule
+            // this file used to carry. That rule's reason was one-handed play
+            // on a phone, which is not the device any more.
+            //
+            // Both landscape rotations, because a tablet gets picked up either
+            // way up and neither is upside down. Neither portrait rotation,
+            // because rotating into portrait needs a portrait layout and no
+            // wireframe specifies one — the same argument the old comment made,
+            // pointed the other way.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
-            PlayerSettings.allowedAutorotateToLandscapeLeft = false;
-            PlayerSettings.allowedAutorotateToLandscapeRight = false;
         }
     }
 }
