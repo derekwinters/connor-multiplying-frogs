@@ -104,7 +104,7 @@ Assets/                       ← everything Unity compiles
       Frogs.Unity.EditModeTests.asmdef
   Editor/                     ← editor-only tooling; never ships in a build
     Frogs.EditorTools.asmdef  ← references Frogs.Core and Frogs.Unity; Editor-only
-  Scenes/                     ← HelloWorld.unity, created by code (below)
+  Scenes/                     ← HelloWorld.unity, created by editor code (below)
   Art/  Audio/  Prefabs/
 Tests/
   Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
@@ -235,7 +235,7 @@ It is idempotent, and whatever it changes under `ProjectSettings/` gets
 committed. The version fields are deliberately absent from it — `/VERSION` owns
 those, injected at build time ([Versioning](versioning.md)).
 
-### So is the Hello World scene
+### So are scenes
 
 `Assets/Editor/HelloWorldScene.cs` creates `Assets/Scenes/HelloWorld.unity` and
 registers it in build settings, through `EditorSceneManager` and
@@ -249,19 +249,29 @@ which is exactly what
 forbids reasoning your way through. Asking Unity to write the file removes the
 guess.
 
-It runs two ways, and the difference matters:
+**A person runs it, from the menu, once.** `Frogs → Create the Hello World
+scene`, then commit what changed. Nothing triggers it automatically and CI does
+not run it, for a reason worth writing down: two automatic triggers were tried
+headlessly — an `[InitializeOnLoad]` static constructor and `-executeMethod`
+through a GameCI step — and **neither produced a scene.** Both ran, both left
+`Assets/Scenes/` empty, and working out why needs an editor to watch it in.
 
-- **From the menu** — `Frogs → Create the Hello World scene`. What a person does.
-- **On load, in batch mode only** — so a headless CI build has a scene to build
-  before anyone has opened the project in an editor. It never runs by itself in
-  an interactive editor, because creating and saving assets behind someone's
-  back is how work gets lost.
+#### Four files, committed together
 
-It is a **guard, not an owner**: it creates the scene only when there isn't one,
-so once the file is committed it does nothing and the committed asset is what
-ships. `Assets/Tests/EditMode/HelloWorldSceneTests.cs` asserts the scene on
-disk either way — that it exists, that a build would include it, and that its
-components survived serialization.
+| File | Why |
+| --- | --- |
+| `Assets/Scenes/HelloWorld.unity` | the scene |
+| `Assets/Scenes/HelloWorld.unity.meta` | its GUID, so references to it survive |
+| `Assets/Scripts/Unity/HelloWorldProbe.cs.meta` | the scene refers to that script **by GUID**; without this the next checkout imports it under a new one and the scene loads with a silent *Missing Script* |
+| `ProjectSettings/EditorBuildSettings.asset` | which scenes are in the build. A committed scene that is not in here is a scene the APK does not contain |
+
+The tool is a **guard, not an owner**: it creates the scene only when there
+isn't one, so once the files are committed it does nothing and the committed
+assets are what ship. `Assets/Tests/EditMode/HelloWorldSceneTests.cs` asserts
+them — that the scene exists, that a build would include it, and that its
+components survived serialization. Those tests **skip rather than fail** while
+the scene does not exist, because a suite that is red for a reason nobody in it
+can fix is a suite people stop reading.
 
 **The screen it renders is deliberately empty.** A camera and one component that
 writes the version to the log, and nothing else: what a build-proof screen

@@ -90,23 +90,6 @@ jobs:
           key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
           restore-keys: Library-android-
 
-      # TEMPORARY — remove before merge. Runs Unity once with -executeMethod to
-      # create Assets/Scenes/HelloWorld.unity, then prints what Unity wrote so
-      # the files can be committed. See PR #179.
-      - name: Create the Hello World scene
-        if: steps.licence.outputs.present == 'true'
-        continue-on-error: true
-        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          unityVersion: 6000.0.81f1
-          targetPlatform: Android
-          buildMethod: Frogs.EditorTools.HelloWorldScene.CreateForCi
-          allowDirtyBuild: true
-
       # The version name, versionCode, and .debug suffix are applied by
       # BuildStampPreprocessor from these variables — a build pre-processor, so
       # no build can be produced without them. See docs/engineering/versioning.md.
@@ -149,21 +132,3 @@ jobs:
                  "(versionCode ${{ steps.stamp.outputs.version_code }}), installs alongside the" \
                  "release build as \`.debug\`." >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      # TEMPORARY — remove before merge. Last, so it lands at the end of the
-      # log where it can be read back. See PR #179.
-      - name: Show what Unity wrote
-        if: always()
-        run: |
-          ls -la Assets/Scenes ProjectSettings || true
-          for file in \
-            scene-bootstrap.log \
-            Assets/Scenes/HelloWorld.unity \
-            Assets/Scenes/HelloWorld.unity.meta \
-            Assets/Scripts/Unity/HelloWorldProbe.cs.meta \
-            ProjectSettings/EditorBuildSettings.asset
-          do
-            echo "vvvvv $file vvvvv"
-            cat "$file" 2>&1 || true
-            echo "^^^^^ $file ^^^^^"
-          done

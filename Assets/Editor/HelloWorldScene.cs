@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Frogs.Unity;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -22,17 +21,18 @@ namespace Frogs.EditorTools
     /// docs/engineering/unity-serialization.md exists to forbid. Asking Unity to
     /// write it removes the guess entirely.
     ///
-    /// This is how the committed scene was produced, and how to produce it
-    /// again. Run it from the menu, or headlessly:
+    /// Run it from the menu — **Frogs → Create the Hello World scene** — and
+    /// commit `Assets/Scenes/HelloWorld.unity`, its `.meta`, and the changed
+    /// `ProjectSettings/EditorBuildSettings.asset` together.
     ///
-    ///     Unity -batchmode -quit -projectPath . \
-    ///           -executeMethod Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
-    ///
-    /// Nothing calls it automatically. Doing this work on domain load was tried
-    /// and does not work — the editor is still settling when `InitializeOnLoad`
-    /// runs, and a scene created there never reached disk. `-executeMethod` is
-    /// the entry point Unity documents for exactly this, and it is the one
-    /// `ProjectBootstrap` already uses.
+    /// Nothing calls it automatically, and CI does not run it. Two automatic
+    /// triggers were tried headlessly and neither produced a scene: an
+    /// `[InitializeOnLoad]` static constructor, and `-executeMethod` from a
+    /// GameCI step. Both ran, both left `Assets/Scenes/` empty. Why is not
+    /// something that can be worked out without an editor to watch, and
+    /// guessing at it is what
+    /// docs/engineering/unity-serialization.md exists to prevent — so this is
+    /// a menu item a person runs once, and the scene it produces is committed.
     ///
     /// It is idempotent: it creates the scene only when there is not one, so
     /// running it against a checkout that already has the committed scene does
@@ -97,37 +97,6 @@ namespace Frogs.EditorTools
             }
 
             Debug.Log($"Created {AssetPath}. Commit it, and its .meta file, together.");
-        }
-
-        /// <summary>
-        /// TEMPORARY — remove before merge. The CI entry point, which reports
-        /// what happened into a file the workflow can print, because a headless
-        /// Unity's own log is thousands of lines and only its tail is readable
-        /// from outside. See PR #179.
-        /// </summary>
-        public static void CreateForCi()
-        {
-            var report = new StringBuilder();
-
-            report.AppendLine($"working directory: {Directory.GetCurrentDirectory()}");
-            report.AppendLine($"batch mode: {Application.isBatchMode}");
-            report.AppendLine($"scene present before: {File.Exists(AssetPath)}");
-
-            try
-            {
-                EnsureReadyToBuild();
-                report.AppendLine("EnsureReadyToBuild returned without throwing.");
-            }
-            catch (Exception error)
-            {
-                report.AppendLine("EnsureReadyToBuild threw:");
-                report.AppendLine(error.ToString());
-            }
-
-            report.AppendLine($"scene present after: {File.Exists(AssetPath)}");
-            report.AppendLine($"scenes in build settings: {EditorBuildSettings.scenes.Length}");
-
-            File.WriteAllText("scene-bootstrap.log", report.ToString());
         }
 
         static void EnsureRegisteredInBuildSettings()
