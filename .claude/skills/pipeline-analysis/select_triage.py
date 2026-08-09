@@ -3,7 +3,7 @@
 
 Pure `process(data)` plus a stdin/stdout `main()`, like the other pipeline
 scripts. Deciding *what to triage* is deterministic and unit-testable; deciding
-*how to triage it* is the `dw-triage-issue` skill's job, and that separation is
+*how to triage it* is the `triage-issue` skill's job, and that separation is
 what keeps a bad triage contained to one issue instead of one batch.
 
     echo '{"issues": [...], "owner": "..."}' | python3 select_triage.py

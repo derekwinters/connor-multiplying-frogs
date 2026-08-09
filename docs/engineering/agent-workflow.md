@@ -56,7 +56,7 @@ and fixed independently:
 | `release-flow` | driving a release through release-please |
 
 The pipeline skills — `pipeline-gatekeeper`, `pipeline-analysis`,
-`dw-triage-issue`, `pipeline-dev`, `pipeline-reconcile`, `pipeline-dashboard` — are
+`triage-issue`, `pipeline-dev`, `pipeline-reconcile`, `pipeline-dashboard` — are
 a separate family. They operate the queue rather than write game code. See
 [Issue pipeline](issue-pipeline.md).
 
@@ -137,7 +137,7 @@ not after.
 
 ### Triage hand-backs open with it too
 
-The rule is not PR-specific. **A `dw-triage-issue` hand-back comment opens with the
+The rule is not PR-specific. **A `triage-issue` hand-back comment opens with the
 same two or three sentences**, before any diagnosis, plan, or file detail.
 
 The argument is if anything stronger there. A PR's wrong plan has already cost

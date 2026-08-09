@@ -222,13 +222,6 @@
       "diverged": false
     },
     {
-      "name": "triage",
-      "vendored_from": "mattpocock/skills",
-      "source_path": "skills/engineering/triage",
-      "diverged": false,
-      "notes": "Distinct from this repo's dw-triage-issue skill, which is the one the nightly pipeline uses. Do not substitute one for the other."
-    },
-    {
       "name": "wait-what",
       "vendored_from": "mattpocock/skills",
       "source_path": "skills/productivity/wait-what",

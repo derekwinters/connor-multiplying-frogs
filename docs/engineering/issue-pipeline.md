@@ -480,14 +480,14 @@ re-read the thread to find out why it is running again.
 Results are sorted by issue number, oldest first.
 
 The dispatcher (`pipeline-analysis`) is a thin loop over that list. It makes no
-decisions itself — the decisions are in `dw-triage-issue`, one issue at a time,
+decisions itself — the decisions are in `triage-issue`, one issue at a time,
 which keeps a bad triage contained to one issue instead of one batch.
 
 **The dispatcher writes nothing at all** — no labels, no comments, not even a
 summary of the round. Every write belongs to the single-issue skill. A round
 that made its own writes would be a second thing that can be wrong, wrong at
 batch scale across the whole queue, in a way no individual triage run could
-produce. It also keeps `dw-triage-issue` genuinely standalone, which is what lets
+produce. It also keeps `triage-issue` genuinely standalone, which is what lets
 reactive triage invoke it with no dispatcher present.
 
 **Concurrency is set by the orchestration layer, not the script.**
@@ -512,7 +512,7 @@ issue carried back by the blocker sweep. On a healthy night it finds nothing.
 
 ### Triage — one issue
 
-`dw-triage-issue` reads an issue and produces:
+`triage-issue` reads an issue and produces:
 
 - an **`area:*` and `type:*` label**;
 - the **milestone**, set as a field by matching the live milestone descriptions;
@@ -1043,7 +1043,7 @@ see [Skills here are local](#skills-here-are-local-and-deliberately-not-synced).
 | --- | --- |
 | `pipeline-gatekeeper` | comment parsing, the gates, label application, acks, reactive fire |
 | `pipeline-analysis` | finding what needs triage and dispatching it |
-| `dw-triage-issue` | triaging one issue, and repairing a re-fire |
+| `triage-issue` | triaging one issue, and repairing a re-fire |
 | `pipeline-dev` | the ready queue and serial delegated delivery |
 | `pipeline-reconcile` | drift detection, auto-fix, and flagging |
 | `pipeline-dashboard` | rendering the live dashboard issue |
@@ -1082,8 +1082,9 @@ applies to both kinds for different reasons.
 ### Vendored skills do not outrank this repo
 
 Where one of our skill names would be confused with a vendored one, ours carries a
-`dw-` prefix — `dw-triage-issue`, not `triage-issue`. The prefix marks a
-collision, not ownership, so most of our skills do not have one. See
+`dw-` prefix — `dw-run-tests`, not `run-tests`. The prefix marks a collision, not
+ownership, so most of our skills do not have one, and it comes off again when the
+skill it collided with is removed. See
 [Skill names](../intro/conventions.md#skill-names).
 
 Several vendored skills cover ground `/docs` already specifies, and where they
@@ -1093,15 +1094,27 @@ disagree, this repo wins:
 | --- | --- |
 | `tdd` | CLAUDE.md rule 1 and [testing](testing.md) |
 | `code-review`, `implement` | the [agent workflow](agent-workflow.md) |
-| `triage` | this repo's own `dw-triage-issue` skill, which the pipeline calls |
 | `resolving-merge-conflicts` | CLAUDE.md rule 7 — this repo rebases |
 | `to-tickets`, `to-spec` | the label and milestone [conventions](../intro/conventions.md) |
 
-`triage` and `dw-triage-issue` are the pair to watch. The pipeline calls
-`dw-triage-issue`; the vendored `triage` knows nothing about our label taxonomy,
-the milestone rules, or the hand-back-to-Derek step, so substituting it drops all
-three silently. This is the collision the `dw-` prefix exists to prevent, and it
-only works if you read the prefix.
+A vendored `triage` skill used to sit in that table, and it was the dangerous
+one: it knew nothing about our label taxonomy, the milestone rules, or the
+hand-back-to-Derek step, so an agent reaching for it instead of this repo's
+`triage-issue` dropped all three silently. It has been **removed** rather than
+deconflicted, because a prefix only protects you if you read it, and the two
+skills wrote different label vocabularies onto the same issues.
+
+Deleting a vendored skill is the stronger fix and the one to prefer when its
+whole subject is already specified here. Renaming ours was never going to stop a
+tired reader picking the wrong one.
+
+Its siblings still mention it — `ask-matt` recommends `/triage`, and
+`setup-matt-pocock-skills` offers to configure its labels. Those files are left
+**verbatim**, because editing a vendored copy to patch a reference sets
+`diverged` and turns every future re-vendor into a manual fixup. The references
+are harmless: `setup-matt-pocock-skills` already asks whether `triage` is
+installed and skips its whole label section when it is not, and a session asked
+to triage now resolves to `triage-issue`, which is the skill you wanted.
 
 The prefix cannot help where the clash is between two names the repo does not
 both own. Two vendored names — `grilling` and `code-review` — also exist as a
