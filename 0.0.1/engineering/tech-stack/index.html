@@ -1423,6 +1423,34 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#so-are-scenes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        So are scenes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="So are scenes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-files-committed-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four files, committed together
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#naming" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1986,6 +2014,34 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#so-are-scenes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        So are scenes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="So are scenes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-files-committed-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four files, committed together
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#naming" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2214,13 +2270,14 @@ costs work we would rather spend on the game.</p>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    EditMode/                 ← EditMode tests for the shell; needs the editor
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      Frogs.Unity.EditModeTests.asmdef
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  Editor/                     ← editor-only tooling; never ships in a build
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    Frogs.EditorTools.asmdef  ← references Frogs.Core; Editor-only platform
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  Scenes/  Art/  Audio/  Prefabs/
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>Tests/
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                                and `dotnet test` can run it with no editor.
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>ProjectSettings/              ← ProjectVersion.txt pins the editor version
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>Packages/manifest.json        ← only the packages actually needed
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    Frogs.EditorTools.asmdef  ← references Frogs.Core and Frogs.Unity; Editor-only
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  Scenes/                     ← HelloWorld.unity, created by editor code (below)
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  Art/  Audio/  Prefabs/
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>Tests/
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                                and `dotnet test` can run it with no editor.
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>ProjectSettings/              ← ProjectVersion.txt pins the editor version
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>Packages/manifest.json        ← only the packages actually needed
 </code></pre></div>
 <p>Two placements are worth explaining, because they look inconsistent and aren't:</p>
 <ul>
@@ -2313,10 +2370,72 @@ the C# API is a compile error. See
 <p>It is idempotent, and whatever it changes under <code>ProjectSettings/</code> gets
 committed. The version fields are deliberately absent from it — <code>/VERSION</code> owns
 those, injected at build time (<a href="../versioning/">Versioning</a>).</p>
+<h3 id="so-are-scenes">So are scenes<a class="headerlink" href="#so-are-scenes" title="Link to this section">&para;</a></h3>
+<p><code>Assets/Editor/HelloWorldScene.cs</code> creates <code>Assets/Scenes/HelloWorld.unity</code> and
+registers it in build settings, through <code>EditorSceneManager</code> and
+<code>EditorBuildSettings</code> rather than by writing YAML.</p>
+<p>Same reason, one step further. A <code>.unity</code> file is file IDs and GUID references
+that have to be internally consistent and consistent with every <code>.meta</code> in the
+project, and Unity ignores keys it doesn't recognise rather than complaining —
+which is exactly what
+<a href="../unity-serialization/#what-this-means-for-an-agent-with-no-editor">Unity serialization</a>
+forbids reasoning your way through. Asking Unity to write the file removes the
+guess.</p>
+<p><strong>It is run once, and the asset it produces is committed.</strong> From the menu —
+<code>Frogs → Create the Hello World scene</code> — or headlessly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+</code></pre></div>
+<p>Nothing triggers it automatically and no build runs it. It is a tool for making
+the asset; the asset is what ships.</p>
+<p>One detail in it is load-bearing and was expensive to find: the scene is created
+with <code>NewSceneMode.Single</code>. The obvious-looking alternative — <code>Additive</code>, plus
+<code>SceneManager.MoveGameObjectToScene</code> for each object, so an open editor session
+keeps its work — <strong>produced no scene at all headlessly, and raised nothing.</strong>
+Twice. Don't swap it back without an editor open to watch what happens.</p>
+<h4 id="four-files-committed-together">Four files, committed together<a class="headerlink" href="#four-files-committed-together" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Assets/Scenes/HelloWorld.unity</code></td>
+<td>the scene</td>
+</tr>
+<tr>
+<td><code>Assets/Scenes/HelloWorld.unity.meta</code></td>
+<td>its GUID, so references to it survive</td>
+</tr>
+<tr>
+<td><code>Assets/Scripts/Unity/HelloWorldProbe.cs.meta</code></td>
+<td>the scene refers to that script <strong>by GUID</strong>; without this the next checkout imports it under a new one and the scene loads with a silent <em>Missing Script</em></td>
+</tr>
+<tr>
+<td><code>ProjectSettings/EditorBuildSettings.asset</code></td>
+<td>which scenes are in the build. A committed scene that is not in here is a scene the APK does not contain</td>
+</tr>
+</tbody>
+</table>
+<p>The tool is idempotent: it creates the scene only when there isn't one, so once
+the files are committed it does nothing. <code>Assets/Tests/EditMode/HelloWorldSceneTests.cs</code>
+asserts them — that the scene exists, that a build would include it, and that
+its components survived serialization. That last one is the guard against the
+failure this whole arrangement exists to avoid: a <code>.meta</code> that goes missing, a
+GUID that changes, and a scene that loads with a <em>Missing Script</em> and says
+nothing about it.</p>
+<p><strong>The screen it renders is deliberately empty.</strong> A camera and one component that
+writes the version to the log, and nothing else: what a build-proof screen
+<em>shows</em> is a layout, and layout goes through
+<a href="../ui-design-process/">the wireframe loop</a> rather than being invented in an
+implementation PR.</p>
 <h3 id="naming">Naming<a class="headerlink" href="#naming" title="Link to this section">&para;</a></h3>
 <p>Use the <code>scaffold-core</code> skill to create a Core type; it applies all of this and
 leaves you with a failing test, which is where a new type should start.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>SplitRule<span class="w"> </span>--subfolder<span class="w"> </span>Rules
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>SplitRule<span class="w"> </span>--subfolder<span class="w"> </span>Rules
 </code></pre></div>
 <ul>
 <li>Assemblies and their folders share a name: <code>Frogs.Core</code>, <code>Frogs.Unity</code>.</li>
@@ -2333,15 +2452,15 @@ leaves you with a failing test, which is where a new type should start.</p>
 <p><strong>Every size, offset, margin, spacing, duration, speed, delay, threshold, count,
 and payout is a named constant or a serialized field. Never a bare literal in a
 method body.</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// No.</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1">// Yes.</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">// No.</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">// Yes.</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="why-this-is-a-rule-and-not-a-preference">Why this is a rule and not a preference<a class="headerlink" href="#why-this-is-a-rule-and-not-a-preference" title="Link to this section">&para;</a></h3>
 <ul>
