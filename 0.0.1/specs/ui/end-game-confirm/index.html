@@ -1220,6 +1220,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#who-may-end-a-game" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who may end a game
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#open-questions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1991,6 +2002,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#who-may-end-a-game" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who may end a game
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#open-questions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2156,17 +2178,22 @@ right.</p>
 <p><a href="../mockups/end-game-confirm.html"><code>mockups/end-game-confirm.html</code></a> — drawn in the
 three-frogs-still-swimming state, which is the one where the confirm has
 something to lose.</p>
+<h2 id="who-may-end-a-game">Who may end a game<a class="headerlink" href="#who-may-end-a-game" title="Link to this section">&para;</a></h2>
+<p><strong>Anyone, on anyone's turn.</strong> Derek's call in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">issue #186</a>.</p>
+<p>The alternative was restricting it to the current player, and it was rejected
+because the tablet cannot tell who is holding it — the restriction would have
+been a guess dressed as a rule. What actually protects a game in progress is
+this dialog telling you, before you act, how many frogs you are about to stop.</p>
+<p>That is why the cost sentence is built from live state rather than being a fixed
+string. It is the whole of the protection, so it has to say something true and
+specific every time.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>Who may end a game, on a shared tablet?</strong>
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">Issue #186</a>.
-  This wireframe proposes <em>anyone, with a confirm that names the cost</em>, on the
-  grounds that the tablet cannot tell who is holding it and the confirm is the
-  real protection. If the answer is "only the current player", this dialog gains
-  a condition and the settings button gains a disabled state.</li>
-<li><strong>Does the game also end on its own when every frog is home?</strong> Same issue.
-  If yes, the third body sentence above is a state almost nobody will see,
-  because the game will already have ended itself.</li>
+<li><strong>Does the game also end on its own when every frog is home?</strong> Still
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">issue #186</a>.
+  If yes, the everybody-is-home body sentence above is a state almost nobody
+  will see, because the game will have ended itself first.</li>
 </ul>
 
 

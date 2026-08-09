@@ -870,6 +870,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-end-log-is-the-winning-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The End log is the winning space
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-start-log-is-a-floor-not-a-special-space" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2008,6 +2019,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-end-log-is-the-winning-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The End log is the winning space
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-start-log-is-a-floor-not-a-special-space" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2170,6 +2192,15 @@ never pass one another, and never interact. Eight lanes, eight frogs, one each.<
 <p>A player's entire state is therefore one number — how far up their own lane they
 are. There is no board state beyond that: no collisions, no blocking, no ordering
 between frogs.</p>
+<h3 id="the-end-log-is-the-winning-space">The End log is the winning space<a class="headerlink" href="#the-end-log-is-the-winning-space" title="Link to this section">&para;</a></h3>
+<p>A frog wins by <strong>landing on the End log</strong>, not by reaching the last lily pad.
+The lane is therefore <strong>nine positions</strong> — the Start log, seven lily pads, and
+the End log — and winning takes <strong>eight correct answers</strong> from the start.</p>
+<p>Confirmed by Derek in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/185">issue #185</a>,
+after the board wireframe needed the number of spaces in a lane and the
+photograph could not settle it. The logs are symmetric: both ends of a lane are
+real positions a frog occupies, one as the floor and one as the goal.</p>
 <h3 id="the-start-log-is-a-floor-not-a-special-space">The Start log is a floor, not a special space<a class="headerlink" href="#the-start-log-is-a-floor-not-a-special-space" title="Link to this section">&para;</a></h3>
 <p>A wrong answer moves you back one lily pad, exactly as the rules card says. The
 Start log is simply the bottom of the lane, so a wrong answer there leaves you
@@ -2199,6 +2230,30 @@ where you are.</p>
 <p>A clamp at the bottom rather than a special case. Worth stating precisely,
 because "move back one" written without a floor is an off-by-one waiting to
 happen.</p>
+<p>Two of the three rows above are about the ends of a lane, so they are worth
+reading together:</p>
+<table>
+<thead>
+<tr>
+<th>Position</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start log</td>
+<td>Position 0. The floor — a wrong answer here moves nothing.</td>
+</tr>
+<tr>
+<td>Lily pads 1–7</td>
+<td>The ordinary spaces.</td>
+</tr>
+<tr>
+<td>End log</td>
+<td>Position 8. The goal — landing on it wins.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="still-unsettled">Still unsettled<a class="headerlink" href="#still-unsettled" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>What the classroom game does after the first frog finishes.</strong> The card says
@@ -2219,9 +2274,15 @@ because the board does not settle it, not because the board says so.</p>
 a session needs a way to stop that isn't "everyone eventually finishes": a quit
 or end-game flow. This is purely ours — a cardboard game ends when you close the
 box, so there is nothing to be faithful to.</p>
-<p>Two things this leaves for whoever specifies it: whether the game also ends <em>on
-its own</em> once every frog is home, and who may trigger a quit when four players
-share one device. Neither is settled here.</p>
+<p><strong>Anyone may end the game, and a confirm is the only thing in the way.</strong> Derek's
+call in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">issue #186</a>.
+The device cannot tell who is holding it, so restricting the exit to a
+particular player was never enforceable — what protects a game in progress is
+that the confirm names the cost before it acts. See
+<a href="../ui/end-game-confirm/">end-game confirm</a>.</p>
+<p>One thing this still leaves for whoever specifies it: whether the game also ends
+<em>on its own</em> once every frog is home. Same issue; not settled.</p>
 
 
 
