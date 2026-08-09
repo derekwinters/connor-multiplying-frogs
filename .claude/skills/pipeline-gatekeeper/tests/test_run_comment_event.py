@@ -147,6 +147,32 @@ class WatermarkTests(unittest.TestCase):
         self.assertFalse(result.applied)
 
 
+class ResultingLabelsTests(unittest.TestCase):
+    """The sweep's replay writes these back onto its in-memory snapshot.
+
+    Reconcile runs next and derives its fixes from that snapshot, so a replay
+    that could not report the labels it left behind would have reconcile "fix"
+    the state the command just set.
+    """
+
+    def test_an_applied_command_reports_the_labels_it_left(self):
+        result = runner.run(event(), RecordingApi(), owner=OWNER,
+                            rerender=lambda **kw: None)
+        self.assertEqual(result.labels, ["ready-for-work"])
+
+    def test_a_refused_command_reports_no_labels_at_all(self):
+        """Not "the labels unchanged" — nothing, so the caller leaves its own
+        copy alone rather than overwriting it with a guess."""
+        api = RecordingApi(reactions=[
+            {"content": "eyes", "user": {"login": "github-actions[bot]"}}])
+        result = runner.run(event(), api, owner=OWNER, rerender=lambda **kw: None)
+        self.assertIsNone(result.labels)
+
+    def test_a_stranger_reports_no_labels(self):
+        result = runner.run(event(author="a-stranger"), RecordingApi(), owner=OWNER)
+        self.assertIsNone(result.labels)
+
+
 class ReactiveTriageTests(unittest.TestCase):
     """The fire is wired in, not merely implemented.
 

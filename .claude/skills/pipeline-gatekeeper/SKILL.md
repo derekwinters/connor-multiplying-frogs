@@ -20,8 +20,8 @@ python3 .claude/skills/pipeline-gatekeeper/run_sweep.py --events-only < state.js
 ## In production this is two workflows, with no model in the loop
 
 `gatekeeper-comment.yml` on every `issue_comment`, and `gatekeeper-sweep.yml`
-every fifteen minutes. Both run these scripts directly. **Nothing here asks a
-model anything.**
+on issue/PR events plus a six-hourly cron. Both run these scripts directly.
+**Nothing here asks a model anything.**
 
 That is the whole point of the design. The gatekeeper is what turns Derek
 typing `/approve` into an issue the builder will pick up — it is the boundary
@@ -78,10 +78,11 @@ redundancy is deliberate: a script that is safe only because the workflow's
 An applied comment gets an `eyes` reaction from the bot, and a comment already
 carrying one is never reconsidered.
 
-This is what makes the fifteen-minute sweep safe. The sweep re-reads recent
-comments to catch anything the event path missed — a dropped webhook, a
-workflow that failed to start — and without a marker it would re-apply every
-command it found, every time.
+This is what makes the sweep's **comment replay** safe. On its six-hourly cron
+the sweep re-reads the last seven days of comments to catch anything
+`gatekeeper-comment` missed — a dropped webhook, a workflow that failed to
+start — and without a marker it would re-apply every command it found, every
+time.
 
 Two details matter:
 
@@ -89,7 +90,7 @@ Two details matter:
   silence a command.
 - **A refused comment is watermarked too** — except a stranger's. It was
   considered and answered; without the mark the sweep would re-post the same
-  refusal every fifteen minutes forever.
+  refusal on every run forever.
 
 If a reaction lookup fails, the comment is treated as **already watermarked**.
 Re-applying a command is worse than skipping one, and the next sweep retries.
@@ -134,9 +135,10 @@ internally, so every decision is reachable in a test without a network call.
 - `run_comment_event.py` — an `issue_comment` webhook payload. Snapshot →
   parse → gate → apply → write labels, ack, reaction → re-render the dashboard
   **once**, after all label writes.
-- `run_sweep.py` — a state snapshot. Revisits cleared blockers, then reconciles.
-  `--events-only` drops reconcile's two cron-only fixes; use it when simulating
-  the fifteen-minute pass.
+- `run_sweep.py` — a state snapshot. Replays comment commands the comment
+  workflow missed, revisits cleared blockers, then reconciles — and re-renders
+  the board **once** for all of it. `--events-only` drops the replay and
+  reconcile's two cron-only fixes; use it when simulating the event path.
 
 Authentication is `GITHUB_TOKEN`, never a PAT.
 
@@ -146,8 +148,9 @@ Authentication is `GITHUB_TOKEN`, never a PAT.
 python3 .github/scripts/run_python_tests.py pipeline-gatekeeper
 ```
 
-158 tests. The parser, the gates, the label planning, the revisit rules, and
-the I/O ordering — none of them touch the network.
+The parser, the gates, the label planning, the revisit rules, the replay's
+watermark rule, and the I/O ordering — none of them touch the network. The
+count is deliberately not written down here; it went stale twice.
 
 ## See also
 

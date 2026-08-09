@@ -196,6 +196,82 @@ dependency lookup in particular does not lose the event: the command is
 probably `/park`, which does not care, and the gates that *do* care see a
 smaller blocker list and refuse — which is the safe direction.
 
+## Replaying the comments the webhook lost
+
+`gatekeeper-comment` fires on `issue_comment: created`. When that delivery is
+dropped — a webhook that never arrives, a workflow that fails to start, a run
+cancelled mid-flight — the command is simply gone. Derek types `/approve`,
+nothing happens, and **nothing anywhere reports that nothing happened.**
+
+So the sweep re-reads recent comments and feeds anything unclaimed back through
+the ordinary path. This is the second pass the 👀 watermark was designed for.
+
+Four properties, and every one of them is load-bearing:
+
+- **It reuses `run_comment_event.run`, the same function the live workflow
+  calls.** Not a second implementation of parse → gate → apply. The owner
+  re-check, the gates, the acknowledgement wording and above all the watermark
+  rule are *inherited* rather than re-derived — and a second copy that got the
+  watermark's failure direction backwards would re-apply every command in the
+  window on every sweep, six times a day, forever.
+- **It is cron-path only.** See below.
+- **The window is bounded** — seven days, `REPLAY_WINDOW_DAYS` in
+  `run_sweep.py`, gathered by one repo-wide `since`-filtered call rather than
+  one request per open issue. Seven days is far more than the six-hourly cron
+  needs for a single dropped webhook; the width is there for a multi-day
+  Actions outage, and costs nothing because re-reading a claimed comment is a
+  no-op. It is bounded rather than unlimited because an unbounded scan of the
+  whole comment history is both slow and a far larger surface for a watermark
+  bug to act on.
+- **A replayed command updates the sweep's own snapshot** before reconcile
+  reads it, and the board is re-rendered **once**, at the end of the sweep.
+
+### Why the replay is cron-only
+
+`gatekeeper-sweep` has two triggers, and on the event path one of them is
+`issues: [labeled]`. An applied command *changes a label*. So an event-path
+replay would wake this workflow up to re-apply the very comment
+`gatekeeper-comment` is applying at that moment — and nothing serialises the
+two, because they are in different concurrency groups.
+
+The six-hourly cron has no such relationship to the comment workflow, which is
+why the replay lives there, alongside reconcile's two cron-only fixes.
+
+### Why the replay writes its labels back
+
+Reconcile runs after the replay, and derives its fixes from the labels on the
+sweep's in-memory snapshot. If the replay moved an issue from `in-progress` to
+`parked` and reconcile then read the pre-replay list, it would see an
+`in-progress` issue with no open PR, call it a stall, and requeue it to
+`ready-for-work` — **silently undoing the command it was replayed to honour**,
+and reporting a successful auto-fix while doing it.
+
+So `run_comment_event.Result` carries the label set the command left behind,
+and the replay writes it onto the snapshot issue. A refused command reports no
+labels at all, rather than "the labels unchanged", so the snapshot is left
+exactly as it was instead of being overwritten with a guess.
+
+### One render, last override wins
+
+`run_comment_event.run` re-renders the dashboard itself, which is right for one
+webhook and wrong for a sweep: six replayed commands would publish six boards,
+five of them describing a half-finished sweep. The replay hands it a collector
+instead, and the sweep renders once at the end.
+
+If two replayed comments both set a `/focus`, **the later one wins** — the
+candidates are fetched oldest-first for exactly that reason. Refusing both as
+ambiguous was the alternative; last-wins is what would have happened had the
+webhooks arrived normally, and matching the undropped case is the less
+surprising rule.
+
+### When a replay raises
+
+One malformed comment does not take the sweep down with it. The failure is
+counted, named in the workflow log, and the sweep carries on — reconcile is the
+backstop for the entire board, and losing it because a single comment blew up
+trades a missed command for a missed sweep, which is the more expensive of the
+two.
+
 ## The approval gates
 
 Both gates **refuse and explain**. Neither ever fixes the problem itself.
@@ -434,7 +510,7 @@ to normalise and hope.
 | Runs | When | Does |
 | --- | --- | --- |
 | `gatekeeper-comment` workflow | on `issue_comment` created | parse and apply commands, immediately |
-| `gatekeeper-sweep` workflow | every 15 minutes | catch missed comments; auto-revisit cleared blockers |
+| `gatekeeper-sweep` workflow | issue/PR events, and a six-hourly cron | auto-revisit cleared blockers, apply reconcile's fixes; on the cron, also replay missed comments |
 | `pipeline-analysis` routine | nightly, 02:00 UTC | triage everything untriaged |
 | reactive triage | fired on demand by the gatekeeper | triage one issue, now |
 | `pipeline-dev` routine | nightly, 03:00 UTC | build and work the ready queue |
@@ -743,13 +819,15 @@ thin modules wire those pieces to GitHub:
 | --- | --- |
 | `_github_api.py` | REST helpers, and the shared dashboard re-render |
 | `run_comment_event.py` | one `issue_comment` event, end to end |
-| `run_sweep.py` | the board-wide revisit + reconcile pass |
+| `run_sweep.py` | the board-wide replay + revisit + reconcile pass |
 
 `run_comment_event.py` is: snapshot → parse → gate → apply → write labels, ack,
 and reaction → **re-render the dashboard once, after every label write.**
 Rendering in between would publish a board describing a half-applied command.
 `run_sweep.py` re-renders once at the end for the same reason, and takes
-`--events-only` to drop reconcile's two cron-only fixes on the 15-minute pass.
+`--events-only` to drop the comment replay and reconcile's two cron-only fixes
+on the **event path**. That flag names the trigger, not a clock: both paths run
+the same script, and the cron is six-hourly.
 
 **Authentication is `GITHUB_TOKEN`, never a PAT.** The workflow token is scoped
 to this repository and expires with the job; a personal access token would
@@ -769,12 +847,19 @@ rehearsing a sweep possible without waiting for a trigger:
 | Entry point | Expects on stdin |
 | --- | --- |
 | `run_comment_event.py` | an `issue_comment` webhook payload |
-| `run_sweep.py` | a state snapshot — issues, pulls, merged commits, focus |
+| `run_sweep.py` | a state snapshot — issues, pulls, merged commits, recent comments, focus |
 
-`run_sweep.py --events-only` simulates the fifteen-minute pass by dropping
-reconcile's two cron-only fixes. Running it *without* that flag outside the
-nightly window will requeue whatever the builder currently has in flight, which
-is the one way to do real damage with these scripts by hand.
+`run_sweep.py --events-only` simulates the **event path** by dropping the
+comment replay and reconcile's two cron-only fixes. Running it *without* that
+flag outside the nightly window will requeue whatever the builder currently has
+in flight, which is the one way to do real damage with these scripts by hand.
+
+The rehearsal snapshot's `recent_comments` are raw `/issues/comments` items,
+exactly as GitHub returns them — the replay hands them to the same
+`fetch_comment_event.build` the live path uses, so it must be given the same
+shape rather than a second one. `PIPELINE_OWNER` names the account whose
+comments count; without it the replay does nothing at all, because an empty
+owner would match an empty author.
 
 ### Applying an action
 

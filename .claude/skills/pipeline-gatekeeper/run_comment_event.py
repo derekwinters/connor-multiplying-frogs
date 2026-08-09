@@ -34,9 +34,16 @@ from _github_api import (  # noqa: E402
 
 
 class Result:
-    def __init__(self, applied: bool, detail: str = "") -> None:
+    def __init__(self, applied: bool, detail: str = "", labels=None) -> None:
         self.applied = applied
         self.detail = detail
+        # The label set the issue ends this pass with, or **None** when the
+        # pass never got as far as computing one. The sweep's replay writes it
+        # back onto its in-memory snapshot, which reconcile then reads — see
+        # `run_sweep.replay_comments`. `None` rather than "the labels
+        # unchanged", so a caller with its own copy leaves it alone instead of
+        # overwriting it with a guess.
+        self.labels = list(labels) if labels is not None else None
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return f"Result(applied={self.applied!r}, {self.detail!r})"
@@ -97,7 +104,9 @@ def run(event: dict, api, owner: str, rerender=None, fire=None) -> Result:
         rerender = rerender or (lambda **kwargs: rerender_dashboard(api, **kwargs))
         rerender(focus_override=plan.focus, cap_override=plan.cap)
 
-    return Result(bool(actions), acknowledgement)
+    # `sorted(set(...))` because that is what `set_labels` actually wrote, and
+    # the caller's snapshot should match the repository rather than the plan.
+    return Result(bool(actions), acknowledgement, sorted(set(plan.labels)))
 
 
 def _apply_gates(outcome, issue):

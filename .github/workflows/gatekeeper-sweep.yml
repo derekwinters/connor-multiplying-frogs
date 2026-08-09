@@ -1,13 +1,26 @@
 name: gatekeeper-sweep
 
-# The board-wide sweep: wake issues whose blockers cleared, and fix drift.
+# The board-wide sweep: replay missed comment commands, wake issues whose
+# blockers cleared, and fix drift.
 #
 # Two paths, and the difference between them is the whole design:
 #
 #   event path   — runs on the events that can actually change the board.
 #                  `strip_labels` only.
 #   cron path    — every six hours, plus manual dispatch. Everything, including
-#                  the two requeue fixes.
+#                  the comment replay and the two requeue fixes.
+#
+# WHY THE COMMENT REPLAY IS CRON-ONLY
+#
+# `gatekeeper-comment` can lose a command outright — a webhook never delivered,
+# a workflow that fails to start — so the cron re-reads the last week of
+# comments and re-applies anything not already carrying the bot's 👀.
+#
+# It cannot run on the event path, because this workflow triggers on
+# `issues: [labeled]` and an applied command CHANGES A LABEL. The replay would
+# wake up and re-apply the very comment `gatekeeper-comment` is applying at
+# that moment, and nothing serialises them — the two workflows are in different
+# concurrency groups.
 #
 # WHY `requeue` AND `requeue_triage` ARE CRON-ONLY
 #
@@ -79,9 +92,9 @@ jobs:
           # not the cron or a deliberate dispatch takes the event path.
           if [ "${{ github.event_name }}" = "schedule" ] \
             || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Cron path — all fixes, including requeue."
+            echo "Cron path — comment replay and all fixes, including requeue."
             python3 .claude/skills/pipeline-gatekeeper/run_sweep.py --fetch
           else
-            echo "Event path — strip_labels only."
+            echo "Event path — strip_labels only, no replay."
             python3 .claude/skills/pipeline-gatekeeper/run_sweep.py --fetch --events-only
           fi
