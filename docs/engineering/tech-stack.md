@@ -103,8 +103,9 @@ Assets/                       ← everything Unity compiles
     EditMode/                 ← EditMode tests for the shell; needs the editor
       Frogs.Unity.EditModeTests.asmdef
   Editor/                     ← editor-only tooling; never ships in a build
-    Frogs.EditorTools.asmdef  ← references Frogs.Core; Editor-only platform
-  Scenes/  Art/  Audio/  Prefabs/
+    Frogs.EditorTools.asmdef  ← references Frogs.Core and Frogs.Unity; Editor-only
+  Scenes/                     ← HelloWorld.unity, created by editor code (below)
+  Art/  Audio/  Prefabs/
 Tests/
   Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
                                 and `dotnet test` can run it with no editor.
@@ -233,6 +234,60 @@ Unity -batchmode -quit -projectPath . \
 It is idempotent, and whatever it changes under `ProjectSettings/` gets
 committed. The version fields are deliberately absent from it — `/VERSION` owns
 those, injected at build time ([Versioning](versioning.md)).
+
+### So are scenes
+
+`Assets/Editor/HelloWorldScene.cs` creates `Assets/Scenes/HelloWorld.unity` and
+registers it in build settings, through `EditorSceneManager` and
+`EditorBuildSettings` rather than by writing YAML.
+
+Same reason, one step further. A `.unity` file is file IDs and GUID references
+that have to be internally consistent and consistent with every `.meta` in the
+project, and Unity ignores keys it doesn't recognise rather than complaining —
+which is exactly what
+[Unity serialization](unity-serialization.md#what-this-means-for-an-agent-with-no-editor)
+forbids reasoning your way through. Asking Unity to write the file removes the
+guess.
+
+**It is run once, and the asset it produces is committed.** From the menu —
+`Frogs → Create the Hello World scene` — or headlessly:
+
+```bash
+Unity -batchmode -quit -projectPath . \
+      -executeMethod Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+```
+
+Nothing triggers it automatically and no build runs it. It is a tool for making
+the asset; the asset is what ships.
+
+One detail in it is load-bearing and was expensive to find: the scene is created
+with `NewSceneMode.Single`. The obvious-looking alternative — `Additive`, plus
+`SceneManager.MoveGameObjectToScene` for each object, so an open editor session
+keeps its work — **produced no scene at all headlessly, and raised nothing.**
+Twice. Don't swap it back without an editor open to watch what happens.
+
+#### Four files, committed together
+
+| File | Why |
+| --- | --- |
+| `Assets/Scenes/HelloWorld.unity` | the scene |
+| `Assets/Scenes/HelloWorld.unity.meta` | its GUID, so references to it survive |
+| `Assets/Scripts/Unity/HelloWorldProbe.cs.meta` | the scene refers to that script **by GUID**; without this the next checkout imports it under a new one and the scene loads with a silent *Missing Script* |
+| `ProjectSettings/EditorBuildSettings.asset` | which scenes are in the build. A committed scene that is not in here is a scene the APK does not contain |
+
+The tool is idempotent: it creates the scene only when there isn't one, so once
+the files are committed it does nothing. `Assets/Tests/EditMode/HelloWorldSceneTests.cs`
+asserts them — that the scene exists, that a build would include it, and that
+its components survived serialization. That last one is the guard against the
+failure this whole arrangement exists to avoid: a `.meta` that goes missing, a
+GUID that changes, and a scene that loads with a *Missing Script* and says
+nothing about it.
+
+**The screen it renders is deliberately empty.** A camera and one component that
+writes the version to the log, and nothing else: what a build-proof screen
+*shows* is a layout, and layout goes through
+[the wireframe loop](ui-design-process.md) rather than being invented in an
+implementation PR.
 
 ### Naming
 

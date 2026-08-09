@@ -19,6 +19,12 @@ namespace Frogs.Core
     {
         const int ComponentCount = 3;
 
+        /// <summary>
+        /// What <see cref="BuildStamp.VersionName"/> puts between the version
+        /// and whatever identifies the individual build.
+        /// </summary>
+        const char BuildSuffixSeparator = '-';
+
         public int Major { get; }
         public int Minor { get; }
         public int Patch { get; }
@@ -56,6 +62,31 @@ namespace Frogs.Core
             }
 
             return Parse(trimmed);
+        }
+
+        /// <summary>
+        /// Reads the version back out of a build's version name — the string a
+        /// running app reports as its own version.
+        ///
+        /// The inverse of <see cref="BuildStamp.VersionName"/>, which appends
+        /// whatever distinguishes this build from the plain release of the same
+        /// version after a '-': a short commit sha, or an "rcN". Everything from
+        /// that separator onward is dropped.
+        ///
+        /// The running app needs this because the version it can see at runtime
+        /// is the stamped name, and the version on the screen is the only
+        /// evidence anybody has that /VERSION reached the APK.
+        /// </summary>
+        public static AppVersion ReadFromBuildName(string versionName)
+        {
+            if (versionName is null)
+            {
+                throw new ArgumentNullException(nameof(versionName));
+            }
+
+            var beforeSeparator = versionName.Split(BuildSuffixSeparator)[0];
+
+            return Parse(beforeSeparator);
         }
 
         /// <summary>

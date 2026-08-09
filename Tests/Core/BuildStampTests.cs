@@ -135,5 +135,27 @@ namespace Frogs.Core.Tests
 
             Assert.That(stamp.VersionName, Is.EqualTo("0.2.3-abc1234"));
         }
+
+        // The running app reads its own version name back to say which build it
+        // is. That only works while composing and reading stay inverses, so the
+        // round trip is asserted rather than assumed.
+        [Test]
+        public void EveryKindOfStamp_HasAVersionNameThatReadsBackToItsVersion()
+        {
+            var stamps = new[]
+            {
+                BuildStamp.Release(Version, 147),
+                BuildStamp.Debug(Version, 147, "abc1234"),
+                BuildStamp.ReleaseCandidate(Version, 147, 2),
+            };
+
+            foreach (var stamp in stamps)
+            {
+                Assert.That(
+                    AppVersion.ReadFromBuildName(stamp.VersionName),
+                    Is.EqualTo(stamp.Version),
+                    $"'{stamp.VersionName}' did not read back to {stamp.Version}");
+            }
+        }
     }
 }

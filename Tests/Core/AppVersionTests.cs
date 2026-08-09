@@ -53,5 +53,31 @@ namespace Frogs.Core.Tests
         {
             Assert.That(() => AppVersion.ReadFrom(contents), Throws.TypeOf<FormatException>());
         }
+
+        // What a running build calls itself is BuildStamp.VersionName, and the
+        // app has to be able to read it back — the version on the screen and in
+        // the log is the only evidence that /VERSION reached the APK.
+        [TestCase("0.0.1", 0, 0, 1)]
+        [TestCase("0.2.3-abc1234", 0, 2, 3)]
+        [TestCase("1.0.0-rc2", 1, 0, 0)]
+        public void ReadFromBuildName_DropsWhateverDistinguishesTheBuild(
+            string versionName, int major, int minor, int patch)
+        {
+            var version = AppVersion.ReadFromBuildName(versionName);
+
+            Assert.That(version.Major, Is.EqualTo(major));
+            Assert.That(version.Minor, Is.EqualTo(minor));
+            Assert.That(version.Patch, Is.EqualTo(patch));
+        }
+
+        [TestCase("")]
+        [TestCase("-abc1234")]
+        [TestCase("nightly")]
+        public void ReadFromBuildName_RejectsANameWithNoVersionInIt(string versionName)
+        {
+            Assert.That(
+                () => AppVersion.ReadFromBuildName(versionName),
+                Throws.TypeOf<FormatException>());
+        }
     }
 }
