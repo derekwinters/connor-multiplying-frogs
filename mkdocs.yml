@@ -91,6 +91,7 @@ nav:
       - specs/index.md
       - Product scope: specs/product-scope.md
       - Future ideas: specs/future-ideas.md
+      - Reference material: specs/reference/index.md
       - UI:
           - specs/ui/index.md
           - Shared components: specs/ui/shared-components.md

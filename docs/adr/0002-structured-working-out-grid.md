@@ -19,10 +19,10 @@ uniform third of the time. Confirmed by Derek:
 | Medium | 3 or 4 | 2-digit × 2-digit | `22 × 41` |
 | Hard | 5 or 6 | 3-digit × 2-digit | `331 × 41` |
 
-The hard pile's faces are inferred by elimination rather than read off the board;
-the other two rows are stated. The uniform distribution matters for the problem
-generator, which has to reproduce the classroom game's difficulty curve rather
-than invent its own.
+All three rows are read directly off the pile labels in the
+[board photograph](../specs/reference/index.md#the-pile-labels). The uniform
+distribution matters for the problem generator, which has to reproduce the
+classroom game's difficulty curve rather than invent its own.
 
 This bounds the grid tightly, and the bound is worth stating because it is the
 difference between three layouts and a general solver. **The grid never has to
