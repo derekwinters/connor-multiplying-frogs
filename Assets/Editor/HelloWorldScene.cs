@@ -22,18 +22,22 @@ namespace Frogs.EditorTools
     /// docs/engineering/unity-serialization.md exists to forbid. Asking Unity to
     /// write it removes the guess entirely.
     ///
-    /// Run it from the menu, or let it run itself: in **batch mode** — CI, and
-    /// nothing else — it creates the scene on load if it is missing, which is
-    /// what lets a headless build produce an APK before anyone has opened the
-    /// project in an editor. In an interactive editor it never runs by itself,
-    /// because creating and saving assets behind someone's back is how work gets
-    /// lost.
+    /// This is how the committed scene was produced, and how to produce it
+    /// again. Run it from the menu, or headlessly:
     ///
-    /// It is idempotent, and it is a *guard*, not an owner: once the scene is
-    /// committed it does nothing, and the committed asset is what ships. The
-    /// EditMode tests assert the scene on disk either way.
+    ///     Unity -batchmode -quit -projectPath . \
+    ///           -executeMethod Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+    ///
+    /// Nothing calls it automatically. Doing this work on domain load was tried
+    /// and does not work — the editor is still settling when `InitializeOnLoad`
+    /// runs, and a scene created there never reached disk. `-executeMethod` is
+    /// the entry point Unity documents for exactly this, and it is the one
+    /// `ProjectBootstrap` already uses.
+    ///
+    /// It is idempotent: it creates the scene only when there is not one, so
+    /// running it against a checkout that already has the committed scene does
+    /// nothing. The EditMode tests assert the scene on disk either way.
     /// </summary>
-    [InitializeOnLoad]
     public static class HelloWorldScene
     {
         /// <summary>Where the build settings and the EditMode tests look.</summary>
@@ -41,31 +45,6 @@ namespace Frogs.EditorTools
 
         const string CameraName = "Camera";
         const string ProbeName = "Hello World Probe";
-
-        static HelloWorldScene()
-        {
-            if (!Application.isBatchMode)
-            {
-                return;
-            }
-
-            try
-            {
-                EnsureReadyToBuild();
-            }
-            catch (Exception error)
-            {
-                // A first import can still be settling when this runs. Retrying
-                // once the editor is idle costs nothing and turns a race into a
-                // slower success; if it fails again the build fails, loudly,
-                // which is the right outcome.
-                Debug.LogWarning(
-                    $"The Hello World scene could not be prepared during load ({error.Message}). "
-                    + "Retrying once the editor is idle.");
-
-                EditorApplication.delayCall += () => EnsureReadyToBuild();
-            }
-        }
 
         /// <summary>
         /// Makes sure there is a Hello World scene and that a build would
