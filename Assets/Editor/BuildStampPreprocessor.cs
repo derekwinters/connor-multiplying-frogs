@@ -40,7 +40,7 @@ namespace Frogs.EditorTools
         public void OnPreprocessBuild(BuildReport report)
         {
             // First, and before the profile below: the project's own identity —
-            // name, company, application id, minimum API, portrait-only. CI
+            // name, company, application id, minimum API, landscape-only. CI
             // builds from a container that has no ProjectSettings.asset, so
             // without this the app is called after the working directory.
             ProjectBootstrap.ApplyToBuild();

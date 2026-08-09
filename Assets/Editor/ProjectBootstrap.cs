@@ -93,14 +93,21 @@ namespace Frogs.EditorTools
 
         static void ApplyOrientation()
         {
-            // Portrait only. The game is played one-handed on a phone; letting
-            // it rotate would mean specifying a landscape layout for every
-            // screen, which is a second design nobody asked for.
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-            PlayerSettings.allowedAutorotateToPortrait = true;
+            // Landscape only. The game is built for kids' tablets, which are
+            // held landscape — Derek's call, overriding the portrait-only rule
+            // this file used to carry. That rule's reason was one-handed play
+            // on a phone, which is not the device any more.
+            //
+            // Both landscape rotations, because a tablet gets picked up either
+            // way up and neither is upside down. Neither portrait rotation,
+            // because rotating into portrait needs a portrait layout and no
+            // wireframe specifies one — the same argument the old comment made,
+            // pointed the other way.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
-            PlayerSettings.allowedAutorotateToLandscapeLeft = false;
-            PlayerSettings.allowedAutorotateToLandscapeRight = false;
         }
     }
 }
