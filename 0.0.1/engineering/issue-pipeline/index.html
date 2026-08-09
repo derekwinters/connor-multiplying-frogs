@@ -2001,6 +2001,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#both-entry-points-fire-and-each-issue-fires-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both entry points fire, and each issue fires once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-outcome-is-classified-truthfully" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2103,6 +2114,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Write ordering: comment first, then the label">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-write-is-code-not-an-instruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The write is code, not an instruction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-hand-back-footer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hand-back footer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3008,6 +3047,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#both-entry-points-fire-and-each-issue-fires-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both entry points fire, and each issue fires once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-outcome-is-classified-truthfully" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3110,6 +3160,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Write ordering: comment first, then the label">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-write-is-code-not-an-instruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The write is code, not an instruction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-hand-back-footer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hand-back footer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3569,7 +3647,7 @@ anyone else is ignored. See <a href="#the-bad-actor-gate">the bad-actor gate</a>
 <tr>
 <td><code>ai-triage</code></td>
 <td>queued for automated triage</td>
-<td>analysis, <code>/retriage</code></td>
+<td><code>/admit</code>, <code>/propose</code>, <code>/revise</code>, <code>/unpark</code></td>
 <td>triage finishes</td>
 </tr>
 <tr>
@@ -3582,7 +3660,7 @@ anyone else is ignored. See <a href="#the-bad-actor-gate">the bad-actor gate</a>
 <td><code>needs-clarification</code></td>
 <td>triage could not proceed without an answer</td>
 <td>triage</td>
-<td><code>/retriage</code> after the answer</td>
+<td><code>/revise &lt;answer&gt;</code>, <code>/park</code>, or the blocker sweep</td>
 </tr>
 <tr>
 <td><code>ready-for-work</code></td>
@@ -3606,6 +3684,13 @@ anyone else is ignored. See <a href="#the-bad-actor-gate">the bad-actor gate</a>
 </table>
 <p>Plus <code>dashboard</code>, which is not a state — it marks the one live dashboard issue,
 which the pipeline never triages or works.</p>
+<p><strong>There is no <code>/retriage</code>.</strong> This table named one twice, and it has never
+existed: <code>parse_commands.COMMANDS</code> has no such entry, so typing it earns the
+unknown-command reaction rather than a re-triage. The way back to <code>ai-triage</code>
+from a question is <code>/revise &lt;your answer&gt;</code> — the one command that returns an
+issue to triage <em>with a note attached</em>, which is exactly what an answer is. The
+verb reads oddly on that route and the hand-back footer says so in plainer
+words; see <a href="#the-hand-back-footer">the footer</a>.</p>
 <p><strong>Invariant:</strong> <code>ready-for-work</code> ⇒ the issue has a milestone. Enforced at the
 <code>/approve</code> gate and re-checked by the reconciler. See
 <a href="../../intro/conventions/#the-invariant-ready-for-work-has-a-milestone">Conventions</a>.</p>
@@ -3718,7 +3803,12 @@ builder's path are refused on them — their children are the work. <code>/park<
 want.</p>
 <p>Two parsing rules worth knowing:</p>
 <ul>
-<li><strong>A command must start its line.</strong> "see /approve for details" is a mention.</li>
+<li><strong>A command must start its line</strong> — its <em>line</em>, not the comment. "see
+  /approve for details" is a mention; a sentence of explanation above
+  <code>/approve</code> is not, and applies normally. The workflow briefly filtered on
+  <code>startsWith(body, '/')</code>, which dropped exactly that case with no run, no
+  reaction and no acknowledgement — a silence indistinguishable from the
+  pipeline being broken.</li>
 <li><strong>A command inside a code fence is ignored</strong>, or writing up this table in a
   comment would execute it.</li>
 </ul>
@@ -4032,6 +4122,29 @@ clean no-op</strong> — the nightly run still picks the issue up, so a missing 
 costs latency rather than correctness, and never fails the command that caused
 it. A network error is swallowed for the same reason: the label move has
 already succeeded by then.</p>
+<h4 id="both-entry-points-fire-and-each-issue-fires-once">Both entry points fire, and each issue fires once<a class="headerlink" href="#both-entry-points-fire-and-each-issue-fires-once" title="Link to this section">&para;</a></h4>
+<p><code>run_comment_event.py</code> fires after its label write; <code>run_sweep.py</code> fires from
+both of its paths, because a cleared blocker and a requeue each land an issue in
+<code>ai-triage</code> without anyone typing a command.</p>
+<p>The sweep fires <strong>at most once per issue per pass</strong>. A revisit does not update
+the in-memory issue that reconcile then reads, so the same issue can look newly
+triageable twice in one sweep — and two fires are two triage sessions racing on
+one issue, each posting its own plan for Derek to choose between.</p>
+<p><code>fire_from_env</code> is the single place the environment variables are read, so both
+entry points poke the same Routine the same way.</p>
+<div class="admonition warning">
+<p class="admonition-title">This was described here for weeks before it was true</p>
+<p><code>fires_triage</code> and <code>fire_routine.fire</code> were both written, both unit-tested
+— and called from nowhere. The workflow passed the two secrets to a step
+that never read them, so <strong>reactive triage never fired once</strong>, on any
+issue, and everything waited for the scheduled round.</p>
+<p>Nothing surfaced it. Tests passed, because each half was correct in
+isolation; the log was green, because nothing had failed; and the fallback
+it was designed around — the nightly round — did the work quietly, which is
+exactly what it is there for. A feature whose absence looks identical to
+its fallback needs a test that the call site exists, and both entry points
+now have one.</p>
+</div>
 <h4 id="the-outcome-is-classified-truthfully">The outcome is classified truthfully<a class="headerlink" href="#the-outcome-is-classified-truthfully" title="Link to this section">&para;</a></h4>
 <p>Success requires a <strong>real fire</strong> — a response carrying a session URL. A bare
 <code>200</code> means the endpoint answered, not that the Routine ran, and reporting that
@@ -4181,6 +4294,60 @@ believes the issue is handled and it waits on a human who has nothing to read.</
 <p><code>ai-triage</code> is removed in the same write that adds the new state, so a hand-back
 rests in exactly one state. An issue carrying both gets triaged again by the
 next analysis round while it sits waiting for Derek.</p>
+<h5 id="the-write-is-code-not-an-instruction">The write is code, not an instruction<a class="headerlink" href="#the-write-is-code-not-an-instruction" title="Link to this section">&para;</a></h5>
+<p><code>hand_back.py</code> performs both writes. This used to be prose in the skill file —
+"remove <code>ai-triage</code> in the same write that adds the new state" — carried out by
+a model at the end of a long analysis, and it was skipped in practice: sixteen
+issues sat on <code>ai-triage</code> with finished plans on them, waiting for an approval
+queue they had never reached.</p>
+<p>Nothing failed when it was skipped, which is the whole problem. The comment was
+posted, so the run looked successful from outside; only the label was missing,
+and no exit code, artifact, or test reports a missing label.</p>
+<p>So it is one call that does both writes or neither:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">hand_back</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;pending-approval&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>It <strong>refuses before it writes</strong> in two cases, so a rejected hand-back leaves the
+issue exactly as it was rather than half-written:</p>
+<ul>
+<li>a state triage may not set — <code>ready-for-work</code> is Derek's, via <code>/approve</code>;</li>
+<li>an analysis the recognizer would not match, which is the state
+  <code>triage_repair</code> cannot repair and the reconciler requeues forever.</li>
+</ul>
+<p>This follows the same principle as the gatekeeper: <em>the component that can
+change state is a parser with a fixed vocabulary, not a model.</em> Triage was the
+one stage where a model applied its own label, and it was the one stage that
+silently stopped doing it.</p>
+<h5 id="the-hand-back-footer">The hand-back footer<a class="headerlink" href="#the-hand-back-footer" title="Link to this section">&para;</a></h5>
+<p>The comment ends with the commands that make sense <strong>on the route it took</strong> —
+not the whole vocabulary:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Offers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pending-approval</code></td>
+<td><code>/approve</code>, <code>/revise &lt;notes&gt;</code>, <code>/park</code></td>
+</tr>
+<tr>
+<td><code>needs-clarification</code></td>
+<td><code>/revise &lt;answer&gt;</code>, <code>/park</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>/approve</code> is deliberately absent from the second: there is no plan on that
+route, so approving would approve nothing, and an offered command that means
+something other than it appears to is worse than no footer.</p>
+<p>The glosses come from <code>render_dashboard.COMMANDS</code> rather than a second copy —
+one description of what each command does. The single exception is <code>/revise</code> on
+the clarification route, where the canonical gloss ("the plan is not right") is
+false, because triage wrote no plan. That override is the visible edge of a real
+gap in the vocabulary: there is no verb for <em>here is the answer, look again</em>,
+and <code>/revise</code> is doing that job because it is the only route back to <code>ai-triage</code>
+that carries a note.</p>
 <h4 id="re-fire-repair">Re-fire repair<a class="headerlink" href="#re-fire-repair" title="Link to this section">&para;</a></h4>
 <p>Triage runs twice more often than you would think: a sweep catches a comment
 late, a Routine is poked twice, a run crashes after posting its analysis but
@@ -4232,6 +4399,17 @@ returns the issue to <code>ai-triage</code>, triage finds the analysis it wrote 
 the label instead, reconcile returns it again. Neither side is wrong on its own
 terms, so nothing surfaces as an error — the issue just cycles. The side that
 writes the format owns the recognizer.</p>
+<p><strong>The author test is shared for the same reason, and it was the one that broke.</strong>
+<code>is_triage_author</code> lives beside the recognizer and is imported the same way. Both
+modules previously kept their own <code>TRIAGE_AUTHOR = "github-actions[bot]"</code>, while
+every real triage comment was posted by the Claude App as <code>claude[bot]</code> — so the
+author filter ran <em>before</em> the recognizer and rejected every analysis on the
+board. Two copies, both stale in the same direction, so nothing looked
+inconsistent.</p>
+<p>Triage has two surfaces and both are accepted: <code>claude[bot]</code> when it runs as the
+App, <code>github-actions[bot]</code> when it runs from a workflow holding <code>GITHUB_TOKEN</code>.
+A human's comment still never counts, which is the point of having the gate at
+all — Derek pasting a checklist is not a triage run.</p>
 <h3 id="the-io-layer">The I/O layer<a class="headerlink" href="#the-io-layer" title="Link to this section">&para;</a></h3>
 <p>Everything with a decision in it is pure and tested without a network. Three
 thin modules wire those pieces to GitHub:</p>
