@@ -174,10 +174,60 @@ manifest-file: .github/release-please/manifest.json
   false`** — plain semver, as described above.
 - **`include-component-in-tag: false`** — one package, so tags are `v0.2.0`
   rather than `multiplying-frogs-v0.2.0`.
+- **No component, and no `package-name` either** — see below. This one is not a
+  preference; setting either stops every release from being tagged.
 - **The manifest** (`.github/release-please/manifest.json`) records the last
   released version per package — `{".": "0.0.1"}`. It is generated:
   release-please updates it in its own release PR, and a hand edit tells the
   tool it already released something it didn't.
+
+### The config carries no component — and must not
+
+This is one root package with `separate-pull-requests: false`, so release-please
+names the release branch `release-please--branches--main`, with no
+`--components--` suffix. **Nothing in the config may declare a component**, and
+that means no `component` key, no `package-name` key, and
+`include-component-in-tag` left `false`.
+
+The reason is a guard inside release-please's `buildRelease`. Before tagging a
+merged release PR it compares the component it parsed out of the branch name
+against the one the config declares:
+
+| | Source | Value here |
+| --- | --- | --- |
+| `branchName.component` | the release branch name | none |
+| `getBranchComponent()` | `component`, else a normalized `package-name` | whatever you set |
+
+If those two disagree it logs `PR component: undefined does not match
+configured component: …` and **returns without building the release**. The
+release PR merges, `/VERSION`, the manifest and `CHANGELOG.md` all update — and
+then there is no tag, no GitHub release, and no APK. The workflow reports
+success, because nothing failed; the release simply was not built.
+
+!!! danger "One wrong key wedges *all* releases, not just one"
+    release-please refuses to open or update a release PR while a merged but
+    untagged one is outstanding — `There are untagged, merged release PRs
+    outstanding - aborting`. So a mismatch does not cost you one release. It
+    costs you every release after it, until the config is fixed.
+
+    It does self-heal: tagging runs before that abort, so the first push to
+    `main` after the fix tags the outstanding release retroactively, at the
+    commit its PR was merged at. **Do not make the tag by hand** — a hand-made
+    tag with no matching release and no `autorelease: tagged` label leaves
+    release-please trying to release the same version again.
+
+`include-component-in-tag: false` does **not** rescue a stray `package-name`.
+That flag is only read when composing the tag; the branch guard calls
+`getBranchComponent()`, which never looks at it.
+
+`.github/scripts/tests/test_release_please_config.py` asserts both halves of
+this at once — that nothing declares a component, *and* that no branch, tag or
+title pattern interpolates `${component}` — so the two can never fall out of
+step again. It runs in the `scripts` suite:
+
+```bash
+python3 .github/scripts/run_python_tests.py scripts
+```
 
 ### The guard test
 
