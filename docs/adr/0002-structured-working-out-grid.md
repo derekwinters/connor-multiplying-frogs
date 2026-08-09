@@ -9,13 +9,20 @@ player fills in to perform the multiplication on screen.
 ## There are exactly three problem shapes
 
 The three card piles are difficulty tiers, and the tier decides how many digits
-are being multiplied. Confirmed by Derek:
+are being multiplied. There is **one die**, and each pile is labelled with the two
+faces that send you to it — six faces split three ways, so every tier comes up a
+uniform third of the time. Confirmed by Derek:
 
-| Pile | Shape | Example |
-| --- | --- | --- |
-| Easy | 2-digit × 1-digit | `68 × 5` |
-| Medium | 2-digit × 2-digit | `22 × 41` |
-| Hard | 3-digit × 2-digit | `331 × 41` |
+| Pile | Roll | Shape | Example |
+| --- | --- | --- | --- |
+| Easy | 1 or 2 | 2-digit × 1-digit | `68 × 5` |
+| Medium | 3 or 4 | 2-digit × 2-digit | `22 × 41` |
+| Hard | 5 or 6 | 3-digit × 2-digit | `331 × 41` |
+
+The hard pile's faces are inferred by elimination rather than read off the board;
+the other two rows are stated. The uniform distribution matters for the problem
+generator, which has to reproduce the classroom game's difficulty curve rather
+than invent its own.
 
 This bounds the grid tightly, and the bound is worth stating because it is the
 difference between three layouts and a general solver. **The grid never has to
