@@ -115,5 +115,77 @@ class FlagTests(unittest.TestCase):
         self.assertEqual(api.label_writes, [])
 
 
+
+class ReactiveTriageTests(unittest.TestCase):
+    """The sweep fires too, on both of its paths.
+
+    Neither path was wired. A blocker clearing at 09:00, or a stalled issue
+    requeued at 02:00, added `ai-triage` and then waited for the *next*
+    scheduled round to notice.
+    """
+
+    def test_waking_a_blocked_issue_fires_triage(self):
+        fired = []
+        state = {
+            "issues": [issue(10, labels=("needs-clarification",), body="Blocked by #42")],
+            "snapshot": {42: {"state": "closed", "labels": []}},
+            "focus": "v0.0.1",
+        }
+        run_sweep.run(state, RecordingApi(), rerender=lambda **kw: None,
+                      fire=fired.append)
+        self.assertEqual(fired, [10])
+
+    def test_requeuing_to_triage_fires_triage(self):
+        fired = []
+        state = {"issues": [issue(10, labels=("pending-approval",), comments=[])],
+                 "focus": "v0.0.1"}
+        run_sweep.run(state, RecordingApi(), rerender=lambda **kw: None,
+                      fire=fired.append)
+        self.assertEqual(fired, [10])
+
+    def test_a_fix_that_does_not_reach_triage_does_not_fire(self):
+        """A stalled `in-progress` issue goes to `ready-for-work`, not triage."""
+        fired = []
+        analysis = {"body": "## Build checklist\n\n- [ ] x",
+                    "author": "github-actions[bot]",
+                    "created_at": "2026-08-08T10:00:00Z"}
+        state = {"issues": [issue(10, labels=("in-progress",), comments=[analysis])],
+                 "focus": "v0.0.1"}
+        run_sweep.run(state, RecordingApi(), rerender=lambda **kw: None,
+                      fire=fired.append)
+        self.assertEqual(fired, [])
+
+    def test_a_quiet_sweep_fires_nothing(self):
+        fired = []
+        analysis = {"body": "## Build checklist\n\n- [ ] x",
+                    "author": "github-actions[bot]",
+                    "created_at": "2026-08-08T10:00:00Z"}
+        state = {"issues": [issue(10, labels=("pending-approval",), comments=[analysis])],
+                 "focus": "v0.0.1"}
+        run_sweep.run(state, RecordingApi(), rerender=lambda **kw: None,
+                      fire=fired.append)
+        self.assertEqual(fired, [])
+
+    def test_an_issue_woken_and_requeued_in_one_sweep_fires_once(self):
+        """Two fires are two triage sessions racing, each posting its own plan.
+
+        A revisit does not update the in-memory issue reconcile then reads, so
+        without the guard this exact state fires twice.
+        """
+        fired = []
+        state = {
+            "issues": [issue(10, labels=("needs-clarification",), body="Blocked by #42")],
+            "snapshot": {42: {"state": "closed", "labels": []}},
+            "focus": "v0.0.1",
+        }
+        run_sweep.run(state, RecordingApi(), rerender=lambda **kw: None,
+                      fire=fired.append)
+        self.assertEqual(fired, [10])
+
+    def test_the_sweep_imports_the_fire(self):
+        source = (Path(__file__).resolve().parents[1] / "run_sweep.py").read_text()
+        self.assertIn("import fire_routine", source)
+
+
 if __name__ == "__main__":
     unittest.main()

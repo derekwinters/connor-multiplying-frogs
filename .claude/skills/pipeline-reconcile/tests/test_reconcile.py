@@ -128,12 +128,22 @@ class RequeueTriageTests(unittest.TestCase):
             findings([issue(10, labels=("pending-approval",), comments=[comment()])],
                      kind="requeue_triage"), [])
 
-    def test_a_human_comment_carrying_a_checklist_does_not_count(self):
+    def test_an_outsiders_comment_carrying_a_checklist_does_not_count(self):
         found = findings(
             [issue(10, labels=("pending-approval",),
-                   comments=[comment(author="derekwinters")])],
+                   comments=[comment(author="a-passing-contributor")])],
             kind="requeue_triage")
         self.assertEqual(len(found), 1)
+
+    def test_the_owners_own_comment_does_count(self):
+        """Triage runs under Derek's account, so his analyses are triage's.
+
+        The accepted cost: a checklist he writes by hand reads as one too.
+        """
+        self.assertEqual(
+            findings([issue(10, labels=("pending-approval",),
+                            comments=[comment(author="derekwinters")])],
+                     kind="requeue_triage"), [])
 
     def test_requeue_triage_is_omitted_on_the_event_path(self):
         """A just-triaged issue transiently has the label but not yet the comment."""
@@ -281,6 +291,31 @@ class ShapeTests(unittest.TestCase):
         """One implementation, per #65 — a second copy drifts into a loop."""
         source = (Path(__file__).resolve().parents[1] / "reconcile.py").read_text()
         self.assertNotIn("def has_analysis_signature", source)
+
+    def test_the_triage_author_set_is_imported_not_redefined(self):
+        """The copy that actually drifted: both sides said `github-actions[bot]`
+        while every real triage comment came from `claude[bot]`."""
+        source = (Path(__file__).resolve().parents[1] / "reconcile.py").read_text()
+        self.assertNotIn("TRIAGE_AUTHOR =", source)
+        self.assertNotIn("TRIAGE_AUTHORS =", source)
+
+    def test_a_claude_app_analysis_is_seen(self):
+        """The regression itself: this read as "no analysis" and requeued forever."""
+        issue = {"labels": ["pending-approval"], "comments": [
+            {"author": "claude[bot]", "body": "## Build checklist\n\n- [ ] x"}]}
+        self.assertTrue(reconcile.has_analysis(issue))
+
+    def test_an_outsiders_analysis_is_not_seen(self):
+        issue = {"labels": ["pending-approval"], "comments": [
+            {"author": "a-passing-contributor",
+             "body": "## Build checklist\n\n- [ ] x"}]}
+        self.assertFalse(reconcile.has_analysis(issue))
+
+    def test_the_owners_analysis_is_seen(self):
+        """Triage posted as `derekwinters` on #83 and #169, not only as a bot."""
+        issue = {"labels": ["pending-approval"], "comments": [
+            {"author": "derekwinters", "body": "## Build checklist\n\n- [ ] x"}]}
+        self.assertTrue(reconcile.has_analysis(issue))
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import apply_actions  # noqa: E402
 import fetch_comment_event  # noqa: E402
+import fire_routine  # noqa: E402
 import gates  # noqa: E402
 import parse_commands  # noqa: E402
 from _github_api import (  # noqa: E402
@@ -41,7 +42,7 @@ class Result:
         return f"Result(applied={self.applied!r}, {self.detail!r})"
 
 
-def run(event: dict, api, owner: str, rerender=None) -> Result:
+def run(event: dict, api, owner: str, rerender=None, fire=None) -> Result:
     """One comment, one pass. Never raises on an ordinary refusal."""
     snapshot = fetch_comment_event.build(event, api, owner)
 
@@ -75,6 +76,13 @@ def run(event: dict, api, owner: str, rerender=None) -> Result:
 
     if changed_labels:
         set_labels(api, issue["number"], plan.labels)
+
+    # After the label write, never before: triage reads the issue's labels, and
+    # firing first would hand it one that is not in `ai-triage` yet. Only when
+    # `ai-triage` is NEWLY present, or a replay turns one stuck comment into a
+    # triage run on every sweep.
+    if apply_actions.fires_triage(issue["labels"], plan.labels):
+        (fire or fire_routine.fire_from_env)(issue["number"])
 
     acknowledgement = apply_actions.acknowledgement(actions, skips)
     if acknowledgement:

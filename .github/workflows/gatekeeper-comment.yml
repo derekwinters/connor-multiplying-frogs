@@ -35,11 +35,22 @@ jobs:
     # costs nothing. The script re-checks the author itself as defense in
     # depth — a script that is safe only because this `if:` filtered for it is
     # one careless edit away from not being safe at all.
+    #
+    # **No filter on the body.** There was a `startsWith(…body, '/')` here, and
+    # it was stricter than the contract it was filtering for: a command has to
+    # start its *line*, not the comment, precisely so you can explain yourself
+    # in the same comment. Under that filter this was silently dropped —
+    #
+    #     Looks right to me.
+    #     /approve
+    #
+    # — with no run, no reaction and no ack, which is indistinguishable from
+    # the pipeline being broken. `parse_commands` already ignores a comment
+    # with no command in it, at the cost of one cheap job.
     if: >-
       github.event.comment.user.login == github.repository_owner &&
       github.event.comment.user.type != 'Bot' &&
-      !github.event.issue.pull_request &&
-      startsWith(github.event.comment.body, '/')
+      !github.event.issue.pull_request
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

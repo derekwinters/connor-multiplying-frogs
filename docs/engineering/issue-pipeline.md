@@ -37,15 +37,23 @@ Exactly one state label per open issue.
 | State | Meaning | Set by | Leaves when |
 | --- | --- | --- | --- |
 | *(none)* | brand new, not yet seen | issue creation | triage picks it up |
-| `ai-triage` | queued for automated triage | analysis, `/retriage` | triage finishes |
+| `ai-triage` | queued for automated triage | `/admit`, `/propose`, `/revise`, `/unpark` | triage finishes |
 | `pending-approval` | triaged; waiting on a human | triage | `/approve`, `/park` |
-| `needs-clarification` | triage could not proceed without an answer | triage | `/retriage` after the answer |
+| `needs-clarification` | triage could not proceed without an answer | triage | `/revise <answer>`, `/park`, or the blocker sweep |
 | `ready-for-work` | approved and eligible for the builder | `/approve` | the builder picks it up |
 | `in-progress` | an agent is building it right now | the builder | its PR merges, or it fails |
 | `parked` | deliberately set aside | `/park` | `/unpark` |
 
 Plus `dashboard`, which is not a state — it marks the one live dashboard issue,
 which the pipeline never triages or works.
+
+**There is no `/retriage`.** This table named one twice, and it has never
+existed: `parse_commands.COMMANDS` has no such entry, so typing it earns the
+unknown-command reaction rather than a re-triage. The way back to `ai-triage`
+from a question is `/revise <your answer>` — the one command that returns an
+issue to triage *with a note attached*, which is exactly what an answer is. The
+verb reads oddly on that route and the hand-back footer says so in plainer
+words; see [the footer](#the-hand-back-footer).
 
 **Invariant:** `ready-for-work` ⇒ the issue has a milestone. Enforced at the
 `/approve` gate and re-checked by the reconciler. See
@@ -108,7 +116,12 @@ want.
 
 Two parsing rules worth knowing:
 
-- **A command must start its line.** "see /approve for details" is a mention.
+- **A command must start its line** — its *line*, not the comment. "see
+  /approve for details" is a mention; a sentence of explanation above
+  `/approve` is not, and applies normally. The workflow briefly filtered on
+  `startsWith(body, '/')`, which dropped exactly that case with no run, no
+  reaction and no acknowledgement — a silence indistinguishable from the
+  pipeline being broken.
 - **A command inside a code fence is ignored**, or writing up this table in a
   comment would execute it.
 
@@ -432,6 +445,34 @@ costs latency rather than correctness, and never fails the command that caused
 it. A network error is swallowed for the same reason: the label move has
 already succeeded by then.
 
+#### Both entry points fire, and each issue fires once
+
+`run_comment_event.py` fires after its label write; `run_sweep.py` fires from
+both of its paths, because a cleared blocker and a requeue each land an issue in
+`ai-triage` without anyone typing a command.
+
+The sweep fires **at most once per issue per pass**. A revisit does not update
+the in-memory issue that reconcile then reads, so the same issue can look newly
+triageable twice in one sweep — and two fires are two triage sessions racing on
+one issue, each posting its own plan for Derek to choose between.
+
+`fire_from_env` is the single place the environment variables are read, so both
+entry points poke the same Routine the same way.
+
+!!! warning "This was described here for weeks before it was true"
+
+    `fires_triage` and `fire_routine.fire` were both written, both unit-tested
+    — and called from nowhere. The workflow passed the two secrets to a step
+    that never read them, so **reactive triage never fired once**, on any
+    issue, and everything waited for the scheduled round.
+
+    Nothing surfaced it. Tests passed, because each half was correct in
+    isolation; the log was green, because nothing had failed; and the fallback
+    it was designed around — the nightly round — did the work quietly, which is
+    exactly what it is there for. A feature whose absence looks identical to
+    its fallback needs a test that the call site exists, and both entry points
+    now have one.
+
 #### The outcome is classified truthfully
 
 Success requires a **real fire** — a response carrying a session URL. A bare
@@ -570,6 +611,58 @@ believes the issue is handled and it waits on a human who has nothing to read.
 rests in exactly one state. An issue carrying both gets triaged again by the
 next analysis round while it sits waiting for Derek.
 
+##### The write is code, not an instruction
+
+`hand_back.py` performs both writes. This used to be prose in the skill file —
+"remove `ai-triage` in the same write that adds the new state" — carried out by
+a model at the end of a long analysis, and it was skipped in practice: sixteen
+issues sat on `ai-triage` with finished plans on them, waiting for an approval
+queue they had never reached.
+
+Nothing failed when it was skipped, which is the whole problem. The comment was
+posted, so the run looked successful from outside; only the label was missing,
+and no exit code, artifact, or test reports a missing label.
+
+So it is one call that does both writes or neither:
+
+```python
+hand_back.apply(api, 47, analysis, labels, "pending-approval")
+```
+
+It **refuses before it writes** in two cases, so a rejected hand-back leaves the
+issue exactly as it was rather than half-written:
+
+- a state triage may not set — `ready-for-work` is Derek's, via `/approve`;
+- an analysis the recognizer would not match, which is the state
+  `triage_repair` cannot repair and the reconciler requeues forever.
+
+This follows the same principle as the gatekeeper: *the component that can
+change state is a parser with a fixed vocabulary, not a model.* Triage was the
+one stage where a model applied its own label, and it was the one stage that
+silently stopped doing it.
+
+##### The hand-back footer
+
+The comment ends with the commands that make sense **on the route it took** —
+not the whole vocabulary:
+
+| Route | Offers |
+| --- | --- |
+| `pending-approval` | `/approve`, `/revise <notes>`, `/park` |
+| `needs-clarification` | `/revise <answer>`, `/park` |
+
+`/approve` is deliberately absent from the second: there is no plan on that
+route, so approving would approve nothing, and an offered command that means
+something other than it appears to is worse than no footer.
+
+The glosses come from `render_dashboard.COMMANDS` rather than a second copy —
+one description of what each command does. The single exception is `/revise` on
+the clarification route, where the canonical gloss ("the plan is not right") is
+false, because triage wrote no plan. That override is the visible edge of a real
+gap in the vocabulary: there is no verb for *here is the answer, look again*,
+and `/revise` is doing that job because it is the only route back to `ai-triage`
+that carries a note.
+
 #### Re-fire repair
 
 Triage runs twice more often than you would think: a sweep catches a comment
@@ -608,6 +701,19 @@ returns the issue to `ai-triage`, triage finds the analysis it wrote and repairs
 the label instead, reconcile returns it again. Neither side is wrong on its own
 terms, so nothing surfaces as an error — the issue just cycles. The side that
 writes the format owns the recognizer.
+
+**The author test is shared for the same reason, and it was the one that broke.**
+`is_triage_author` lives beside the recognizer and is imported the same way. Both
+modules previously kept their own `TRIAGE_AUTHOR = "github-actions[bot]"`, while
+every real triage comment was posted by the Claude App as `claude[bot]` — so the
+author filter ran *before* the recognizer and rejected every analysis on the
+board. Two copies, both stale in the same direction, so nothing looked
+inconsistent.
+
+Triage has two surfaces and both are accepted: `claude[bot]` when it runs as the
+App, `github-actions[bot]` when it runs from a workflow holding `GITHUB_TOKEN`.
+A human's comment still never counts, which is the point of having the gate at
+all — Derek pasting a checklist is not a triage run.
 
 ### The I/O layer
 

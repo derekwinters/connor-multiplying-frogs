@@ -46,10 +46,41 @@ STATE_LABELS = {
     "parked",
 }
 
-# Comments this login authored are triage's. A human pasting a checklist by hand
-# is not a triage run, and treating it as one would let a well-meaning comment
-# suppress the analysis the issue is actually waiting for.
-TRIAGE_AUTHOR = "github-actions[bot]"
+# Comments these logins authored are triage's. A human pasting a checklist by
+# hand is not a triage run, and treating it as one would let a well-meaning
+# comment suppress the analysis the issue is actually waiting for.
+#
+# **All three, because triage has three surfaces**, confirmed against the board:
+#
+# | Login | When |
+# | --- | --- |
+# | `claude[bot]` | triage running as the Claude GitHub App — #4, #147 |
+# | `derekwinters` | triage running in a session under Derek's own account — #83, #169 |
+# | `github-actions[bot]` | triage running from a workflow holding `GITHUB_TOKEN` |
+#
+# All three posted analyses in the same round on 9 Aug. Accepting only one is
+# not a stricter rule, it is a broken one: this set read `github-actions[bot]`
+# alone while no analysis had ever come from it, so `has_analysis_signature` was
+# never reached and the pipeline believed no issue had been analyzed at all.
+#
+# **The cost of including the owner, stated plainly.** A `## Build checklist`
+# Derek writes by hand now reads as a triage analysis, and will suppress the
+# analysis the issue is actually waiting for. That is accepted deliberately —
+# triage genuinely runs under his account, so excluding him would leave a third
+# of hand-backs invisible, which is the worse failure. Derek's call, taken
+# knowing the trade.
+TRIAGE_AUTHORS = frozenset({"claude[bot]", "derekwinters", "github-actions[bot]"})
+
+
+def is_triage_author(login) -> bool:
+    """Did triage write this, by its own hand?
+
+    The one definition. `pipeline-reconcile` imports it rather than keeping a
+    copy — the same rule, and the same reason, as `has_analysis_signature`
+    below: two copies of "was this triage" drift, and the drift is a cycle
+    neither side reports.
+    """
+    return (login or "").lower() in TRIAGE_AUTHORS
 
 # An owner note that objects to the plan. Repairing the label would apply the
 # state the rejected plan asked for and drop the objection on the floor.
@@ -87,7 +118,7 @@ def analysis_comment_times(comments) -> list:
     times = [
         comment.get("created_at") or ""
         for comment in comments or []
-        if (comment.get("author") or "").lower() == TRIAGE_AUTHOR.lower()
+        if is_triage_author(comment.get("author"))
         and has_analysis_signature(comment.get("body"))
     ]
 

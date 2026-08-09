@@ -34,7 +34,7 @@ _TRIAGE_SKILL = Path(__file__).resolve().parents[1] / "triage-issue"
 if str(_TRIAGE_SKILL) not in sys.path:
     sys.path.insert(0, str(_TRIAGE_SKILL))
 
-from triage_repair import has_analysis_signature  # noqa: E402
+from triage_repair import has_analysis_signature, is_triage_author  # noqa: E402
 
 TRIAGE_LABEL = "ai-triage"
 READY_LABEL = "ready-for-work"
@@ -56,8 +56,6 @@ STATE_LABELS = {
 # overrule a human.
 ANALYZED_STATES = {"pending-approval", "needs-clarification", READY_LABEL,
                    IN_PROGRESS_LABEL}
-
-TRIAGE_AUTHOR = "github-actions[bot]"
 
 TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$",
                           re.IGNORECASE | re.MULTILINE)
@@ -113,7 +111,7 @@ def has_open_pr(issue_number: int, pulls) -> bool:
 def has_analysis(issue) -> bool:
     """Did triage analyze this issue — by triage's own hand?"""
     return any(
-        (comment.get("author") or "").lower() == TRIAGE_AUTHOR.lower()
+        is_triage_author(comment.get("author"))
         and has_analysis_signature(comment.get("body"))
         for comment in issue.get("comments") or []
     )
