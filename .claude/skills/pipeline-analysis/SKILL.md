@@ -1,6 +1,6 @@
 ---
 name: pipeline-analysis
-description: Run a triage round — find every issue waiting for triage and dispatch dw-triage-issue once per issue. Use for the nightly backstop round, or when asked to triage everything untriaged.
+description: Run a triage round — find every issue waiting for triage and dispatch triage-issue once per issue. Use for the nightly backstop round, or when asked to triage everything untriaged.
 ---
 
 # pipeline-analysis
@@ -13,15 +13,15 @@ export GITHUB_REPOSITORY=derekwinters/connor-multiplying-frogs
 # 1. Who needs triage, and what does each one carry into it?
 python3 .claude/skills/pipeline-analysis/select_triage.py < issues.json
 
-# 2. One dw-triage-issue invocation per eligible issue, bounded concurrency.
-#      dw-triage-issue 47
-#      dw-triage-issue 51
+# 2. One triage-issue invocation per eligible issue, bounded concurrency.
+#      triage-issue 47
+#      triage-issue 51
 #      ...
 ```
 
 ## This skill writes nothing
 
-**Every write belongs to `dw-triage-issue`.** No labels, no comments, no milestones,
+**Every write belongs to `triage-issue`.** No labels, no comments, no milestones,
 no summary comment saying what the round did. The dispatcher's entire output is
 having invoked the single-issue skill the right number of times.
 
@@ -31,7 +31,7 @@ across every issue in the queue, in a way no single triage run could produce.
 Keeping the loop empty means a bad night is a set of independently-bad issues,
 each one reviewable and fixable on its own.
 
-It also keeps `dw-triage-issue` genuinely standalone. Reactive triage invokes it
+It also keeps `triage-issue` genuinely standalone. Reactive triage invokes it
 directly with no dispatcher anywhere in sight, and that only works while the
 dispatcher owns nothing the single-issue skill needs.
 
@@ -51,7 +51,7 @@ without a live repo.
 
 ## Step 2 — dispatch, with concurrency chosen above
 
-Invoke `dw-triage-issue` once per eligible issue, several at a time.
+Invoke `triage-issue` once per eligible issue, several at a time.
 
 **The concurrency limit is set by the orchestration layer, not written into the
 script.** `select_triage.py` reports what needs triage; it has no opinion on how
@@ -74,7 +74,7 @@ round for it.
 | --- | --- | --- |
 | Trigger | nightly, 02:00 UTC | `ai-triage` newly added |
 | Scope | every eligible issue | exactly one issue |
-| Runs this skill? | yes | **no** — `dw-triage-issue` directly |
+| Runs this skill? | yes | **no** — `triage-issue` directly |
 
 **Reactive triage is the normal path.** Filing an issue and getting triage hours
 later is a bad experience when the person who filed it is sitting right there,
@@ -104,5 +104,5 @@ pure-`process` / stdin-stdout shape. No network in any of them.
 
 ## See also
 
-- `dw-triage-issue` — everything this skill dispatches to
+- `triage-issue` — everything this skill dispatches to
 - `docs/engineering/issue-pipeline.md` — the stage, the schedule, reactive fire

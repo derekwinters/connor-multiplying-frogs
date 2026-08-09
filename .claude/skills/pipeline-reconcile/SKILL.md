@@ -123,11 +123,11 @@ python3 .github/scripts/run_python_tests.py pipeline-reconcile
 
 37 tests. Two are worth knowing about: one asserts no finding can ever close an
 issue, and one reads this module's source to assert it does not define its own
-`has_analysis_signature` — that recognizer is imported from `dw-triage-issue`,
+`has_analysis_signature` — that recognizer is imported from `triage-issue`,
 because two copies drift into a requeue↔repair loop that reports no error.
 
 ## See also
 
-- `dw-triage-issue` — owns `has_analysis_signature`
+- `triage-issue` — owns `has_analysis_signature`
 - `pipeline-dashboard` — renders the flags
 - `docs/engineering/issue-pipeline.md` — the stage and the schedule

@@ -30,7 +30,7 @@ from pathlib import Path
 # this sweep sees no analysis and requeues to `ai-triage`, triage sees the
 # analysis it wrote and only repairs the label, and the issue cycles forever
 # with neither side reporting an error. See #65.
-_TRIAGE_SKILL = Path(__file__).resolve().parents[1] / "dw-triage-issue"
+_TRIAGE_SKILL = Path(__file__).resolve().parents[1] / "triage-issue"
 if str(_TRIAGE_SKILL) not in sys.path:
     sys.path.insert(0, str(_TRIAGE_SKILL))
 

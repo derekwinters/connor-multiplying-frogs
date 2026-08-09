@@ -115,17 +115,21 @@ with a skill from outside this repo.** Most of our skills need no prefix:
 unambiguously already, and a prefix on a name nobody could mistake is noise in
 every directory listing.
 
-Two skills carry it today, and both earned it by colliding:
+One skill carries it today, and it earned it by colliding:
 
 | Skill | Would be confused with |
 | --- | --- |
-| `dw-triage-issue` | `triage`, vendored from `mattpocock/skills` |
 | `dw-run-tests` | `run`, a built-in skill |
 
-Neither is an exact name clash — both are the *near* miss, which is the one that
-actually bites. Asked to "run the tests" or to "triage this issue", an agent
-picking by name alone can reach for the wrong one, and the wrong one does not
-know about our labels, our milestones, or our Core suite.
+It is not an exact name clash — it is the *near* miss, which is the one that
+actually bites. Asked to "run the tests", an agent picking by name alone can
+reach for the wrong one, and the wrong one does not know about our Core suite.
+
+**The prefix comes off when the collision goes away.** `triage-issue` carried it
+while a vendored `triage` skill sat beside it; that skill has since been removed,
+so the prefix was marking a collision that no longer existed — which is worse
+than no prefix at all, because it tells a reader to go looking for a rival skill
+they will not find.
 
 **Before naming a new skill, check for collisions** — against the vendored names
 in `.claude/.skills-manifest.json` and against the skills the harness already
