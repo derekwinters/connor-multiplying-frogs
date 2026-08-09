@@ -11,9 +11,23 @@ you are about to open a wireframe issue.
 
 ## Screens
 
-*No screens specified yet.* The game concept is still being settled in
-[issue #7](https://github.com/derekwinters/connor-multiplying-frogs/issues/7),
-and every screen page arrives through its own `Wireframe:` issue.
+Every screen and every dialog in v1, in the order a game meets them.
+
+| Page | What it is |
+| --- | --- |
+| [Title screen](title-screen.md) | The way in. One button. |
+| [Game setup](game-setup.md) | Which frogs are playing, and in what order |
+| [Game board](game-board.md) | The pond, the lanes, and `Roll` |
+| [Roll and card](roll-and-card.md) | The die, the pile it maps to, the card you drew |
+| [Working-out grid](working-out-grid.md) | The grid and keypad you answer on |
+| [Answer result](answer-result.md) | Right or wrong, and what your frog does |
+| [Settings dialog](settings-dialog.md) | The rules, the exit, the version |
+| [End-game confirm](end-game-confirm.md) | The one dialog that can end everybody's game |
+| [Game over](game-over.md) | Who won, and where everybody got to |
+
+Every one of these is designed at **1920 × 1200, landscape** — the target is a
+kids' Android tablet, and that is the one canvas every layout is drawn against.
+See [target platform](../../engineering/tech-stack.md#target-platform).
 
 ## Shared components
 

@@ -1,19 +1,42 @@
 # Mockups
 
-The committed 1:1 HTML mockups. Each is a static page sized to the target phone
-viewport, showing a screen's real elements at their real proportions.
+The committed 1:1 HTML mockups. Each is a static page sized to the target tablet
+viewport — **1920 × 1200, landscape** — showing a screen's real elements at their
+real proportions.
 
-Open one on a phone. That is what it is for — a mockup judged on a laptop is a
-mockup judged at the wrong size, and size is most of what a wireframe decides.
+Open one on the tablet. That is what it is for — a mockup judged on a laptop is
+a mockup judged at the wrong size, and size is most of what a wireframe decides.
 
 ## Committed mockups
 
 | Screen | Mockup | Spec page |
 | --- | --- | --- |
-| *(none yet)* | | |
+| Title screen | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
+| Game setup | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
+| Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
+| Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
+| Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
+| Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
+| Answer result — right | [`answer-result-right.html`](answer-result-right.html) | [Answer result](../answer-result.md) |
+| Answer result — wrong | [`answer-result-wrong.html`](answer-result-wrong.html) | [Answer result](../answer-result.md) |
+| Settings dialog | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
+| End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
+| Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
+
+Two screens have two mockups each, and for the same reason both times: a state
+that only exists in contrast is a state you have to see next to its opposite.
+The grid is drawn at the biggest and the smallest problem the game can deal, and
+the result dialog is drawn right and wrong.
 
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
+
+### Colour in these mockups is a placeholder
+
+The four frog colours exist so the frogs can be told apart in a picture, and the
+single green accent marks the primary action. Neither is a palette decision —
+that is an `area:art` call and it lands with the frog sprites. See
+[frog colours](../shared-components.md#frog-colours).
 
 ## What a mockup is, and is not
 

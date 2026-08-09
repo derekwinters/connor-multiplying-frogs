@@ -1,0 +1,110 @@
+# Answer result
+
+Right or wrong, what the number was, and what your frog does about it.
+
+## Invariants
+
+**Invariant:** on a wrong answer the **correct answer is revealed and the
+working is not**. Showing worked partial products would quietly make one
+method canonical, which is the thing
+[ADR-0002](../../adr/0002-structured-working-out-grid.md) rules out.
+**Invariant:** right or wrong is never signalled by colour alone — the mark,
+the words, and the movement all say it.
+**Invariant:** the movement is stated before it happens, in words, and the frog
+then visibly makes that move on the board once this dialog closes. The player
+is told what will happen and then watches it happen.
+**Invariant:** a wrong answer on the Start log moves nothing and says so. The
+Start log is a floor, not a special space — see
+[the reference material](../reference/index.md#the-start-log-is-a-floor-not-a-special-space).
+**Invariant:** this dialog cannot be dismissed, and its only button hands the
+turn on.
+
+## Regions
+
+| Region | Job |
+| --- | --- |
+| `mark` | The tick or the cross |
+| `verdict` | The headline — the sum, or that it was wrong |
+| `consequence` | One sentence: what the frog does |
+| `chip` | The player chip, showing the move as `pad 3 → 4` |
+| `controls` | The hand-on button |
+
+## Anchors
+
+A centred [dialog](shared-components.md#dialog), `ResultDialogWidth` by
+`ResultDialogHeight`. `mark` is pinned top-left of the panel's padding box;
+`verdict` and `consequence` sit to its right in a column; `chip` below the
+mark; `controls` bottom-right.
+
+Both states use the same panel size and the same anchors, so the dialog does not
+resize or reflow between a right answer and a wrong one. Two dialogs that jump
+about are two dialogs a child reads as two different things happening.
+
+## Named constants
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| Dialog width | `ResultDialogWidth` | 1100 px |
+| Dialog height | `ResultDialogHeight` | 620 px |
+| Mark diameter | `ResultMarkSize` | 180 px |
+| Mark glyph size | `ResultMarkGlyphSize` | 110 px |
+| Verdict size | `ResultVerdictSize` | 76 px |
+| Consequence size | `ResultConsequenceSize` | 48 px |
+| Consequence column width | `ResultTextWidth` | 760 px |
+| Hold before the frog hops | `ResultHopDelay` | 0.2 s |
+
+## Elements
+
+| | **Right** | **Wrong** |
+| --- | --- | --- |
+| Mark | Filled tick | Outlined cross |
+| Verdict | `331 × 41 = 13,571` | `Not this time` |
+| Consequence | `Right! Green hops forward one lily pad.` | `331 × 41 = 13,571. Green hops back one lily pad.` |
+| Chip | `pad 3 → 4` | `pad 3 → 2` |
+| Button | `Blue's turn` | `Blue's turn` |
+
+The wrong state leads with *Not this time* rather than with the number, because
+the first thing a child reads should not be the size of their mistake. The
+correct answer is in the next line, where it teaches instead of stings.
+
+The button is named for **the next player**, not `OK`. On a shared tablet the
+useful information at the end of a turn is whose turn it is now, and a button
+that says it is a button that passes the device to the right person.
+
+### The three consequence sentences
+
+| Situation | Sentence |
+| --- | --- |
+| Right | `<Colour> hops forward one lily pad.` |
+| Wrong, above the Start log | `<Colour> hops back one lily pad.` |
+| Wrong, on the Start log | `<Colour> stays on the Start log.` |
+
+Three, not two. The third is the floor rule, and writing it as its own sentence
+is how the layout proves it was thought about rather than left as an
+off-by-one.
+
+## Behaviour
+
+- Entering from [working-out grid](working-out-grid.md) when `Check it` is
+  pressed.
+- Nothing is decided here. Core has already compared the answer and computed
+  the new position; this dialog reads it out.
+- The button closes the dialog, waits `ResultHopDelay`, and the frog hops on the
+  [game board](game-board.md) over `FrogHopDuration`. Then the next player's
+  turn begins.
+- If that hop puts a frog on the End log, its chip switches to `Home` and play
+  continues with the remaining frogs.
+- Hardware back does nothing.
+
+## Mockup
+
+- **Right:** [`mockups/answer-result-right.html`](mockups/answer-result-right.html)
+- **Wrong:** [`mockups/answer-result-wrong.html`](mockups/answer-result-wrong.html)
+
+## Open questions
+
+- **Does a right answer get any celebration beyond the hop?** Audio is
+  [parked](../future-ideas.md), and a "correct" chime is the most likely parked
+  item to be promoted. If it is, this is the screen it plays on.
+- **Should the wrong state offer to show the working?** Ruled out by ADR-0002 —
+  noted here so it is not re-proposed as a kindness.
