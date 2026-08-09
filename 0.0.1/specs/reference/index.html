@@ -855,6 +855,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What the photograph does not settle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frogs-are-independent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frogs are independent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-start-log-is-a-floor-not-a-special-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Start log is a floor, not a special space
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#still-unsettled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still unsettled
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-v1-fills-a-gap-the-board-leaves-open" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where v1 fills a gap the board leaves open
+      
+    </span>
+  </a>
+  
 </li>
       
     </ul>
@@ -1673,6 +1723,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What the photograph does not settle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frogs-are-independent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frogs are independent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-start-log-is-a-floor-not-a-special-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Start log is a floor, not a special space
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#still-unsettled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still unsettled
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-v1-fills-a-gap-the-board-leaves-open" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where v1 fills a gap the board leaves open
+      
+    </span>
+  </a>
+  
 </li>
       
     </ul>
@@ -1790,18 +1890,68 @@ beside each pile:</p>
 <p>Two faces per pile, so each difficulty comes up a uniform <strong>⅓</strong> of the time.
 That distribution is what the problem generator has to reproduce.</p>
 <h2 id="what-the-photograph-does-not-settle">What the photograph does not settle<a class="headerlink" href="#what-the-photograph-does-not-settle" title="Link to this section">&para;</a></h2>
-<p>Tracked in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/170">issue #170</a>:</p>
+<p>Two of these were confirmed by Derek in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/170">issue #170</a>
+after the photograph was taken. They are rules of the classroom game, recorded
+here because the board alone does not show them.</p>
+<h3 id="frogs-are-independent">Frogs are independent<a class="headerlink" href="#frogs-are-independent" title="Link to this section">&para;</a></h3>
+<p>Every player keeps their own lane for the whole game. Frogs never share a lane,
+never pass one another, and never interact. Eight lanes, eight frogs, one each.</p>
+<p>A player's entire state is therefore one number — how far up their own lane they
+are. There is no board state beyond that: no collisions, no blocking, no ordering
+between frogs.</p>
+<h3 id="the-start-log-is-a-floor-not-a-special-space">The Start log is a floor, not a special space<a class="headerlink" href="#the-start-log-is-a-floor-not-a-special-space" title="Link to this section">&para;</a></h3>
+<p>A wrong answer moves you back one lily pad, exactly as the rules card says. The
+Start log is simply the bottom of the lane, so a wrong answer there leaves you
+where you are.</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Correct</td>
+<td>Forward one lily pad</td>
+</tr>
+<tr>
+<td>Wrong, anywhere above the Start log</td>
+<td>Back one lily pad</td>
+</tr>
+<tr>
+<td>Wrong, on the Start log</td>
+<td>Stay</td>
+</tr>
+</tbody>
+</table>
+<p>A clamp at the bottom rather than a special case. Worth stating precisely,
+because "move back one" written without a floor is an off-by-one waiting to
+happen.</p>
+<h2 id="still-unsettled">Still unsettled<a class="headerlink" href="#still-unsettled" title="Link to this section">&para;</a></h2>
 <ul>
-<li>Whether frogs are truly independent — one lane each, never sharing or
-  interacting. Strongly implied by eight lanes and eight frogs.</li>
-<li>What happens on a wrong answer while on the Start log.</li>
-<li>Whether play continues after the first frog reaches the End log.</li>
+<li><strong>What the classroom game does after the first frog finishes.</strong> The card says
+  only "First one to the end wins!" and stops there. Whether Connor's class keeps
+  playing for second place is not recorded on the board or the card, and has not
+  been recalled — so it stays unknown. v1 does not wait on it; see below.</li>
+<li><strong>The full card deck is not photographed.</strong> The game generates problems rather
+  than shipping the classroom deck, and the generator's constraints have to be
+  derived from the real cards —
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/171">issue #171</a>.</li>
 </ul>
-<p>The full card deck is also not photographed. The game generates problems rather
-than shipping the classroom deck, and the generator's constraints have to come
-from the real cards —
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/171">issue #171</a>.</p>
+<h2 id="where-v1-fills-a-gap-the-board-leaves-open">Where v1 fills a gap the board leaves open<a class="headerlink" href="#where-v1-fills-a-gap-the-board-leaves-open" title="Link to this section">&para;</a></h2>
+<p>Recorded here so nobody later mistakes it for something the classroom game says.</p>
+<p><strong>Play continues after the first frog reaches the End log.</strong> The first frog home
+wins; the others keep taking turns. Derek's provisional call — <em>"for now"</em> — made
+because the board does not settle it, not because the board says so.</p>
+<p><strong>A game can be ended deliberately.</strong> Because play continues past the winner,
+a session needs a way to stop that isn't "everyone eventually finishes": a quit
+or end-game flow. This is purely ours — a cardboard game ends when you close the
+box, so there is nothing to be faithful to.</p>
+<p>Two things this leaves for whoever specifies it: whether the game also ends <em>on
+its own</em> once every frog is home, and who may trigger a quit when four players
+share one device. Neither is settled here.</p>
 
 
 
