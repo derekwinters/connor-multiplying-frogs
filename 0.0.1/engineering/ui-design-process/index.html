@@ -1899,6 +1899,10 @@
 
 <h1 id="ui-design-process">UI design process<a class="headerlink" href="#ui-design-process" title="Link to this section">&para;</a></h1>
 <p><strong>No UI gets built without an approved wireframe. Not even graybox.</strong></p>
+<p><strong>Every layout and every dialog.</strong> Not just the big screens — a confirm box, a
+toast, an end-of-turn panel each get their own wireframe. A dialog is the
+easiest thing to slip in without one and, being small, the easiest to get
+wrong in a way nobody notices until Connor is holding it.</p>
 <p>UI is the part of this game Connor has the strongest opinions about and the part
 that is most expensive to redo. A layout argued about as a picture costs an
 evening; the same argument had about working code costs the code.</p>
@@ -1943,10 +1947,14 @@ does, and — critically — the <strong>named constants</strong> that define it
 <p>A <strong>1:1 HTML mockup</strong>: a static page sized to the target device, laying out the
 real elements at the real proportions.</p>
 <ul>
+<li><strong>1920 × 1200, landscape.</strong> That is the target device — a kids' Android
+  tablet — and it is the viewport every mockup is drawn at. See
+  <a href="../tech-stack/#target-platform">target platform</a>.</li>
 <li>1:1 because "roughly this" is how a button ends up too small for an
-  eight-year-old's thumb. Sized to a real phone viewport, in the real units.</li>
-<li>HTML because it opens in a browser on a phone. Connor can look at the actual
-  thing at the actual size, on the device he plays on, and say it's wrong.</li>
+  eight-year-old's thumb. Real viewport, real units.</li>
+<li>HTML because it opens in a browser on the tablet itself. Connor can look at
+  the actual thing at the actual size, on the device he plays on, and say it's
+  wrong.</li>
 <li>Static. No behaviour, no framework, no build step. It is a picture that
   happens to be made of divs.</li>
 </ul>

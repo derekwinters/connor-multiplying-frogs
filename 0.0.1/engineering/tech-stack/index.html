@@ -1306,6 +1306,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-settings-above-are-applied-by-the-build-not-stored-in-the-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The settings above are applied by the build, not stored in the repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1897,6 +1908,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-settings-above-are-applied-by-the-build-not-stored-in-the-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The settings above are applied by the build, not stored in the repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2208,8 +2230,9 @@ guessed at now.</p>
    in the same PR, so the migration is reviewed rather than discovered.</li>
 </ol>
 <h2 id="target-platform">Target platform<a class="headerlink" href="#target-platform" title="Link to this section">&para;</a></h2>
-<p><strong>Android phones.</strong> That is the platform, singular. Connor plays on a phone;
-that is who the game is for.</p>
+<p><strong>Android tablets, held landscape.</strong> Phones still run it — same OS, same
+architecture, same APK — but the tablet is the device the game is designed
+around, because that is what kids play on.</p>
 <table>
 <thead>
 <tr>
@@ -2220,7 +2243,11 @@ that is who the game is for.</p>
 <tbody>
 <tr>
 <td>Primary target</td>
-<td>Android, ARM64 (<code>arm64-v8a</code>)</td>
+<td>Android tablets, ARM64 (<code>arm64-v8a</code>)</td>
+</tr>
+<tr>
+<td>Also runs on</td>
+<td>Android phones</td>
 </tr>
 <tr>
 <td>Scripting backend</td>
@@ -2232,7 +2259,11 @@ that is who the game is for.</p>
 </tr>
 <tr>
 <td>Orientation</td>
-<td>Portrait</td>
+<td>Landscape only (both ways up)</td>
+</tr>
+<tr>
+<td>Reference resolution</td>
+<td>1920 × 1200 (16:10)</td>
 </tr>
 <tr>
 <td>Output</td>
@@ -2240,9 +2271,23 @@ that is who the game is for.</p>
 </tr>
 </tbody>
 </table>
+<p>This page previously said <em>"Android phones. That is the platform, singular"</em>
+and specified portrait, on the reasoning that the game is played one-handed on
+a phone. <strong>Derek changed it</strong>: the game is primarily for kids' tablets, and a
+tablet is held in landscape. The old rule's reasoning did not survive the
+change of device, so both the device and the orientation moved together.</p>
+<p>Portrait is not ruled out forever — but supporting it means designing a second
+layout for every screen, which is the same argument the portrait-only rule used
+to make in reverse. It stays off until a wireframe specifies one.</p>
+<p><strong>1920 × 1200 is the resolution every layout is designed at.</strong> It is 16:10,
+which is the common kids'-tablet shape, and it is the viewport every UI mockup
+is drawn at — see <a href="../ui-design-process/">the UI design process</a>. Devices that
+are not exactly this still run the game; the number exists so that layouts are
+designed against one agreed canvas instead of each being guessed at separately.</p>
 <h3 id="two-build-profiles">Two build profiles<a class="headerlink" href="#two-build-profiles" title="Link to this section">&para;</a></h3>
-<p><strong>Device build</strong> — ARM64, IL2CPP, what actually gets installed on a phone. This
-is what the release build produces, and what an RC build has to prove works.</p>
+<p><strong>Device build</strong> — ARM64, IL2CPP, what actually gets installed on a tablet or a
+phone. This is what the release build produces, and what an RC build has to
+prove works.</p>
 <p><strong>Emulator build</strong> — x86_64, Mono. IL2CPP cross-compiling to x86_64 is slow and
 buys nothing for a smoke test, so the emulator profile trades fidelity for a
 build that finishes while you are still looking at it. Use it for "does the app
@@ -2252,6 +2297,28 @@ shipped.</p>
 emulator-targeted asset is attached alongside it so the release can be tried on
 a desktop without rebuilding. A bug that reproduces only under the emulator is a
 bug in the profile until proven otherwise.</p>
+<h3 id="the-settings-above-are-applied-by-the-build-not-stored-in-the-repo">The settings above are applied by the build, not stored in the repo<a class="headerlink" href="#the-settings-above-are-applied-by-the-build-not-stored-in-the-repo" title="Link to this section">&para;</a></h3>
+<p><code>ProjectSettings/ProjectSettings.asset</code> is <strong>not committed</strong>. Unity generates a
+default one in the CI container on every build, which means every value in the
+tables above — product name, application id, minimum API level, orientation —
+starts as whatever Unity happens to default to.</p>
+<p>That is not theoretical. The first APK ever installed on a phone was called
+<strong><code>workspace</code></strong>, after the container's working directory, and it rotated freely
+in spite of this page promising a fixed orientation.</p>
+<p>So <code>ProjectBootstrap.ApplyToBuild()</code> applies them, and
+<code>BuildStampPreprocessor</code> calls it on <strong>every</strong> build — the same mechanism, and
+the same reasoning, as the version stamp: a step that can be forgotten will be.
+The order inside that pre-processor matters and is deliberate:</p>
+<ol>
+<li><code>ProjectBootstrap.ApplyToBuild()</code> — identity, minimum API, landscape-only.</li>
+<li>The <code>.debug</code> application-id suffix, so it appends to the real id rather than
+   to <code>com.DefaultCompany.workspace</code>.</li>
+<li>The device/emulator profile, so it can still override architecture and
+   scripting backend. Those two are deliberately <em>not</em> in <code>ApplyToBuild</code>.</li>
+</ol>
+<p>Committing a reviewed <code>ProjectSettings.asset</code> is still worth doing — it would
+make the settings a diffable source file rather than something reconstructed
+each build — but it needs an editor session to generate honestly.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
 if a choice is easier because Android is the only target, take the easier
