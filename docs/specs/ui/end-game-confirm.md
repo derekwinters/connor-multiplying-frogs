@@ -52,7 +52,12 @@ right.
     | --- | --- |
     | Some frogs still going | `Three frogs are still swimming. Ending it now stops the game for all four players and shows the results.` |
     | Only one frog left going | `One frog is still swimming. Ending it now stops the game for all four players and shows the results.` |
-    | Every frog home | `Everybody is home. Ending it now shows the results.` |
+
+    There is no everybody-is-home wording, and there does not need to be:
+    [the game ends itself](../reference/index.md#where-v1-fills-a-gap-the-board-leaves-open)
+    the moment the last frog lands on its End log, so this dialog can never open
+    on a finished game. At least one frog is always still swimming when it
+    appears — which is exactly why it has something to warn about.
 
 - **`End the game`** — destructive [button](shared-components.md#button). Goes
   to [game over](game-over.md) with the standings as they are.
@@ -91,7 +96,4 @@ specific every time.
 
 ## Open questions
 
-- **Does the game also end on its own when every frog is home?** Still
-  [issue #186](https://github.com/derekwinters/connor-multiplying-frogs/issues/186).
-  If yes, the everybody-is-home body sentence above is a state almost nobody
-  will see, because the game will have ended itself first.
+None.

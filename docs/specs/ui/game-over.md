@@ -75,9 +75,16 @@ through the title screen.
 
 ## Behaviour
 
-- Reached two ways: every frog home (if that ends the game — see the open
-  question), or `End the game` confirmed from
-  [end-game confirm](end-game-confirm.md).
+- Reached two ways, and only two:
+
+    | Route | What the headline says |
+    | --- | --- |
+    | The last frog reaches its End log, and the game ends itself | `<Colour> frog wins!` |
+    | `End the game` confirmed from [end-game confirm](end-game-confirm.md) | `<Colour> frog wins!` if anyone got home, otherwise `Game over` |
+
+    The first route needs no input from anybody. When the last frog lands on its
+    End log, the hop finishes, and this screen follows — see
+    [how a game ends](../reference/index.md#where-v1-fills-a-gap-the-board-leaves-open).
 - Entering: rows appear in place, top to bottom, over `StandingsRevealDuration`
   (0.4 s total). No suspense reveal — everyone watched it happen.
 - Hardware back does what `Back to the title` does.
@@ -93,10 +100,6 @@ one that has to look fair.
 
 ## Open questions
 
-- **Does the game end itself once every frog is home?**
-  [Issue #186](https://github.com/derekwinters/connor-multiplying-frogs/issues/186).
-  This screen works either way; what changes is how often it is reached without
-  anyone choosing to end anything.
 - **Is finishing order the right ranking for frogs that did not finish?**
   Ranking by lily pads is the only fact available, and ties are possible. Two
   frogs on the same pad currently share a place number. Say if they should be

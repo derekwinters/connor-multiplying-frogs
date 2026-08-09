@@ -162,6 +162,10 @@ changes, one of the others has to move with it.
   [the reference material](../reference/index.md#where-v1-fills-a-gap-the-board-leaves-open),
   not something the classroom board says.
 - A frog that is home is skipped in turn order.
+- **When the last frog gets home, the game ends itself.** The hop finishes, and
+  [game over](game-over.md) follows with no input from anybody — see
+  [how a game ends](../reference/index.md#where-v1-fills-a-gap-the-board-leaves-open).
+  A finished game never sits on this screen waiting to be dismissed.
 - Hardware back opens the [settings dialog](settings-dialog.md). It does not
   quit, and it never quits without the confirm.
 
