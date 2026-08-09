@@ -103,8 +103,9 @@ Assets/                       ← everything Unity compiles
     EditMode/                 ← EditMode tests for the shell; needs the editor
       Frogs.Unity.EditModeTests.asmdef
   Editor/                     ← editor-only tooling; never ships in a build
-    Frogs.EditorTools.asmdef  ← references Frogs.Core; Editor-only platform
-  Scenes/  Art/  Audio/  Prefabs/
+    Frogs.EditorTools.asmdef  ← references Frogs.Core and Frogs.Unity; Editor-only
+  Scenes/                     ← HelloWorld.unity, created by code (below)
+  Art/  Audio/  Prefabs/
 Tests/
   Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
                                 and `dotnet test` can run it with no editor.
@@ -233,6 +234,40 @@ Unity -batchmode -quit -projectPath . \
 It is idempotent, and whatever it changes under `ProjectSettings/` gets
 committed. The version fields are deliberately absent from it — `/VERSION` owns
 those, injected at build time ([Versioning](versioning.md)).
+
+### So is the Hello World scene
+
+`Assets/Editor/HelloWorldScene.cs` creates `Assets/Scenes/HelloWorld.unity` and
+registers it in build settings, through `EditorSceneManager` and
+`EditorBuildSettings` rather than by writing YAML.
+
+Same reason, one step further. A `.unity` file is file IDs and GUID references
+that have to be internally consistent and consistent with every `.meta` in the
+project, and Unity ignores keys it doesn't recognise rather than complaining —
+which is exactly what
+[Unity serialization](unity-serialization.md#what-this-means-for-an-agent-with-no-editor)
+forbids reasoning your way through. Asking Unity to write the file removes the
+guess.
+
+It runs two ways, and the difference matters:
+
+- **From the menu** — `Frogs → Create the Hello World scene`. What a person does.
+- **On load, in batch mode only** — so a headless CI build has a scene to build
+  before anyone has opened the project in an editor. It never runs by itself in
+  an interactive editor, because creating and saving assets behind someone's
+  back is how work gets lost.
+
+It is a **guard, not an owner**: it creates the scene only when there isn't one,
+so once the file is committed it does nothing and the committed asset is what
+ships. `Assets/Tests/EditMode/HelloWorldSceneTests.cs` asserts the scene on
+disk either way — that it exists, that a build would include it, and that its
+components survived serialization.
+
+**The screen it renders is deliberately empty.** A camera and one component that
+writes the version to the log, and nothing else: what a build-proof screen
+*shows* is a layout, and layout goes through
+[the wireframe loop](ui-design-process.md) rather than being invented in an
+implementation PR.
 
 ### Naming
 

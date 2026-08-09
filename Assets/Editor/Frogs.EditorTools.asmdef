@@ -2,7 +2,8 @@
     "name": "Frogs.EditorTools",
     "rootNamespace": "Frogs.EditorTools",
     "references": [
-        "Frogs.Core"
+        "Frogs.Core",
+        "Frogs.Unity"
     ],
     "includePlatforms": [
         "Editor"

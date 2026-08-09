@@ -275,6 +275,18 @@ fast suite covers it, and the I/O is in the shell.
 release candidate, because a phone with four test builds on it needs to say
 which is which, and "the one from Tuesday" is not an answer.
 
+### The app reads its own version back, through Core
+
+`AppVersion.ReadFromBuildName` is the inverse of the composition above: it takes
+the name a running build reports — Unity's `Application.version` — and drops
+whatever distinguishes that build from the plain release of the same version,
+the `-abc1234` or the `-rc2`.
+
+The running app uses it to say which build it is, because that line is the only
+evidence anybody has that `/VERSION` reached the APK rather than a default Unity
+wrote. Composing and reading are asserted as inverses in the Core suite, so a
+change to one that forgets the other fails in seconds rather than on a phone.
+
 ### `versionCode` is the commit count, not the version
 
 ```text
