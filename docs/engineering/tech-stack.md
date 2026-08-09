@@ -62,7 +62,8 @@ around, because that is what kids play on.
 | Also runs on | Android phones |
 | Scripting backend | IL2CPP for device builds |
 | Minimum API level | 24 (Android 7.0) |
-| Orientation | Landscape (both ways up) |
+| Orientation | Landscape only (both ways up) |
+| Reference resolution | 1920 × 1200 (16:10) |
 | Output | `.apk` for direct install; `.aab` only if the game is ever published |
 
 This page previously said *"Android phones. That is the platform, singular"*
@@ -74,6 +75,12 @@ change of device, so both the device and the orientation moved together.
 Portrait is not ruled out forever — but supporting it means designing a second
 layout for every screen, which is the same argument the portrait-only rule used
 to make in reverse. It stays off until a wireframe specifies one.
+
+**1920 × 1200 is the resolution every layout is designed at.** It is 16:10,
+which is the common kids'-tablet shape, and it is the viewport every UI mockup
+is drawn at — see [the UI design process](ui-design-process.md). Devices that
+are not exactly this still run the game; the number exists so that layouts are
+designed against one agreed canvas instead of each being guessed at separately.
 
 ### Two build profiles
 
