@@ -121,13 +121,19 @@ board's current state, and a comment would outlive the state it described.
 python3 .github/scripts/run_python_tests.py pipeline-reconcile
 ```
 
-37 tests. Two are worth knowing about: one asserts no finding can ever close an
-issue, and one reads this module's source to assert it does not define its own
-`has_analysis_signature` — that recognizer is imported from `triage-issue`,
-because two copies drift into a requeue↔repair loop that reports no error.
+40 tests. Three are worth knowing about: one asserts no finding can ever close an
+issue, and two read this module's source to assert it defines neither its own
+`has_analysis_signature` nor its own triage-author set — both are imported from
+`triage-issue`, because two copies drift into a requeue↔repair loop that reports
+no error.
+
+The author guard is the one that was earned. Both modules kept
+`TRIAGE_AUTHOR = "github-actions[bot]"` while every real triage comment came
+from `claude[bot]`, so `has_analysis` answered "no analysis" for the whole board
+— and because the two copies agreed with each other, nothing looked wrong.
 
 ## See also
 
-- `triage-issue` — owns `has_analysis_signature`
+- `triage-issue` — owns `has_analysis_signature` and `is_triage_author`
 - `pipeline-dashboard` — renders the flags
 - `docs/engineering/issue-pipeline.md` — the stage and the schedule

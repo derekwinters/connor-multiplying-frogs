@@ -282,6 +282,24 @@ class ShapeTests(unittest.TestCase):
         source = (Path(__file__).resolve().parents[1] / "reconcile.py").read_text()
         self.assertNotIn("def has_analysis_signature", source)
 
+    def test_the_triage_author_set_is_imported_not_redefined(self):
+        """The copy that actually drifted: both sides said `github-actions[bot]`
+        while every real triage comment came from `claude[bot]`."""
+        source = (Path(__file__).resolve().parents[1] / "reconcile.py").read_text()
+        self.assertNotIn("TRIAGE_AUTHOR =", source)
+        self.assertNotIn("TRIAGE_AUTHORS =", source)
+
+    def test_a_claude_app_analysis_is_seen(self):
+        """The regression itself: this read as "no analysis" and requeued forever."""
+        issue = {"labels": ["pending-approval"], "comments": [
+            {"author": "claude[bot]", "body": "## Build checklist\n\n- [ ] x"}]}
+        self.assertTrue(reconcile.has_analysis(issue))
+
+    def test_a_human_analysis_is_still_not_seen(self):
+        issue = {"labels": ["pending-approval"], "comments": [
+            {"author": "derekwinters", "body": "## Build checklist\n\n- [ ] x"}]}
+        self.assertFalse(reconcile.has_analysis(issue))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -92,6 +92,40 @@ class AnalysisCommentTimesTests(unittest.TestCase):
         comments = [comment(CHECKLIST_BODY, author="derekwinters")]
         self.assertEqual(repair.analysis_comment_times(comments), [])
 
+    def test_the_claude_app_is_a_triage_author(self):
+        """The App posts triage's comments — this is the login that actually writes them."""
+        comments = [comment(CHECKLIST_BODY, author="claude[bot]")]
+        self.assertEqual(repair.analysis_comment_times(comments), ["2026-08-08T10:00:00Z"])
+
+    def test_the_actions_bot_is_still_a_triage_author(self):
+        """A workflow-run triage posts under the Actions token, and older comments exist."""
+        comments = [comment(CHECKLIST_BODY, author="github-actions[bot]")]
+        self.assertEqual(repair.analysis_comment_times(comments), ["2026-08-08T10:00:00Z"])
+
+    def test_the_author_match_ignores_case(self):
+        comments = [comment(CHECKLIST_BODY, author="Claude[Bot]")]
+        self.assertEqual(repair.analysis_comment_times(comments), ["2026-08-08T10:00:00Z"])
+
+
+class TriageAuthorTests(unittest.TestCase):
+    """`is_triage_author` — the one definition of "triage wrote this"."""
+
+    def test_the_claude_app_is_recognized(self):
+        self.assertTrue(repair.is_triage_author("claude[bot]"))
+
+    def test_the_actions_bot_is_recognized(self):
+        self.assertTrue(repair.is_triage_author("github-actions[bot]"))
+
+    def test_a_human_is_not(self):
+        self.assertFalse(repair.is_triage_author("derekwinters"))
+
+    def test_another_app_is_not(self):
+        self.assertFalse(repair.is_triage_author("dependabot[bot]"))
+
+    def test_an_empty_or_missing_login_is_not(self):
+        self.assertFalse(repair.is_triage_author(""))
+        self.assertFalse(repair.is_triage_author(None))
+
     def test_times_come_back_oldest_first(self):
         comments = [
             comment(QUESTION_BODY, created_at="2026-08-05T09:00:00Z"),

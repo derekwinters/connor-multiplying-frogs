@@ -46,10 +46,28 @@ STATE_LABELS = {
     "parked",
 }
 
-# Comments this login authored are triage's. A human pasting a checklist by hand
-# is not a triage run, and treating it as one would let a well-meaning comment
-# suppress the analysis the issue is actually waiting for.
-TRIAGE_AUTHOR = "github-actions[bot]"
+# Comments these logins authored are triage's. A human pasting a checklist by
+# hand is not a triage run, and treating it as one would let a well-meaning
+# comment suppress the analysis the issue is actually waiting for.
+#
+# **Both, because triage has two surfaces.** Run as the Claude GitHub App it
+# posts as `claude[bot]`; run from a workflow holding `GITHUB_TOKEN` it posts as
+# `github-actions[bot]`. Accepting only one is not a stricter rule, it is a
+# broken one: this set read `github-actions[bot]` alone while every real triage
+# comment came from the App, so `has_analysis_signature` was never reached and
+# the pipeline believed no issue had ever been analyzed.
+TRIAGE_AUTHORS = frozenset({"claude[bot]", "github-actions[bot]"})
+
+
+def is_triage_author(login) -> bool:
+    """Did triage write this, by its own hand?
+
+    The one definition. `pipeline-reconcile` imports it rather than keeping a
+    copy — the same rule, and the same reason, as `has_analysis_signature`
+    below: two copies of "was this triage" drift, and the drift is a cycle
+    neither side reports.
+    """
+    return (login or "").lower() in TRIAGE_AUTHORS
 
 # An owner note that objects to the plan. Repairing the label would apply the
 # state the rejected plan asked for and drop the objection on the floor.
@@ -87,7 +105,7 @@ def analysis_comment_times(comments) -> list:
     times = [
         comment.get("created_at") or ""
         for comment in comments or []
-        if (comment.get("author") or "").lower() == TRIAGE_AUTHOR.lower()
+        if is_triage_author(comment.get("author"))
         and has_analysis_signature(comment.get("body"))
     ]
 

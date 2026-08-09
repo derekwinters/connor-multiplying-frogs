@@ -161,7 +161,37 @@ issues.
 
 See `docs/engineering/agent-workflow.md` for the lead's full rationale.
 
+### The footer is added for you
+
+`hand_back.py` appends the commands that make sense **on the route taken** —
+`/approve`, `/revise`, `/park` on a plan; `/revise <answer>` and `/park` on a
+question. Do not write one by hand and do not paste the whole command list: a
+`needs-clarification` hand-back that offers `/approve` invites approving a plan
+that was never written.
+
+The wording comes from `render_dashboard.COMMANDS`, so there is one description
+of each command rather than a third copy drifting quietly out of date.
+
 ## Write ordering: comment first, then the label
+
+**Do not do this by hand. Call `hand_back.py`.**
+
+```python
+import hand_back
+hand_back.apply(api, 47, analysis, labels, "pending-approval")
+```
+
+One call, both writes, in the right order — or neither. It appends the route's
+footer, removes `ai-triage`, adds exactly one state label, and keeps every
+`area:`, `type:` and `skip-docs` label untouched.
+
+It **refuses before writing anything** if you pass a state triage may not set
+(`ready-for-work` is Derek's, via `/approve`) or an analysis the recognizer
+would not match. Both refusals leave the issue exactly as it was.
+
+This used to be an instruction in this file rather than code, and it was skipped
+in practice — sixteen issues sat on `ai-triage` carrying finished plans, because
+a missing label fails nothing and the posted comment made the run look done.
 
 **Post the analysis comment. Then set the state label. Always that order.**
 
@@ -257,15 +287,28 @@ Only comments authored by the bot count. Derek pasting a checklist by hand is
 not a triage run, and treating it as one would let a helpful comment suppress
 the analysis the issue is actually waiting for.
 
+`is_triage_author` is that gate, and it is shared the same way — `reconcile.py`
+imports it too. Both surfaces count: `claude[bot]` when triage runs as the App,
+`github-actions[bot]` when it runs from a workflow. Accepting only the second
+was a real bug and a quiet one: the gate runs *before* the recognizer, so every
+analysis on the board read as absent while both modules agreed with each other.
+
 ## Running the tests
 
 ```bash
 python3 .github/scripts/run_python_tests.py triage-issue
 ```
 
-23 tests over `triage_repair.py`: what the recognizer matches and — more
-importantly — what it refuses to match, and the four repair outcomes. No
-network in any of them.
+57 tests over `triage_repair.py` and `hand_back.py`: what the recognizer matches
+and — more importantly — what it refuses to match, the four repair outcomes, and
+the hand-back write. No network in any of them; `apply` takes an `api` callable,
+so its ordering is asserted against a fake that records calls.
+
+Two are worth knowing about because they pin a rule rather than a behaviour:
+one asserts the footer never names a command `parse_commands` would refuse (the
+test that catches a `/retriage`), and one asserts a comment still reads as an
+analysis *after* the footer is appended — a footer that broke the recognizer
+would send every triaged issue back round the loop.
 
 ## See also
 
