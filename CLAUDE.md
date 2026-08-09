@@ -152,6 +152,15 @@ No UI code is written before there is an agreed wireframe for it. UI is the part
 Connor has the strongest opinions about and the part that is most expensive to
 redo, so the layout gets settled as a cheap picture first.
 
+**Every layout and every dialog gets its own wireframe.** Not only the big
+screens — a confirm box, a toast, an end-of-turn panel each get one. A dialog
+is the easiest thing to slip in without a wireframe, and being small, the
+easiest to get wrong in a way nobody notices until Connor is holding it.
+
+**Mockups are drawn at 1920 × 1200, landscape.** That is the target device, a
+kids' Android tablet, and it is the one canvas every layout is designed
+against. A mockup at some other size is a mockup of a screen nobody has.
+
 A UI issue starts as a `type:wireframe` issue with a mockup in
 `docs/specs/ui/`. Only once that is agreed does an implementation issue get
 opened against it. Finding yourself writing a layout without a wireframe to
