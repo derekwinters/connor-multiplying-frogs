@@ -32,6 +32,7 @@ See docs/engineering/issue-pipeline.md.
 from __future__ import annotations
 
 import json
+import os
 import urllib.request
 
 BODY_SNIPPET_LIMIT = 300
@@ -104,6 +105,23 @@ def _post(url: str, headers: dict, body: bytes):
 
     with urllib.request.urlopen(request, timeout=30) as response:
         return response.status, response.read().decode(errors="replace")
+
+
+def fire_from_env(issue_number: int) -> FireResult:
+    """`fire`, with the endpoint read from the environment.
+
+    The one place the three environment variables are read, so both entry
+    points — `run_comment_event` and `run_sweep` — poke the same Routine the
+    same way. Never raises: the label move has already landed by this point,
+    and a few hours of extra latency is not a reason to report the command as
+    failed.
+    """
+    return fire(
+        issue_number,
+        os.environ.get("GITHUB_REPOSITORY", ""),
+        os.environ.get("AI_TRIAGE_URL"),
+        os.environ.get("AI_TRIAGE_SECRET"),
+    )
 
 
 def fire(issue_number: int, repository: str, url: str, secret: str, post=None) -> FireResult:

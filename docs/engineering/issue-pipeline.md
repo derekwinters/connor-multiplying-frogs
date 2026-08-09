@@ -116,7 +116,12 @@ want.
 
 Two parsing rules worth knowing:
 
-- **A command must start its line.** "see /approve for details" is a mention.
+- **A command must start its line** — its *line*, not the comment. "see
+  /approve for details" is a mention; a sentence of explanation above
+  `/approve` is not, and applies normally. The workflow briefly filtered on
+  `startsWith(body, '/')`, which dropped exactly that case with no run, no
+  reaction and no acknowledgement — a silence indistinguishable from the
+  pipeline being broken.
 - **A command inside a code fence is ignored**, or writing up this table in a
   comment would execute it.
 
@@ -439,6 +444,34 @@ clean no-op** — the nightly run still picks the issue up, so a missing secret
 costs latency rather than correctness, and never fails the command that caused
 it. A network error is swallowed for the same reason: the label move has
 already succeeded by then.
+
+#### Both entry points fire, and each issue fires once
+
+`run_comment_event.py` fires after its label write; `run_sweep.py` fires from
+both of its paths, because a cleared blocker and a requeue each land an issue in
+`ai-triage` without anyone typing a command.
+
+The sweep fires **at most once per issue per pass**. A revisit does not update
+the in-memory issue that reconcile then reads, so the same issue can look newly
+triageable twice in one sweep — and two fires are two triage sessions racing on
+one issue, each posting its own plan for Derek to choose between.
+
+`fire_from_env` is the single place the environment variables are read, so both
+entry points poke the same Routine the same way.
+
+!!! warning "This was described here for weeks before it was true"
+
+    `fires_triage` and `fire_routine.fire` were both written, both unit-tested
+    — and called from nowhere. The workflow passed the two secrets to a step
+    that never read them, so **reactive triage never fired once**, on any
+    issue, and everything waited for the scheduled round.
+
+    Nothing surfaced it. Tests passed, because each half was correct in
+    isolation; the log was green, because nothing had failed; and the fallback
+    it was designed around — the nightly round — did the work quietly, which is
+    exactly what it is there for. A feature whose absence looks identical to
+    its fallback needs a test that the call site exists, and both entry points
+    now have one.
 
 #### The outcome is classified truthfully
 

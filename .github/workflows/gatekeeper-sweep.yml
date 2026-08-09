@@ -66,6 +66,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PIPELINE_OWNER: ${{ github.repository_owner }}
+          # The sweep fires triage too: a cleared blocker wakes an issue into
+          # `ai-triage`, and so does a requeue. Without these the sweep's fire
+          # is a permanent `not-configured` no-op and those issues wait for the
+          # next scheduled round. See issue #83.
+          AI_TRIAGE_URL: ${{ secrets.AI_TRIAGE_URL }}
+          AI_TRIAGE_SECRET: ${{ secrets.AI_TRIAGE_SECRET }}
         run: |
           set -euo pipefail
 

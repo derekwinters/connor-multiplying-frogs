@@ -27,7 +27,9 @@ _RECONCILE_SKILL = Path(__file__).resolve().parents[1] / "pipeline-reconcile"
 if str(_RECONCILE_SKILL) not in sys.path:
     sys.path.insert(0, str(_RECONCILE_SKILL))
 
+import apply_actions  # noqa: E402
 import check_revisits  # noqa: E402
+import fire_routine  # noqa: E402
 import reconcile  # noqa: E402
 from _github_api import (  # noqa: E402
     comment as post_comment,
@@ -37,7 +39,7 @@ from _github_api import (  # noqa: E402
 )
 
 
-def apply_revisits(api, issues, snapshot) -> list:
+def apply_revisits(api, issues, snapshot, fire=None) -> list:
     """Wake issues whose blockers have all cleared.
 
     A state-derived transition, not a command — nothing else would ever wake an
@@ -54,12 +56,19 @@ def apply_revisits(api, issues, snapshot) -> list:
 
         set_labels(api, revisit.issue_number, labels)
         post_comment(api, revisit.issue_number, revisit.comment)
+
+        # A woken issue lands back in `ai-triage` and needs analyzing. Without
+        # this it waits for the next scheduled round, which is the whole
+        # latency the reactive fire exists to remove.
+        if apply_actions.fires_triage(issue.get("labels") or [], labels):
+            (fire or fire_routine.fire_from_env)(revisit.issue_number)
+
         woken.append(revisit.issue_number)
 
     return woken
 
 
-def apply_fixes(api, findings, issues) -> list:
+def apply_fixes(api, findings, issues, fire=None) -> list:
     """Apply the auto-fix findings. Flags are left for the dashboard."""
     fixed = []
 
@@ -77,17 +86,35 @@ def apply_fixes(api, findings, issues) -> list:
         labels |= set(finding.get("add_labels") or [])
 
         set_labels(api, number, sorted(labels))
+
+        if apply_actions.fires_triage(issue.get("labels") or [], sorted(labels)):
+            (fire or fire_routine.fire_from_env)(number)
+
         fixed.append(number)
 
     return fixed
 
 
-def run(state: dict, api, events_only: bool = False, rerender=None) -> dict:
+def run(state: dict, api, events_only: bool = False, rerender=None,
+        fire=None) -> dict:
     """One sweep. Returns what it did, for the workflow log."""
     issues = state.get("issues") or []
     snapshot = state.get("snapshot") or {}
 
-    woken = apply_revisits(api, issues, snapshot)
+    # **At most one fire per issue per sweep.** A revisit wakes an issue into
+    # `ai-triage` without updating the in-memory copy reconcile then reads, so
+    # the same issue can look newly-triageable twice in one pass. Two fires are
+    # two triage sessions racing on one issue, each posting its own plan.
+    sink = fire or fire_routine.fire_from_env
+    already_fired = set()
+
+    def fire_once(number):
+        if number in already_fired:
+            return
+        already_fired.add(number)
+        sink(number)
+
+    woken = apply_revisits(api, issues, snapshot, fire=fire_once)
 
     findings = reconcile.process({
         "issues": issues,
@@ -97,7 +124,7 @@ def run(state: dict, api, events_only: bool = False, rerender=None) -> dict:
         "events_only": events_only,
     })["findings"]
 
-    fixed = apply_fixes(api, findings, issues)
+    fixed = apply_fixes(api, findings, issues, fire=fire_once)
 
     # Once, at the end. The board should describe the state the sweep left
     # behind, not one of the states it passed through.

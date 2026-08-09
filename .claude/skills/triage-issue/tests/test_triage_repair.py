@@ -87,9 +87,17 @@ class AnalysisCommentTimesTests(unittest.TestCase):
         comments = [comment("thanks!"), comment(CHECKLIST_BODY, created_at="2026-08-02T09:00:00Z")]
         self.assertEqual(repair.analysis_comment_times(comments), ["2026-08-02T09:00:00Z"])
 
-    def test_a_human_comment_carrying_a_checklist_is_not_triage(self):
-        """Derek pasting a checklist by hand must not read as a triage run."""
+    def test_the_owners_own_login_counts(self):
+        """Triage runs under Derek's account too, so his login is a triage author.
+
+        The cost is deliberate and accepted: a checklist he writes by hand now
+        reads as a triage analysis. See the note on `TRIAGE_AUTHORS`.
+        """
         comments = [comment(CHECKLIST_BODY, author="derekwinters")]
+        self.assertEqual(repair.analysis_comment_times(comments), ["2026-08-08T10:00:00Z"])
+
+    def test_any_other_human_is_not_triage(self):
+        comments = [comment(CHECKLIST_BODY, author="a-passing-contributor")]
         self.assertEqual(repair.analysis_comment_times(comments), [])
 
     def test_the_claude_app_is_a_triage_author(self):
@@ -116,8 +124,16 @@ class TriageAuthorTests(unittest.TestCase):
     def test_the_actions_bot_is_recognized(self):
         self.assertTrue(repair.is_triage_author("github-actions[bot]"))
 
-    def test_a_human_is_not(self):
-        self.assertFalse(repair.is_triage_author("derekwinters"))
+    def test_the_owner_is_recognized(self):
+        """Triage sessions run under Derek's own account, not only as a bot."""
+        self.assertTrue(repair.is_triage_author("derekwinters"))
+
+    def test_any_other_human_is_not(self):
+        self.assertFalse(repair.is_triage_author("a-passing-contributor"))
+
+    def test_the_accepted_set_is_exactly_three(self):
+        """Widening this set is a decision, not a convenience — pin the size."""
+        self.assertEqual(len(repair.TRIAGE_AUTHORS), 3)
 
     def test_another_app_is_not(self):
         self.assertFalse(repair.is_triage_author("dependabot[bot]"))

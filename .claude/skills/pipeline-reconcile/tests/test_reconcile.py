@@ -128,12 +128,22 @@ class RequeueTriageTests(unittest.TestCase):
             findings([issue(10, labels=("pending-approval",), comments=[comment()])],
                      kind="requeue_triage"), [])
 
-    def test_a_human_comment_carrying_a_checklist_does_not_count(self):
+    def test_an_outsiders_comment_carrying_a_checklist_does_not_count(self):
         found = findings(
             [issue(10, labels=("pending-approval",),
-                   comments=[comment(author="derekwinters")])],
+                   comments=[comment(author="a-passing-contributor")])],
             kind="requeue_triage")
         self.assertEqual(len(found), 1)
+
+    def test_the_owners_own_comment_does_count(self):
+        """Triage runs under Derek's account, so his analyses are triage's.
+
+        The accepted cost: a checklist he writes by hand reads as one too.
+        """
+        self.assertEqual(
+            findings([issue(10, labels=("pending-approval",),
+                            comments=[comment(author="derekwinters")])],
+                     kind="requeue_triage"), [])
 
     def test_requeue_triage_is_omitted_on_the_event_path(self):
         """A just-triaged issue transiently has the label but not yet the comment."""
@@ -295,10 +305,17 @@ class ShapeTests(unittest.TestCase):
             {"author": "claude[bot]", "body": "## Build checklist\n\n- [ ] x"}]}
         self.assertTrue(reconcile.has_analysis(issue))
 
-    def test_a_human_analysis_is_still_not_seen(self):
+    def test_an_outsiders_analysis_is_not_seen(self):
+        issue = {"labels": ["pending-approval"], "comments": [
+            {"author": "a-passing-contributor",
+             "body": "## Build checklist\n\n- [ ] x"}]}
+        self.assertFalse(reconcile.has_analysis(issue))
+
+    def test_the_owners_analysis_is_seen(self):
+        """Triage posted as `derekwinters` on #83 and #169, not only as a bot."""
         issue = {"labels": ["pending-approval"], "comments": [
             {"author": "derekwinters", "body": "## Build checklist\n\n- [ ] x"}]}
-        self.assertFalse(reconcile.has_analysis(issue))
+        self.assertTrue(reconcile.has_analysis(issue))
 
 
 if __name__ == "__main__":

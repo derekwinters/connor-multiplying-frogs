@@ -147,6 +147,48 @@ class WatermarkTests(unittest.TestCase):
         self.assertFalse(result.applied)
 
 
+class ReactiveTriageTests(unittest.TestCase):
+    """The fire is wired in, not merely implemented.
+
+    `fires_triage` and `fire_routine.fire` were both written and both tested,
+    and nothing called either — so reactive triage never fired once, and every
+    issue waited for the scheduled round. These tests assert the call site
+    exists, which is the part that was missing.
+    """
+
+    def _fired(self, **kwargs):
+        fired = []
+        api = RecordingApi()
+        runner.run(event(**kwargs), api, owner=OWNER,
+                   rerender=lambda **kw: None, fire=fired.append)
+        return fired
+
+    def test_admitting_an_issue_fires_triage(self):
+        self.assertEqual(self._fired(body="/admit", labels=()), [10])
+
+    def test_revise_fires_triage(self):
+        """`/revise` returns the issue to `ai-triage` — it needs analyzing again."""
+        self.assertEqual(self._fired(body="/revise wrong pond", labels=("pending-approval",)), [10])
+
+    def test_approve_does_not_fire_triage(self):
+        """`/approve` moves to `ready-for-work`. Nothing to triage."""
+        self.assertEqual(self._fired(body="/approve", labels=("pending-approval",)), [])
+
+    def test_re_admitting_an_already_admitted_issue_does_not_fire(self):
+        """An idempotent re-add is not a new admission — or one stuck comment
+        becomes a triage run on every sweep."""
+        self.assertEqual(self._fired(body="/admit", labels=("ai-triage",)), [])
+
+    def test_a_refused_command_does_not_fire(self):
+        self.assertEqual(
+            self._fired(body="/admit", labels=("type:epic",)), [])
+
+    def test_the_runner_imports_the_fire(self):
+        """The regression itself: the module never imported `fire_routine`."""
+        source = (Path(__file__).resolve().parents[1] / "run_comment_event.py").read_text()
+        self.assertIn("import fire_routine", source)
+
+
 class TokenTests(unittest.TestCase):
     def test_the_api_helper_uses_the_workflow_token_not_a_pat(self):
         source = (Path(__file__).resolve().parents[1] / "_github_api.py").read_text()
