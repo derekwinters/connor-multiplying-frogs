@@ -1,10 +1,30 @@
 # The game adds a structured working-out grid the classroom game has no equivalent of
 
-The cards are multi-digit long multiplication — `331 × 41`, `22 × 41`, `68 × 5` —
-not times-table recall. At the table that is fine, because paper is ambient and
-the working-out *is* the exercise; on a phone there is nowhere to work. Rather
-than assume paper beside the device, the game provides a **structured grid with
-carry boxes** that a player fills in to perform the multiplication on screen.
+The cards are multi-digit long multiplication, not times-table recall. At the
+table that is fine, because paper is ambient and the working-out *is* the
+exercise; on a phone there is nowhere to work. Rather than assume paper beside
+the device, the game provides a **structured grid with carry boxes** that a
+player fills in to perform the multiplication on screen.
+
+## There are exactly three problem shapes
+
+The three card piles are difficulty tiers, and the tier decides how many digits
+are being multiplied. Confirmed by Derek:
+
+| Pile | Shape | Example |
+| --- | --- | --- |
+| Easy | 2-digit × 1-digit | `68 × 5` |
+| Medium | 2-digit × 2-digit | `22 × 41` |
+| Hard | 3-digit × 2-digit | `331 × 41` |
+
+This bounds the grid tightly, and the bound is worth stating because it is the
+difference between three layouts and a general solver. **The grid never has to
+render a shape outside this table**, and `331 × 41` is the confirmed worst case
+rather than an assumed one.
+
+The tier also has no effect on movement — every pile is worth the same one lily
+pad forward. Drawing the easy pile is pure luck and strictly better, which is the
+classroom game's design and stays.
 
 This is a **new mechanic**, and under
 [ADR-0001](0001-rules-sacred-presentation-ours.md) that made it Connor's call.
