@@ -777,6 +777,24 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -849,6 +867,258 @@
     
   
     Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="game-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
   
 
     
@@ -1680,9 +1950,56 @@ and when an implementation is allowed to start — is in
 <a href="../../engineering/ui-design-process/">UI design process</a>. Read that first if
 you are about to open a wireframe issue.</p>
 <h2 id="screens">Screens<a class="headerlink" href="#screens" title="Link to this section">&para;</a></h2>
-<p><em>No screens specified yet.</em> The game concept is still being settled in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/7">issue #7</a>,
-and every screen page arrives through its own <code>Wireframe:</code> issue.</p>
+<p>Every screen and every dialog in v1, in the order a game meets them.</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="title-screen/">Title screen</a></td>
+<td>The way in. One button.</td>
+</tr>
+<tr>
+<td><a href="game-setup/">Game setup</a></td>
+<td>Which frogs are playing, and in what order</td>
+</tr>
+<tr>
+<td><a href="game-board/">Game board</a></td>
+<td>The pond, the lanes, and <code>Roll</code></td>
+</tr>
+<tr>
+<td><a href="roll-and-card/">Roll and card</a></td>
+<td>The die, the pile it maps to, the card you drew</td>
+</tr>
+<tr>
+<td><a href="working-out-grid/">Working-out grid</a></td>
+<td>The grid and keypad you answer on</td>
+</tr>
+<tr>
+<td><a href="answer-result/">Answer result</a></td>
+<td>Right or wrong, and what your frog does</td>
+</tr>
+<tr>
+<td><a href="settings-dialog/">Settings dialog</a></td>
+<td>The rules, the exit, the version</td>
+</tr>
+<tr>
+<td><a href="end-game-confirm/">End-game confirm</a></td>
+<td>The one dialog that can end everybody's game</td>
+</tr>
+<tr>
+<td><a href="game-over/">Game over</a></td>
+<td>Who won, and where everybody got to</td>
+</tr>
+</tbody>
+</table>
+<p>Every one of these is designed at <strong>1920 × 1200, landscape</strong> — the target is a
+kids' Android tablet, and that is the one canvas every layout is drawn against.
+See <a href="../../engineering/tech-stack/#target-platform">target platform</a>.</p>
 <h2 id="shared-components">Shared components<a class="headerlink" href="#shared-components" title="Link to this section">&para;</a></h2>
 <p>Reusable atomic pieces — a primary button, the score readout, a confirm dialog —
 are specified once in <a href="shared-components/">Shared components</a> and

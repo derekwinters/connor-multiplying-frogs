@@ -770,6 +770,24 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -839,6 +857,258 @@
     
   
     Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
   
 
     
@@ -1716,16 +1986,24 @@ player in whatever state the last one left it.</p>
 <li>The grid must be <strong>sized to the card</strong>, not to the largest possible problem, or
   <code>68 × 5</code> looks like homework. Which cells exist for a given problem is game
   logic and belongs in <code>Core</code>; only drawing them belongs in the Unity shell.</li>
-<li><code>331 × 41</code> in portrait — two partial-product rows, a sum row, and carry boxes
-  above them — is the tightest layout in the game and the project's biggest
-  unknown. It gets a <code>type:wireframe</code> issue and is drawn before any UI code
-  exists.</li>
-<li>Revealing the <em>worked solution</em> on a wrong answer is ruled out by the same
+<li>
+<p><code>331 × 41</code> — two partial-product rows, a sum row, and carry boxes above them —
+  is the tightest layout in the game. It gets a <code>type:wireframe</code> issue and is
+  drawn before any UI code exists.</p>
+<p>This was written when the target was a portrait phone, and it called
+<code>331 × 41</code> the project's biggest layout unknown. The target then
+<a href="../../engineering/tech-stack/#target-platform">became a landscape tablet</a>,
+and the unknown largely went away with it: side by side, the grid takes the
+left of the screen and the keypad the right, and the worst case fits with
+room to spare. See
+<a href="../../specs/ui/working-out-grid/">the working-out grid wireframe</a>.
+- Revealing the <em>worked solution</em> on a wrong answer is ruled out by the same
   reasoning: showing one method's partial products would quietly make that method
-  canonical. The correct answer is revealed; the working is not.</li>
-<li>Diagnostic marking — highlighting where the working first went astray — is
+  canonical. The correct answer is revealed; the working is not.
+- Diagnostic marking — highlighting where the working first went astray — is
   genuinely the best teaching tool available here, and is parked in
-  <a href="../../specs/future-ideas/">future ideas</a> rather than dropped.</li>
+  <a href="../../specs/future-ideas/">future ideas</a> rather than dropped.</p>
+</li>
 </ul>
 
 

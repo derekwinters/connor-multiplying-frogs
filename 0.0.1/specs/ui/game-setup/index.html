@@ -12,31 +12,31 @@
         <meta name="author" content="Derek Winters">
       
       
-        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.0.1/engineering/">
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.0.1/specs/ui/game-setup/">
       
       
-        <link rel="prev" href="../adr/0004-core-owns-the-save-format/">
+        <link rel="prev" href="../title-screen/">
       
       
-        <link rel="next" href="tech-stack/">
+        <link rel="next" href="../game-board/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Engineering - Multiplying Frogs</title>
+        <title>Game setup - Multiplying Frogs</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,7 +55,7 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#engineering" class="md-skip">
+        <a href="#game-setup" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+    <a href="../../.." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Engineering
+              Game setup
             
           </span>
         </div>
@@ -227,7 +227,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -248,7 +248,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../intro/" class="md-tabs__link">
+        <a href="../../../intro/" class="md-tabs__link">
           
   
   
@@ -266,11 +266,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../specs/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
           
   
   
@@ -292,7 +294,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../adr/" class="md-tabs__link">
+        <a href="../../../adr/" class="md-tabs__link">
           
   
   
@@ -310,13 +312,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../../engineering/" class="md-tabs__link">
           
   
   
@@ -338,7 +338,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../tools/" class="md-tabs__link">
+        <a href="../../../tools/" class="md-tabs__link">
           
   
   
@@ -380,7 +380,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+    <a href="../../.." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -410,7 +410,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -466,7 +466,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../intro/" class="md-nav__link ">
+            <a href="../../../intro/" class="md-nav__link ">
               
   
   
@@ -510,7 +510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../intro/vision/" class="md-nav__link">
+      <a href="../../../intro/vision/" class="md-nav__link">
         
   
   
@@ -538,7 +538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../intro/how-to-play/" class="md-nav__link">
+      <a href="../../../intro/how-to-play/" class="md-nav__link">
         
   
   
@@ -566,7 +566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../intro/conventions/" class="md-nav__link">
+      <a href="../../../intro/conventions/" class="md-nav__link">
         
   
   
@@ -598,6 +598,8 @@
       
   
   
+    
+  
   
   
     
@@ -619,20 +621,23 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../specs/" class="md-nav__link ">
+            <a href="../../" class="md-nav__link ">
               
   
   
@@ -650,13 +655,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -676,7 +681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/product-scope/" class="md-nav__link">
+      <a href="../../product-scope/" class="md-nav__link">
         
   
   
@@ -704,7 +709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/future-ideas/" class="md-nav__link">
+      <a href="../../future-ideas/" class="md-nav__link">
         
   
   
@@ -732,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/reference/" class="md-nav__link">
+      <a href="../../reference/" class="md-nav__link">
         
   
   
@@ -757,6 +762,8 @@
                 
   
   
+    
+  
   
   
     
@@ -794,18 +801,21 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../specs/ui/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -823,13 +833,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_3_5" id="__nav_3_5_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -849,7 +859,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/shared-components/" class="md-nav__link">
+      <a href="../shared-components/" class="md-nav__link">
         
   
   
@@ -877,7 +887,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/title-screen/" class="md-nav__link">
+      <a href="../title-screen/" class="md-nav__link">
         
   
   
@@ -902,10 +912,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../specs/ui/game-setup/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -921,6 +958,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -933,7 +1078,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/game-board/" class="md-nav__link">
+      <a href="../game-board/" class="md-nav__link">
         
   
   
@@ -961,7 +1106,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/roll-and-card/" class="md-nav__link">
+      <a href="../roll-and-card/" class="md-nav__link">
         
   
   
@@ -989,7 +1134,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/working-out-grid/" class="md-nav__link">
+      <a href="../working-out-grid/" class="md-nav__link">
         
   
   
@@ -1017,7 +1162,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/answer-result/" class="md-nav__link">
+      <a href="../answer-result/" class="md-nav__link">
         
   
   
@@ -1045,7 +1190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/settings-dialog/" class="md-nav__link">
+      <a href="../settings-dialog/" class="md-nav__link">
         
   
   
@@ -1073,7 +1218,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/end-game-confirm/" class="md-nav__link">
+      <a href="../end-game-confirm/" class="md-nav__link">
         
   
   
@@ -1101,7 +1246,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/game-over/" class="md-nav__link">
+      <a href="../game-over/" class="md-nav__link">
         
   
   
@@ -1129,7 +1274,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../specs/ui/mockups/" class="md-nav__link">
+      <a href="../mockups/" class="md-nav__link">
         
   
   
@@ -1203,7 +1348,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../adr/" class="md-nav__link ">
+            <a href="../../../adr/" class="md-nav__link ">
               
   
   
@@ -1247,7 +1392,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+      <a href="../../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
         
   
   
@@ -1275,7 +1420,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/0002-structured-working-out-grid/" class="md-nav__link">
+      <a href="../../../adr/0002-structured-working-out-grid/" class="md-nav__link">
         
   
   
@@ -1303,7 +1448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/0003-network-boundary/" class="md-nav__link">
+      <a href="../../../adr/0003-network-boundary/" class="md-nav__link">
         
   
   
@@ -1331,7 +1476,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+      <a href="../../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
         
   
   
@@ -1363,8 +1508,6 @@
       
   
   
-    
-  
   
   
     
@@ -1394,23 +1537,20 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../../../engineering/" class="md-nav__link ">
               
   
   
@@ -1428,13 +1568,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_5" id="__nav_5_label" tabindex="">
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1454,7 +1594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tech-stack/" class="md-nav__link">
+      <a href="../../../engineering/tech-stack/" class="md-nav__link">
         
   
   
@@ -1482,7 +1622,7 @@
   
   
     <li class="md-nav__item">
-      <a href="testing/" class="md-nav__link">
+      <a href="../../../engineering/testing/" class="md-nav__link">
         
   
   
@@ -1510,7 +1650,7 @@
   
   
     <li class="md-nav__item">
-      <a href="versioning/" class="md-nav__link">
+      <a href="../../../engineering/versioning/" class="md-nav__link">
         
   
   
@@ -1538,7 +1678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ci-cd/" class="md-nav__link">
+      <a href="../../../engineering/ci-cd/" class="md-nav__link">
         
   
   
@@ -1566,7 +1706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="agent-workflow/" class="md-nav__link">
+      <a href="../../../engineering/agent-workflow/" class="md-nav__link">
         
   
   
@@ -1594,7 +1734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="issue-pipeline/" class="md-nav__link">
+      <a href="../../../engineering/issue-pipeline/" class="md-nav__link">
         
   
   
@@ -1622,7 +1762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ui-design-process/" class="md-nav__link">
+      <a href="../../../engineering/ui-design-process/" class="md-nav__link">
         
   
   
@@ -1650,7 +1790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="unity-serialization/" class="md-nav__link">
+      <a href="../../../engineering/unity-serialization/" class="md-nav__link">
         
   
   
@@ -1708,7 +1848,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../tools/" class="md-nav__link ">
+            <a href="../../../tools/" class="md-nav__link ">
               
   
   
@@ -1767,6 +1907,102 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1782,7 +2018,7 @@
 
 
   
-    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/engineering/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/game-setup.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1790,27 +2026,200 @@
   
 
 
-<h1 id="engineering">Engineering<a class="headerlink" href="#engineering" title="Link to this section">&para;</a></h1>
-<p>How the game gets built. Each page here expands one of the non-negotiable rules
-in <code>CLAUDE.md</code> — the root file is the summary you read every session, and these
-are the details you come back for.</p>
+<h1 id="game-setup">Game setup<a class="headerlink" href="#game-setup" title="Link to this section">&para;</a></h1>
+<p>Pick which frogs are playing. Tap a frog to put it in the game, tap it again to
+take it out, then start.</p>
+<h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
+<p><strong>Invariant:</strong> a game cannot start with fewer than two frogs or more than four.
+The cap of four is a recorded rule change from the classroom game's 2–8 — see
+<a href="../../future-ideas/">future ideas</a>.
+<strong>Invariant:</strong> no keyboard ever appears on this screen. See
+<a href="../shared-components/#why-there-is-no-typing">why there is no typing</a>.
+<strong>Invariant:</strong> turn order is the order the frogs are listed in, left to right,
+and that order is visible before the game starts. A player should not have to
+discover whose turn is next by watching.
+<strong>Invariant:</strong> every frog seat is a <code>MinTouchTarget</code>-safe target with a very
+large margin — these are the biggest tap targets in the game, because they are
+tapped by four children at once, reaching across each other.</p>
+<h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>header</code></td>
+<td>The question: <em>Who is playing?</em></td>
+</tr>
+<tr>
+<td><code>seats</code></td>
+<td>The four frog seats, in a row</td>
+</tr>
+<tr>
+<td><code>hint</code></td>
+<td>One line saying what to do, and what is stopping you if <code>Start</code> is off</td>
+</tr>
+<tr>
+<td><code>controls</code></td>
+<td><code>Back</code> and <code>Start</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong><a href="tech-stack/">Tech stack</a></strong> — Unity, the engine-free Core assembly, and
-  the naming conventions that keep the split honest.</li>
-<li><strong><a href="testing/">Testing</a></strong> — strict TDD, what gets tested in plain NUnit
-  versus Unity EditMode, and why the fast suite has to stay fast.</li>
-<li><strong><a href="versioning/">Versioning</a></strong> — Conventional Commits, release-please, and
-  <code>/VERSION</code> as the single source of the app's version.</li>
-<li><strong><a href="ci-cd/">CI/CD</a></strong> — every workflow, what it gates, and what to do when it
-  goes red.</li>
-<li><strong><a href="agent-workflow/">Agent workflow</a></strong> — how an issue becomes a merged PR,
-  including what belongs in a PR body.</li>
-<li><strong><a href="issue-pipeline/">Issue pipeline</a></strong> — the label state machine, the
-  gatekeeper, and the nightly builder.</li>
-<li><strong><a href="ui-design-process/">UI design process</a></strong> — wireframe before UI code, and
-  what "agreed" means.</li>
-<li><strong><a href="unity-serialization/">Unity serialization</a></strong> — the serializer's rules,
-  written down so nobody has to guess at them.</li>
+<li><code>header</code> pinned to the top safe area, centred.</li>
+<li><code>seats</code> centred both ways in the space between <code>header</code> and <code>controls</code>. Four
+  seats, always four, always in the same left-to-right order — an unchosen frog
+  is an empty seat, not a missing one, so the row never reflows while you are
+  tapping it.</li>
+<li><code>hint</code> sits <code>HintGap</code> beneath <code>seats</code>, centred.</li>
+<li><code>controls</code> pinned to the bottom safe area: <code>Back</code> at the left, <code>Start</code> at the
+  right, both <code>SafeMargin</code> from their edge.</li>
+</ul>
+<h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Safe margin</td>
+<td><code>SafeMargin</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Header size</td>
+<td><code>SetupHeaderSize</code></td>
+<td>72 px</td>
+</tr>
+<tr>
+<td>Seat width</td>
+<td><code>SeatWidth</code></td>
+<td>360 px</td>
+</tr>
+<tr>
+<td>Seat height</td>
+<td><code>SeatHeight</code></td>
+<td>440 px</td>
+</tr>
+<tr>
+<td>Gap between seats</td>
+<td><code>SeatGap</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Seat corner radius</td>
+<td><code>SeatRadius</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Frog swatch in a seat</td>
+<td><code>SeatSwatchDiameter</code></td>
+<td>200 px</td>
+</tr>
+<tr>
+<td>Seat colour-name size</td>
+<td><code>SeatLabelSize</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Ring on a chosen seat</td>
+<td><code>SeatChosenRing</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Gap between the seat row and the hint</td>
+<td><code>HintGap</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Hint size</td>
+<td><code>SetupHintSize</code></td>
+<td>36 px</td>
+</tr>
+<tr>
+<td>Turn-order badge diameter</td>
+<td><code>SeatOrderBadge</code></td>
+<td>72 px</td>
+</tr>
+</tbody>
+</table>
+<p>Four seats at 360 px with three 48 px gaps is 1584 px, centred in 1920 with
+168 px either side. The row is deliberately not full-bleed: the empty space is
+what makes it obvious there are four seats and no more.</p>
+<h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
+<ul>
+<li>
+<p><strong>Frog seat ×4</strong> — Green, Blue, Orange, Pink, in that order, using
+  <a href="../shared-components/#frog-colours">frog colours</a>. Two states, and only two:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>What it looks like</th>
+<th>What tapping does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty</td>
+<td>Dashed outline, grey swatch, <code>Tap to play</code></td>
+<td>Adds this frog; it takes the next free turn-order number</td>
+</tr>
+<tr>
+<td>Chosen</td>
+<td>Filled, <code>SeatChosenRing</code> ring, colour name, turn-order badge</td>
+<td>Removes this frog; the badges after it renumber</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>Turn-order badge</strong> — <code>1</code>–<code>4</code> on a chosen seat, top-left corner. This is the
+  only thing on the screen that says what turn order is, and it is why the
+  numbers renumber immediately when a frog is removed rather than at start.</p>
+</li>
+<li><strong><code>Start</code></strong> — primary <a href="../shared-components/#button">button</a>. Disabled below
+  two frogs.</li>
+<li><strong><code>Back</code></strong> — secondary button. Returns to the <a href="../title-screen/">title screen</a>.</li>
+<li><strong>Hint</strong> — <code>Pick two to four frogs</code> while <code>Start</code> is disabled;
+  <code>Green goes first</code> once it is enabled. One line, always present, so the
+  layout does not jump when it changes.</li>
+</ul>
+<h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
+<ul>
+<li>Entering: seats all empty, every time. The game does not remember the last
+  line-up, because it does not remember anything between sessions in v1 and
+  because the players at the table are usually different ones.</li>
+<li>Tapping a chosen seat removes it. There is no confirm — nothing has started
+  yet, and a confirm on an action with no cost teaches children to dismiss
+  confirms.</li>
+<li><code>Start</code> begins the game with the chosen frogs in badge order and goes to
+  <a href="../game-board/">game board</a>, with frog 1's turn active and nothing rolled.</li>
+<li>Hardware back does what <code>Back</code> does.</li>
+</ul>
+<h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
+<p><a href="../mockups/game-setup.html"><code>mockups/game-setup.html</code></a> — drawn with three frogs
+chosen and one seat empty, which is the state that shows both seat appearances
+and the renumbering at once.</p>
+<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong>Does a saved game change this screen?</strong>
+  <a href="../../../adr/0004-core-owns-the-save-format/">ADR-0004</a> puts a save format in
+  Core. If a game in progress can be resumed, the resume entry point is most
+  likely here or on the <a href="../title-screen/">title screen</a>, and either way it is a
+  new element that needs adding to a wireframe. Not decided; nothing on this
+  screen assumes it.</li>
+<li><strong>Should the four colours be reorderable?</strong> Proposed: no. Turn order is
+  tap order, which is one gesture rather than two, and re-ordering is a drag
+  interaction on a screen four children are all reaching at.</li>
 </ul>
 
 
@@ -1884,10 +2293,10 @@ are the details you come back for.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
