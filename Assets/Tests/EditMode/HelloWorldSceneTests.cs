@@ -15,11 +15,6 @@ namespace Frogs.Unity.EditModeTests
     /// around any asset that is not authored by hand — the failure being
     /// watched for is *detachment*, which produces no error anywhere, so the
     /// messages name the likely cause rather than the expected value.
-    ///
-    /// They are **skipped, not failed, until the scene exists**. Creating it
-    /// needs one Unity Editor session (issue #182); an agent cannot do it, and
-    /// a suite that is red for a reason nobody in it can fix is a suite people
-    /// stop reading. A skip says the same thing and says it in the results.
     /// </summary>
     public sealed class HelloWorldSceneTests
     {
@@ -29,18 +24,16 @@ namespace Frogs.Unity.EditModeTests
         // here rather than quietly agree with itself.
         const string ScenePath = "Assets/Scenes/HelloWorld.unity";
 
-        [SetUp]
-        public void SkipUntilSomeoneHasCreatedTheScene()
+        [Test]
+        public void TheSceneAssetIsWhereTheBuildLooksForIt()
         {
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-            {
-                Assert.Ignore(
-                    $"There is no scene at {ScenePath} yet. It takes one Unity Editor "
-                    + "session to create — Frogs → Create the Hello World scene — and that "
-                    + "is issue #182. Until then an Android build has no scenes and fails "
-                    + "with exit code 103. These tests guard the scene's wiring once it is "
-                    + "committed.");
-            }
+            Assert.That(
+                AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath),
+                Is.Not.Null,
+                $"There is no scene at {ScenePath}. An Android build with no scenes fails "
+                + "with exit code 103 and an empty output directory. Recreate it with "
+                + "Frogs → Create the Hello World scene, and commit the scene and its "
+                + ".meta together.");
         }
 
         [Test]

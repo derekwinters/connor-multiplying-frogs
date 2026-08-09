@@ -249,12 +249,22 @@ which is exactly what
 forbids reasoning your way through. Asking Unity to write the file removes the
 guess.
 
-**A person runs it, from the menu, once.** `Frogs → Create the Hello World
-scene`, then commit what changed. Nothing triggers it automatically and CI does
-not run it, for a reason worth writing down: two automatic triggers were tried
-headlessly — an `[InitializeOnLoad]` static constructor and `-executeMethod`
-through a GameCI step — and **neither produced a scene.** Both ran, both left
-`Assets/Scenes/` empty, and working out why needs an editor to watch it in.
+**It is run once, and the asset it produces is committed.** From the menu —
+`Frogs → Create the Hello World scene` — or headlessly:
+
+```bash
+Unity -batchmode -quit -projectPath . \
+      -executeMethod Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+```
+
+Nothing triggers it automatically and no build runs it. It is a tool for making
+the asset; the asset is what ships.
+
+One detail in it is load-bearing and was expensive to find: the scene is created
+with `NewSceneMode.Single`. The obvious-looking alternative — `Additive`, plus
+`SceneManager.MoveGameObjectToScene` for each object, so an open editor session
+keeps its work — **produced no scene at all headlessly, and raised nothing.**
+Twice. Don't swap it back without an editor open to watch what happens.
 
 #### Four files, committed together
 
@@ -265,13 +275,13 @@ through a GameCI step — and **neither produced a scene.** Both ran, both left
 | `Assets/Scripts/Unity/HelloWorldProbe.cs.meta` | the scene refers to that script **by GUID**; without this the next checkout imports it under a new one and the scene loads with a silent *Missing Script* |
 | `ProjectSettings/EditorBuildSettings.asset` | which scenes are in the build. A committed scene that is not in here is a scene the APK does not contain |
 
-The tool is a **guard, not an owner**: it creates the scene only when there
-isn't one, so once the files are committed it does nothing and the committed
-assets are what ship. `Assets/Tests/EditMode/HelloWorldSceneTests.cs` asserts
-them — that the scene exists, that a build would include it, and that its
-components survived serialization. Those tests **skip rather than fail** while
-the scene does not exist, because a suite that is red for a reason nobody in it
-can fix is a suite people stop reading.
+The tool is idempotent: it creates the scene only when there isn't one, so once
+the files are committed it does nothing. `Assets/Tests/EditMode/HelloWorldSceneTests.cs`
+asserts them — that the scene exists, that a build would include it, and that
+its components survived serialization. That last one is the guard against the
+failure this whole arrangement exists to avoid: a `.meta` that goes missing, a
+GUID that changes, and a scene that loads with a *Missing Script* and says
+nothing about it.
 
 **The screen it renders is deliberately empty.** A camera and one component that
 writes the version to the log, and nothing else: what a build-proof screen

@@ -21,22 +21,23 @@ namespace Frogs.EditorTools
     /// docs/engineering/unity-serialization.md exists to forbid. Asking Unity to
     /// write it removes the guess entirely.
     ///
-    /// Run it from the menu — **Frogs → Create the Hello World scene** — and
-    /// commit `Assets/Scenes/HelloWorld.unity`, its `.meta`, and the changed
-    /// `ProjectSettings/EditorBuildSettings.asset` together.
+    /// This is what produced the committed scene, and how to produce it again:
     ///
-    /// Nothing calls it automatically, and CI does not run it. Two automatic
-    /// triggers were tried headlessly and neither produced a scene: an
-    /// `[InitializeOnLoad]` static constructor, and `-executeMethod` from a
-    /// GameCI step. Both ran, both left `Assets/Scenes/` empty. Why is not
-    /// something that can be worked out without an editor to watch, and
-    /// guessing at it is what
-    /// docs/engineering/unity-serialization.md exists to prevent — so this is
-    /// a menu item a person runs once, and the scene it produces is committed.
+    ///     Frogs → Create the Hello World scene
+    ///
+    ///     Unity -batchmode -quit -projectPath . \
+    ///           -executeMethod Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+    ///
+    /// Commit `Assets/Scenes/HelloWorld.unity`, its `.meta`, and the changed
+    /// `ProjectSettings/EditorBuildSettings.asset` together — and the `.meta` of
+    /// any script the scene refers to, because that is where the GUID it points
+    /// at lives.
+    ///
+    /// Nothing calls this automatically, and it is not part of a build. It is
+    /// a tool for making the asset; the asset is what ships.
     ///
     /// It is idempotent: it creates the scene only when there is not one, so
-    /// running it against a checkout that already has the committed scene does
-    /// nothing. The EditMode tests assert the scene on disk either way.
+    /// running it against a checkout that already has the scene does nothing.
     /// </summary>
     public static class HelloWorldScene
     {
@@ -79,8 +80,14 @@ namespace Frogs.EditorTools
             }
 
             // Single, so the new scene is the active one and objects created
-            // below land in it. Additive would need each object moving across,
-            // which is more moving parts for no gain.
+            // below land in it.
+            //
+            // Not Additive. An additive scene is not the active one, so every
+            // object has to be moved across with SceneManager.MoveGameObjectToScene
+            // — and headlessly that combination produced no scene at all, twice,
+            // without raising anything. This version was run in CI and its
+            // output is the committed scene, so leave it alone unless you have
+            // an editor open to check the replacement in.
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             // A camera, so the app renders a screen rather than nothing, and the
