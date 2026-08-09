@@ -296,6 +296,25 @@ is worse than not waking it at all.
 An unstructured mention — "this is similar to #42" — is not a dependency, and
 is deliberately not matched.
 
+#### One recognizer, shared
+
+Recognizing that line has exactly one implementation: `text_blockers` in
+`.claude/skills/issue-blockers/blocker_refs.py`, and the union has exactly two —
+`blockers_of` for a snapshot that already carries its native edges, and
+`union_blockers` for the one caller that fetches them live. Every reader in the
+pipeline imports them: the sweep, the queue selector, the reconciler, the
+dashboard, the comment-event snapshot, and `audit`.
+
+`issue-blockers` owns them because it is the skill that documents the format —
+the same "the side that writes the format owns the recognizer" rule that put
+`has_analysis_signature` in `triage-issue`.
+
+The pattern used to be written out in each reader, and the drift is silent in
+the worst way: the queue selector reads a line as a blocker and refuses to
+build the issue, the sweep does not and so never wakes it, and the dashboard
+shows it as ready the whole time. Nothing errors. The issue just stops moving,
+and no log anywhere says why.
+
 ### When a blocker resolves
 
 | Blocker state | Resolved? |
@@ -814,7 +833,9 @@ to have it.
 Two of those are narrower than they look.
 
 **Hard blockers are native edges unioned with `Blocked by #N` lines**, merged by
-one helper. An issue can have one dependency recorded natively and another still
+one helper — `blockers_of` in `.claude/skills/issue-blockers/blocker_refs.py`,
+the same one the sweep and the dashboard use. An issue can have one dependency
+recorded natively and another still
 written in prose, and reading either source alone releases work that is still
 half-blocked. A blocker the caller knows nothing about counts as unresolved:
 not knowing whether the thing you depend on is finished is precisely the case

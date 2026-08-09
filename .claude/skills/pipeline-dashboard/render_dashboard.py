@@ -24,6 +24,17 @@ import os
 import re
 import sys
 import urllib.request
+from pathlib import Path
+
+# One recognizer for `Blocked by #N`, and one union of it with the native
+# edges, shared with the skill that documents the format. A copy here that
+# drifted would show the board as ready while the builder refuses to build —
+# the failure Derek would see first and be least able to explain. See #147.
+_BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
+if str(_BLOCKERS_SKILL) not in sys.path:
+    sys.path.insert(0, str(_BLOCKERS_SKILL))
+
+from blocker_refs import blockers_of  # noqa: E402
 
 DEFAULT_CAP = 3
 
@@ -40,9 +51,6 @@ STATE_LABELS = PLANNING_LABELS | ACTIVE_LABELS | {PARKED}
 
 FOCUS_MARKER = re.compile(r"<!--\s*pipeline-focus:\s*(.+?)\s*-->")
 CAP_MARKER = re.compile(r"<!--\s*pipeline-cap:\s*(.+?)\s*-->")
-
-TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$",
-                          re.IGNORECASE | re.MULTILINE)
 
 COMMANDS = [
     ("/admit", "bring an issue into the pipeline"),
@@ -157,13 +165,6 @@ def ready_queue(data: dict, focus=None) -> list:
     focus = focus or resolve_focus(data)
 
     return _sorted_rows(_active(data, focus, READY), data)
-
-
-def blockers_of(issue) -> list:
-    """Hard blockers — native edges unioned with `Blocked by #N` lines."""
-    from_native = {int(n) for n in (issue.get("native_blockers") or [])}
-    from_text = {int(n) for n in TEXT_BLOCKER.findall(issue.get("body") or "")}
-    return sorted(from_native | from_text)
 
 
 def _open_issues(data) -> dict:

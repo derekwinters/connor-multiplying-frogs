@@ -19,20 +19,25 @@ See docs/engineering/issue-pipeline.md.
 
 from __future__ import annotations
 
-import re
+import sys
+from pathlib import Path
+
+# One recognizer for `Blocked by #N` and one union with the native edges,
+# shared with the skill that documents the format. See #147. This is the one
+# caller that fetches its natives live rather than reading them off a
+# pre-built snapshot, which is why it calls `union_blockers` directly.
+_BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
+if str(_BLOCKERS_SKILL) not in sys.path:
+    sys.path.insert(0, str(_BLOCKERS_SKILL))
+
+from blocker_refs import union_blockers  # noqa: E402
 
 DASHBOARD_LABEL = "dashboard"
 WATERMARK = "eyes"
 
-TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$", re.IGNORECASE | re.MULTILINE)
-
 
 def _labels(issue: dict) -> list[str]:
     return [label.get("name", "") for label in (issue.get("labels") or [])]
-
-
-def _text_blockers(body: str | None) -> set[int]:
-    return {int(number) for number in TEXT_BLOCKER.findall(body or "")}
 
 
 def _native_blockers(api, issue_number: int) -> set[int]:
@@ -95,8 +100,8 @@ def build(event: dict, api, owner: str, bot_login: str = "github-actions[bot]") 
             "labels": labels,
             "body": issue.get("body") or "",
             "milestone": (issue.get("milestone") or {}).get("title"),
-            "blockers": sorted(
-                _text_blockers(issue.get("body")) | _native_blockers(api, issue["number"])),
+            "blockers": union_blockers(
+                issue.get("body"), _native_blockers(api, issue["number"])),
             "is_dashboard": DASHBOARD_LABEL in labels,
         },
         "comment": {

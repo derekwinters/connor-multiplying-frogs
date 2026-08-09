@@ -19,6 +19,17 @@ from __future__ import annotations
 import json
 import re
 import sys
+from pathlib import Path
+
+# One recognizer for `Blocked by #N`, and one union of it with the native
+# edges, shared with the skill that documents the format. A copy here that
+# drifted from the sweep's would refuse to build an issue nothing would ever
+# wake, with nothing reporting a reason. See #147.
+_BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
+if str(_BLOCKERS_SKILL) not in sys.path:
+    sys.path.insert(0, str(_BLOCKERS_SKILL))
+
+from blocker_refs import blockers_of  # noqa: E402
 
 READY_LABEL = "ready-for-work"
 PARKED_LABEL = "parked"
@@ -29,12 +40,9 @@ EPIC_LABEL = "type:epic"
 # the only thing standing between a quiet night and thirty open PRs.
 DEFAULT_CAP = 3
 
-# A hard blocker, written in prose. Structured only — "this is similar to #42"
-# is not a dependency, and treating it as one would stall issues at random.
-TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$",
-                          re.IGNORECASE | re.MULTILINE)
-
-# Soft ordering. Does not gate the issue — it sequences it.
+# Soft ordering. Does not gate the issue — it sequences it. It has no native
+# form and exactly one reader, so unlike the blocker pattern there is nothing
+# here for it to drift from.
 TEXT_DEPENDS = re.compile(r"^\s*depends\s+on\s*:?\s*#(\d+)\s*$",
                           re.IGNORECASE | re.MULTILINE)
 
@@ -48,18 +56,6 @@ CLOSING_KEYWORD = re.compile(
 
 def _numbers(pattern, body) -> set:
     return {int(number) for number in pattern.findall(body or "")}
-
-
-def blockers_of(issue: dict) -> list:
-    """Every issue this one is *blocked by* — native edges unioned with text.
-
-    **One helper, both sources.** A dependency can be recorded natively while
-    another sits in prose in the same body, and reading only one source means
-    releasing an issue that is still half-blocked. Union is the only safe
-    merge, and doing it in one place is what stops the two readings drifting.
-    """
-    from_native = {int(number) for number in (issue.get("native_blockers") or [])}
-    return sorted(from_native | _numbers(TEXT_BLOCKER, issue.get("body")))
 
 
 def depends_on(issue: dict) -> list:

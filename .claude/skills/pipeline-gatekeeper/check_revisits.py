@@ -13,7 +13,19 @@ See docs/engineering/issue-pipeline.md.
 
 from __future__ import annotations
 
-import re
+import sys
+from pathlib import Path
+
+# One recognizer for `Blocked by #N`, and one union of it with the native
+# edges, shared with the skill that documents the format. Six copies of the
+# pattern used to drift silently: this sweep would stop seeing a line the queue
+# selector still refused to build past, and the issue would never wake. See
+# #147.
+_BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
+if str(_BLOCKERS_SKILL) not in sys.path:
+    sys.path.insert(0, str(_BLOCKERS_SKILL))
+
+from blocker_refs import blockers_of  # noqa: E402
 
 # The state a blocked issue is parked in by triage.
 BLOCKED_LABEL = "needs-clarification"
@@ -25,10 +37,6 @@ WIREFRAME_LABEL = "type:wireframe"
 # be built, and holding the dependent back until it closes costs a night for
 # nothing.
 SCHEDULED_LABELS = {"ready-for-work", "in-progress"}
-
-# Structured only. "This is similar to #42" is not a dependency, and treating it
-# as one would wake issues at random.
-TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$", re.IGNORECASE | re.MULTILINE)
 
 
 class Revisit:
@@ -49,18 +57,6 @@ class Revisit:
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return f"Revisit(#{self.issue_number}, cleared={self.cleared})"
-
-
-def blockers_of(issue: dict) -> list[int]:
-    """Every issue this one waits on — text lines **unioned** with native edges.
-
-    Union rather than either-or: an issue can have one recorded natively and
-    another still written in prose, and waking it when only half have cleared
-    is worse than not waking it at all.
-    """
-    from_text = {int(number) for number in TEXT_BLOCKER.findall(issue.get("body") or "")}
-    from_native = {int(number) for number in (issue.get("native_blockers") or [])}
-    return sorted(from_text | from_native)
 
 
 def is_resolved(blocker: dict) -> bool:
