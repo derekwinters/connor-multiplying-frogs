@@ -1357,6 +1357,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-check-that-catches-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The check that catches it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#two-layers-of-enforcement" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1909,6 +1920,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-check-that-catches-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The check that catches it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#two-layers-of-enforcement" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2192,12 +2214,13 @@ costs work we would rather spend on the game.</p>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    EditMode/                 ← EditMode tests for the shell; needs the editor
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>      Frogs.Unity.EditModeTests.asmdef
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  Editor/                     ← editor-only tooling; never ships in a build
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  Scenes/  Art/  Audio/  Prefabs/
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>Tests/
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                                and `dotnet test` can run it with no editor.
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>ProjectSettings/              ← ProjectVersion.txt pins the editor version
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>Packages/manifest.json        ← only the packages actually needed
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    Frogs.EditorTools.asmdef  ← references Frogs.Core; Editor-only platform
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  Scenes/  Art/  Audio/  Prefabs/
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>Tests/
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                                and `dotnet test` can run it with no editor.
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>ProjectSettings/              ← ProjectVersion.txt pins the editor version
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>Packages/manifest.json        ← only the packages actually needed
 </code></pre></div>
 <p>Two placements are worth explaining, because they look inconsistent and aren't:</p>
 <ul>
@@ -2217,11 +2240,28 @@ coroutines, no <code>ScriptableObject</code>. <code>Frogs.Core.asmdef</code> set
 compiler rather than by remembering.</p>
 <p><code>Frogs.Core</code> is also <code>autoReferenced: false</code>: nothing picks it up implicitly, so
 an assembly that wants Core has to say so. <code>Frogs.Unity</code> says so.</p>
+<p><strong>Which means every folder of <code>.cs</code> needs an asmdef, including <code>Editor/</code>.</strong> A
+file in a folder no asmdef covers compiles into a <em>predefined</em> assembly —
+<code>Assembly-CSharp</code> or <code>Assembly-CSharp-Editor</code> — and a predefined assembly has no
+references list anyone can edit. It sees <code>autoReferenced: true</code> assemblies and
+nothing else, so <code>using Frogs.Core;</code> there cannot compile, whatever the file
+does. <code>Assets/Editor/</code> therefore has <code>Frogs.EditorTools.asmdef</code>.</p>
+<p>That asmdef sets <code>includePlatforms: ["Editor"]</code>, and it has to. The <code>Editor</code>
+folder name only makes code editor-only while the folder is part of a predefined
+assembly; once it has an asmdef of its own, the folder convention no longer
+applies and the platform list is what keeps build tooling out of the player.</p>
+<h4 id="the-check-that-catches-it">The check that catches it<a class="headerlink" href="#the-check-that-catches-it" title="Link to this section">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>.github/scripts/check_assembly_references.py
+</code></pre></div>
+<p>It reads every <code>using</code> under <code>Assets/</code>, works out which assembly the file
+compiles into, and fails if that assembly cannot see the one the namespace
+belongs to — the same verdict Unity gives, without an editor or a licence. CI
+runs it beside <code>check_core_isolation.py</code> (<a href="../ci-cd/">CI/CD</a>).</p>
 <h4 id="two-layers-of-enforcement">Two layers of enforcement<a class="headerlink" href="#two-layers-of-enforcement" title="Link to this section">&para;</a></h4>
 <p>The asmdef flag is the real enforcement, but it only fires inside Unity —
 minutes later, in CI, and only while the flag is still set. So there is a second
 check that runs anywhere in under a second, with no editor and no .NET:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>.github/scripts/check_core_isolation.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>.github/scripts/check_core_isolation.py
 </code></pre></div>
 <p>It fails if <code>Frogs.Core.asmdef</code> loses <code>noEngineReferences</code>, if it gains an engine
 or editor reference, or if any <code>.cs</code> under <code>Assets/Scripts/Core/</code> imports —
@@ -2246,13 +2286,13 @@ for every test run, forever. Five minutes saved once, paid back on every commit.
 <h3 id="when-you-genuinely-need-engine-behaviour-in-core">When you genuinely need engine behaviour in Core<a class="headerlink" href="#when-you-genuinely-need-engine-behaviour-in-core" title="Link to this section">&para;</a></h3>
 <p>You need an <strong>interface Core owns and the Unity layer implements</strong>. Core
 declares what it needs in its own vocabulary; the shell provides it.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// In Core — no engine types.</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1">// In the Unity layer.</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">UnityClock</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UnityEngine</span><span class="p">.</span><span class="n">Time</span><span class="p">.</span><span class="n">time</span><span class="p">;</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// In Core — no engine types.</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">// In the Unity layer.</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">UnityClock</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UnityEngine</span><span class="p">.</span><span class="n">Time</span><span class="p">.</span><span class="n">time</span><span class="p">;</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
 </code></pre></div>
 <p>Tests substitute a fake clock and control time exactly. That is the whole point,
 and it is why "I'll just reference UnityEngine here" is never the shortcut it
@@ -2267,8 +2307,8 @@ silently ignores keys it doesn't recognise, so a hand-edited settings file with
 one wrong key builds fine and is wrong at runtime; the same mistake made through
 the C# API is a compile error. See
 <a href="../unity-serialization/">Unity serialization</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.ProjectBootstrap.Apply
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.ProjectBootstrap.Apply
 </code></pre></div>
 <p>It is idempotent, and whatever it changes under <code>ProjectSettings/</code> gets
 committed. The version fields are deliberately absent from it — <code>/VERSION</code> owns
@@ -2276,7 +2316,7 @@ those, injected at build time (<a href="../versioning/">Versioning</a>).</p>
 <h3 id="naming">Naming<a class="headerlink" href="#naming" title="Link to this section">&para;</a></h3>
 <p>Use the <code>scaffold-core</code> skill to create a Core type; it applies all of this and
 leaves you with a failing test, which is where a new type should start.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>SplitRule<span class="w"> </span>--subfolder<span class="w"> </span>Rules
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>SplitRule<span class="w"> </span>--subfolder<span class="w"> </span>Rules
 </code></pre></div>
 <ul>
 <li>Assemblies and their folders share a name: <code>Frogs.Core</code>, <code>Frogs.Unity</code>.</li>
@@ -2293,15 +2333,15 @@ leaves you with a failing test, which is where a new type should start.</p>
 <p><strong>Every size, offset, margin, spacing, duration, speed, delay, threshold, count,
 and payout is a named constant or a serialized field. Never a bare literal in a
 method body.</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// No.</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1">// Yes.</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// No.</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1">// Yes.</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="why-this-is-a-rule-and-not-a-preference">Why this is a rule and not a preference<a class="headerlink" href="#why-this-is-a-rule-and-not-a-preference" title="Link to this section">&para;</a></h3>
 <ul>

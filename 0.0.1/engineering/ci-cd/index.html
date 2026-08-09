@@ -1613,6 +1613,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#three-secrets-not-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three secrets, not one
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#path-gating-and-what-it-means-for-branch-protection" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2374,6 +2385,17 @@
     <span class="md-ellipsis">
       
         A missing licence fails, it does not skip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-secrets-not-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three secrets, not one
       
     </span>
   </a>
@@ -3213,18 +3235,38 @@ alongside the skills:</p>
 </tbody>
 </table>
 <p>See <a href="../testing/">Testing</a> for what belongs in each.</p>
-<p>The Core job also runs <code>check_core_isolation.py</code> first. It costs nothing and it
-fails for a reason the test output would never explain: game logic that has
-grown a dependency on the engine.</p>
+<p>The Core job also runs two static checks first. Both cost nothing and both fail
+for reasons the test output would never explain:</p>
+<ul>
+<li><code>check_core_isolation.py</code> — game logic that has grown a dependency on the
+  engine.</li>
+<li><code>check_assembly_references.py</code> — a <code>using</code> of a project namespace from an
+  assembly that cannot see it. Unity gives the same verdict, but only inside an
+  editor, minutes into a build, after a licence has been sorted out. See
+  <a href="../tech-stack/#the-check-that-catches-it">the Core/Unity split</a>.</li>
+</ul>
 <h4 id="a-missing-licence-fails-it-does-not-skip">A missing licence fails, it does not skip<a class="headerlink" href="#a-missing-licence-fails-it-does-not-skip" title="Link to this section">&para;</a></h4>
 <p>The EditMode job's <strong>first</strong> step, before any checkout or container pull,
-asserts that <code>UNITY_LICENSE</code> is set — and fails the job if it isn't.</p>
+asserts that <code>UNITY_LICENSE</code>, <code>UNITY_EMAIL</code>, and <code>UNITY_PASSWORD</code> are all set —
+and fails the job if any is missing.</p>
 <p>Skipping would be the friendlier behaviour and the wrong one. A required check
 that goes green because the suite never ran is worse than no check at all: it
 reports "tested" on a PR nothing tested, and nobody looks twice at a green tick.</p>
-<p>Until the secret exists (#82), this job is red on every PR that touches the
+<p>Until the secrets exist (#82), this job is red on every PR that touches the
 Unity project. That is the intended behaviour, and it is visible rather than
 quiet.</p>
+<h4 id="three-secrets-not-one">Three secrets, not one<a class="headerlink" href="#three-secrets-not-one" title="Link to this section">&para;</a></h4>
+<p>A Unity Personal licence needs <strong>all three</strong> of <code>UNITY_LICENSE</code>, <code>UNITY_EMAIL</code>,
+and <code>UNITY_PASSWORD</code>, in every workflow that starts a Unity container.</p>
+<p>The name of the first one is misleading. GameCI never passes <code>UNITY_LICENSE</code>
+into the container at all — it parses the serial out of the <code>.ulf</code> on the runner
+and activates inside the container with
+<code>unity-editor -serial … -username … -password …</code>. A licence on its own gets as
+far as producing a valid serial and then dies with <em>"License activation strategy
+could not be determined"</em>, several minutes and one image pull later.</p>
+<p>So the licence gates check all three up front. The secrets are the raw contents
+of <code>Unity_lic.ulf</code> — the XML, verbatim, not base64 and not flattened onto one
+line — plus the Unity ID that licence belongs to.</p>
 <h4 id="path-gating-and-what-it-means-for-branch-protection">Path-gating, and what it means for branch protection<a class="headerlink" href="#path-gating-and-what-it-means-for-branch-protection" title="Link to this section">&para;</a></h4>
 <p>The workflow only runs when <code>Assets/</code>, <code>Tests/</code>, <code>ProjectSettings/</code>,
 <code>Packages/</code>, or its own files change. Most changes here are docs, skills, and
