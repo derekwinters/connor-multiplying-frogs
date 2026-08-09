@@ -59,17 +59,100 @@ What it is, in a sentence or two.
 
 ## The parking lot
 
-*Nothing parked yet.*
+Everything below was raised and deliberately set aside during the founding
+design conversation in
+[issue #7](https://github.com/derekwinters/connor-multiplying-frogs/issues/7).
 
-The game concept itself is still being settled by Derek and Connor in
-[issue #7](https://github.com/derekwinters/connor-multiplying-frogs/issues/7),
-and `v0.0.1` is entirely infrastructure — build tooling, CI, the AI pipeline,
-and a Hello World app. There is not yet a game for an idea to be "out of scope"
-*of*.
+### Local-network play
 
-Expect this section to start filling up as soon as the concept lands: the first
-entries will be the things that come up during that conversation and get set
-aside.
+Two or more phones on the same wifi discovering each other, so players use their
+own devices instead of passing one around.
+
+**Why it's parked:** wanted for a later version, but it requires overriding a
+non-negotiable `CLAUDE.md` rule — the app is fully offline, and LAN discovery
+needs an Android network permission. See
+[ADR-0003](../adr/0003-network-boundary.md); the rule gets amended when the
+feature is actually built, not before.
+**Issue:** none yet.
+
+### Diagnostic marking of the working-out grid
+
+On a wrong answer, highlight the first cell where the working went astray,
+rather than just revealing the correct answer.
+
+**Why it's parked:** genuinely the best teaching tool available here, and it
+requires picking one long-multiplication algorithm as canonical — a pedagogical
+stance nobody has taken. See
+[ADR-0002](../adr/0002-structured-working-out-grid.md).
+**Issue:** none yet.
+
+### Computer frogs
+
+Fill empty seats with computer-controlled players so the game can be played
+alone.
+
+**Why it's parked:** the planned direction is toward *more real people in the
+room* (local-network play), so an artificial opponent is a branch off that road
+rather than a step along it. The cost is real — Connor cannot play his own game
+without someone to play it with.
+**Issue:** none yet.
+
+### Five to eight players
+
+The classroom game's rules card says 2–8 players and the board has eight lanes.
+v1 caps at four.
+
+**Why it's parked:** with two-to-five-minute turns, eight players sharing one
+phone means waiting fifteen to thirty-five minutes between turns. At the table
+that works because everyone can see the board and think at once; one screen
+takes that away. Note this cap is a **rule change**, made by Derek in #7.
+**Issue:** none yet.
+
+### Sound and music
+
+Any audio at all — a chime for a correct answer, music, effects.
+
+**Why it's parked:** deliberately out of v1. Audio means assets, licences, a mute
+control, and a settings screen to put the mute control on. A single "correct"
+chime does a lot of work and is the most likely of the parked items to be
+promoted first.
+**Issue:** none yet.
+
+### Other kinds of arithmetic
+
+Division, addition or subtraction modes, which the card and pile system would
+support with almost no change.
+
+**Why it's parked:** it is a multiplication game; the name says so.
+**Issue:** none yet.
+
+### More than one board
+
+Alternate tracks, longer or shorter lanes, difficulty settings beyond what the
+piles already provide.
+
+**Why it's parked:** v1 ships exactly the classroom board. Nothing has been
+played yet, so there is no evidence about what a second board would need to be.
+**Issue:** none yet.
+
+### An in-app tutorial
+
+An onboarding flow teaching the rules inside the game.
+
+**Why it's parked:** Connor already knows the rules, and
+[how to play](../intro/how-to-play.md) covers anyone who doesn't. A tutorial is a
+second thing to build and keep correct as the game changes.
+**Issue:** none yet.
+
+### Frogs that visibly multiply
+
+A correct answer briefly swarms the screen with that many frogs before they
+collapse back into your single playing piece — making the title literal and
+showing what multiplication actually means.
+
+**Why it's parked:** Connor's call, and the decision was that the frog stays a
+playing piece and the title stays a pun.
+**Issue:** none yet.
 
 ## Promoted
 
