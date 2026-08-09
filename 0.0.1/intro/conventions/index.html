@@ -2487,7 +2487,7 @@ with a skill from outside this repo.</strong> Most of our skills need no prefix:
 <code>pipeline-gatekeeper</code>, <code>release-flow</code>, <code>scaffold-core</code> and the rest are named
 unambiguously already, and a prefix on a name nobody could mistake is noise in
 every directory listing.</p>
-<p>Two skills carry it today, and both earned it by colliding:</p>
+<p>One skill carries it today, and it earned it by colliding:</p>
 <table>
 <thead>
 <tr>
@@ -2497,19 +2497,19 @@ every directory listing.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>dw-triage-issue</code></td>
-<td><code>triage</code>, vendored from <code>mattpocock/skills</code></td>
-</tr>
-<tr>
 <td><code>dw-run-tests</code></td>
 <td><code>run</code>, a built-in skill</td>
 </tr>
 </tbody>
 </table>
-<p>Neither is an exact name clash — both are the <em>near</em> miss, which is the one that
-actually bites. Asked to "run the tests" or to "triage this issue", an agent
-picking by name alone can reach for the wrong one, and the wrong one does not
-know about our labels, our milestones, or our Core suite.</p>
+<p>It is not an exact name clash — it is the <em>near</em> miss, which is the one that
+actually bites. Asked to "run the tests", an agent picking by name alone can
+reach for the wrong one, and the wrong one does not know about our Core suite.</p>
+<p><strong>The prefix comes off when the collision goes away.</strong> <code>triage-issue</code> carried it
+while a vendored <code>triage</code> skill sat beside it; that skill has since been removed,
+so the prefix was marking a collision that no longer existed — which is worse
+than no prefix at all, because it tells a reader to go looking for a rival skill
+they will not find.</p>
 <p><strong>Before naming a new skill, check for collisions</strong> — against the vendored names
 in <code>.claude/.skills-manifest.json</code> and against the skills the harness already
 offers. An exact match or a shared-prefix near-miss earns a <code>dw-</code>; anything else

@@ -4085,13 +4085,13 @@ bad-actor gate. Carrying the note here means the triage run does not have to
 re-read the thread to find out why it is running again.</p>
 <p>Results are sorted by issue number, oldest first.</p>
 <p>The dispatcher (<code>pipeline-analysis</code>) is a thin loop over that list. It makes no
-decisions itself — the decisions are in <code>dw-triage-issue</code>, one issue at a time,
+decisions itself — the decisions are in <code>triage-issue</code>, one issue at a time,
 which keeps a bad triage contained to one issue instead of one batch.</p>
 <p><strong>The dispatcher writes nothing at all</strong> — no labels, no comments, not even a
 summary of the round. Every write belongs to the single-issue skill. A round
 that made its own writes would be a second thing that can be wrong, wrong at
 batch scale across the whole queue, in a way no individual triage run could
-produce. It also keeps <code>dw-triage-issue</code> genuinely standalone, which is what lets
+produce. It also keeps <code>triage-issue</code> genuinely standalone, which is what lets
 reactive triage invoke it with no dispatcher present.</p>
 <p><strong>Concurrency is set by the orchestration layer, not the script.</strong>
 <code>select_triage.py</code> reports what needs triage and has no opinion on how fast to
@@ -4109,7 +4109,7 @@ that were never configured, a label changed by hand instead of by a command, an
 issue carried back by the blocker sweep. On a healthy night it finds nothing.
 <strong>An empty round is the system working</strong>, not a wasted run.</p>
 <h3 id="triage-one-issue">Triage — one issue<a class="headerlink" href="#triage-one-issue" title="Link to this section">&para;</a></h3>
-<p><code>dw-triage-issue</code> reads an issue and produces:</p>
+<p><code>triage-issue</code> reads an issue and produces:</p>
 <ul>
 <li>an <strong><code>area:*</code> and <code>type:*</code> label</strong>;</li>
 <li>the <strong>milestone</strong>, set as a field by matching the live milestone descriptions;</li>
@@ -4755,7 +4755,7 @@ see <a href="#skills-here-are-local-and-deliberately-not-synced">Skills here are
 <td>finding what needs triage and dispatching it</td>
 </tr>
 <tr>
-<td><code>dw-triage-issue</code></td>
+<td><code>triage-issue</code></td>
 <td>triaging one issue, and repairing a re-fire</td>
 </tr>
 <tr>
@@ -4802,8 +4802,9 @@ It is still a manual, reviewed act — see <a href="#why-not-sync">Why not sync<
 applies to both kinds for different reasons.</p>
 <h3 id="vendored-skills-do-not-outrank-this-repo">Vendored skills do not outrank this repo<a class="headerlink" href="#vendored-skills-do-not-outrank-this-repo" title="Link to this section">&para;</a></h3>
 <p>Where one of our skill names would be confused with a vendored one, ours carries a
-<code>dw-</code> prefix — <code>dw-triage-issue</code>, not <code>triage-issue</code>. The prefix marks a
-collision, not ownership, so most of our skills do not have one. See
+<code>dw-</code> prefix — <code>dw-run-tests</code>, not <code>run-tests</code>. The prefix marks a collision, not
+ownership, so most of our skills do not have one, and it comes off again when the
+skill it collided with is removed. See
 <a href="../../intro/conventions/#skill-names">Skill names</a>.</p>
 <p>Several vendored skills cover ground <code>/docs</code> already specifies, and where they
 disagree, this repo wins:</p>
@@ -4824,10 +4825,6 @@ disagree, this repo wins:</p>
 <td>the <a href="../agent-workflow/">agent workflow</a></td>
 </tr>
 <tr>
-<td><code>triage</code></td>
-<td>this repo's own <code>dw-triage-issue</code> skill, which the pipeline calls</td>
-</tr>
-<tr>
 <td><code>resolving-merge-conflicts</code></td>
 <td>CLAUDE.md rule 7 — this repo rebases</td>
 </tr>
@@ -4837,11 +4834,22 @@ disagree, this repo wins:</p>
 </tr>
 </tbody>
 </table>
-<p><code>triage</code> and <code>dw-triage-issue</code> are the pair to watch. The pipeline calls
-<code>dw-triage-issue</code>; the vendored <code>triage</code> knows nothing about our label taxonomy,
-the milestone rules, or the hand-back-to-Derek step, so substituting it drops all
-three silently. This is the collision the <code>dw-</code> prefix exists to prevent, and it
-only works if you read the prefix.</p>
+<p>A vendored <code>triage</code> skill used to sit in that table, and it was the dangerous
+one: it knew nothing about our label taxonomy, the milestone rules, or the
+hand-back-to-Derek step, so an agent reaching for it instead of this repo's
+<code>triage-issue</code> dropped all three silently. It has been <strong>removed</strong> rather than
+deconflicted, because a prefix only protects you if you read it, and the two
+skills wrote different label vocabularies onto the same issues.</p>
+<p>Deleting a vendored skill is the stronger fix and the one to prefer when its
+whole subject is already specified here. Renaming ours was never going to stop a
+tired reader picking the wrong one.</p>
+<p>Its siblings still mention it — <code>ask-matt</code> recommends <code>/triage</code>, and
+<code>setup-matt-pocock-skills</code> offers to configure its labels. Those files are left
+<strong>verbatim</strong>, because editing a vendored copy to patch a reference sets
+<code>diverged</code> and turns every future re-vendor into a manual fixup. The references
+are harmless: <code>setup-matt-pocock-skills</code> already asks whether <code>triage</code> is
+installed and skips its whole label section when it is not, and a session asked
+to triage now resolves to <code>triage-issue</code>, which is the skill you wanted.</p>
 <p>The prefix cannot help where the clash is between two names the repo does not
 both own. Two vendored names — <code>grilling</code> and <code>code-review</code> — also exist as a
 personal or built-in skill, and which one a session resolves is harness
