@@ -75,14 +75,23 @@ right.
 three-frogs-still-swimming state, which is the one where the confirm has
 something to lose.
 
+## Who may end a game
+
+**Anyone, on anyone's turn.** Derek's call in
+[issue #186](https://github.com/derekwinters/connor-multiplying-frogs/issues/186).
+
+The alternative was restricting it to the current player, and it was rejected
+because the tablet cannot tell who is holding it — the restriction would have
+been a guess dressed as a rule. What actually protects a game in progress is
+this dialog telling you, before you act, how many frogs you are about to stop.
+
+That is why the cost sentence is built from live state rather than being a fixed
+string. It is the whole of the protection, so it has to say something true and
+specific every time.
+
 ## Open questions
 
-- **Who may end a game, on a shared tablet?**
-  [Issue #186](https://github.com/derekwinters/connor-multiplying-frogs/issues/186).
-  This wireframe proposes *anyone, with a confirm that names the cost*, on the
-  grounds that the tablet cannot tell who is holding it and the confirm is the
-  real protection. If the answer is "only the current player", this dialog gains
-  a condition and the settings button gains a disabled state.
-- **Does the game also end on its own when every frog is home?** Same issue.
-  If yes, the third body sentence above is a state almost nobody will see,
-  because the game will already have ended itself.
+- **Does the game also end on its own when every frog is home?** Still
+  [issue #186](https://github.com/derekwinters/connor-multiplying-frogs/issues/186).
+  If yes, the everybody-is-home body sentence above is a state almost nobody
+  will see, because the game will have ended itself first.

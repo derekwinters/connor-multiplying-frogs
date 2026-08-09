@@ -71,6 +71,18 @@ A player's entire state is therefore one number — how far up their own lane th
 are. There is no board state beyond that: no collisions, no blocking, no ordering
 between frogs.
 
+### The End log is the winning space
+
+A frog wins by **landing on the End log**, not by reaching the last lily pad.
+The lane is therefore **nine positions** — the Start log, seven lily pads, and
+the End log — and winning takes **eight correct answers** from the start.
+
+Confirmed by Derek in
+[issue #185](https://github.com/derekwinters/connor-multiplying-frogs/issues/185),
+after the board wireframe needed the number of spaces in a lane and the
+photograph could not settle it. The logs are symmetric: both ends of a lane are
+real positions a frog occupies, one as the floor and one as the goal.
+
 ### The Start log is a floor, not a special space
 
 A wrong answer moves you back one lily pad, exactly as the rules card says. The
@@ -86,6 +98,15 @@ where you are.
 A clamp at the bottom rather than a special case. Worth stating precisely,
 because "move back one" written without a floor is an off-by-one waiting to
 happen.
+
+Two of the three rows above are about the ends of a lane, so they are worth
+reading together:
+
+| Position | What it is |
+| --- | --- |
+| Start log | Position 0. The floor — a wrong answer here moves nothing. |
+| Lily pads 1–7 | The ordinary spaces. |
+| End log | Position 8. The goal — landing on it wins. |
 
 ## Still unsettled
 
@@ -111,6 +132,13 @@ a session needs a way to stop that isn't "everyone eventually finishes": a quit
 or end-game flow. This is purely ours — a cardboard game ends when you close the
 box, so there is nothing to be faithful to.
 
-Two things this leaves for whoever specifies it: whether the game also ends *on
-its own* once every frog is home, and who may trigger a quit when four players
-share one device. Neither is settled here.
+**Anyone may end the game, and a confirm is the only thing in the way.** Derek's
+call in
+[issue #186](https://github.com/derekwinters/connor-multiplying-frogs/issues/186).
+The device cannot tell who is holding it, so restricting the exit to a
+particular player was never enforceable — what protects a game in progress is
+that the confirm names the cost before it acts. See
+[end-game confirm](../ui/end-game-confirm.md).
+
+One thing this still leaves for whoever specifies it: whether the game also ends
+*on its own* once every frog is home. Same issue; not settled.

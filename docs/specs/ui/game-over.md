@@ -8,6 +8,9 @@ Who won, and where everybody else got to.
 far it got. Nobody disappears off the bottom of the game they just played.
 **Invariant:** there is no score. The classroom game has no score — it has an
 order — and inventing one would be inventing a mechanic.
+**Invariant:** a frog is home when it **lands on the End log** — eight correct
+answers — not when it reaches the last lily pad. See
+[the End log is the winning space](../reference/index.md#the-end-log-is-the-winning-space).
 **Invariant:** the winner is the frog that reached the End log first, and
 finishing order is the order frogs got home. Frogs that did not finish are
 ranked by how many lily pads they made.
