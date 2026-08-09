@@ -1880,6 +1880,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What counts as a blocker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2158,7 +2175,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#one-recognizer-shared" class="md-nav__link">
+  <a href="#one-recognizer-shared_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         One recognizer, shared
@@ -2926,6 +2943,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What counts as a blocker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -3204,7 +3238,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#one-recognizer-shared" class="md-nav__link">
+  <a href="#one-recognizer-shared_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         One recognizer, shared
@@ -3954,6 +3988,21 @@ natively and another still in prose, and waking it when only half have cleared
 is worse than not waking it at all.</p>
 <p>An unstructured mention — "this is similar to #42" — is not a dependency, and
 is deliberately not matched.</p>
+<h4 id="one-recognizer-shared">One recognizer, shared<a class="headerlink" href="#one-recognizer-shared" title="Link to this section">&para;</a></h4>
+<p>Recognizing that line has exactly one implementation: <code>text_blockers</code> in
+<code>.claude/skills/issue-blockers/blocker_refs.py</code>, and the union has exactly two —
+<code>blockers_of</code> for a snapshot that already carries its native edges, and
+<code>union_blockers</code> for the one caller that fetches them live. Every reader in the
+pipeline imports them: the sweep, the queue selector, the reconciler, the
+dashboard, the comment-event snapshot, and <code>audit</code>.</p>
+<p><code>issue-blockers</code> owns them because it is the skill that documents the format —
+the same "the side that writes the format owns the recognizer" rule that put
+<code>has_analysis_signature</code> in <code>triage-issue</code>.</p>
+<p>The pattern used to be written out in each reader, and the drift is silent in
+the worst way: the queue selector reads a line as a blocker and refuses to
+build the issue, the sweep does not and so never wakes it, and the dashboard
+shows it as ready the whole time. Nothing errors. The issue just stops moving,
+and no log anywhere says why.</p>
 <h3 id="when-a-blocker-resolves">When a blocker resolves<a class="headerlink" href="#when-a-blocker-resolves" title="Link to this section">&para;</a></h3>
 <table>
 <thead>
@@ -4386,7 +4435,7 @@ first leaves Derek deciding which one an <code>/approve</code> refers to.</p>
 the label would apply the state the rejected plan asked for and silently discard
 the objection. The note travels with the issue from <code>select_triage.py</code>, so the
 rewrite answers the actual complaint.</p>
-<h5 id="one-recognizer-shared">One recognizer, shared<a class="headerlink" href="#one-recognizer-shared" title="Link to this section">&para;</a></h5>
+<h5 id="one-recognizer-shared_1">One recognizer, shared<a class="headerlink" href="#one-recognizer-shared_1" title="Link to this section">&para;</a></h5>
 <p>"Does this comment look like triage wrote it" has exactly one implementation:
 <code>has_analysis_signature</code> in <code>triage_repair.py</code>. It matches a <code>## Build
 checklist</code> heading anchored at the start of a line, or the
@@ -4521,7 +4570,9 @@ to have it.</p>
 </ul>
 <p>Two of those are narrower than they look.</p>
 <p><strong>Hard blockers are native edges unioned with <code>Blocked by #N</code> lines</strong>, merged by
-one helper. An issue can have one dependency recorded natively and another still
+one helper — <code>blockers_of</code> in <code>.claude/skills/issue-blockers/blocker_refs.py</code>,
+the same one the sweep and the dashboard use. An issue can have one dependency
+recorded natively and another still
 written in prose, and reading either source alone releases work that is still
 half-blocked. A blocker the caller knows nothing about counts as unresolved:
 not knowing whether the thing you depend on is finished is precisely the case
