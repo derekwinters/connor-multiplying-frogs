@@ -57,6 +57,12 @@ jobs:
       - name: Core is engine-free
         run: python3 .github/scripts/check_core_isolation.py
 
+      # Also cheap, and it answers in milliseconds what Unity only answers
+      # minutes into a build, in an editor, behind a licence: whether a `using`
+      # of a project namespace can actually see the assembly it names.
+      - name: Every import is reachable
+        run: python3 .github/scripts/check_assembly_references.py
+
       - name: Run the Core suite
         run: dotnet test Tests/Core/Frogs.Core.Tests.csproj --verbosity normal
 
