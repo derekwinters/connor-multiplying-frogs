@@ -42,15 +42,29 @@ worth dimming.
 | Element | Constant | Value |
 | --- | --- | --- |
 | Headline size | `GameOverHeadlineSize` | 88 px |
+| Headline top offset | `GameOverHeadlineTop` | 64 px |
 | Standings column width | `StandingsRowWidth` | 1200 px |
+| Standings column top offset | `StandingsColumnTop` | 250 px |
 | Row height | `StandingsRowHeight` | 140 px |
+| Row inner horizontal padding | `StandingsRowPadding` | 40 px |
+| Gap between a row's place/swatch/name/progress | `StandingsRowInnerGap` | 32 px |
 | Gap between rows | `StandingsRowGap` | 24 px |
 | Row corner radius | `StandingsRowRadius` | 24 px |
+| Ordinary row border | `StandingsRowBorder` | 3 px |
 | Winner row border | `StandingsWinnerBorder` | 6 px |
+| Place number column width | `StandingsPlaceWidth` | 80 px |
 | Place number size | `StandingsPlaceSize` | 56 px |
 | Frog swatch in a row | `StandingsSwatchDiameter` | 88 px |
 | Colour name size | `StandingsNameSize` | 52 px |
 | Progress readout size | `StandingsProgressSize` | 44 px |
+| Rows' entry-reveal duration (total) | `StandingsRevealDuration` | 0.4 s |
+
+The `controls` row sits on the bottom safe-area line, `SafeMargin` (48 px) in
+from each edge — the same constant [title screen](title-screen.md) and
+[game setup](game-setup.md) already name, not a second margin of its own. The
+progress readout's denominator is `LaneWinningPosition` (8) from
+[game board](game-board.md); `LanePositionCount` (9) counts the Start log too
+and is not the number this readout means.
 
 ## Elements
 
