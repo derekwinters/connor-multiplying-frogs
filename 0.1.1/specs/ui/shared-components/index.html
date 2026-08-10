@@ -3099,9 +3099,8 @@ tap.</p>
 <h4 id="1-what-it-is_3">1. What it is<a class="headerlink" href="#1-what-it-is_3" title="Link to this section">&para;</a></h4>
 <p>A frog's identity, wherever the game has to say <em>which frog</em> — its colour, its
 name, and how far up its lane it is.</p>
-<p>Used by: <a href="../game-setup/">game setup</a>, <a href="../game-board/">game board</a>,
-<a href="../roll-and-card/">roll and card</a>, <a href="../answer-result/">answer result</a>,
-<a href="../game-over/">game over</a>.</p>
+<p>Used by: <a href="../game-board/">game board</a>, <a href="../roll-and-card/">roll and card</a>,
+<a href="../answer-result/">answer result</a>.</p>
 <h4 id="2-invariants_3">2. Invariants<a class="headerlink" href="#2-invariants_3" title="Link to this section">&para;</a></h4>
 <p><strong>Invariant:</strong> a frog is identified by its colour <strong>and</strong> its colour's name, in
 words, always together. Colour alone excludes a colour-blind player from knowing
@@ -3143,7 +3142,12 @@ from every other chip on screen, by something other than colour.
 <tr>
 <td>Label size</td>
 <td><code>PlayerChipLabelSize</code></td>
-<td>40 px</td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Pad-count text size</td>
+<td><code>PlayerChipPadCountSize</code></td>
+<td>24 px</td>
 </tr>
 <tr>
 <td>Corner radius</td>
@@ -3157,6 +3161,14 @@ from every other chip on screen, by something other than colour.
 </tr>
 </tbody>
 </table>
+<p><code>PlayerChipLabelSize</code> was 40 px on this page; the committed mockups' shared
+stylesheet — repeated across all eleven files — draws the name at 32 px and the
+pad-count line separately at 24 px, and <code>game-board.html</code>'s five instantiated
+chips (covering all three states below) all render at those two sizes. The
+mockups are what Connor approved when each screen's wireframe was signed off,
+so they win: <code>PlayerChipLabelSize</code> is corrected to 32 px, and
+<code>PlayerChipPadCountSize</code> — a value this table previously had no name for at
+all — is added at 24 px.</p>
 <h4 id="4-states_3">4. States<a class="headerlink" href="#4-states_3" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3172,22 +3184,40 @@ from every other chip on screen, by something other than colour.
 </tr>
 <tr>
 <td>Active (this player's turn)</td>
-<td><code>PlayerChipActiveRing</code> ring, filled background, label at full weight</td>
+<td><code>PlayerChipActiveRing</code> ring, label at full weight</td>
 </tr>
 <tr>
 <td>Home (frog has finished)</td>
-<td>A small home marker after the name; pad count replaced by <code>Home!</code></td>
-</tr>
-<tr>
-<td>Empty seat (setup only)</td>
-<td>Dashed outline, <code>Tap to add</code> in place of the name</td>
+<td>Pad count replaced by <code>Home!</code></td>
 </tr>
 </tbody>
 </table>
+<p>The Active row dropped "filled background": the mockups' <code>.chip.act</code> rule
+gives the ring and the bold weight but leaves the base chip background
+unchanged, and the chip invariant only requires the active chip be visibly
+different by something other than colour, which the ring and weight already
+satisfy without a fill.</p>
+<p>The Home row dropped "a small home marker after the name": no committed
+mockup has ever drawn one — the only rendered Home chip
+(<code>game-board.html</code>'s Blue) is just the swatch, the colour name, and <code>Home!</code>.
+Building a marker now would mean inventing a visual for it, which
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md">rule 8</a>
+(wireframe before UI code) exists to prevent. A marker, if wanted later, needs
+its own wireframe first.</p>
+<p>There is no longer an Empty-seat state on this page.
+<a href="../game-setup/">Game setup</a> does not use this chip — it specifies its own
+Frog seat element, with its own constants and states, and its mockup draws
+that element's numbers, not this one's. See that page for the setup screen.</p>
+<p><a href="../game-over/">Game over</a> does not use this chip either, for the same
+reason: it specifies its own <strong>Standings row</strong> element — its own constants
+(<code>StandingsSwatchDiameter</code> 88 px against this chip's <code>PlayerSwatchDiameter</code>
+64 px, <code>StandingsNameSize</code> 52 px, no <code>PlayerChip*</code> constant anywhere on that
+page) and its mockup draws <code>.row</code> markup, not <code>.chip</code>. It stays listed under
+<a href="#frog-colours">Frog colours</a> below, since it legitimately reuses that
+element's four colour constants for its own swatch.</p>
 <h4 id="5-behaviour_3">5. Behaviour<a class="headerlink" href="#5-behaviour_3" title="Link to this section">&para;</a></h4>
-<p>The chip is not a button anywhere except on
-<a href="../game-setup/">game setup</a>, where tapping one adds or removes that frog from
-the game. On every other screen it is a readout.</p>
+<p>The chip is a readout on every screen that uses it. It has no button state in
+v0.2 — no tap handler, on any screen, in any state.</p>
 <h4 id="why-there-is-no-typing">Why there is no typing<a class="headerlink" href="#why-there-is-no-typing" title="Link to this section">&para;</a></h4>
 <p>Four players share one tablet, and the setup screen is the first thing they
 touch. Asking four children to each type a name means a soft keyboard, a
