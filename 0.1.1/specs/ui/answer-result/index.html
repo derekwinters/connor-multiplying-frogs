@@ -2202,6 +2202,11 @@ about are two dialogs a child reads as two different things happening.</p>
 <td>180 px</td>
 </tr>
 <tr>
+<td>Mark ring width, wrong state</td>
+<td><code>ResultMarkRingWidth</code></td>
+<td>8 px</td>
+</tr>
+<tr>
 <td>Mark glyph size</td>
 <td><code>ResultMarkGlyphSize</code></td>
 <td>110 px</td>
@@ -2212,14 +2217,34 @@ about are two dialogs a child reads as two different things happening.</p>
 <td>76 px</td>
 </tr>
 <tr>
+<td>Verdict top, from the panel's top edge</td>
+<td><code>ResultVerdictTop</code></td>
+<td>70 px</td>
+</tr>
+<tr>
 <td>Consequence size</td>
 <td><code>ResultConsequenceSize</code></td>
 <td>48 px</td>
 </tr>
 <tr>
+<td>Consequence top, from the panel's top edge</td>
+<td><code>ResultConsequenceTop</code></td>
+<td>180 px</td>
+</tr>
+<tr>
 <td>Consequence column width</td>
 <td><code>ResultTextWidth</code></td>
 <td>760 px</td>
+</tr>
+<tr>
+<td>Text column left, from the panel's left edge</td>
+<td><code>ResultTextLeft</code></td>
+<td>280 px</td>
+</tr>
+<tr>
+<td>Chip top, from the panel's top edge</td>
+<td><code>ResultChipTop</code></td>
+<td>340 px</td>
 </tr>
 <tr>
 <td>Hold before the frog hops</td>
@@ -2228,6 +2253,15 @@ about are two dialogs a child reads as two different things happening.</p>
 </tr>
 </tbody>
 </table>
+<p><code>mark</code>, <code>chip</code> and <code>controls</code> are all <code>DialogPadding</code> from the panel's edges —
+the shared <a href="../shared-components/#dialog">Dialog</a>'s own padding, not a constant
+of this page's. <code>ResultMarkRingWidth</code> and the four rows that place <code>verdict</code>,
+<code>consequence</code> and <code>chip</code> are numbers the two committed mockups already draw;
+they are on this table so the layout is built from names rather than measured
+off the picture.</p>
+<p>The frog's hop itself runs over <code>FrogHopDuration</code>, which is the
+<a href="../game-board/#named-constants">game board</a>'s constant, not this page's — the
+hop happens on that screen, after this dialog has gone.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2265,6 +2299,12 @@ about are two dialogs a child reads as two different things happening.</p>
 </tr>
 </tbody>
 </table>
+<p>The chip's move reads <code>pad &lt;before&gt; → &lt;after&gt;</code> in all three situations,
+including the floor case where nothing moved (<code>pad 0 → 0</code>). Neither mockup draws
+that one; extending the pattern rather than writing a separate sentence for it
+is a presentation call under
+<a href="../../../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a>, and the numbers are
+the lane positions Core reports either way.</p>
 <p>The wrong state leads with <em>Not this time</em> rather than with the number, because
 the first thing a child reads should not be the size of their mistake. The
 correct answer is in the next line, where it teaches instead of stings.</p>
@@ -2282,7 +2322,7 @@ that says it is a button that passes the device to the right person.</p>
 <tbody>
 <tr>
 <td>Right</td>
-<td><code>&lt;Colour&gt; hops forward one lily pad.</code></td>
+<td><code>Right! &lt;Colour&gt; hops forward one lily pad.</code></td>
 </tr>
 <tr>
 <td>Wrong, above the Start log</td>
