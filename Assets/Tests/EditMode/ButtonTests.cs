@@ -128,6 +128,27 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
+        public void SetLabelSize_OverridesTheDefaultButtonLabelSize()
+        {
+            // title-screen.md's TitleButtonLabelSize (64 px) is not the
+            // shared ButtonLabelSize (44 px) — the same "a screen may size
+            // its own instance" carve-out CallerSuppliedSize_… asserts for
+            // width/height, extended to the label.
+            var button = CreateButton(ButtonKind.Primary);
+
+            try
+            {
+                button.SetLabelSize(64f);
+
+                Assert.That(button.Label.fontSize, Is.EqualTo(64));
+            }
+            finally
+            {
+                Destroy(button);
+            }
+        }
+
+        [Test]
         public void Pressed_MovesTheVisualDownByButtonPressOffset_AndDarkensTheFill()
         {
             var button = CreateButton(ButtonKind.Primary);
