@@ -8,15 +8,19 @@
   can be told apart in a picture; the palette is an area:art decision.
   Numbers here are the numbers in the spec page's constants table.
 
-  THIS MOCKUP IS A QUESTION, NOT AN AGREED PICTURE.
+  THIS DRAWING USED TO BE THE QUESTION. IT IS NOW THE ANSWER.
 
   It is the same screen as working-out-grid-331x41.html with the addition
-  section drawn at its cap of six rows instead of the two it starts with,
-  at today's constants and nothing else changed. At those constants it does
-  not fit: the answer row ends up below the bottom of the tablet.
+  section drawn at its cap of six rows instead of the two it starts with. At
+  full-size addition rows it did not fit — 1180 px of grid in 908 px of panel,
+  with the answer row below the bottom edge of the tablet — and that overflow
+  was drawn deliberately, as the input to open question 3.
 
-  That overrun is the point of the drawing. What to do about it is an open
-  question on the spec page, and this picture is its input, not its answer.
+  Derek settled that question: smaller cells for the addition rows only. The
+  section takes GridAdditionRowHeight (56 px) once it holds more rows than the
+  card dealt it, and every other row keeps the size it has at two rows. Six
+  grown rows now make an 892 px grid in the 908 px available, and the grid
+  re-centres in that space as it grows, per the page's Anchors rule.
 -->
 <html lang="en">
 <head>
@@ -62,6 +66,11 @@
   .cell{width:104px;height:104px;border:3px solid var(--line);border-radius:10px;background:#fff;
         display:flex;align-items:center;justify-content:center;font-size:56px}
   .cell.fix{border:none;background:transparent;font-weight:700}
+  /* A grown section's row: GridAdditionRowHeight tall, with GridSmallDigitSize
+     digits in it. Same width, same border, same colours — only the height and
+     the digit shrink, and they shrink for every row in the section, the two
+     the card dealt included. */
+  .cell.sm{height:56px;font-size:28px}
   .carry{width:104px;height:56px;display:flex;align-items:center;justify-content:center}
   .carry i{display:block;width:56px;height:52px;border:3px dashed var(--faint);border-radius:8px}
   .key{width:140px;height:140px;border:3px solid var(--line);border-radius:20px;background:#fff;
@@ -75,11 +84,9 @@
         justify-content:center;font-size:44px}
   /* Measurement annotations. Not part of the screen — they are the drawing
      talking about itself, and none of them is an element to be built. */
-  .limit{position:absolute;left:0;right:0;height:0;border-top:4px dashed var(--warn)}
-  .limit span{position:absolute;right:0;top:-38px;font-size:24px;font-weight:700;color:var(--warn)}
-  .overrun{position:absolute;left:0;right:0;background:rgba(176,58,46,.10);
-           border-top:4px dashed var(--warn)}
-  .tag{font-size:24px;color:var(--warn);font-weight:700}
+  .limit{position:absolute;left:0;right:0;height:0;border-top:4px dashed var(--accent)}
+  .limit span{position:absolute;right:0;top:-38px;font-size:24px;font-weight:700;color:var(--accent)}
+  .tag{font-size:24px;color:var(--accent);font-weight:700}
   .brace{position:absolute;border:4px solid var(--accent);border-right:none;border-radius:20px 0 0 20px}
 </style>
 </head>
@@ -95,26 +102,27 @@
         <div class="row" style="height:96px;padding:0 32px;border-radius:20px;border:3px solid var(--faint);font-size:40px;font-weight:700">331 × 41 · hard pile</div>
       </div>
 
-      <!-- grid: the committed origin, left 370 / top 216, unchanged.
-           Only the addition section's row count differs from
-           working-out-grid-331x41.html. -->
-      <div class="abs col" style="left:370px;top:216px;gap:8px">
+      <!-- grid: the committed left, 370, unchanged. The top is 148 rather than
+           the as-dealt drawing's 216, because a 892 px grid centres higher in
+           the 908 px between the header band and DialogPadding than a 732 px
+           one does — the grid moves, the keypad does not. -->
+      <div class="abs col" style="left:370px;top:148px;gap:8px">
         <div class="row" style="gap:8px"><div class="carry"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div>
         <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">3</div><div class="cell fix">3</div><div class="cell fix">1</div></div>
         <div class="row" style="gap:8px"><div class="cell fix">×</div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">4</div><div class="cell fix">1</div></div>
         <div style="height:6px;background:var(--ink);width:664px"></div>
 
         <!-- addition section: the two rows every card starts with … -->
-        <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
-        <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
         <!-- … and the four a player can grow it by, to the cap of six. A grown
-             row is an ordinary row: same cells, same size, no marking. The `+`
-             stays on the bottom row of the section, where the committed
-             two-row drawing puts it. -->
-        <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
-        <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
-        <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
-        <div class="row" style="gap:8px"><div class="cell fix">+</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+             row is an ordinary row: same cells, same size as the rest of the
+             section, no marking. The `+` stays on the bottom row of the
+             section, where the committed two-row drawing puts it. -->
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm">+</div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
 
         <div style="height:6px;background:var(--ink);width:664px"></div>
         <div class="row" style="gap:8px"><div class="carry"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div>
@@ -130,45 +138,46 @@
 
       <!-- Left margin: which rows are the addition section, and where it
            starts and stops. Annotation, not an element. -->
-      <div class="abs brace" style="left:300px;top:518px;width:44px;height:664px"></div>
-      <div class="abs col" style="left:64px;top:530px;width:224px;gap:10px">
+      <div class="abs brace" style="left:300px;top:450px;width:44px;height:376px"></div>
+      <div class="abs col" style="left:64px;top:452px;width:224px;gap:10px">
         <div style="font-size:26px;font-weight:700;color:var(--accent)">addition section</div>
         <div style="font-size:24px;color:#6C7873;line-height:1.3">rows 1–2 are what<br>every card starts with</div>
       </div>
-      <div class="abs" style="left:64px;top:748px;width:224px;font-size:24px;color:#6C7873;line-height:1.3">
-        rows 3–6 are grown by the player, one at a time, and stop here
+      <div class="abs" style="left:64px;top:600px;width:224px;font-size:24px;color:#6C7873;line-height:1.3">
+        rows 3–6 are grown by the player, one at a time, and stop here. The
+        whole section is 56 px a row from the third onward, dealt rows
+        included
       </div>
 
       <!-- Right of the grid: what the drawing measures. -->
       <div class="abs col" style="left:1060px;top:216px;width:240px;gap:18px">
-        <div style="font-size:28px;font-weight:700;color:var(--warn)">This does not fit.</div>
+        <div style="font-size:28px;font-weight:700;color:var(--accent)">This fits.</div>
         <div style="font-size:24px;color:#6C7873;line-height:1.35">
-          Two rows: the grid is 732 px tall and ends 948 px into the panel,
-          with about 100 px to spare.
+          There are 908 px between the header band and
+          <code>DialogPadding</code>. The rows that never change size come to
+          460 px, and the gaps to 96 px.
         </div>
         <div style="font-size:24px;color:#6C7873;line-height:1.35">
-          Six rows: 1180 px tall, ending 1396 px into the panel. There are
-          908 px between the header and <code>DialogPadding</code>, so it is
-          272 px too tall even pushed right up under the header.
-        </div>
-        <div style="font-size:24px;color:var(--warn);line-height:1.35;font-weight:700">
-          The second rule line, the second carry strip and the answer row are
-          all below the bottom of the tablet.
+          Six rows at <code>GridAdditionRowHeight</code>: 336 px. The grid is
+          892 px tall and ends 1040 px into the panel — 16 px to spare.
         </div>
         <div style="font-size:24px;color:#6C7873;line-height:1.35">
-          What gives — scroll, smaller cells, something else — is an open
-          question on the spec page. This picture is the question, not the
-          answer.
+          At full-size rows it was 1180 px, 272 px too tall, with the second
+          rule line, the second carry strip and the answer row all below the
+          bottom of the tablet. That drawing was the question; this one is
+          Derek's answer to it.
+        </div>
+        <div style="font-size:24px;color:#6C7873;line-height:1.35">
+          The problem, both rule lines, both carry strips and the answer row
+          are the size they are on the as-dealt drawing. Only the scratch
+          paper shrank.
         </div>
       </div>
     </div>
 
-    <!-- Everything from the DialogPadding limit down to the bottom of the
-         tablet: outside the dialog, and past the panel edge, off the screen. -->
-    <div class="abs overrun" style="left:0;right:0;top:1096px;height:104px"></div>
-
     <!-- The last usable pixel inside the dialog: DialogMaxHeight less
-         DialogPadding, 1096 px down the canvas. -->
+         DialogPadding, 1096 px down the canvas. The grid's bottom edge is
+         8 px above it. -->
     <div class="abs limit" style="left:48px;right:48px;top:1096px">
       <span>DialogPadding — the last usable pixel inside the dialog</span>
     </div>
