@@ -18,18 +18,28 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
+| Working-out grid, `331 × 41` grown to the cap | [`working-out-grid-331x41-grown.html`](working-out-grid-331x41-grown.html) | [Working-out grid](../working-out-grid.md) |
 | Answer result — right | [`answer-result-right.html`](answer-result-right.html) | [Answer result](../answer-result.md) |
 | Answer result — wrong | [`answer-result-wrong.html`](answer-result-wrong.html) | [Answer result](../answer-result.md) |
 | Settings dialog | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
 
-Three screens have two mockups each, for two different reasons.
+Three screens have more than one mockup, for two different reasons.
 
 Two of them are drawing **a state that only exists in contrast** — a state you
 have to see next to its opposite. The grid is drawn at the biggest and the
 smallest problem the game can deal, and the result dialog is drawn right and
 wrong. Both files in each pair are agreed pictures of the same screen.
+
+The grid's **third** file is neither: it is the widest card with its addition
+section grown to the cap, drawn to find out what the cap costs at today's
+constants. The answer is that it does not fit — the answer row ends up below the
+bottom of the tablet. That is
+[an open question on the spec page](../working-out-grid.md#open-questions), and
+the mockup is its input rather than an agreed picture. A mockup that overflows
+is doing its job here; it is cheaper to find this in a picture than in a built
+screen.
 
 The title screen's pair is **a question, not two states**. Which of `RESUME` and
 `NEW` is the primary button is
