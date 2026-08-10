@@ -552,6 +552,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -568,6 +586,91 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#who-is-playing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who is playing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-lane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your lane
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-turn-start-to-finish" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A turn, start to finish
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-it-right-and-getting-it-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting it right, and getting it wrong
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-page-does-not-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this page does not cover
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-these-rules-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where these rules come from
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1777,6 +1880,80 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#who-is-playing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who is playing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#your-lane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your lane
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-turn-start-to-finish" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A turn, start to finish
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-it-right-and-getting-it-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting it right, and getting it wrong
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-page-does-not-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this page does not cover
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-these-rules-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where these rules come from
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1801,13 +1978,210 @@
 
 
 <h1 id="how-to-play">How to play<a class="headerlink" href="#how-to-play" title="Link to this section">&para;</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Not written yet</p>
-<p>This page is a stub so the docs site builds and the navigation reflects
-what the contract will cover. It is filled in by
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/11">issue #11</a>.</p>
-</div>
-<p>The game explained the way you would explain it to someone holding the phone.</p>
+<p>Multiplying Frogs is the multiplication board game from Connor's math class, on
+a tablet. Two to four people share one device. On your turn you roll the die,
+draw a card from the pile the roll names, work out the multiplication, and your
+frog hops one lily pad up its lane if you got it right — or one back if you
+didn't. The first frog to reach its End log wins.</p>
+<p>That is the whole game. The rest of this page is the same thing explained the
+way you would explain it to someone who has just picked the tablet up.</p>
+<p>This is the friendly version, not the exact one. The rules spec — every rule
+stated precisely, edge case by edge case, for the code to be built against — is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/199">issue #199</a>
+and this page will link to it once it exists. Until then, and whenever the two
+disagree, the classroom game wins: it is photographed and transcribed in
+<a href="../../specs/reference/">reference material</a>, and
+<a href="../../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a> makes it the authority
+on every rule.</p>
+<h2 id="who-is-playing">Who is playing<a class="headerlink" href="#who-is-playing" title="Link to this section">&para;</a></h2>
+<p>Two to four people, sharing one device and taking turns on it. That is
+pass-and-play, and it is the only way the game is played — there are no computer
+frogs, and nobody plays over the internet.</p>
+<p>Everyone gets one frog, and it stays one frog. The title is a pun; nothing
+multiplies except the numbers.</p>
+<p><strong>The classroom rules card says 2–8 players, and v1 caps it at four.</strong> That is a
+real change to a rule of the classroom game, not a detail of the port, so it is
+written down as one — the reasoning is in
+<a href="../vision/#two-places-v1-differs-from-the-classroom-game">the vision</a>, and
+letting five to eight people play is
+<a href="../../specs/future-ideas/#five-to-eight-players">parked, not dropped</a>.</p>
+<h2 id="your-lane">Your lane<a class="headerlink" href="#your-lane" title="Link to this section">&para;</a></h2>
+<p>Every frog has a lane of its own, and stays in it for the whole game. A lane is
+a <strong>Start log</strong>, then <strong>seven lily pads</strong>, then an <strong>End log</strong> — nine positions
+in all. Every frog starts on its Start log, so it takes eight correct answers to
+get from one end to the other.</p>
+<p>Frogs never share a lane, never pass one another, and never get in each other's
+way. There is nothing to plan and nothing you can do to anybody else: how far up
+your own lane you are is the whole of your position in the game. What the other
+players are doing is only ever something to watch.</p>
+<h2 id="a-turn-start-to-finish">A turn, start to finish<a class="headerlink" href="#a-turn-start-to-finish" title="Link to this section">&para;</a></h2>
+<p>A turn is one player's complete go, and it always goes the same way.</p>
+<ol>
+<li>
+<p><strong>The hand-off.</strong> The device reaches you with the board on screen, saying
+   whose turn it is. That is when the board is on screen — for the rest of the
+   turn you are looking at your card and your working.</p>
+</li>
+<li>
+<p><strong>You roll.</strong> One die, six faces. The roll decides which of the three piles
+   your card comes from, and it does nothing else. It is not how far you move,
+   and it never moves a frog.</p>
+</li>
+<li>
+<p><strong>You draw a card.</strong> Each pile is labelled with the two die faces that send
+   you to it, so each one comes up a third of the time.</p>
+<table>
+<thead>
+<tr>
+<th>You rolled</th>
+<th>The pile it sends you to</th>
+<th>What is on the card</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 or 2</td>
+<td>The easiest of the three</td>
+<td>2-digit × 1-digit, like <code>68 × 5</code></td>
+</tr>
+<tr>
+<td>3 or 4</td>
+<td>The middle one</td>
+<td>2-digit × 2-digit, like <code>22 × 41</code></td>
+</tr>
+<tr>
+<td>5 or 6</td>
+<td>The hardest</td>
+<td>3-digit × 2-digit, like <code>331 × 41</code></td>
+</tr>
+</tbody>
+</table>
+<p>You never choose your pile, and there is no way to swap the card once it is
+drawn. Getting an easy one is luck.</p>
+</li>
+<li>
+<p><strong>You work it out.</strong> The card is proper long multiplication, so the game
+   gives you somewhere to do it: a <strong>working-out grid</strong>, with <strong>carry boxes</strong>
+   above the columns for holding a digit you have carried, exactly as you would
+   on paper. You fill it in with a keypad of digits. There is nothing to switch
+   on and no mode to find — the <strong>answer row</strong> is simply the bottom row of the
+   grid, so if you can do <code>68 × 5</code> in your head you fill in one row and you are
+   done, and if you are facing <code>331 × 41</code> you work your way up to it.</p>
+<p>Nothing you write in the grid is marked. The carry boxes and the rows above
+the answer are yours to think in, and no one is checking them — the reason
+is in <a href="../../adr/0002-structured-working-out-grid/">ADR-0002</a>.</p>
+</li>
+<li>
+<p><strong>The game checks your answer.</strong> You type the number yourself; there is
+   nothing to pick from and nothing to guess between. The game tells you
+   straight away whether it is right, and only the answer row decides that.</p>
+<p>If you got it wrong, it tells you what the answer was. It does not show you
+how to get there — there is more than one right way to lay out a long
+multiplication, and the game does not take a side about which one is yours.</p>
+</li>
+<li>
+<p><strong>Your frog moves</strong>, and you can see it move. What it does is the next
+   section.</p>
+</li>
+<li>
+<p><strong>You hand the device on</strong>, and the board comes back for the next player.</p>
+</li>
+</ol>
+<p>There is no hurry anywhere in that. The cards are <code>331 × 41</code>, not <code>7 × 8</code>, so a
+turn is a couple of minutes of real arithmetic and the game is built to let you
+take them. Nothing in it rewards being fast.</p>
+<h2 id="getting-it-right-and-getting-it-wrong">Getting it right, and getting it wrong<a class="headerlink" href="#getting-it-right-and-getting-it-wrong" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>What happened</th>
+<th>What your frog does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You got it right</td>
+<td>Forward one lily pad</td>
+</tr>
+<tr>
+<td>You got it wrong</td>
+<td>Back one lily pad</td>
+</tr>
+<tr>
+<td>You got it wrong on the Start log</td>
+<td>Nothing — it stays where it is</td>
+</tr>
+</tbody>
+</table>
+<p>The Start log is the bottom of the lane rather than anywhere special: there is
+simply nowhere further back to go, so a wrong answer there costs you the turn
+and no more.</p>
+<p><strong>Every card is worth the same one lily pad.</strong> A card from the hardest pile
+moves you exactly as far as one from the easiest, and there is no bonus for the
+hard one and no points of any kind. Drawing <code>68 × 5</code> instead of <code>331 × 41</code> is
+pure luck and it is straightforwardly good news. That is how the classroom game
+works, and it stays that way.</p>
+<p><strong>The first frog to reach its End log wins</strong>, which is where the classroom rules
+card stops: <em>"First one to the end wins!"</em>. The rest of the players keep taking
+their turns after that, and the game finishes on its own once every frog has
+reached its End log. Those last two are v1's calls rather than the classroom
+game's — the card never said what happens after the winner, and
+<a href="../../specs/reference/#where-v1-fills-a-gap-the-board-leaves-open">reference material</a>
+records both as gaps the board left open rather than rules it settled.</p>
+<h2 id="what-this-page-does-not-cover">What this page does not cover<a class="headerlink" href="#what-this-page-does-not-cover" title="Link to this section">&para;</a></h2>
+<p><strong>Starting a game and stopping one.</strong> Choosing how many are playing, and how a
+session gets ended before everybody is finished, are set out in the layout pages
+for <a href="../../specs/ui/game-setup/">game setup</a>,
+<a href="../../specs/ui/end-game-confirm/">the end-game confirm</a> and
+<a href="../../specs/ui/game-over/">game over</a>. They are not rules of the classroom game
+— a cardboard game starts when you open the box — so they are described where
+they were decided rather than restated here.</p>
+<p><strong>What any of it looks like.</strong> Nothing on this page describes the screen,
+because how the game is drawn is not what a rule is. That belongs to
+<a href="../../specs/ui/">the layout contract</a>, and art direction has not been
+decided at all yet.</p>
+<h2 id="where-these-rules-come-from">Where these rules come from<a class="headerlink" href="#where-these-rules-come-from" title="Link to this section">&para;</a></h2>
+<p>Nothing on this page was decided by this page.</p>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Where it was settled</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The rules card, the board, the piles, the lane</td>
+<td><a href="../../specs/reference/">Reference material</a></td>
+</tr>
+<tr>
+<td>Frogs are independent; the Start log is a floor</td>
+<td><a href="../../specs/reference/#frogs-are-independent">Reference material</a>, from Connor via <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/170">#170</a></td>
+</tr>
+<tr>
+<td>The End log is the winning position</td>
+<td><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/185">#185</a></td>
+</tr>
+<tr>
+<td>Play after the first frog finishes; how a game ends</td>
+<td><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">#186</a></td>
+</tr>
+<tr>
+<td>The rules belong to the classroom game</td>
+<td><a href="../../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a></td>
+</tr>
+<tr>
+<td>The working-out grid and the three card shapes</td>
+<td><a href="../../adr/0002-structured-working-out-grid/">ADR-0002</a></td>
+</tr>
+<tr>
+<td>Four players, keypad entry, and the shape of a turn</td>
+<td><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/7">#7</a></td>
+</tr>
+</tbody>
+</table>
+<p>If this page and one of those disagree, the source wins, and the fix is to
+correct this page in the pull request where you noticed it.</p>
 
 
 
