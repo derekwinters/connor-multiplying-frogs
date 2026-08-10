@@ -2162,6 +2162,26 @@ the card; the card is what you now have to do.</p>
 <td>760 px</td>
 </tr>
 <tr>
+<td><code>rolled</code> label size</td>
+<td><code>RolledLabelSize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td>Gap between the player chip and <code>rolled</code></td>
+<td><code>RolledLabelGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>Die group column width</td>
+<td><code>DieColumnWidth</code></td>
+<td>400 px</td>
+</tr>
+<tr>
+<td>Die group top offset</td>
+<td><code>DieGroupTop</code></td>
+<td>220 px</td>
+</tr>
+<tr>
 <td>Die face, square</td>
 <td><code>DieFaceSize</code></td>
 <td>240 px</td>
@@ -2170,6 +2190,16 @@ the card; the card is what you now have to do.</p>
 <td>Die corner radius</td>
 <td><code>DieCornerRadius</code></td>
 <td>40 px</td>
+</tr>
+<tr>
+<td>Die border width</td>
+<td><code>DieBorderWidth</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td>Inset from the die's edge to the pip grid</td>
+<td><code>DiePipInset</code></td>
+<td>34 px</td>
 </tr>
 <tr>
 <td>Die pip diameter</td>
@@ -2187,6 +2217,11 @@ the card; the card is what you now have to do.</p>
 <td>40 px</td>
 </tr>
 <tr>
+<td>Card top offset</td>
+<td><code>CardTop</code></td>
+<td>180 px</td>
+</tr>
+<tr>
 <td>Card width</td>
 <td><code>CardWidth</code></td>
 <td>560 px</td>
@@ -2202,14 +2237,34 @@ the card; the card is what you now have to do.</p>
 <td>24 px</td>
 </tr>
 <tr>
+<td>Card border width</td>
+<td><code>CardBorderWidth</code></td>
+<td>4 px</td>
+</tr>
+<tr>
 <td>Problem text size on the card</td>
 <td><code>CardProblemSize</code></td>
 <td>120 px</td>
 </tr>
 <tr>
+<td>Gap between the problem and its rule</td>
+<td><code>CardRuleGap</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Rule under the problem, thickness</td>
+<td><code>CardRuleThickness</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Rule under the problem, length</td>
+<td><code>CardRuleLength</code></td>
+<td>360 px</td>
+</tr>
+<tr>
 <td>Gap between the die group and the card</td>
 <td><code>RollCardGap</code></td>
-<td>96 px</td>
+<td>208 px</td>
 </tr>
 <tr>
 <td>Die roll animation</td>
@@ -2227,11 +2282,36 @@ the card; the card is what you now have to do.</p>
 game — sits inside <code>CardWidth</code> with room to spare, written the way the classroom
 cards are written: the two numbers stacked and right-aligned, <code>×</code> to the left of
 the second, a rule underneath.</p>
+<p>The three horizontal values across the panel add up exactly, and that is what
+fixes <code>RollCardGap</code>: the panel is <code>RollDialogWidth</code> (1280 px) less
+<code>DialogPadding</code> (56 px) on each side, so 1168 px of content, and
+<code>DieColumnWidth</code> (400) + <code>RollCardGap</code> (208) + <code>CardWidth</code> (560) is that 1168.
+<code>RollCardGap</code> read 96 px until issue #221 and could not: it left 208 px of
+content unaccounted for, and the committed mockup — the agreed wireframe — has
+always drawn 208. The mockup was treated as authoritative and the table
+corrected to match it.</p>
+<p><code>DieGroupTop</code> and <code>CardTop</code> are measured from the inside top of the panel, the
+same way <a href="../game-over/">game over</a>'s <code>GameOverHeadlineTop</code> and
+<code>StandingsColumnTop</code> are measured from the top of the canvas. They differ by
+40 px because the two groups are different heights: the taller card sits higher
+so that it and the die group are vertically centred against each other.</p>
+<p><code>DieBorderWidth</code> and <code>CardBorderWidth</code> hold the same number as
+<a href="../shared-components/#button">shared components</a>' <code>ButtonBorderWidth</code> today and
+are deliberately not that constant — the button is free to restyle its outline
+without redrawing the die or the card. The die's own vertical stack adds up the
+same way the row does: <code>DiePipInset</code> (34) either side of a three-across pip grid
+inside a <code>DieFaceSize</code> (240) square bounded by <code>DieBorderWidth</code> (4) leaves 164 px
+of grid, so each of the nine cells is 54⅔ px and a <code>DiePipDiameter</code> (40) pip sits
+centred in one with room around it.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Player chip</strong> — <a href="../shared-components/#player-chip">shared</a>, active state.
   Four players share a tablet; the dialog says whose turn this is because the
   header behind it is dimmed.</li>
+<li><strong><code>rolled</code></strong> — the word beside the chip, <code>RolledLabelSize</code>, <code>RolledLabelGap</code>
+  past it, in the same quiet grey as a chip's second line. It is what makes
+  <code>whose</code> a sentence — <em>Green rolled</em> — rather than a chip sitting on its own,
+  and it is why this dialog needs no title of its own.</li>
 <li><strong>Die</strong> — one six-sided die, drawn with pips rather than a numeral. There is
   exactly one die: the rules card says "Dice", and three piles × two faces
   accounts for all six faces of one — see
