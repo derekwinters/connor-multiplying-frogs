@@ -12,28 +12,42 @@ import scaffold  # noqa: E402
 
 class NameTests(unittest.TestCase):
     def test_a_plain_name_is_accepted(self):
-        self.assertEqual("Pond", scaffold.validate_type_name("Pond"))
+        self.assertEqual("Lane", scaffold.validate_type_name("Lane"))
 
     def test_whitespace_is_trimmed(self):
-        self.assertEqual("Pond", scaffold.validate_type_name("  Pond  "))
+        self.assertEqual("Lane", scaffold.validate_type_name("  Lane  "))
 
     def test_a_lowercase_name_is_rejected(self):
         # C# types are PascalCase, and a scaffolder that silently "fixes" the
         # name produces a file whose name does not match what was asked for.
         with self.assertRaises(ValueError):
-            scaffold.validate_type_name("pond")
+            scaffold.validate_type_name("lilypad")
 
     def test_a_name_with_a_space_is_rejected(self):
         with self.assertRaises(ValueError):
-            scaffold.validate_type_name("Frog Colony")
+            scaffold.validate_type_name("Lily Pad")
 
     def test_a_name_with_a_dot_is_rejected(self):
         with self.assertRaises(ValueError):
-            scaffold.validate_type_name("Frogs.Pond")
+            scaffold.validate_type_name("Frogs.Lane")
 
     def test_an_empty_name_is_rejected(self):
         with self.assertRaises(ValueError):
             scaffold.validate_type_name("")
+
+    def test_the_rejection_message_suggests_this_game_s_type_names(self):
+        # This message is read at the moment a type gets its name, so the
+        # examples in it seed the domain model. They have to be words from
+        # CONTEXT.md, not from a game we are not building.
+        with self.assertRaises(ValueError) as raised:
+            scaffold.validate_type_name("lane")
+
+        message = str(raised.exception)
+
+        self.assertIn("`Lane`", message)
+        self.assertNotIn("Pond", message)
+        self.assertNotIn("Colony", message)
+        self.assertNotIn("Split", message)
 
 
 class NamespaceTests(unittest.TestCase):
@@ -41,13 +55,13 @@ class NamespaceTests(unittest.TestCase):
         self.assertEqual("Frogs.Core", scaffold.namespace_for(""))
 
     def test_a_subfolder_becomes_a_namespace_segment(self):
-        self.assertEqual("Frogs.Core.Rules", scaffold.namespace_for("Rules"))
+        self.assertEqual("Frogs.Core.Cards", scaffold.namespace_for("Cards"))
 
     def test_nested_subfolders_nest_the_namespace(self):
-        self.assertEqual("Frogs.Core.Rules.Splitting", scaffold.namespace_for("Rules/Splitting"))
+        self.assertEqual("Frogs.Core.Cards.Piles", scaffold.namespace_for("Cards/Piles"))
 
     def test_the_test_namespace_mirrors_it(self):
-        self.assertEqual("Frogs.Core.Tests.Rules", scaffold.test_namespace_for("Rules"))
+        self.assertEqual("Frogs.Core.Tests.Cards", scaffold.test_namespace_for("Cards"))
 
 
 class GuidTests(unittest.TestCase):
@@ -70,13 +84,13 @@ class GuidTests(unittest.TestCase):
 
 class GeneratedSourceTests(unittest.TestCase):
     def test_the_class_is_in_the_right_namespace(self):
-        source = scaffold.class_source("Pond", "Frogs.Core.Rules")
+        source = scaffold.class_source("Card", "Frogs.Core.Cards")
 
-        self.assertIn("namespace Frogs.Core.Rules", source)
-        self.assertIn("public sealed class Pond", source)
+        self.assertIn("namespace Frogs.Core.Cards", source)
+        self.assertIn("public sealed class Card", source)
 
     def test_the_class_does_not_reference_unity(self):
-        source = scaffold.class_source("Pond", "Frogs.Core")
+        source = scaffold.class_source("Lane", "Frogs.Core")
 
         self.assertNotIn("UnityEngine", source)
         self.assertNotIn("MonoBehaviour", source)
@@ -85,14 +99,14 @@ class GeneratedSourceTests(unittest.TestCase):
         # The scaffolder leaves you at the START of the red phase. A class with
         # a plausible implementation already in it is an invitation to skip
         # writing the test that should have driven it.
-        source = scaffold.class_source("Pond", "Frogs.Core")
+        source = scaffold.class_source("Lane", "Frogs.Core")
 
         self.assertNotIn("return", source)
 
 
 class GeneratedTestTests(unittest.TestCase):
     def source(self):
-        return scaffold.test_source("Pond", "Frogs.Core", "Frogs.Core.Tests")
+        return scaffold.test_source("Lane", "Frogs.Core", "Frogs.Core.Tests")
 
     def test_it_is_a_failing_test_not_an_empty_stub(self):
         # The whole point: running the suite immediately after scaffolding must
@@ -102,7 +116,7 @@ class GeneratedTestTests(unittest.TestCase):
         self.assertIn("Assert.Fail", source)
 
     def test_it_names_the_type_under_test(self):
-        self.assertIn("PondTests", self.source())
+        self.assertIn("LaneTests", self.source())
 
     def test_it_uses_the_test_namespace_and_imports_the_type(self):
         source = self.source()
@@ -118,11 +132,11 @@ class WritingTests(unittest.TestCase):
     def test_it_writes_four_files_in_the_right_places(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)
-            written = scaffold.scaffold(root, "Pond", subfolder="Rules")
+            written = scaffold.scaffold(root, "Card", subfolder="Cards")
 
-            self.assertTrue((root / "Assets/Scripts/Core/Rules/Pond.cs").is_file())
-            self.assertTrue((root / "Assets/Scripts/Core/Rules/Pond.cs.meta").is_file())
-            self.assertTrue((root / "Tests/Core/Rules/PondTests.cs").is_file())
+            self.assertTrue((root / "Assets/Scripts/Core/Cards/Card.cs").is_file())
+            self.assertTrue((root / "Assets/Scripts/Core/Cards/Card.cs.meta").is_file())
+            self.assertTrue((root / "Tests/Core/Cards/CardTests.cs").is_file())
             self.assertEqual(3, len(written))
 
     def test_the_test_file_gets_no_meta(self):
@@ -130,17 +144,17 @@ class WritingTests(unittest.TestCase):
         # there would be a file nothing reads.
         with TemporaryDirectory() as directory:
             root = Path(directory)
-            scaffold.scaffold(root, "Pond")
+            scaffold.scaffold(root, "Lane")
 
-            self.assertFalse((root / "Tests/Core/PondTests.cs.meta").exists())
+            self.assertFalse((root / "Tests/Core/LaneTests.cs.meta").exists())
 
     def test_it_refuses_to_overwrite(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)
-            scaffold.scaffold(root, "Pond")
+            scaffold.scaffold(root, "Lane")
 
             with self.assertRaises(FileExistsError):
-                scaffold.scaffold(root, "Pond")
+                scaffold.scaffold(root, "Lane")
 
 
 if __name__ == "__main__":

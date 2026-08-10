@@ -177,7 +177,7 @@ by three PRs is not a contract.
 Every PR body carries a `**Docs:**` line stating what happened:
 
 ```
-**Docs:** docs/specs/frogs.md — updated the splitting rule to cap at 32.
+**Docs:** docs/specs/ui/game-board.md — a lane is now nine positions, not eight.
 **Docs:** None — no behaviour the docs describe was changed.
 ```
 

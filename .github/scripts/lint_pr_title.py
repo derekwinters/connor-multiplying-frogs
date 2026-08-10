@@ -9,7 +9,7 @@ merge succeeds, and the version silently does not move.
 So the title is a required check rather than a matter of discipline.
 
 Usage:
-    python3 .github/scripts/lint_pr_title.py --title "feat(frogs): add the pond"
+    python3 .github/scripts/lint_pr_title.py --title "feat(frogs): add the lane"
     PR_TITLE="fix: ..." python3 .github/scripts/lint_pr_title.py
 
 Exits 0 when the title conforms, 1 with one line per problem when it does not.
@@ -77,7 +77,7 @@ def validate(title: str) -> list[str]:
     if not match:
         return problems + [
             f"'{title}' is not a Conventional Commit. Expected `type(scope): subject`, "
-            f"for example `feat(frogs): add the pond`. Allowed types: "
+            f"for example `feat(frogs): add the lane`. Allowed types: "
             f"{', '.join(ALLOWED_TYPES)}."
         ]
 

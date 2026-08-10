@@ -65,9 +65,10 @@ Read the issue, then pick exactly one. Most of the skill is knowing which.
 Diagnose the **root cause**, not the symptom. Then: the fix approach, a
 `## Build checklist`, the milestone, `type:bug`, `pending-approval`.
 
-A bug report says "the frogs kept splitting past 32". The diagnosis says which
-code path skipped the check and why. A plan written against the symptom fixes
-the one case in the report and leaves the other three.
+A bug report says "my frog went backwards off the bottom of its lane". The
+diagnosis says which code path skipped the Start-log floor and why. A plan
+written against the symptom fixes the one case in the report and leaves the
+other three.
 
 #### When the root cause is a missing rule
 
@@ -79,10 +80,10 @@ That is a **spec gap**, and patching the code alone guarantees the same class of
 bug returns somewhere else. The plan proposes the missing **invariant** in
 plain English, and the checklist gets an item that tests it:
 
-> **Proposed invariant:** a frog never splits when the pond is at its cap,
-> whatever caused the split — timer, tap, or another frog landing on it.
+> **Proposed invariant:** a frog never moves below the Start log, whatever
+> moved it back — a wrong answer, or a turn that resolves twice.
 >
-> - [ ] Test: a tap on a frog at cap produces no new frog
+> - [ ] Test: a wrong answer on the Start log leaves the frog on the Start log
 
 Proposing an invariant is not inventing a mechanic: it is writing down the rule
 the existing behaviour already implies, so it can be agreed or corrected. If the
@@ -110,11 +111,11 @@ survive into the build because it was already written down.
 Ask one concrete question:
 
 ```markdown
-❓ **Needs from Derek/Connor:** when the pond is full and Connor taps a frog,
-should nothing happen, or should the frog wiggle to show it heard the tap?
+❓ **Needs from Derek/Connor:** when a wrong answer moves a frog back a lily
+pad, should the frog hop backwards, or just appear on the lower pad?
 
-Either is easy to build. I've not guessed because it changes how the game feels
-when you're winning.
+Either is easy to build. I've not guessed because it changes how it feels to
+get one wrong.
 ```
 
 Concrete means answerable with a sentence. "How should this work?" hands the

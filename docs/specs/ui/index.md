@@ -31,7 +31,7 @@ See [target platform](../../engineering/tech-stack.md#target-platform).
 
 ## Shared components
 
-Reusable atomic pieces — a primary button, the score readout, a confirm dialog —
+Reusable atomic pieces — a primary button, a player chip, a confirm dialog —
 are specified once in [Shared components](shared-components.md) and
 **referenced** by screen pages, never re-specified in them.
 
@@ -56,21 +56,21 @@ Things that must always be true of this screen, stated as
 `**Invariant:** …` lines so they can be quoted in a PR and asserted in a test.
 
 ```markdown
-**Invariant:** the pause screen never covers the score readout.
+**Invariant:** whose turn it is is stated in words, not only shown by a highlight.
 **Invariant:** every destructive action confirms before it acts.
 ```
 
 ### 3. Regions
 
 The screen broken into its named areas, top to bottom. A region is a box with a
-name and a job — `header`, `playfield`, `controls`. Naming them is what lets
-everything else say *where* without re-describing the layout each time.
+name and a job. Naming them is what lets everything else say *where* without
+re-describing the layout each time. The [game board](game-board.md)'s three:
 
 | Region | Job |
 | --- | --- |
-| `header` | score and pause button |
-| `playfield` | the pond; everything interactive |
-| `controls` | the two action buttons |
+| `header` | whose turn it is, and the settings button |
+| `pond` | the lanes — one per frog in the game |
+| `controls` | the `Roll` button |
 
 ### 4. Anchors
 
@@ -89,8 +89,8 @@ radius, and duration on the screen, named and valued.
 
 | Element | Constant | Value |
 | --- | --- | --- |
-| Panel width | `PausePanelWidth` | 280 dp |
-| Gap between buttons | `PauseButtonSpacing` | 12 dp |
+| `Roll` button width | `RollButtonWidth` | 480 px |
+| Gap between positions in a lane | `LanePositionGap` | 48 px |
 
 Same names in the code. See
 [named constants are the origin](../../engineering/ui-design-process.md#the-named-constants-are-the-origin-not-an-afterthought).
