@@ -70,6 +70,20 @@ def fire_text(repository: str, issue_number) -> str:
     return f"Triage issue {issue_number} in {repository}."
 
 
+# The key the API actually uses, then the two this looked for first. Order is
+# most-likely-first; all three are kept so an endpoint returning either shape
+# still reads as a real fire.
+SESSION_URL_KEYS = ("claude_code_session_url", "session_url", "url")
+
+
+def _session_url(payload):
+    """The session URL out of a fire response, or None if there isn't one."""
+    if not isinstance(payload, dict):
+        return None
+
+    return next((payload[key] for key in SESSION_URL_KEYS if payload.get(key)), None)
+
+
 def interpret_fire_response(status: int, body: str) -> FireResult:
     """Classify the response **truthfully**.
 
@@ -94,7 +108,7 @@ def interpret_fire_response(status: int, body: str) -> FireResult:
             False, "unreadable",
             f"HTTP {status} with a body that is not JSON: {snippet}")
 
-    session = payload.get("session_url") or payload.get("url") if isinstance(payload, dict) else None
+    session = _session_url(payload)
 
     if not session:
         return FireResult(
