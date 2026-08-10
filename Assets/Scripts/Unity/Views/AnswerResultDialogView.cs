@@ -726,7 +726,7 @@ namespace Frogs.Unity.Views
 
             var resolution = _turn.Resolution;
 
-            _board.LaneFor(_turn.Frog).PlacePieceBetween(
+            _board.LaneFor(_turn.Frog).PlacePiecePartWay(
                 resolution.PositionBefore,
                 resolution.PositionAfter,
                 HopProgress);

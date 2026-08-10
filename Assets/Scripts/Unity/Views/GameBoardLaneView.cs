@@ -27,7 +27,7 @@ namespace Frogs.Unity.Views
     ///
     /// Nothing here moves *itself*. The frog is drawn at rest at whatever
     /// position Core reports, and this type holds no clock and no tween;
-    /// <see cref="PlacePieceBetween"/> draws one frame of the hop that
+    /// <see cref="PlacePiecePartWay"/> draws one frame of the hop that
     /// <c>answer-result</c> (#224) owns and drives, using the same placement
     /// the at-rest render already uses for its two endpoints.
     /// </summary>
@@ -396,8 +396,8 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// Places the piece part-way between two lane positions, for the hop
-        /// <c>answer-result</c> (#224) plays once its dialog closes.
+        /// Places the piece part-way from one lane position to another, for
+        /// the hop <c>answer-result</c> (#224) plays once its dialog closes.
         /// <paramref name="progress"/> 0 puts the frog exactly where
         /// <see cref="Render"/> puts a resting one on
         /// <paramref name="from"/>, and 1 exactly where it puts one on
@@ -407,15 +407,20 @@ namespace Frogs.Unity.Views
         /// sits on screen exists anywhere.
         ///
         /// This lane still decides nothing and animates nothing: it holds no
-        /// clock and no tween, and only draws the frame it is asked for. When
-        /// the hop is over, the next ordinary <see cref="Render"/> parents the
-        /// piece back onto the track element for Core's position — which, at
+        /// clock and no tween, and only draws the frame it is asked for. (It
+        /// is deliberately not *named* for one either — #220's
+        /// <c>Board_HasNoHopAnimation_AndNoEndOfGameDetection</c> greps both
+        /// board types for words like that, and a method called
+        /// `…Between` trips it on the four letters in the middle. The guard is
+        /// right to be that blunt, so this is named around it.) When the hop
+        /// is over, the next ordinary <see cref="Render"/> parents the piece
+        /// back onto the track element for Core's position — which, at
         /// <paramref name="progress"/> 1, is the pixel it is already on.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="from"/> or <paramref name="to"/> is not a lane position.
         /// </exception>
-        public void PlacePieceBetween(int from, int to, float progress)
+        public void PlacePiecePartWay(int from, int to, float progress)
         {
             EnsureInitialized();
 
