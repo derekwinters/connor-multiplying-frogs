@@ -2044,6 +2044,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#every-input-to-the-verdict-re-runs-the-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Every input to the verdict re-runs the gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-grace-poll" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2827,6 +2838,17 @@
     <span class="md-ellipsis">
       
         The release PR is exempt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#every-input-to-the-verdict-re-runs-the-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Every input to the verdict re-runs the gate
       
     </span>
   </a>
@@ -3741,6 +3763,11 @@ miss its paths rather than skipped, so it can never report on them — and a
 code-only PR is exactly what the reconciliation gate exists to catch. It is
 therefore also the one workflow here that is safe to mark required in branch
 protection.</p>
+<p><strong>And <code>types: [opened, synchronize, reopened, labeled]</code>.</strong> The first three are
+GitHub's default set, spelled out because naming <code>types:</code> at all <em>replaces</em> the
+defaults rather than extending them. <code>labeled</code> is the addition, and it is the
+whole of <a href="#the-skip-docs-escape-hatch">the escape hatch</a> working: see
+<a href="#every-input-to-the-verdict-re-runs-the-gate">Every input to the verdict re-runs the gate</a>.</p>
 <p>When docs changed, it builds with <code>mkdocs build --strict</code>, so a broken nav
 entry, a dead internal link, or a page missing from the nav fails the PR rather
 than shipping a broken site. No deploy — publishing is <code>docs-publish</code>'s job.</p>
@@ -3824,6 +3851,40 @@ not excuse the docs. Neither does a <code>.md</code> file sitting next to some s
 nothing else. It cannot reconcile docs, and there is nobody driving it to apply
 a label. Matched <strong>both</strong> by its head branch and by its <code>autorelease: pending</code>
 label, so a change to either does not silently start failing every release.</p>
+<h4 id="every-input-to-the-verdict-re-runs-the-gate">Every input to the verdict re-runs the gate<a class="headerlink" href="#every-input-to-the-verdict-re-runs-the-gate" title="Link to this section">&para;</a></h4>
+<p>The verdict has exactly two inputs: the PR's <strong>changed files</strong> and the PR's
+<strong>labels</strong>. Both have to be able to start a fresh run, or the tick on the PR is
+answering a question nobody asked any more.</p>
+<table>
+<thead>
+<tr>
+<th>Input changes</th>
+<th>What re-runs the gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a commit is pushed</td>
+<td>the <code>synchronize</code> trigger</td>
+</tr>
+<tr>
+<td>a label is added</td>
+<td>the <code>labeled</code> trigger, or the grace poll if the run is still going</td>
+</tr>
+</tbody>
+</table>
+<p><code>labeled</code> is on the workflow for that reason and no other. It is not obvious
+from reading <code>docs-test.yml</code>, so it carries a comment saying so and
+<code>.github/scripts/tests/test_docs_gate_triggers.py</code> asserts it — the failure mode
+if it is tidied away is silent, and lands on whoever is already blocked.</p>
+<p>Because <code>docs-test</code> is grouped per PR with <code>cancel-in-progress: true</code>, a label
+applied while a run is in flight cancels that run and starts another. That is
+the right way round: the surviving run is the newer one, it is the one that saw
+the new label, and it is the one whose conclusion the branch ruleset reads.</p>
+<p>Removing a label does <strong>not</strong> re-run the gate, so a PR that passed on
+<code>skip-docs</code> keeps its green tick if the label is taken off again. That is a
+known gap rather than a decision — see
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/250">#250</a>.</p>
 <h4 id="the-grace-poll">The grace poll<a class="headerlink" href="#the-grace-poll" title="Link to this section">&para;</a></h4>
 <p>A <code>skip-docs</code> label applied moments after the PR opens would otherwise produce a
 failing run that is already wrong by the time anyone reads it — and a red tick
@@ -3832,12 +3893,19 @@ nobody should act on is worse than a slow one.</p>
 (<code>GRACE_POLL_ATTEMPTS</code> × <code>GRACE_POLL_SECONDS</code>) before reporting. A label landing
 inside that window is observed by the same run: <strong>no failing run is produced at
 all.</strong> A passing PR never waits.</p>
+<p>The poll is the pipeline's case, not a human's. <code>pipeline-dev</code> applies
+<code>skip-docs</code> in the same breath as opening the PR, so the label is always inside
+the window and a bot PR never flashes red. A person reads the failure first and
+labels afterwards, minutes later — that is the <code>labeled</code> trigger's job, and the
+poll is no substitute for it.</p>
 <p>If the label API cannot be read, the gate keeps failing. Unknown is not
 permission — a gate that passes when it cannot see the labels is a gate an
 outage switches off.</p>
 <h4 id="the-skip-docs-escape-hatch">The <code>skip-docs</code> escape hatch<a class="headerlink" href="#the-skip-docs-escape-hatch" title="Link to this section">&para;</a></h4>
 <p>For the genuinely doc-irrelevant PR — a dependency bump, a CI fix, a typo in a
-comment. Adding the label re-runs the check, so nothing needs pushing.</p>
+comment. Adding the label re-runs the check, so nothing needs pushing: either
+the run still in flight sees it during the grace poll, or the <code>labeled</code> trigger
+starts a new one.</p>
 <p>Using it is a decision, so it goes in the PR's <code>## Deviations and Decisions</code>
 section with a reason. A <code>skip-docs</code> label with no justification is a review
 comment.</p>
