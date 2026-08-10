@@ -2158,6 +2158,12 @@ width; <code>footprint</code> sits bottom-left; the primary button bottom-right.
 empty space. That gap is the layout, not decoration: <code>Back to the game</code> is the
 button people reach for without looking, and it must not be adjacent to the one
 that ends everybody's game.</p>
+<p>Because that gap is the load-bearing number, the actions column is positioned
+from the <strong>bottom of the panel up</strong> — <code>End the game</code> sits <code>ButtonDestructiveGap</code>
+above the button row, and <code>How to play</code> sits <code>SettingsActionGap</code> above <code>End the
+game</code>. The column's top edge is whatever is left over. Laid out the other way
+round, from the top down, the gap would be a consequence of arithmetic and a
+longer label or a shorter panel could quietly close it.</p>
 <h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2193,6 +2199,11 @@ that ends everybody's game.</p>
 <td><code>ButtonDestructiveGap</code></td>
 <td>96 px</td>
 </tr>
+<tr>
+<td>Version label's offset from the panel's bottom edge</td>
+<td><code>SettingsVersionBottomOffset</code></td>
+<td>60 px</td>
+</tr>
 </tbody>
 </table>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
@@ -2203,7 +2214,10 @@ that ends everybody's game.</p>
   <a href="../end-game-confirm/">end-game confirm</a>. Never ends anything by itself.</li>
 <li><strong><code>Back to the game</code></strong> — primary button. Closes and returns to exactly the
   board state that was there.</li>
-<li><strong>Version</strong> — <code>v0.1.0</code>, quiet, bottom-left.</li>
+<li><strong>Version</strong> — <code>v0.1.0</code>, quiet, bottom-left, at
+  <a href="../title-screen/#named-constants"><code>VersionLabelSize</code></a>. The same value doing
+  the same job as the title screen's own version readout, under the identical
+  name — not a second constant for the same number.</li>
 </ul>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
