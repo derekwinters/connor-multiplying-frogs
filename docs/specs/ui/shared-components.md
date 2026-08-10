@@ -231,9 +231,8 @@ tap.
 A frog's identity, wherever the game has to say *which frog* — its colour, its
 name, and how far up its lane it is.
 
-Used by: [game setup](game-setup.md), [game board](game-board.md),
-[roll and card](roll-and-card.md), [answer result](answer-result.md),
-[game over](game-over.md).
+Used by: [game board](game-board.md), [roll and card](roll-and-card.md),
+[answer result](answer-result.md).
 
 #### 2. Invariants
 
@@ -253,24 +252,59 @@ from every other chip on screen, by something other than colour.
 | Chip width on the board | `PlayerChipWidth` | 256 px |
 | Frog swatch diameter | `PlayerSwatchDiameter` | 64 px |
 | Gap between swatch and label | `PlayerChipSwatchGap` | 24 px |
-| Label size | `PlayerChipLabelSize` | 40 px |
+| Label size | `PlayerChipLabelSize` | 32 px |
+| Pad-count text size | `PlayerChipPadCountSize` | 24 px |
 | Corner radius | `PlayerChipRadius` | 20 px |
 | Ring drawn around the active chip | `PlayerChipActiveRing` | 6 px |
+
+`PlayerChipLabelSize` was 40 px on this page; the committed mockups' shared
+stylesheet — repeated across all eleven files — draws the name at 32 px and the
+pad-count line separately at 24 px, and `game-board.html`'s five instantiated
+chips (covering all three states below) all render at those two sizes. The
+mockups are what Connor approved when each screen's wireframe was signed off,
+so they win: `PlayerChipLabelSize` is corrected to 32 px, and
+`PlayerChipPadCountSize` — a value this table previously had no name for at
+all — is added at 24 px.
 
 #### 4. States
 
 | State | Appearance |
 | --- | --- |
 | Default | Swatch, colour name, pad count |
-| Active (this player's turn) | `PlayerChipActiveRing` ring, filled background, label at full weight |
-| Home (frog has finished) | A small home marker after the name; pad count replaced by `Home!` |
-| Empty seat (setup only) | Dashed outline, `Tap to add` in place of the name |
+| Active (this player's turn) | `PlayerChipActiveRing` ring, label at full weight |
+| Home (frog has finished) | Pad count replaced by `Home!` |
+
+The Active row dropped "filled background": the mockups' `.chip.act` rule
+gives the ring and the bold weight but leaves the base chip background
+unchanged, and the chip invariant only requires the active chip be visibly
+different by something other than colour, which the ring and weight already
+satisfy without a fill.
+
+The Home row dropped "a small home marker after the name": no committed
+mockup has ever drawn one — the only rendered Home chip
+(`game-board.html`'s Blue) is just the swatch, the colour name, and `Home!`.
+Building a marker now would mean inventing a visual for it, which
+[rule 8](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md)
+(wireframe before UI code) exists to prevent. A marker, if wanted later, needs
+its own wireframe first.
+
+There is no longer an Empty-seat state on this page.
+[Game setup](game-setup.md) does not use this chip — it specifies its own
+Frog seat element, with its own constants and states, and its mockup draws
+that element's numbers, not this one's. See that page for the setup screen.
+
+[Game over](game-over.md) does not use this chip either, for the same
+reason: it specifies its own **Standings row** element — its own constants
+(`StandingsSwatchDiameter` 88 px against this chip's `PlayerSwatchDiameter`
+64 px, `StandingsNameSize` 52 px, no `PlayerChip*` constant anywhere on that
+page) and its mockup draws `.row` markup, not `.chip`. It stays listed under
+[Frog colours](#frog-colours) below, since it legitimately reuses that
+element's four colour constants for its own swatch.
 
 #### 5. Behaviour
 
-The chip is not a button anywhere except on
-[game setup](game-setup.md), where tapping one adds or removes that frog from
-the game. On every other screen it is a readout.
+The chip is a readout on every screen that uses it. It has no button state in
+v0.2 — no tap handler, on any screen, in any state.
 
 #### Why there is no typing
 
