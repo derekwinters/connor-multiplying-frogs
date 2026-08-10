@@ -1702,6 +1702,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-end-to-end-acceptance-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The end-to-end acceptance pass
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The end-to-end acceptance pass">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-acceptance-pass-cannot-reach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the acceptance pass cannot reach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#known-limitation-editmode-tests-run-in-ci-not-in-agent-environments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2120,6 +2148,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-end-to-end-acceptance-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The end-to-end acceptance pass
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The end-to-end acceptance pass">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-acceptance-pass-cannot-reach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the acceptance pass cannot reach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#known-limitation-editmode-tests-run-in-ci-not-in-agent-environments" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2304,6 +2360,114 @@ not something a test suite does.</p>
 </ol>
 <p>If you find yourself starting in a <code>MonoBehaviour</code>, stop. The feature will end
 up testable only in an editor, and it will end up untested.</p>
+<h2 id="the-end-to-end-acceptance-pass">The end-to-end acceptance pass<a class="headerlink" href="#the-end-to-end-acceptance-pass" title="Link to this section">&para;</a></h2>
+<p>Most tests prove one piece. The <strong>acceptance pass</strong> is the small set that
+proves the pieces fit together into a game somebody can play from the first
+roll to the last, and it is deliberately split across the two tiers by what
+each one can honestly reach.</p>
+<table>
+<thead>
+<tr>
+<th>Seam</th>
+<th>Proved by</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The roster and the turn order that follows from it</td>
+<td>scripted game</td>
+<td><code>Tests/Core/ScriptedGameTests.cs</code></td>
+</tr>
+<tr>
+<td>A roll, and the pile it selects</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>The card that pile deals, and the grid Core derives from it</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>A right answer moving the frog forward</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>A wrong answer moving it back</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>The floor at the Start log</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>A frog reaching its End log, and being recorded as a finisher</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>Play continuing afterwards, with home frogs skipped</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>The game ending itself once every frog is home</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>The winner being the <strong>first</strong> finisher, not the last</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>A game ended deliberately, and the standings it produces</td>
+<td>scripted game</td>
+<td>Core</td>
+</tr>
+<tr>
+<td>The grid <strong>view</strong> drawing the grid Core reported</td>
+<td>EditMode</td>
+<td><code>Assets/Tests/EditMode/EndToEndAcceptanceTests.cs</code></td>
+</tr>
+<tr>
+<td>The game-over <strong>screen</strong> rendering both headlines</td>
+<td>EditMode</td>
+<td>same</td>
+</tr>
+<tr>
+<td>The scenes the build ships keeping their components</td>
+<td>EditMode</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<p>Three whole games are played at the Core tier, all from <strong>one named seed</strong>, so
+a failure is the same failure every run: one played until both frogs are home
+and the game ends itself, one ended deliberately with nobody home, and one
+ended deliberately with one frog home. They are <em>played</em>, not staged — a frog
+gets up its lane by answering questions the game itself dealt, because a seam
+that is never called in a real sequence is a seam that can break without any
+isolated test noticing. That is not a hypothetical: this pass is what caught
+<code>Game.RecordFinish</code> never being called from anywhere but a test, which left
+every real game with no winner.</p>
+<h3 id="what-the-acceptance-pass-cannot-reach">What the acceptance pass cannot reach<a class="headerlink" href="#what-the-acceptance-pass-cannot-reach" title="Link to this section">&para;</a></h3>
+<p><strong>There is no harness in this repo for driving the real screens end to end.</strong>
+EditMode is an edit-mode editor session: it opens a scene without running
+<code>Awake</code>, <code>OnEnable</code> or <code>Start</code>, no coroutines run, no frames tick, and
+<code>Time.deltaTime</code> never advances. A tapped-through sequence of screens, a screen
+transition, and a timed hop cannot be observed there, and
+<a href="#no-playmode-tests-no-on-device-testing">PlayMode tests are not the answer</a>.</p>
+<p>So the shell tier proves the adapter-shaped things EditMode is actually for,
+and nothing pretends otherwise. Writing a real walkthrough needs a lifecycle
+driver — explicit <code>Initialize()</code> entry points, or a test driver that pumps the
+lifecycle by hand — that does not exist yet. Until it does, the only place the
+real screens are seen <em>running</em> is a build somebody installs and opens, which
+is where Derek and Connor find out whether it is fun.</p>
 <h2 id="known-limitation-editmode-tests-run-in-ci-not-in-agent-environments">Known limitation: EditMode tests run in CI, not in agent environments<a class="headerlink" href="#known-limitation-editmode-tests-run-in-ci-not-in-agent-environments" title="Link to this section">&para;</a></h2>
 <p>Agent environments have no Unity editor and no licence. <strong>EditMode tests cannot
 be run there.</strong> This is a fact about the environment, not a shortcoming of the
