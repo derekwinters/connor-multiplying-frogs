@@ -347,6 +347,37 @@ directory. The two have the same version and differ only in architecture, which
 is not visible from a filename sitting next to another filename — separate
 paths make it impossible for the wrong one to be picked up by a glob.
 
+#### The `Android/` segment is the builder's, not ours
+
+`game-ci/unity-builder` writes to **`<buildsPath>/<targetPlatform>/`** — it
+appends the platform directory itself, whether or not `buildsPath` was set. So
+the APKs land in `build/device/Android/` and `build/emulator/Android/`, and
+anything reading them must include that segment:
+
+| Workflow | `buildsPath` | Where the APK actually lands |
+| --- | --- | --- |
+| `pr-build`, `rc-build` | default (`build`) | `build/Android/` |
+| `release-build` | `build/device`, `build/emulator` | `build/device/Android/`, `build/emulator/Android/` |
+
+Getting this wrong is quiet rather than loud. The attach step runs under
+`shopt -s nullglob`, so a pattern that matches nothing simply disappears — both
+Unity builds go green, the assets array comes out empty, and the step reports
+that the build produced no APK when it produced two. That is what left `v0.1.0`
+tagged with no APK on it (#212).
+
+Two things now stop it recurring:
+
+- **`.github/scripts/tests/test_build_output_paths.py`** asserts the invariant
+  across every workflow that runs a Unity build: each APK path must sit under
+  the `<buildsPath>/<targetPlatform>/` of a build in the same file, and each
+  build path must be read by something. A `buildsPath` and the glob consuming
+  it cannot drift apart, and a build profile nobody collects is a failure too.
+  It runs in `Gate tests` with the other CI-script tests.
+- **The attach step names what it searched**, and says for each path whether
+  the directory was missing, empty, or held files that were not `*.apk` —
+  because "the build produced nothing" and "nothing matched the glob" have
+  completely different fixes and used to be the same message.
+
 The profile is applied by `BuildStampPreprocessor` from `FROGS_ANDROID_PROFILE`,
 and an unrecognised value fails the build rather than defaulting: guessing here
 ships the wrong architecture, which looks fine until someone installs it.

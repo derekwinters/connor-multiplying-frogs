@@ -157,10 +157,39 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
 
-          assets=(build/device/*.apk build/emulator/*.apk)
+          # The `Android/` segment is unity-builder's, not ours: it writes to
+          # `<buildsPath>/<targetPlatform>/<buildName>.apk`, appending the
+          # platform directory whether or not buildsPath was set. Globbing
+          # `build/device/*.apk` matches nothing even when the build succeeded.
+          # See issue #212 — and the guard in
+          # .github/scripts/tests/test_build_output_paths.py.
+          searched=(build/device/Android build/emulator/Android)
+          assets=(build/device/Android/*.apk build/emulator/Android/*.apk)
 
+          # Under nullglob an unmatched pattern vanishes silently, so an empty
+          # array on its own cannot tell "the build produced nothing" from
+          # "the build produced something this glob does not match" — and those
+          # have completely different fixes. Say which, per path.
           if [ ${#assets[@]} -eq 0 ]; then
-            echo "::error::Neither build produced an APK, so there is nothing to attach."
+            echo "No APK matched. Searched, in order:"
+            for dir in "${searched[@]}"; do
+              if [ ! -d "$dir" ]; then
+                echo "  $dir — no such directory: the build wrote nothing here."
+                continue
+              fi
+
+              present=("$dir"/*)
+              if [ ${#present[@]} -eq 0 ]; then
+                echo "  $dir — exists but is empty: the build produced nothing."
+              else
+                echo "  $dir — has ${#present[@]} file(s), none of them *.apk:"
+                printf '      %s\n' "${present[@]}"
+              fi
+            done
+
+            echo "::error::No APK matched under ${searched[*]}. The log above says," \
+                 "for each path, whether the build wrote nothing there or wrote" \
+                 "something the *.apk glob did not match."
             exit 1
           fi
 
