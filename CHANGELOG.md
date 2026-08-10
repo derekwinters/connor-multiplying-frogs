@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.2.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.1.1...v0.2.0) (2026-08-10)
+
+
+### Features
+
+* **build:** create the Game scene, the scene the app actually boots into ([#266](https://github.com/derekwinters/connor-multiplying-frogs/issues/266)) ([0e36b1a](https://github.com/derekwinters/connor-multiplying-frogs/commit/0e36b1a8fbf6cfc3847517edbbd59d1ced91b325))
+* **core:** add a seeded, deterministic random number generator ([#258](https://github.com/derekwinters/connor-multiplying-frogs/issues/258)) ([9187acb](https://github.com/derekwinters/connor-multiplying-frogs/commit/9187acb2ae8e26e58ab6903548d324ee4133b531))
+* **core:** add the Game type — roster, turn order, and turn phases ([#263](https://github.com/derekwinters/connor-multiplying-frogs/issues/263)) ([9795154](https://github.com/derekwinters/connor-multiplying-frogs/commit/97951549718c6da245aa80bb6517b5dce5f85121))
+* **core:** add the Lane type — nine positions, forward, back, home ([#259](https://github.com/derekwinters/connor-multiplying-frogs/issues/259)) ([1f04b67](https://github.com/derekwinters/connor-multiplying-frogs/commit/1f04b67f58b92606ae20309b6c0de51d33d3574b))
+* **core:** add the roll and its fixed mapping to the three piles ([#260](https://github.com/derekwinters/connor-multiplying-frogs/issues/260)) ([4cab4c9](https://github.com/derekwinters/connor-multiplying-frogs/commit/4cab4c942a942f88f44e243debf5350121ca6bc2))
+* **core:** generate a card, shaped to the pile it was drawn from ([#261](https://github.com/derekwinters/connor-multiplying-frogs/issues/261)) ([ac464f2](https://github.com/derekwinters/connor-multiplying-frogs/commit/ac464f22039ac0bbedb64205a287818194aa1194)), closes [#203](https://github.com/derekwinters/connor-multiplying-frogs/issues/203)
+* **core:** grade the answer and resolve the frog's move ([#264](https://github.com/derekwinters/connor-multiplying-frogs/issues/264)) ([3feaad6](https://github.com/derekwinters/connor-multiplying-frogs/commit/3feaad6ceb59fa1bc26150a714b9607bb1a0ecaa))
+* **core:** report the working-out grid's shape for a card and row count ([#262](https://github.com/derekwinters/connor-multiplying-frogs/issues/262)) ([edd9623](https://github.com/derekwinters/connor-multiplying-frogs/commit/edd9623664946b123d6735c1841965775115f891))
+* **core:** the two ways a game ends, and the standings it produces ([#265](https://github.com/derekwinters/connor-multiplying-frogs/issues/265)) ([3011b65](https://github.com/derekwinters/connor-multiplying-frogs/commit/3011b65ba7bf9a066c70d6425482c9caa9a501ff))
+* **router:** screen router — one screen, one dialog, and hardware back ([#267](https://github.com/derekwinters/connor-multiplying-frogs/issues/267)) ([f877858](https://github.com/derekwinters/connor-multiplying-frogs/commit/f877858c5023448c44d6e580b169adfa5e71663e))
+* **ui:** build the end-game confirm dialog ([#276](https://github.com/derekwinters/connor-multiplying-frogs/issues/276)) ([226ffb1](https://github.com/derekwinters/connor-multiplying-frogs/commit/226ffb1d09597b21c3369adce5f9c2d5dc502ac3))
+* **ui:** build the game board — lanes, frogs, turn banner, and `Roll` ([#273](https://github.com/derekwinters/connor-multiplying-frogs/issues/273)) ([beb569a](https://github.com/derekwinters/connor-multiplying-frogs/commit/beb569a5ec950734dac24899d3c65c60d7dae80b))
+* **ui:** build the game setup screen — choose frogs and turn order ([#270](https://github.com/derekwinters/connor-multiplying-frogs/issues/270)) ([9897c8f](https://github.com/derekwinters/connor-multiplying-frogs/commit/9897c8f992412e84c529a652789514669ee37d96))
+* **ui:** build the settings dialog ([#274](https://github.com/derekwinters/connor-multiplying-frogs/issues/274)) ([4be6faa](https://github.com/derekwinters/connor-multiplying-frogs/commit/4be6faacc0852e8e29c62d58d4999298a4c01c0c))
+* **ui:** build the shared Dialog and the Player chip ([#271](https://github.com/derekwinters/connor-multiplying-frogs/issues/271)) ([bc182f4](https://github.com/derekwinters/connor-multiplying-frogs/commit/bc182f4fc4491c9c3875731ab0c80a0bfc06dadf)), closes [#219](https://github.com/derekwinters/connor-multiplying-frogs/issues/219)
+* **ui:** build the title screen to its RESUME/NEW wireframe ([#269](https://github.com/derekwinters/connor-multiplying-frogs/issues/269)) ([77ce62f](https://github.com/derekwinters/connor-multiplying-frogs/commit/77ce62f72b1bc3ec8d12bfc33486431061673b01))
+* **ui:** choose uGUI, then build the shared Button and the frog colours ([#268](https://github.com/derekwinters/connor-multiplying-frogs/issues/268)) ([35a2b38](https://github.com/derekwinters/connor-multiplying-frogs/commit/35a2b382355639451638b7f3c396b51cf2d70e3c))
+* **ui:** show the die, the pile, and the card you drew ([#275](https://github.com/derekwinters/connor-multiplying-frogs/issues/275)) ([8dad28d](https://github.com/derekwinters/connor-multiplying-frogs/commit/8dad28d3019a2ee26632a82da5c312bda1963a63))
+* **ui:** show who won and where everybody got to when a game ends ([#272](https://github.com/derekwinters/connor-multiplying-frogs/issues/272)) ([a908509](https://github.com/derekwinters/connor-multiplying-frogs/commit/a908509d55fa530e1c489c49e0dc4588afe36852))
+* **ui:** the answer result dialog and the frog's hop ([#278](https://github.com/derekwinters/connor-multiplying-frogs/issues/278)) ([6e903ab](https://github.com/derekwinters/connor-multiplying-frogs/commit/6e903ab1c3a6e7cd23849108ff09c0c5899c4582))
+* **working-out-grid:** draw the grid and keypad from Core's grid model ([#277](https://github.com/derekwinters/connor-multiplying-frogs/issues/277)) ([f240273](https://github.com/derekwinters/connor-multiplying-frogs/commit/f2402732666ec342baaeb5655bd03a64e2c134af))
+
+
+### Bug Fixes
+
+* **build:** pass the build's inputs on Unity's command line ([#253](https://github.com/derekwinters/connor-multiplying-frogs/issues/253)) ([50fa53b](https://github.com/derekwinters/connor-multiplying-frogs/commit/50fa53bd446f4d77faa8da52f1b35d7d4d27c998))
+* **ci:** make the docs reconciliation gate match CLAUDE.md rule 9 ([#251](https://github.com/derekwinters/connor-multiplying-frogs/issues/251)) ([5e26c5f](https://github.com/derekwinters/connor-multiplying-frogs/commit/5e26c5f463d090a8a537cf6a135caa4b54567d29)), closes [#176](https://github.com/derekwinters/connor-multiplying-frogs/issues/176)
+* **game:** record a frog's finish when it reaches the End log ([#281](https://github.com/derekwinters/connor-multiplying-frogs/issues/281)) ([53df092](https://github.com/derekwinters/connor-multiplying-frogs/commit/53df092b0cb2d0b47546ed5a6b63d11777fde519))
+* **gatekeeper:** log the reactive-triage fire instead of discarding it ([#232](https://github.com/derekwinters/connor-multiplying-frogs/issues/232)) ([00c4371](https://github.com/derekwinters/connor-multiplying-frogs/commit/00c437109e017c9cb28c8b93a6fbf37e904bcf5a)), closes [#231](https://github.com/derekwinters/connor-multiplying-frogs/issues/231)
+* **gatekeeper:** recognise claude_code_session_url as a real fire ([#241](https://github.com/derekwinters/connor-multiplying-frogs/issues/241)) ([cb94905](https://github.com/derekwinters/connor-multiplying-frogs/commit/cb949053ff0df27a6a56a5cb5f20dcf1f9454148)), closes [#240](https://github.com/derekwinters/connor-multiplying-frogs/issues/240)
+* **gatekeeper:** return the triage endpoint's error body instead of raising ([#237](https://github.com/derekwinters/connor-multiplying-frogs/issues/237)) ([f6d7ad4](https://github.com/derekwinters/connor-multiplying-frogs/commit/f6d7ad40c1dd9f9bb8b3890248baa52ba651d294)), closes [#236](https://github.com/derekwinters/connor-multiplying-frogs/issues/236)
+* **gatekeeper:** send the anthropic-version header the triage endpoint requires ([#239](https://github.com/derekwinters/connor-multiplying-frogs/issues/239)) ([ba66aa1](https://github.com/derekwinters/connor-multiplying-frogs/commit/ba66aa17275e512ff4781c0734be476770ba35d8)), closes [#238](https://github.com/derekwinters/connor-multiplying-frogs/issues/238)
+
 ## [0.1.1](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.1.0...v0.1.1) (2026-08-10)
 
 
