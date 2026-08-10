@@ -1762,6 +1762,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-game-scene-is-what-the-app-actually-boots-into" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Game scene is what the app actually boots into
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#naming" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2364,6 +2375,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-game-scene-is-what-the-app-actually-boots-into" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Game scene is what the app actually boots into
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#naming" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2799,6 +2821,19 @@ writes the version to the log, and nothing else: what a build-proof screen
 <em>shows</em> is a layout, and layout goes through
 <a href="../ui-design-process/">the wireframe loop</a> rather than being invented in an
 implementation PR.</p>
+<h3 id="the-game-scene-is-what-the-app-actually-boots-into">The <code>Game</code> scene is what the app actually boots into<a class="headerlink" href="#the-game-scene-is-what-the-app-actually-boots-into" title="Link to this section">&para;</a></h3>
+<p><code>Assets/Editor/GameScene.cs</code> creates <code>Assets/Scenes/Game.unity</code> the same way —
+<code>EditorSceneManager</code>, not hand-authored YAML — with a camera and nothing else.
+No probe, no layout: what a screen shows still goes through the wireframe loop
+first, and the screen router that puts content into this scene is its own,
+later issue.</p>
+<p><code>Game.unity</code> is <strong>first</strong> in <code>ProjectSettings/EditorBuildSettings.asset</code> —
+index 0, which is the entry Unity boots into. <code>HelloWorld.unity</code> stays in the
+list, enabled, one slot behind it; nothing removes it, and its own EditMode
+tests still pass unchanged, because they assert presence and <code>enabled</code>, never
+position. Registering <code>Game.unity</code> by appending it, the way a first pass at
+this might do it, would leave the built APK opening into the blank Hello World
+scene forever — the ordering is the whole point, not an incidental detail.</p>
 <h3 id="naming">Naming<a class="headerlink" href="#naming" title="Link to this section">&para;</a></h3>
 <p>Use the <code>scaffold-core</code> skill to create a Core type; it applies all of this and
 leaves you with a failing test, which is where a new type should start.</p>
