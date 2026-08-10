@@ -2211,12 +2211,14 @@ chosen and one seat empty, which is the state that shows both seat appearances
 and the renumbering at once.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>Does a saved game change this screen?</strong>
-  <a href="../../../adr/0004-core-owns-the-save-format/">ADR-0004</a> puts a save format in
-  Core. If a game in progress can be resumed, the resume entry point is most
-  likely here or on the <a href="../title-screen/">title screen</a>, and either way it is a
-  new element that needs adding to a wireframe. Not decided; nothing on this
-  screen assumes it.</li>
+<li><strong>Does a saved game change this screen?</strong> <strong>Answered: no.</strong>
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/228">#228</a>
+  settled that a game in progress is re-entered from the
+  <a href="../title-screen/">title screen</a>, which gained a <code>RESUME</code> button beside <code>NEW</code>.
+  Nothing on this screen changes: a resumed game does not pass through setup,
+  because its roster was chosen here when that game was started.
+  <a href="../../../adr/0004-core-owns-the-save-format/">ADR-0004</a>'s save format is still
+  the thing that has to exist behind that button, and it does not exist yet.</li>
 <li><strong>Should the four colours be reorderable?</strong> Proposed: no. Turn order is
   tap order, which is one gesture rather than two, and re-ordering is a drag
   interaction on a screen four children are all reaching at.</li>

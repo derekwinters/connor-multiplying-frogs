@@ -955,6 +955,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invariant-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The invariant this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -987,6 +1004,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-became-of-the-play-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What became of the Play* constants
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1922,6 +1956,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invariant-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The invariant this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1954,6 +2005,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-became-of-the-play-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What became of the Play* constants
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2027,15 +2095,34 @@
 
 
 <h1 id="title-screen">Title screen<a class="headerlink" href="#title-screen" title="Link to this section">&para;</a></h1>
-<p>The first thing you see. It says what the game is and gives you one thing to
-press.</p>
+<p>The first thing you see. It says what the game is and gives you the way into a
+game: carry on with the one you left, or start a new one.</p>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
-<p><strong>Invariant:</strong> there is exactly one interactive element on this screen — <code>Play</code>.
+<p><strong>Invariant:</strong> the only interactive elements on this screen are <code>RESUME</code> and
+<code>NEW</code>. There is never a third. How many of the two are on screen when there is
+no saved game is <a href="#open-questions">open question 2</a>; nothing is ever <em>added</em>
+beyond these two.
 <strong>Invariant:</strong> nothing on this screen can start a game with the wrong number of
 players. Choosing who is playing happens on <a href="../game-setup/">game setup</a>, always,
-including when you have played five games in a row.
+including when you have played five games in a row. <strong><code>RESUME</code> is not an
+exception to this.</strong> It does not choose a roster — it restores the one a saved
+game already carries, and that roster was chosen on game setup when that game
+was started. The one path that leaves this screen without passing through game
+setup does so because the choice has already been made, not because it can be
+made somewhere else.
 <strong>Invariant:</strong> the version string is present and is read from <code>/VERSION</code>, never
 typed into a layout.</p>
+<h3 id="the-invariant-this-page-used-to-carry">The invariant this page used to carry<a class="headerlink" href="#the-invariant-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
+<p>Until this wireframe, the first invariant on this page read:</p>
+<blockquote>
+<p><strong>Invariant:</strong> there is exactly one interactive element on this screen —
+<code>Play</code>.</p>
+</blockquote>
+<p>That stopped being true when <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/228">#228</a>
+settled that a saved game is re-entered from the title screen. <code>Play</code> does not
+exist on this screen any more: it is <code>NEW</code>, and it has a neighbour. The old
+wording is quoted here so the change is visible, and it is not true anywhere
+else on this page.</p>
 <h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2055,7 +2142,7 @@ typed into a layout.</p>
 </tr>
 <tr>
 <td><code>action</code></td>
-<td>The <code>Play</code> button</td>
+<td>The button row: <code>RESUME</code> and <code>NEW</code>, side by side</td>
 </tr>
 <tr>
 <td><code>footprint</code></td>
@@ -2071,8 +2158,15 @@ typed into a layout.</p>
 <li><code>title</code> is centred horizontally, its baseline at <code>TitleBaselineY</code> from the
   top. It is not vertically centred — the art has a subject in the middle of it
   and the title sits above that.</li>
-<li><code>action</code> is centred horizontally, <code>PlayButtonBottomOffset</code> up from the bottom
-  safe area, so it is under the thumb of a tablet held two-handed.</li>
+<li><code>action</code> is a <strong>single horizontal row, centred horizontally as a row</strong>, its
+  bottom edge <code>TitleButtonBottomOffset</code> up from the bottom safe area, so both
+  buttons are under the thumbs of a tablet held two-handed. Within the row,
+  <code>RESUME</code> is on the left and <code>NEW</code> on the right, separated by
+  <code>TitleButtonGap</code>.</li>
+<li>The row is centred <strong>as a whole</strong>, not per button. That is what makes the
+  no-save case fall out for free: if <a href="#open-questions">open question 2</a> is
+  answered <code>Hidden</code>, the row contains one button and centres it, which is
+  exactly where <code>Play</code> used to sit.</li>
 <li><code>footprint</code> is pinned to the bottom-left safe area corner.</li>
 <li>On a screen that is not 16:10, the art crops and everything else keeps its
   distance from the <strong>safe area</strong>, not the screen edge.</li>
@@ -2103,19 +2197,29 @@ typed into a layout.</p>
 <td>160 px</td>
 </tr>
 <tr>
-<td><code>Play</code> button width</td>
-<td><code>PlayButtonWidth</code></td>
+<td>Width of each button in the <code>action</code> row</td>
+<td><code>TitleButtonWidth</code></td>
 <td>560 px</td>
 </tr>
 <tr>
-<td><code>Play</code> button height</td>
-<td><code>PlayButtonHeight</code></td>
+<td>Height of each button in the <code>action</code> row</td>
+<td><code>TitleButtonHeight</code></td>
 <td>160 px</td>
 </tr>
 <tr>
-<td><code>Play</code> button up from the safe area</td>
-<td><code>PlayButtonBottomOffset</code></td>
+<td>Gap between <code>RESUME</code> and <code>NEW</code></td>
+<td><code>TitleButtonGap</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Button row up from the safe area</td>
+<td><code>TitleButtonBottomOffset</code></td>
 <td>120 px</td>
+</tr>
+<tr>
+<td>Label size on both buttons</td>
+<td><code>TitleButtonLabelSize</code></td>
+<td>64 px</td>
 </tr>
 <tr>
 <td>Version string size</td>
@@ -2129,13 +2233,88 @@ typed into a layout.</p>
 </tr>
 </tbody>
 </table>
-<p><code>PlayButtonHeight</code> is larger than the shared <code>ButtonHeight</code> of 112 px. This is
-the one button on the screen and the first one a child touches; it is allowed to
-be the biggest button in the game.</p>
+<p><code>TitleButtonHeight</code> is larger than the shared <code>ButtonHeight</code> of 112 px, and
+<code>TitleButtonWidth</code> larger than the shared <code>ButtonMinWidth</code> of 320 px. These are
+the first buttons a child touches and there is nothing else on the screen
+competing with them for space; they are allowed to be the biggest buttons in the
+game. Both buttons take the same width and the same height, deliberately: they
+are two peer choices, and a size difference would be a second, accidental way of
+saying which one matters — which is what
+<a href="#open-questions">open question 1</a> is for the review to answer on purpose.</p>
+<p><code>TitleButtonGap</code> is <strong>not</strong> the shared <code>ButtonGap</code> of 32 px. That value is sized
+for the shared 112 px button; scaled to a 160 px one the same proportion lands
+just under 48 px, and 48 px is already this page's <code>SafeMargin</code> and game
+setup's <code>SeatGap</code> at a comparable scale. At 32 px two 560 px buttons read as one
+split control rather than two choices.</p>
+<p>The row is <code>TitleButtonWidth</code> × 2 + <code>TitleButtonGap</code> = 1168 px wide, centred in
+the 1824 px between the safe margins, leaving 328 px either side. The row is
+deliberately not full-bleed, for the same reason game setup's seat row is not.</p>
+<p><code>TitleButtonLabelSize</code> is 64 px rather than the shared <code>ButtonLabelSize</code> of
+44 px, in the same proportion as the buttons themselves are oversized
+(44 × 160 ÷ 112 ≈ 63). This is not a new decision — 64 px is what the committed
+mockup has drawn since this screen was first agreed. It is given a name here
+because there are now two labels of very different lengths (<code>RESUME</code> and <code>NEW</code>)
+sharing one button size, and a label size that only exists inside a mockup is a
+label size the next redraw gets wrong.</p>
+<h3 id="what-became-of-the-play-constants">What became of the <code>Play*</code> constants<a class="headerlink" href="#what-became-of-the-play-constants" title="Link to this section">&para;</a></h3>
+<p><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">#216</a>
+builds this screen from named constants and names three of them that no longer
+exist. They are <strong>renamed, not removed, and their values do not change</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Value</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PlayButtonWidth</code></td>
+<td><code>TitleButtonWidth</code></td>
+<td>560 px</td>
+<td>Unchanged; now applies to both buttons</td>
+</tr>
+<tr>
+<td><code>PlayButtonHeight</code></td>
+<td><code>TitleButtonHeight</code></td>
+<td>160 px</td>
+<td>Unchanged; now applies to both buttons</td>
+</tr>
+<tr>
+<td><code>PlayButtonBottomOffset</code></td>
+<td><code>TitleButtonBottomOffset</code></td>
+<td>120 px</td>
+<td>Unchanged; now measured to the bottom of the row</td>
+</tr>
+</tbody>
+</table>
+<p>The names lose their <code>Play</code> prefix because <code>Play</code> is not a thing on this screen
+any more, and a constant named after a button that does not exist is a constant
+somebody will eventually apply to the wrong one. <code>TitleButtonGap</code> is the one
+genuinely new number.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong><code>Play</code></strong> — primary <a href="../shared-components/#button">button</a>. Goes to
-  <a href="../game-setup/">game setup</a>. Never disabled.</li>
+<li><strong><code>RESUME</code></strong> — goes back into the saved game, on the
+  <a href="../game-board/">game board</a>. It restores a roster; it never chooses one. What
+  state within a turn a resumed game re-enters is the save format's business
+  (<a href="../../../adr/0004-core-owns-the-save-format/">ADR-0004</a>) and is not settled
+  here.</li>
+<li><strong>Its button kind is not assigned yet.</strong> Whether it is the primary or the
+    secondary of the pair is <a href="#open-questions">open question 1</a>.</li>
+<li><strong>What it does when there is no game to resume is not settled either.</strong> It
+    is <a href="#open-questions">open question 2</a>, and this page does not assume an
+    answer. The mockups draw the state where a save exists.</li>
+<li>Nothing on this screen writes, reads, or deletes a save. The save
+    round-trip does not exist yet — it is out of the shape-only proof of
+    concept (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/198">#198</a>)
+    — and this wireframe draws the button without implying the mechanism behind
+    it.</li>
+<li><strong><code>NEW</code></strong> — renamed from <code>Play</code>, and it goes exactly where <code>Play</code> went:
+  <a href="../game-setup/">game setup</a>. Never disabled; there is no state of this screen
+  that would justify greying it out. Its button kind is the other half of
+  <a href="#open-questions">open question 1</a>.</li>
 <li><strong>Title</strong> — text, not a logo image, until an <code>area:art</code> issue supplies one.
   The wireframe reserves the space a wordmark would occupy.</li>
 <li><strong>Version</strong> — <code>v0.1.0</code>, from <code>/VERSION</code>. It exists so that a screenshot from a
@@ -2144,27 +2323,64 @@ be the biggest button in the game.</p>
 </ul>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
-<li>Entering: art and title fade in over <code>TitleFadeDuration</code> (0.3 s). No
-  animation on <code>Play</code> — a button that moves is a button that gets missed.</li>
+<li>Entering: art and title fade in over <code>TitleFadeDuration</code> (0.3 s). Neither
+  button animates — a button that moves is a button that gets missed.</li>
 <li>The hardware back button on this screen exits the app. It is the only screen
   where back exits.</li>
 <li>Nothing auto-advances. The title screen waits indefinitely.</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
-<p><a href="../mockups/title-screen.html"><code>mockups/title-screen.html</code></a></p>
+<p>Two mockups, drawn as a pair, differing in <strong>exactly one thing</strong>: which of the
+two buttons is the primary. Everything else — position, size, gap, wording — is
+identical between them, so the review is answering
+<a href="#open-questions">open question 1</a> and nothing else.</p>
+<ul>
+<li><strong><code>NEW</code> primary:</strong> <a href="../mockups/title-screen.html"><code>mockups/title-screen.html</code></a></li>
+<li><strong><code>RESUME</code> primary:</strong> <a href="../mockups/title-screen-resume-primary.html"><code>mockups/title-screen-resume-primary.html</code></a></li>
+</ul>
+<p><strong>Neither is the agreed picture yet.</strong> The pair is the question. Once review
+picks one, it becomes <code>title-screen.html</code> and the other file goes.</p>
+<p>Both draw the state where <strong>a save exists</strong>, so both buttons are live. That is
+the state the layout question is about; the no-save layout falls out of
+whichever answer <a href="#open-questions">open question 2</a> gets, and is drawn when that
+is answered.</p>
 <p>The splash illustration attached to
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/168">issue #168</a>
-is the art this screen is built around. The mockup draws its region as a
+is the art this screen is built around. The mockups draw its region as a
 placeholder block rather than embedding the image, because a mockup that needs
 a network fetch is a mockup that does not open on the sofa — and because the
 wireframe is deciding <em>where the art goes</em>, not what it is.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
+<li><strong>1. Which of <code>RESUME</code> and <code>NEW</code> is the primary button?</strong> Not decided. The
+  shared <a href="../shared-components/#button">Button</a> invariant is <em>"exactly one
+  primary button is visible at a time"</em>, so one of the two is primary and the
+  other is secondary — this is not a question the page can leave unanswered
+  forever, only one it must not answer by accident. It reads either way: <code>NEW</code>
+  inherits <code>Play</code>'s emphasis and is the button that is always there, while a
+  game sitting half-finished is arguably the likelier reason somebody opened the
+  app at all. The two mockups above are the two answers, side by side.</li>
+<li><strong>2. What does <code>RESUME</code> do when there is no game to resume?</strong> Not decided —
+  a fresh install, or after a game has finished and no save remains. Three
+  options, all buildable from the existing
+  <a href="../shared-components/#button">Button</a> states:</li>
+<li><strong>Hidden</strong> — not laid out at all. The component's <code>Hidden</code> state is
+     already <em>"not laid out at all — buttons do not leave gaps behind"</em>, and
+     because the <code>action</code> row is centred as a row, the screen then shows a
+     single centred <code>NEW</code> exactly where <code>Play</code> used to be.</li>
+<li><strong>Disabled</strong> — always laid out, at 40 % opacity and unpressable. The
+     component already has this state; it needs only a condition saying when it
+     applies.</li>
+<li><strong>Absent</strong> — <code>RESUME</code> is not built yet and the screen ships with <code>NEW</code>
+     alone until save/resume exists. This one differs from the other two in kind:
+     it makes the two-button mockup a forward record rather than a build target.</li>
 <li><strong>Is there a <code>How to play</code> button here?</strong> Proposed: no. The rules are one
   sentence long, Connor already knows them, and
   <a href="../../future-ideas/">an in-app tutorial is parked</a>. If one is wanted it goes
-  here, beneath <code>Play</code>, as a secondary button — and it needs its own wireframe
-  for the screen it opens.</li>
+  beneath the <code>RESUME</code>/<code>NEW</code> row as a secondary button — and it needs its own
+  wireframe for the screen it opens. Note that it would make three interactive
+  elements, so it is a change to this page's first invariant as well as to its
+  layout.</li>
 <li><strong>Does the title screen come back after a game, or does <code>Play again</code> restart
   directly?</strong> Both exist on <a href="../game-over/">game over</a>; this screen does not care
   which is used.</li>
