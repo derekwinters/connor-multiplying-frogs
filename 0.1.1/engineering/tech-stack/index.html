@@ -2665,8 +2665,8 @@ is the one the asmdef flag and a grep for <code>using UnityEngine</code> both mi
 <p>Run it before pushing. CI runs it too (<a href="../ci-cd/">CI/CD</a>).</p>
 <p><strong>The Unity layer is thin.</strong> It reads input, hands it to Core, asks Core what the
 world looks like now, and draws that. A <code>MonoBehaviour</code> that contains a rule —
-how fast a frog moves, when it splits, what scores — is a rule in the wrong
-assembly.</p>
+how far a frog moves, what a wrong answer costs, what winning means — is a rule
+in the wrong assembly.</p>
 <h3 id="why">Why<a class="headerlink" href="#why" title="Link to this section">&para;</a></h3>
 <p>Because it is the difference between a test suite that runs in two seconds and
 one that runs in two minutes.</p>
@@ -2772,47 +2772,53 @@ implementation PR.</p>
 <h3 id="naming">Naming<a class="headerlink" href="#naming" title="Link to this section">&para;</a></h3>
 <p>Use the <code>scaffold-core</code> skill to create a Core type; it applies all of this and
 leaves you with a failing test, which is where a new type should start.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>SplitRule<span class="w"> </span>--subfolder<span class="w"> </span>Rules
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>Card<span class="w"> </span>--subfolder<span class="w"> </span>Cards
 </code></pre></div>
 <ul>
 <li>Assemblies and their folders share a name: <code>Frogs.Core</code>, <code>Frogs.Unity</code>.</li>
 <li>A subfolder under <code>Assets/Scripts/Core/</code> becomes a namespace segment:
-  <code>Rules/</code> is <code>Frogs.Core.Rules</code>, and its tests are <code>Frogs.Core.Tests.Rules</code>.</li>
-<li>Core types are named for the game, not the engine — <code>Pond</code>, <code>FrogColony</code>,
-  <code>SplitRule</code>. If a type name only makes sense to someone who knows Unity, it
-  probably belongs in the shell.</li>
+  <code>Cards/</code> is <code>Frogs.Core.Cards</code>, and its tests are <code>Frogs.Core.Tests.Cards</code>.</li>
+<li>Core types are named for the game, not the engine — <code>Lane</code>, <code>LilyPad</code>,
+  <code>Card</code>. The words come from <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CONTEXT.md"><code>CONTEXT.md</code></a>,
+  which is the glossary for exactly this reason. If a type name only makes sense
+  to someone who knows Unity, it probably belongs in the shell.</li>
 <li>Unity-layer types that exist to display a Core type are named <code>&lt;Thing&gt;View</code>
   (<code>FrogView</code>), and ones that exist to feed input in are <code>&lt;Thing&gt;Input</code>.</li>
 <li>One public type per file, file named for the type.</li>
 </ul>
 <h2 id="geometry-layout-and-tuning-values-are-named-variables">Geometry, layout, and tuning values are named variables<a class="headerlink" href="#geometry-layout-and-tuning-values-are-named-variables" title="Link to this section">&para;</a></h2>
-<p><strong>Every size, offset, margin, spacing, duration, speed, delay, threshold, count,
-and payout is a named constant or a serialized field. Never a bare literal in a
+<p><strong>Every size, offset, margin, spacing, duration, speed, delay, threshold, and
+count is a named constant or a serialized field. Never a bare literal in a
 method body.</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">// No.</span>
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">colony</span><span class="p">.</span><span class="n">Count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">position</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">);</span>
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
 <a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">// Yes.</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MaxColonySize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_spawnHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">;</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_splitAnimationSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LaneWinningPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_lanePositionGap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">48f</span><span class="p">;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_frogHopDuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
 </code></pre></div>
+<p>None of those three names is invented here. <code>LaneWinningPosition</code>,
+<code>LanePositionGap</code> and <code>FrogHopDuration</code> are what
+<a href="../../specs/ui/game-board/">the game board spec</a> already calls those numbers,
+and a constant in the code keeps the name the spec page gave it so the two can
+be checked against each other.</p>
 <h3 id="why-this-is-a-rule-and-not-a-preference">Why this is a rule and not a preference<a class="headerlink" href="#why-this-is-a-rule-and-not-a-preference" title="Link to this section">&para;</a></h3>
 <ul>
-<li><strong>Tuning is the game.</strong> Whether a frog splits after three seconds or four is
-  the difference between fun and not, and it is a question for Connor. A number
-  with a name is a number he can be asked about; <code>0.4f</code> on line 118 of a method
-  is not.</li>
+<li><strong>Tuning is the game.</strong> Whether a wrong answer costs a lily pad or costs
+  nothing is the difference between fun and not, and it is a question for
+  Connor. A number with a name is a number he can be asked about; <code>0.4f</code> on
+  line 118 of a method is not.</li>
 <li><strong>A named value can be found.</strong> Changing "the gap between lily pads" means
   finding one constant, not grepping for <code>1.5f</code> and guessing which of the eleven
   matches is the gap.</li>
-<li><strong>A named value can be tested.</strong> <code>MaxColonySize</code> can be asserted against;
-  <code>&gt; 32</code> buried in a branch can only be re-typed into the test, where it will
-  agree with a bug just as happily as with correct code.</li>
-<li><strong>The name is the documentation.</strong> <code>_splitAnimationSeconds = 0.4f</code> says what
-  0.4 <em>is</em>. No comment required, and no comment to go stale.</li>
+<li><strong>A named value can be tested.</strong> <code>LaneWinningPosition</code> can be asserted
+  against; <code>== 8</code> buried in a branch can only be re-typed into the test, where
+  it will agree with a bug just as happily as with correct code.</li>
+<li><strong>The name is the documentation.</strong> <code>_frogHopDuration = 0.4f</code> says what 0.4
+  <em>is</em>. No comment required, and no comment to go stale.</li>
 </ul>
 <h3 id="this-includes-graybox">This includes graybox<a class="headerlink" href="#this-includes-graybox" title="Link to this section">&para;</a></h3>
 <p>Especially graybox. Placeholder layout is the code most likely to survive to
@@ -2825,7 +2831,7 @@ bare literals is a screen nobody can re-lay-out without rebuilding it.</p>
   <code>count + 1</code> is fine; <code>width * 1</code> was never fine.</li>
 <li>Loop bounds derived from a collection — <code>for (var i = 0; i &lt; frogs.Count; i++)</code>.</li>
 <li>Values inside a test that <em>are</em> the test's subject — a test asserting a frog
-  splits at 32 should say <code>32</code> where the reader can see it.</li>
+  wins on position 8 should say <code>8</code> where the reader can see it.</li>
 <li>Unity's own required literals in serialization or attribute arguments, where a
   constant is not permitted by the language.</li>
 </ul>

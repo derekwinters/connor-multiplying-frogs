@@ -2724,7 +2724,7 @@ failure mode a queue can have.</p>
 <h2 id="issues">Issues<a class="headerlink" href="#issues" title="Link to this section">&para;</a></h2>
 <h3 id="every-issue-names-the-spec-pages-it-touches">Every issue names the spec pages it touches<a class="headerlink" href="#every-issue-names-the-spec-pages-it-touches" title="Link to this section">&para;</a></h3>
 <p>Every issue body ends with a line naming the pages in <code>/docs</code> it affects:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>**Spec pages touched:** docs/specs/frogs.md, docs/specs/ui/hud.md
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>**Spec pages touched:** docs/specs/reference/index.md, docs/specs/ui/game-board.md
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>**Spec pages touched:** none — repo config.
 </code></pre></div>
 <p><code>none</code> is a legitimate answer and has to be written out; a missing line is not
@@ -2764,10 +2764,10 @@ into work. The question's own comment thread is not durable enough on its own,
 because nobody reads a closed issue's thread. Close it with a comment stating
 what was decided, in one sentence, so the thread has an answer at the bottom.</p>
 <p><strong>It stays open when</strong> the decision is made but nothing has been written down
-yet, when it was answered partially ("splitting caps at 32" — but not what
-happens at the cap), or when the answer was "not yet". A question that was
-answered "not now" is a question that gets asked again later, and reopening a
-closed issue loses the thread.</p>
+yet, when it was answered partially ("a wrong answer moves you back one" — but
+not what happens on the Start log), or when the answer was "not yet". A question
+that was answered "not now" is a question that gets asked again later, and
+reopening a closed issue loses the thread.</p>
 <p><strong>It becomes a task</strong> — closed as a duplicate, with the task linked — when the
 answer turns out to be small enough to just build. Do not quietly retitle a
 question into a task; the distinction is what makes the question queue

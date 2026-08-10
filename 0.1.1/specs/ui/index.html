@@ -2001,7 +2001,7 @@ you are about to open a wireframe issue.</p>
 kids' Android tablet, and that is the one canvas every layout is drawn against.
 See <a href="../../engineering/tech-stack/#target-platform">target platform</a>.</p>
 <h2 id="shared-components">Shared components<a class="headerlink" href="#shared-components" title="Link to this section">&para;</a></h2>
-<p>Reusable atomic pieces — a primary button, the score readout, a confirm dialog —
+<p>Reusable atomic pieces — a primary button, a player chip, a confirm dialog —
 are specified once in <a href="shared-components/">Shared components</a> and
 <strong>referenced</strong> by screen pages, never re-specified in them.</p>
 <p>The reason is drift. Three screens that each describe "the primary button" will,
@@ -2017,13 +2017,13 @@ look.</p>
 <h3 id="2-invariants">2. Invariants<a class="headerlink" href="#2-invariants" title="Link to this section">&para;</a></h3>
 <p>Things that must always be true of this screen, stated as
 <code>**Invariant:** …</code> lines so they can be quoted in a PR and asserted in a test.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gs">**Invariant:**</span> the pause screen never covers the score readout.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gs">**Invariant:**</span> whose turn it is is stated in words, not only shown by a highlight.
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gs">**Invariant:**</span> every destructive action confirms before it acts.
 </code></pre></div>
 <h3 id="3-regions">3. Regions<a class="headerlink" href="#3-regions" title="Link to this section">&para;</a></h3>
 <p>The screen broken into its named areas, top to bottom. A region is a box with a
-name and a job — <code>header</code>, <code>playfield</code>, <code>controls</code>. Naming them is what lets
-everything else say <em>where</em> without re-describing the layout each time.</p>
+name and a job. Naming them is what lets everything else say <em>where</em> without
+re-describing the layout each time. The <a href="game-board/">game board</a>'s three:</p>
 <table>
 <thead>
 <tr>
@@ -2034,15 +2034,15 @@ everything else say <em>where</em> without re-describing the layout each time.</
 <tbody>
 <tr>
 <td><code>header</code></td>
-<td>score and pause button</td>
+<td>whose turn it is, and the settings button</td>
 </tr>
 <tr>
-<td><code>playfield</code></td>
-<td>the pond; everything interactive</td>
+<td><code>pond</code></td>
+<td>the lanes — one per frog in the game</td>
 </tr>
 <tr>
 <td><code>controls</code></td>
-<td>the two action buttons</td>
+<td>the <code>Roll</code> button</td>
 </tr>
 </tbody>
 </table>
@@ -2066,14 +2066,14 @@ radius, and duration on the screen, named and valued.</p>
 </thead>
 <tbody>
 <tr>
-<td>Panel width</td>
-<td><code>PausePanelWidth</code></td>
-<td>280 dp</td>
+<td><code>Roll</code> button width</td>
+<td><code>RollButtonWidth</code></td>
+<td>480 px</td>
 </tr>
 <tr>
-<td>Gap between buttons</td>
-<td><code>PauseButtonSpacing</code></td>
-<td>12 dp</td>
+<td>Gap between positions in a lane</td>
+<td><code>LanePositionGap</code></td>
+<td>48 px</td>
 </tr>
 </tbody>
 </table>
