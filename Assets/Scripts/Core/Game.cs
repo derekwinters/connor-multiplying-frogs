@@ -6,17 +6,24 @@ namespace Frogs.Core
 {
     /// <summary>
     /// A whole game: the roster and its turn order, a <see cref="Lane"/> per
-    /// frog, and which of the five <see cref="TurnPhase"/> moments the
-    /// current turn is in. A screen asks this type "whose turn is it, and
-    /// what should I be showing right now?" — nothing else holds that answer.
+    /// frog, which of the five <see cref="TurnPhase"/> moments the current
+    /// turn is in, and whether the game is over. A screen asks this type
+    /// "whose turn is it, and what should I be showing right now?" and,
+    /// eventually, "is it over, and who won?" — nothing else holds those
+    /// answers.
     ///
     /// A <see cref="Game"/> owns advancing to the next player and the rule
     /// that a turn's phase only ever moves forward one step at a time. It
     /// does **not** own whether an answer is right or how far a frog moves as
     /// a result — that is grading, <c>core-turn-resolution</c> (#210). It
-    /// does **not** own how a game ends — that is <c>core-game-end</c> (#211).
-    /// This type only guarantees that advancing to the next player never
-    /// hangs, even when every frog is home, so #211 has a seam to build on.
+    /// does own the two ways a game ends (<see cref="IsOver"/>) and the
+    /// standings that come out of one (<see cref="Winner"/>,
+    /// <see cref="FinishingOrder"/>, <see cref="Standings"/>) —
+    /// <c>core-game-end</c> (#211). "Every frog home" is computed fresh from
+    /// lane position on every call; a deliberate end and finishing order are
+    /// the two facts nothing about lane position can reconstruct, so they are
+    /// the ones this type remembers, via <see cref="EndGame"/> and
+    /// <see cref="RecordFinish"/>.
     /// </summary>
     public sealed class Game
     {
@@ -44,6 +51,8 @@ namespace Frogs.Core
         TurnPhase _phase;
         Roll _drawnRoll;
         Card _drawnCard;
+        bool _endedDeliberately;
+        readonly List<FrogColour> _finishingOrder = new List<FrogColour>();
 
         /// <summary>
         /// A game for <paramref name="turnOrder"/> — already-ordered, first
@@ -158,6 +167,130 @@ namespace Frogs.Core
         public FrogColour NextActiveFrog
         {
             get { return _turnOrder[NextActiveIndex()]; }
+        }
+
+        /// <summary>
+        /// Whether the game is over — the OR of the two ways it can be:
+        /// every frog is home, or it was ended deliberately.
+        /// docs/specs/reference/index.md#where-v1-fills-a-gap-the-board-leaves-open
+        /// names both. The first fact is computed fresh from every frog's
+        /// lane position each time this is asked — nothing is cached, and
+        /// nothing needs to be told to "notice" a frog landing on the End
+        /// log. The second cannot be computed the same way — a deliberate end
+        /// can happen with frogs still short of home, so it is the one fact
+        /// this type has to remember, set by <see cref="EndGame"/>.
+        /// </summary>
+        public bool IsOver
+        {
+            get { return _endedDeliberately || _turnOrder.All(colour => _lanes[colour].IsHome); }
+        }
+
+        /// <summary>
+        /// Ends the game deliberately, right now, regardless of whether any
+        /// frog is home. docs/specs/reference/index.md#where-v1-fills-a-gap-the-board-leaves-open:
+        /// "A game can be ended deliberately" — purely a v1 gap-fill, not a
+        /// rule the classroom board specifies. Every frog's <see cref="Lane"/>
+        /// is left exactly as it was: ending a game is not losing it — see
+        /// docs/specs/ui/end-game-confirm.md ("stops the game and shows the
+        /// results" rather than resetting anyone).
+        /// </summary>
+        public void EndGame()
+        {
+            _endedDeliberately = true;
+        }
+
+        /// <summary>
+        /// The frog that reached the End log first, or null if the game was
+        /// ended before anyone finished — a well-defined Core answer to "did
+        /// anyone finish, and if so who was first", not a display string.
+        /// docs/specs/ui/game-over.md#invariants: "the winner is the frog
+        /// that reached the End log first."
+        /// </summary>
+        public FrogColour? Winner
+        {
+            get { return _finishingOrder.Count > 0 ? _finishingOrder[0] : (FrogColour?)null; }
+        }
+
+        /// <summary>
+        /// The order frogs got home, first to last. Not roster order, and
+        /// not recomputed from position — every finisher sits on the same
+        /// <see cref="Lane.LaneWinningPosition"/>, so position cannot tell
+        /// them apart; this is only ever the order <see cref="RecordFinish"/>
+        /// was told about arrivals. docs/specs/ui/game-over.md#invariants:
+        /// "finishing order is the order frogs got home."
+        /// </summary>
+        public IReadOnlyList<FrogColour> FinishingOrder
+        {
+            get { return _finishingOrder; }
+        }
+
+        /// <summary>
+        /// Records that <paramref name="colour"/>'s frog has reached the End
+        /// log, if it has — the moment its place in <see cref="FinishingOrder"/>
+        /// has to be captured, since nothing about a frog's position can tell
+        /// arrival order apart afterward. A no-op if the frog is not home, and
+        /// a no-op if it was already recorded — safe to call more than once.
+        /// </summary>
+        /// <exception cref="ArgumentException"><paramref name="colour"/> is not in this game's roster.</exception>
+        public void RecordFinish(FrogColour colour)
+        {
+            var lane = LaneFor(colour);
+
+            if (lane.IsHome && !_finishingOrder.Contains(colour))
+            {
+                _finishingOrder.Add(colour);
+            }
+        }
+
+        /// <summary>
+        /// One row per frog: place, colour, lane position, and whether it is
+        /// home — the fact docs/specs/ui/game-over.md's standings screen
+        /// reads directly. Finishers come first, in <see cref="FinishingOrder"/>;
+        /// everyone else follows, most lily pads made first. Frogs tied on
+        /// lane position share the same place number —
+        /// docs/specs/ui/game-over.md#open-questions: "Two frogs on the same
+        /// pad currently share a place number." No turn-order tiebreak: that
+        /// question is still open, and this does not answer it.
+        /// </summary>
+        public IReadOnlyList<StandingsRow> Standings
+        {
+            get
+            {
+                var unfinished = _turnOrder
+                    .Where(colour => !_finishingOrder.Contains(colour))
+                    .OrderByDescending(colour => _lanes[colour].Position);
+
+                var ranked = _finishingOrder.Concat(unfinished).ToArray();
+                var rows = new List<StandingsRow>(ranked.Length);
+
+                for (var index = 0; index < ranked.Length; index++)
+                {
+                    var colour = ranked[index];
+                    var lane = _lanes[colour];
+
+                    var tiedWithPrevious = index > 0
+                        && !_finishingOrder.Contains(colour)
+                        && !_finishingOrder.Contains(ranked[index - 1])
+                        && lane.Position == _lanes[ranked[index - 1]].Position;
+
+                    var place = tiedWithPrevious ? rows[index - 1].Place : index + 1;
+
+                    rows.Add(new StandingsRow(colour, place, lane.Position, lane.IsHome));
+                }
+
+                return rows;
+            }
+        }
+
+        /// <summary>
+        /// How many frogs have not yet reached their End log — readable at
+        /// any point during play, not only once the game is over. This is
+        /// the count docs/specs/ui/end-game-confirm.md's cost sentence
+        /// builds its wording around ("Three frogs are still swimming...").
+        /// </summary>
+        public int FrogsStillSwimming
+        {
+            get { return _turnOrder.Count(colour => !_lanes[colour].IsHome); }
         }
 
         /// <summary>This frog's lane — where it is, and whether it is home.</summary>

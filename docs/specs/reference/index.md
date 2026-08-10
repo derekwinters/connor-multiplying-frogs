@@ -160,3 +160,10 @@ Together those two decisions describe the whole of how a game finishes:
 There is no third way, and in particular there is no state where a finished
 game sits waiting to be dismissed. That is what makes the ordinary two-player
 game work without anyone ever opening the settings.
+
+Only the first of those two routes is derivable from where the frogs are: every
+frog's lane position can be checked fresh, at any moment, to see whether all of
+them are home. The second cannot — a deliberate end can happen with frogs still
+short of home, so nothing about lane position says it happened. `Frogs.Core`
+computes the first fact every time it is asked and records the second the
+moment it occurs; the game being over is the two facts combined with OR.

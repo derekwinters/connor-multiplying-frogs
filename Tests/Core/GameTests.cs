@@ -321,6 +321,151 @@ namespace Frogs.Core.Tests
             Assert.That(game.Seed, Is.EqualTo(Seed));
         }
 
+        // docs/specs/reference/index.md#where-v1-fills-a-gap-the-board-leaves-open:
+        // "The game also ends on its own once every frog is home." Computed
+        // fresh from lane position every time it's asked — no flag, and
+        // nothing is called to "notice" it.
+        [Test]
+        public void AGameWhereEveryFrogIsOnItsEndLog_ReportsItselfOver_WithNoSeparateCallNeeded()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+
+            SendHome(game, FrogColour.Green);
+            SendHome(game, FrogColour.Blue);
+
+            Assert.That(game.IsOver, Is.True);
+        }
+
+        // The exact state docs/specs/ui/game-over.md's own mockup is drawn
+        // in — four frogs, one home, three still short of LaneWinningPosition
+        // — described there as "the state where the game was ended before
+        // the others finished."
+        [Test]
+        public void EndingTheGameDeliberately_WithFrogsShortOfHome_ReportsTheGameAsOver()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue, FrogColour.Orange, FrogColour.Pink };
+            var game = new Game(roster, Seed);
+            SendHome(game, FrogColour.Green);
+            AdvanceTo(game, FrogColour.Blue, 6);
+            AdvanceTo(game, FrogColour.Orange, 4);
+            AdvanceTo(game, FrogColour.Pink, 1);
+
+            game.EndGame();
+
+            Assert.That(game.IsOver, Is.True);
+        }
+
+        // docs/specs/ui/end-game-confirm.md: ending "stops the game and shows
+        // the results" rather than resetting anyone — every frog keeps the
+        // pads it has.
+        [Test]
+        public void EndingTheGameDeliberately_ChangesNoFrogsPosition()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue, FrogColour.Orange, FrogColour.Pink };
+            var game = new Game(roster, Seed);
+            SendHome(game, FrogColour.Green);
+            AdvanceTo(game, FrogColour.Blue, 6);
+            AdvanceTo(game, FrogColour.Orange, 4);
+            AdvanceTo(game, FrogColour.Pink, 1);
+            var positionsBefore = roster.ToDictionary(colour => colour, colour => game.LaneFor(colour).Position);
+
+            game.EndGame();
+
+            foreach (var colour in roster)
+            {
+                Assert.That(game.LaneFor(colour).Position, Is.EqualTo(positionsBefore[colour]), colour.ToString());
+            }
+        }
+
+        // docs/specs/ui/game-over.md#invariants: "the winner is the frog
+        // that reached the End log first, and finishing order is the order
+        // frogs got home." Every finisher sits on the same
+        // Lane.LaneWinningPosition, so position alone cannot tell them apart
+        // afterward — Orange finishes before Blue here even though Blue
+        // comes first in the roster, proving finishing order tracks arrival,
+        // not the roster array.
+        [Test]
+        public void Winner_IsWhicheverFrogFinishedFirst_AndFinishingOrderIsArrivalOrderNotRosterOrder()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue, FrogColour.Orange };
+            var game = new Game(roster, Seed);
+            SendHome(game, FrogColour.Orange);
+
+            game.RecordFinish(FrogColour.Orange);
+
+            Assert.That(game.Winner, Is.EqualTo(FrogColour.Orange));
+            Assert.That(game.FinishingOrder, Is.EqualTo(new[] { FrogColour.Orange }));
+
+            SendHome(game, FrogColour.Blue);
+            game.RecordFinish(FrogColour.Blue);
+
+            Assert.That(game.Winner, Is.EqualTo(FrogColour.Orange), "a later finisher must not change who won");
+            Assert.That(game.FinishingOrder, Is.EqualTo(new[] { FrogColour.Orange, FrogColour.Blue }));
+        }
+
+        // docs/specs/ui/game-over.md: "Frogs that did not finish are ranked
+        // by how many lily pads they made", and the open question's own
+        // wording is the current, still-open-to-change behaviour to build:
+        // "Two frogs on the same pad currently share a place number."
+        [Test]
+        public void Standings_RanksUnfinishedFrogsBelowFinishedOnes_ByLilyPadsMade_WithTiesSharingAPlaceNumber()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue, FrogColour.Orange, FrogColour.Pink };
+            var game = new Game(roster, Seed);
+            SendHome(game, FrogColour.Green);
+            game.RecordFinish(FrogColour.Green);
+            AdvanceTo(game, FrogColour.Blue, 4);
+            AdvanceTo(game, FrogColour.Orange, 4); // ties with Blue
+            AdvanceTo(game, FrogColour.Pink, 1);
+
+            var standings = game.Standings;
+            var green = standings.Single(row => row.Colour == FrogColour.Green);
+            var blue = standings.Single(row => row.Colour == FrogColour.Blue);
+            var orange = standings.Single(row => row.Colour == FrogColour.Orange);
+            var pink = standings.Single(row => row.Colour == FrogColour.Pink);
+
+            Assert.That(blue.Place, Is.EqualTo(orange.Place), "same lily pad, same place number");
+            Assert.That(blue.Place, Is.GreaterThan(green.Place), "unfinished ranked below every finished frog");
+            Assert.That(pink.Place, Is.GreaterThan(blue.Place), "fewer pads, a lower place");
+        }
+
+        // docs/specs/ui/game-over.md: the headline reads "Game over" rather
+        // than naming a winner when the game was ended before anybody got
+        // home. Core's job is the unambiguous fact, not the wording — a null
+        // Winner is that fact.
+        [Test]
+        public void AGameEndedBeforeAnyoneFinished_HasNoWinner()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+            AdvanceTo(game, FrogColour.Green, 3);
+
+            game.EndGame();
+
+            Assert.That(game.IsOver, Is.True);
+            Assert.That(game.Winner, Is.Null);
+            Assert.That(game.FinishingOrder, Is.Empty);
+        }
+
+        // docs/specs/ui/end-game-confirm.md builds its cost sentence from
+        // this count — "Three frogs are still swimming..." — and needs it
+        // mid-game, not only once the game is already over.
+        [Test]
+        public void FrogsStillSwimming_IsReadableAtAnyPointDuringPlay_NotOnlyAfterTheGameEnds()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue, FrogColour.Orange };
+            var game = new Game(roster, Seed);
+
+            Assert.That(game.FrogsStillSwimming, Is.EqualTo(3));
+
+            SendHome(game, FrogColour.Green);
+            game.RecordFinish(FrogColour.Green);
+
+            Assert.That(game.IsOver, Is.False, "the game keeps going once one frog is home");
+            Assert.That(game.FrogsStillSwimming, Is.EqualTo(2));
+        }
+
         const int TurnsToPlay = 12;
 
         static FrogColour[] FourFrogRoster()
@@ -357,6 +502,18 @@ namespace Frogs.Core.Tests
             var lane = game.LaneFor(colour);
 
             while (!lane.IsHome)
+            {
+                lane.MoveForward();
+            }
+        }
+
+        // Advances a frog's Lane directly to a given lily pad — for setting
+        // up standings scenarios without going through a real turn.
+        static void AdvanceTo(Game game, FrogColour colour, int position)
+        {
+            var lane = game.LaneFor(colour);
+
+            for (var move = 0; move < position; move++)
             {
                 lane.MoveForward();
             }
