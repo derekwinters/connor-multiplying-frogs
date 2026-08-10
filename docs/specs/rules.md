@@ -215,6 +215,17 @@ changes who won.
 ([Game board](ui/game-board.md#behaviour): *"a frog that reaches the End log
 stays there"*)
 
+**Invariant:** a frog that is home does not move. A forward move or a back move
+made while the frog is on the End log leaves it on the End log, still home —
+the same clamp the Start log has at the other end. This is a guard on a call
+that should not happen, not a rule of play in its own right: a home frog is
+skipped in turn order (below), so a correctly-behaving caller never asks a
+home frog to move. Settled by Derek — *"once home, the player is skipped,
+letting other players finish until everyone is home or anyone ends the
+game"* — confirming the reading `Lane` (#201) was built against, that the
+logs are symmetric ends of the lane rather than one of them being an overflow
+into a tenth position.
+
 ## Finishing
 
 The classroom game does not say what happens after the first frog wins. The card
