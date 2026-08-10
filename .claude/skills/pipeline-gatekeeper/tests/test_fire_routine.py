@@ -108,3 +108,92 @@ def _explode(url, headers, body):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReportingTests(unittest.TestCase):
+    """The fire must say what it did.
+
+    `interpret_fire_response` classifies the outcome truthfully so a
+    misconfigured Routine cannot hide behind a green log line. That only works
+    if somebody prints the classification — see issue #231, where every call
+    site discarded it and a failed fire looked exactly like a working one.
+    """
+
+    def test_the_send_is_announced_before_the_post_goes_out(self):
+        # Ordering matters: a POST that hangs or crashes the job must already
+        # have said it was about to happen, or the log stops at the label move
+        # and the fire looks like it was never attempted.
+        def post(url, headers, body):
+            print("POSTED")
+            return 200, '{"session_url": "https://x/s/1"}'
+
+        lines = _capture(lambda: fire_routine.fire_and_report(
+            42, "owner/repo", "https://x", "s", post=post))
+
+        announced = next(i for i, l in enumerate(lines) if "Sending triage webhook" in l)
+        posted = lines.index("POSTED")
+        self.assertLess(announced, posted, lines)
+        self.assertIn("42", lines[announced])
+
+    def test_a_successful_fire_reports_the_session(self):
+        lines = _capture(lambda: fire_routine.report(
+            fire_routine.FireResult(True, "fired", "Triage session: https://x/s/1"), 42))
+
+        self.assertTrue(any("fired" in line for line in lines), lines)
+        self.assertFalse(any(line.startswith("::error::") for line in lines), lines)
+
+    def test_a_failed_fire_is_an_actions_error_annotation(self):
+        lines = _capture(lambda: fire_routine.report(
+            fire_routine.FireResult(False, "no-session", "the endpoint answered"), 42))
+
+        self.assertTrue(any(line.startswith("::error::") for line in lines), lines)
+        self.assertTrue(any("no-session" in line for line in lines), lines)
+
+    def test_not_configured_is_a_notice_not_an_error(self):
+        # A choice not yet made is not a fault. Erroring on it would train
+        # everyone to ignore the annotation.
+        lines = _capture(lambda: fire_routine.report(
+            fire_routine.FireResult(False, "not-configured", "secrets are not set"), 42))
+
+        self.assertTrue(any(line.startswith("::notice::") for line in lines), lines)
+        self.assertFalse(any(line.startswith("::error::") for line in lines), lines)
+
+    def test_it_never_prints_the_url_or_the_secret(self):
+        # The endpoint is a secret and GitHub masks only exact matches, so a
+        # host fragment in the log is a leak that nothing would catch.
+        def post(url, headers, body):
+            return 200, '{"session_url": "https://x/s/1"}'
+
+        lines = _capture(lambda: fire_routine.fire_and_report(
+            42, "owner/repo", "https://routine.example.internal/hook", "s3cret", post=post))
+
+        joined = "\n".join(lines)
+        self.assertNotIn("routine.example.internal", joined)
+        self.assertNotIn("s3cret", joined)
+
+    def test_fire_and_report_returns_the_result_and_never_raises(self):
+        def post(url, headers, body):
+            raise OSError("connection refused")
+
+        result = None
+
+        def go():
+            nonlocal result
+            result = fire_routine.fire_and_report(
+                42, "owner/repo", "https://x", "s", post=post)
+
+        lines = _capture(go)
+
+        self.assertFalse(result.fired)
+        self.assertTrue(any(line.startswith("::error::") for line in lines), lines)
+
+
+def _capture(action) -> list:
+    """Run `action`, returning everything it wrote to stdout and stderr."""
+    import contextlib
+    import io
+
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        action()
+    return [line for line in (out.getvalue() + err.getvalue()).splitlines() if line]
