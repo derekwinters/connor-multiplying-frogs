@@ -576,6 +576,21 @@ as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a `401`
 says the secret is wrong rather than just failing.
 
+#### An error status is an answer, not a failure to reach
+
+`urlopen` raises on any 4xx or 5xx rather than returning it, so an error status
+has to be caught and turned back into a `(status, body)` pair. Skipping that
+step costs three things at once, and
+[#236](https://github.com/derekwinters/connor-multiplying-frogs/issues/236) cost
+all three: the response body is discarded, which for a `400` is the only thing
+that names the field the endpoint rejected; the classification above becomes
+unreachable on every error path, so the "your secret is wrong" message can never
+print; and every HTTP error reports as *"could not reach the Routine"*, which
+sends you looking at networking while the endpoint is up and answering.
+
+Only a genuine transport failure — a refused connection, a timeout, DNS — is
+reported as unreachable.
+
 #### And the classification is printed
 
 Classifying an outcome nobody prints buys nothing. Every fire writes two lines
