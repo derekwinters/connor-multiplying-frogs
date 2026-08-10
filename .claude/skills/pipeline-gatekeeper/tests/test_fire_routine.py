@@ -314,3 +314,43 @@ class RequiredHeaderTests(unittest.TestCase):
     def test_the_version_is_a_named_constant_not_a_literal(self):
         # Tuning and protocol values get names, per the repo's constants rule.
         self.assertTrue(fire_routine.ANTHROPIC_VERSION)
+
+
+class SessionKeyTests(unittest.TestCase):
+    """The API names the session `claude_code_session_url`.
+
+    Looking only for `session_url`/`url` made the success path unreachable, so a
+    healthy fire was annotated as an error — see #240. An error annotation that
+    fires on every good run is as useless as a green line nobody believes.
+    """
+
+    REAL_RESPONSE = (
+        '{"claude_code_session_id":"session_01VW2xgbD4WTT48QSA2QLXwr",'
+        '"claude_code_session_url":"https://claude.ai/code/session_01VW2xgbD4WTT48QSA2QLXwr",'
+        '"type":"routine_fire"}')
+
+    def test_a_real_routine_fire_response_is_a_success(self):
+        result = fire_routine.interpret_fire_response(200, self.REAL_RESPONSE)
+
+        self.assertTrue(result.fired)
+        self.assertEqual("fired", result.outcome)
+
+    def test_the_session_url_reaches_the_detail(self):
+        result = fire_routine.interpret_fire_response(200, self.REAL_RESPONSE)
+
+        self.assertIn("https://claude.ai/code/session_01VW2xgbD4WTT48QSA2QLXwr",
+                      result.detail)
+
+    def test_the_older_key_still_works(self):
+        result = fire_routine.interpret_fire_response(
+            200, '{"session_url": "https://x/s/1"}')
+
+        self.assertTrue(result.fired)
+
+    def test_a_response_with_no_session_at_all_is_still_refused(self):
+        # The guard is the point of the check: a bare 200 means the endpoint
+        # answered, not that the Routine ran.
+        result = fire_routine.interpret_fire_response(200, '{"type": "ok"}')
+
+        self.assertFalse(result.fired)
+        self.assertEqual("no-session", result.outcome)

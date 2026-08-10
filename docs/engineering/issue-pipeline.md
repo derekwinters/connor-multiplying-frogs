@@ -576,6 +576,13 @@ as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a `401`
 says the secret is wrong rather than just failing.
 
+The API names that field **`claude_code_session_url`**. The older `session_url`
+and `url` are still accepted, but looking for only those made the success path
+unreachable and annotated every healthy fire as an error
+([#240](https://github.com/derekwinters/connor-multiplying-frogs/issues/240)) —
+which is the same failure as a green line nobody believes, pointing the other
+way. An annotation that fires on every good run is one people stop reading.
+
 #### The endpoint is the Anthropic API, so `anthropic-version` is required
 
 `AI_TRIAGE_URL` points at an Anthropic API endpoint, and that API requires an
