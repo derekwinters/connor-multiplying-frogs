@@ -120,6 +120,8 @@ a player is most likely to be reaching for.
 | Gap between adjacent buttons | `ButtonGap` | 32 px |
 | Gap between a destructive button and its neighbour | `ButtonDestructiveGap` | 96 px |
 | Press travel | `ButtonPressOffset` | 4 px |
+| Border width, outlined kinds | `ButtonBorderWidth` | 4 px |
+| Opacity while disabled | `ButtonDisabledOpacity` | 0.40 |
 
 #### 4. States
 
@@ -129,8 +131,22 @@ a player is most likely to be reaching for.
 | Default (secondary) | Outlined, `ButtonBorderWidth` 4 px, dark label, no fill |
 | Default (destructive) | Outlined in the warning colour, warning-coloured label |
 | Pressed | Moves down by `ButtonPressOffset`; fill darkens |
-| Disabled | 40 % opacity, no press response |
+| Disabled | `ButtonDisabledOpacity` opacity, no press response |
 | Hidden | Not laid out at all — buttons do not leave gaps behind |
+
+`ButtonBorderWidth` and `ButtonDisabledOpacity` were always on this page — both
+appeared in the States row above with a value and no name — and are named here
+so the code has a name to declare, per
+[the named constants are the origin, not an afterthought](../../engineering/ui-design-process.md#the-named-constants-are-the-origin-not-an-afterthought).
+
+**Disabled is 40 % opacity, not a grey fill.** The committed mockups' `.btn.off`
+rule draws disabled as a flat grey (`background:#C9D2CE;color:#8C9793`), which
+disagrees with this page's own States table. This page is the component's
+contract; the mockups are drawings of screens built from it — see
+[CLAUDE.md](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md)
+on which document wins being a decision, not an assumption. This page wins: disabled is the kind's own default appearance at
+`ButtonDisabledOpacity`, not a distinct grey style. The mockups should be
+redrawn to match the next time they are touched.
 
 #### 5. Behaviour
 

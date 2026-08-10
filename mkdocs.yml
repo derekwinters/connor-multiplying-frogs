@@ -112,6 +112,7 @@ nav:
       - 0002 The working-out grid: adr/0002-structured-working-out-grid.md
       - 0003 The network boundary: adr/0003-network-boundary.md
       - 0004 Core owns the save format: adr/0004-core-owns-the-save-format.md
+      - 0005 uGUI, not UI Toolkit: adr/0005-ugui-not-ui-toolkit.md
   - Engineering:
       - engineering/index.md
       - Tech stack: engineering/tech-stack.md

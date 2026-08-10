@@ -20,7 +20,11 @@ the game evolves; it is superseded by a later ADR that says so.
 | [0002](0002-structured-working-out-grid.md) | The game adds a structured working-out grid the classroom game has no equivalent of |
 | [0003](0003-network-boundary.md) | The internet is permanently out; the local network is an open question |
 | [0004](0004-core-owns-the-save-format.md) | Core owns the save format and hand-rolls it |
+| [0005](0005-ugui-not-ui-toolkit.md) | The game's UI is built in uGUI, not UI Toolkit |
 
-All four were settled in
+The first four were settled in
 [issue #7](https://github.com/derekwinters/connor-multiplying-frogs/issues/7),
-the design conversation that established what Multiplying Frogs is.
+the design conversation that established what Multiplying Frogs is. ADR-0005
+was settled in
+[issue #214](https://github.com/derekwinters/connor-multiplying-frogs/issues/214),
+the first issue to draw a pixel.
