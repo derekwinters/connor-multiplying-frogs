@@ -81,14 +81,13 @@ worth knowing in itself.
 
 | Page | What it settles |
 | --- | --- |
+| [Rules of play](rules.md) | Every rule the code is built against, stated as invariants: how many frogs play, what a roll does, how far a frog moves, what winning is, and the two ways a game ends. |
 | [Reference material](reference/index.md) | The classroom board, photographed and transcribed: the rules card verbatim, the three card piles and the rolls that reach them, the nine positions in a lane, and the handful of things the board leaves open. |
 
-The precise rules spec — every rule stated edge case by edge case for the code
-to be built against — is
-[issue #199](https://github.com/derekwinters/connor-multiplying-frogs/issues/199)
-and does not exist yet. Until it lands, reference material is where the rules
-are recorded, and [how to play](../intro/how-to-play.md) is the same rules in
-the friendly form.
+The two are a pair, and the order matters: reference material is the source and
+decides nothing, [rules of play](rules.md) is the contract distilled from it,
+and [how to play](../intro/how-to-play.md) is the same rules in the friendly
+form.
 
 ### The product
 
