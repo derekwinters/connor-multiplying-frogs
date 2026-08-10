@@ -1,3 +1,5 @@
+using System;
+using System.Reflection;
 using NUnit.Framework;
 using Frogs.Core;
 
@@ -116,6 +118,93 @@ namespace Frogs.Core.Tests
 
             Assert.That(lane.Position, Is.EqualTo(Lane.LaneWinningPosition));
             Assert.That(lane.IsHome, Is.True);
+        }
+
+        // Resolving a turn grades the submitted answer against the card and
+        // moves the frog exactly as the outcome table in docs/specs/rules.md
+        // says — the resolution entry point maps onto MoveForward/MoveBack,
+        // adding no position arithmetic of its own.
+        [Test]
+        public void Resolve_WithACorrectAnswer_MovesForwardOneLilyPadAndReportsCorrect()
+        {
+            var lane = new Lane();
+            lane.MoveForward();
+            lane.MoveForward();
+            var card = Card.Draw(Pile.Easy, Rng.FromSeed(1));
+
+            var resolution = lane.Resolve(card.Product, card);
+
+            Assert.That(resolution.Outcome, Is.EqualTo(TurnOutcome.Correct));
+            Assert.That(resolution.PositionBefore, Is.EqualTo(2));
+            Assert.That(resolution.PositionAfter, Is.EqualTo(3));
+            Assert.That(resolution.CorrectAnswer, Is.EqualTo(card.Product));
+            Assert.That(lane.Position, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Resolve_WithAWrongAnswerAboveTheStartLog_MovesBackOneLilyPadAndReportsWrongAboveStartLog()
+        {
+            var lane = new Lane();
+            lane.MoveForward();
+            lane.MoveForward();
+            var card = Card.Draw(Pile.Easy, Rng.FromSeed(1));
+
+            var resolution = lane.Resolve(card.Product + 1, card);
+
+            Assert.That(resolution.Outcome, Is.EqualTo(TurnOutcome.WrongAboveStartLog));
+            Assert.That(resolution.PositionBefore, Is.EqualTo(2));
+            Assert.That(resolution.PositionAfter, Is.EqualTo(1));
+            Assert.That(resolution.CorrectAnswer, Is.EqualTo(card.Product));
+            Assert.That(lane.Position, Is.EqualTo(1));
+        }
+
+        // The Start log is a floor, not a special space: a wrong answer here
+        // resolves via the same MoveBack() call as any other wrong answer —
+        // it is Lane's own floor clamp that leaves the position unchanged,
+        // not a clamp reimplemented in Resolve. docs/specs/rules.md — "the
+        // Start log is a floor, not a special space".
+        [Test]
+        public void Resolve_WithAWrongAnswerOnTheStartLog_LeavesThePositionUnchangedAndReportsWrongOnStartLog()
+        {
+            var lane = new Lane();
+            var card = Card.Draw(Pile.Easy, Rng.FromSeed(1));
+
+            var resolution = lane.Resolve(card.Product + 1, card);
+
+            Assert.That(resolution.Outcome, Is.EqualTo(TurnOutcome.WrongOnStartLog));
+            Assert.That(resolution.PositionBefore, Is.EqualTo(0));
+            Assert.That(resolution.PositionAfter, Is.EqualTo(0));
+            Assert.That(resolution.CorrectAnswer, Is.EqualTo(card.Product));
+            Assert.That(lane.Position, Is.EqualTo(0));
+        }
+
+        // Consistent with WorkingOutGrid.For's guard on the same Card
+        // parameter: a null card is a caller error, not a fourth outcome.
+        [Test]
+        public void Resolve_WithANullCard_ThrowsArgumentNullException()
+        {
+            var lane = new Lane();
+
+            Assert.That(() => lane.Resolve(42, null), Throws.ArgumentNullException);
+        }
+
+        // ADR-0002: "nothing in the grid is marked" — only the answer row is
+        // graded. Proved structurally, not just by convention: Resolve's
+        // signature is exactly (int, Card), so there is no parameter or field
+        // the working-out grid's carry boxes or partial-product rows could
+        // even be passed through.
+        [Test]
+        public void Resolve_TakesOnlyTheSubmittedAnswerAndTheCard()
+        {
+            var method = typeof(Lane).GetMethod(nameof(Lane.Resolve));
+
+            Assert.That(method, Is.Not.Null);
+
+            var parameters = method.GetParameters();
+
+            Assert.That(parameters.Length, Is.EqualTo(2));
+            Assert.That(parameters[0].ParameterType, Is.EqualTo(typeof(int)));
+            Assert.That(parameters[1].ParameterType, Is.EqualTo(typeof(Card)));
         }
 
         // Frogs are independent: each player keeps their own lane for the
