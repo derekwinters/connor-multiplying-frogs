@@ -277,3 +277,40 @@ def _urlopen_raising(error):
             fire_routine.urllib.request.urlopen = real
 
     return patched()
+
+
+class RequiredHeaderTests(unittest.TestCase):
+    """`AI_TRIAGE_URL` is an Anthropic API endpoint, and that API requires the
+    `anthropic-version` header on every request. Without it the fire is refused
+    at header validation with a 400, before the token or the payload is ever
+    looked at — see #238, which is why every fire since the feature shipped has
+    been rejected.
+    """
+
+    def test_the_anthropic_version_header_is_sent(self):
+        sent = {}
+
+        def post(url, headers, body):
+            sent.update(headers)
+            return 200, '{"session_url": "https://x/s/1"}'
+
+        fire_routine.fire(42, "owner/repo", "https://x", "s", post=post)
+
+        self.assertIn("anthropic-version", sent)
+        self.assertTrue(sent["anthropic-version"])
+
+    def test_it_does_not_displace_the_other_headers(self):
+        sent = {}
+
+        def post(url, headers, body):
+            sent.update(headers)
+            return 200, '{"session_url": "https://x/s/1"}'
+
+        fire_routine.fire(42, "owner/repo", "https://x", "s3cret", post=post)
+
+        self.assertEqual("Bearer s3cret", sent["Authorization"])
+        self.assertEqual("application/json", sent["Content-Type"])
+
+    def test_the_version_is_a_named_constant_not_a_literal(self):
+        # Tuning and protocol values get names, per the repo's constants rule.
+        self.assertTrue(fire_routine.ANTHROPIC_VERSION)

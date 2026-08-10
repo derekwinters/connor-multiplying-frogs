@@ -576,6 +576,21 @@ as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a `401`
 says the secret is wrong rather than just failing.
 
+#### The endpoint is the Anthropic API, so `anthropic-version` is required
+
+`AI_TRIAGE_URL` points at an Anthropic API endpoint, and that API requires an
+`anthropic-version` header on **every** request. Without it the fire is refused
+at header validation with a `400`, before the token or the payload is examined —
+which is why a missing version reads as a malformed request rather than an auth
+failure, and why a `400` here never meant the secret was wrong.
+
+That cost real time in
+[#238](https://github.com/derekwinters/connor-multiplying-frogs/issues/238):
+because the URL is a secret, nobody could see it was an `api.anthropic.com`
+endpoint, so nobody thought to ask what headers that API demands. If the fire
+ever starts failing at header validation again, the endpoint's own message names
+the header — which is the whole reason the two fixes above exist.
+
 #### An error status is an answer, not a failure to reach
 
 `urlopen` raises on any 4xx or 5xx rather than returning it, so an error status

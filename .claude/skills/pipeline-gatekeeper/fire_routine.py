@@ -38,6 +38,12 @@ import urllib.request
 
 BODY_SNIPPET_LIMIT = 300
 
+# `AI_TRIAGE_URL` is an Anthropic API endpoint, and that API requires this
+# header on every request. Omit it and the fire is refused at header validation
+# with a `400` — before the token or the payload is looked at, which is why a
+# missing version reads as a malformed request rather than an auth failure.
+ANTHROPIC_VERSION = "2023-06-01"
+
 
 class FireResult:
     def __init__(self, fired: bool, outcome: str, detail: str = "") -> None:
@@ -203,6 +209,7 @@ def fire(issue_number: int, repository: str, url: str, secret: str, post=None) -
     headers = {
         "Authorization": f"Bearer {secret}",
         "Content-Type": "application/json",
+        "anthropic-version": ANTHROPIC_VERSION,
     }
 
     try:
