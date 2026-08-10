@@ -2026,7 +2026,13 @@ player in whatever state the last one left it.</p>
 and the unknown largely went away with it: side by side, the grid takes the
 left of the screen and the keypad the right, and the worst case fits with
 room to spare. See
-<a href="../../specs/ui/working-out-grid/">the working-out grid wireframe</a>.
+<a href="../../specs/ui/working-out-grid/">the working-out grid wireframe</a>.</p>
+<p>"A sum row" reads looser than what got built. The wireframe and its
+mockups settled on two partial-product rows, a second carry strip above
+them, and the answer row itself standing in as the sum — there is no
+separate <code>SumRow</code>. <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+treats the mockups as authoritative over this bullet's wording rather than
+the other way round.
 - Revealing the <em>worked solution</em> on a wrong answer is ruled out by the same
   reasoning: showing one method's partial products would quietly make that method
   canonical. The correct answer is revealed; the working is not.

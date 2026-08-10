@@ -2408,6 +2408,12 @@ addition rows · rule · carry strip · answer
 and what varies it is not the card: every card is dealt
 <code>GridAdditionRowsAtStart</code> of them, and the player can grow the section from
 there to <code>GridAdditionRowsMax</code>.</p>
+<p>The <code>rule</code> entries in that list are drawn separators, not rows: a straight
+line at <code>GridRuleThickness</code>, with no cells of its own, between two row
+kinds the shell already knows are adjacent. <code>Core</code> does not report them —
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+reports carry strip, multiplicand, multiplier, addition rows, carry strip,
+answer row, and nothing named <code>Rule</code>.</p>
 </li>
 </ul>
 <p><strong>"The addition section"</strong> is this page's name for those rows — the block
@@ -2588,38 +2594,33 @@ correct result here: the wireframe's job was to find out what the cap costs at
 today's numbers, not to pick the fix.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <p>Questions 2 to 5 arrived with the growable addition section
-(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>),
-and none of them is answered by anything Derek has said. Questions 1 and 6 are
-older. Question 1 is the one that changes what <code>Core</code> builds.</p>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>).
+Question 6 is older. Questions 1 and 5 are settled; 2, 3, 4 and 6 are not
+answered by anything Derek has said yet.</p>
 <ul>
 <li>
-<p><strong>1. Which carry convention does Connor's class use?</strong> The mockups put one
-  carry strip above the multiplication and one above the addition, each reused
-  across the rows it covers. The alternative is a strip attached to each
-  addition row, so a carry is never reused across two passes. Nothing is marked
-  either way, so this is about matching what he is taught — his call, not one to
-  make in code.</p>
-<p>This is <strong>the one open question on this page that changes the shape of the
-grid in <code>Core</code></strong>, so it is worth being exact about what depends on it.
-Depending on it: the number of carry strips a grid has, whether that number
-tracks the addition row count (and therefore grows during a turn), and the
-per-row-versus-shared structure the row list above states. Not depending on
-it: the column count, the addition section's starting count and cap, the
-growth trigger, the fact that nothing is graded, and the overrun measured in
-the third mockup — a per-row strip would make the overrun worse, not
-different in kind.</p>
-<p><code>Core</code> and the grid screen are being built to what the mockups draw today —
-two strips at most — which is a recorded position, not an answer. If the
-answer is the per-row strip, this page's row list, its <code>Elements</code> section,
-all three mockups and the grid model change together.
-Tracked in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/255">#255</a>.
-It was originally asked in
+<p><strong>1. Which carry convention does Connor's class use? Settled: shared
+  strip.</strong> The mockups put one carry strip above the multiplication and one
+  above the addition, each reused across the rows it covers. The alternative
+  was a strip attached to each addition row, so a carry is never reused across
+  two passes.</p>
+<p>This was <strong>the one open question on this page that changed the shape of
+the grid in <code>Core</code></strong>, which is why it is worth being exact about what
+depended on it. Depending on it: the number of carry strips a grid has,
+whether that number tracks the addition row count (and therefore grows
+during a turn), and the per-row-versus-shared structure the row list above
+states. Not depending on it: the column count, the addition section's
+starting count and cap, the growth trigger, the fact that nothing is
+graded, and the overrun measured in the third mockup.</p>
+<p>Derek's call on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/255">#255</a>:
+"Shared strip — matches today's mockups." <code>Core</code> and the grid screen are
+built to what the mockups already drew — two strips at most, confirmed
+rather than redrawn. It was originally asked in
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/227">#227</a>,
 which was carrying two questions under one title and was closed once Derek
 answered the other one — superscript carries versus written-out addition
-rows, the change this page has just absorbed. The layout question itself was
-never answered, so it has its own issue now.</p>
+rows, the change this page has already absorbed. The layout question
+itself is what #255 answered.</p>
 </li>
 <li>
 <p><strong>2. What happens to the second carry strip as the section grows?</strong> Today it
@@ -2648,11 +2649,20 @@ never answered, so it has its own issue now.</p>
   one this project has drawn — a default in a picture, not a decision.</p>
 </li>
 <li>
-<p><strong>5. Can a grown row be taken away again?</strong> Backspacing the last digit out of
-  a grown row could remove it, or leave it. Leaving it means a mis-tap costs a
-  row permanently and, near the cap, costs the ability to grow another. Removing
-  it means a row can vanish under the caret. Neither is obviously right and
-  neither is stated.</p>
+<p><strong>5. Can a grown row be taken away again? Settled: yes.</strong> Derek, on
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>:
+  backspacing the last digit out of a grown row removes the row. This is
+  Core-level state, not just drawing — the grid model needs a transition for
+  the addition section shrinking by one row, not only growing by one.
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>
+  reports the grid for a given <code>(card, addition row count)</code> snapshot, so a
+  shrink is nothing more than the next snapshot's count being one lower — it
+  does not need an operation of its own. <code>GridAdditionRowsAtStart</code> is the
+  floor: no snapshot may ask for fewer, because no card is ever dealt fewer.
+  What is not settled, and is not this page's or <code>Core</code>'s to settle: whether
+  removing a row the player isn't currently at (not the section's bottom row)
+  is reachable at all — that is the caret-and-keypad interaction policy, owned
+  by whichever issue builds turn interaction.</p>
 </li>
 <li>
 <p><strong>6. Should the keypad have an <code>=</code>?</strong> No, currently: <code>Check it</code> is the commit,
