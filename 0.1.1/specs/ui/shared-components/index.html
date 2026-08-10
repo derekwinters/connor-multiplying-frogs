@@ -1711,6 +1711,8 @@
       
         
       
+        
+      
     
     
     
@@ -1864,6 +1866,34 @@
     
   
     0004 Core owns the save format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
   
 
     
@@ -2886,6 +2916,16 @@ a player is most likely to be reaching for.</p>
 <td><code>ButtonPressOffset</code></td>
 <td>4 px</td>
 </tr>
+<tr>
+<td>Border width, outlined kinds</td>
+<td><code>ButtonBorderWidth</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td>Opacity while disabled</td>
+<td><code>ButtonDisabledOpacity</code></td>
+<td>0.40</td>
+</tr>
 </tbody>
 </table>
 <h4 id="4-states_1">4. States<a class="headerlink" href="#4-states_1" title="Link to this section">&para;</a></h4>
@@ -2915,7 +2955,7 @@ a player is most likely to be reaching for.</p>
 </tr>
 <tr>
 <td>Disabled</td>
-<td>40 % opacity, no press response</td>
+<td><code>ButtonDisabledOpacity</code> opacity, no press response</td>
 </tr>
 <tr>
 <td>Hidden</td>
@@ -2923,6 +2963,18 @@ a player is most likely to be reaching for.</p>
 </tr>
 </tbody>
 </table>
+<p><code>ButtonBorderWidth</code> and <code>ButtonDisabledOpacity</code> were always on this page — both
+appeared in the States row above with a value and no name — and are named here
+so the code has a name to declare, per
+<a href="../../../engineering/ui-design-process/#the-named-constants-are-the-origin-not-an-afterthought">the named constants are the origin, not an afterthought</a>.</p>
+<p><strong>Disabled is 40 % opacity, not a grey fill.</strong> The committed mockups' <code>.btn.off</code>
+rule draws disabled as a flat grey (<code>background:#C9D2CE;color:#8C9793</code>), which
+disagrees with this page's own States table. This page is the component's
+contract; the mockups are drawings of screens built from it — see
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md">CLAUDE.md</a>
+on which document wins being a decision, not an assumption. This page wins: disabled is the kind's own default appearance at
+<code>ButtonDisabledOpacity</code>, not a distinct grey style. The mockups should be
+redrawn to match the next time they are touched.</p>
 <h4 id="5-behaviour_1">5. Behaviour<a class="headerlink" href="#5-behaviour_1" title="Link to this section">&para;</a></h4>
 <p>Acts on <strong>release</strong>, not on press, so a finger that lands wrong can slide off
 and cancel. A disabled button does nothing at all — it does not explain itself,

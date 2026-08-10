@@ -12,13 +12,13 @@
         <meta name="author" content="Derek Winters">
       
       
-        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.1.1/specs/reference/">
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.1.1/adr/0005-ugui-not-ui-toolkit/">
       
       
-        <link rel="prev" href="../future-ideas/">
+        <link rel="prev" href="../0004-core-owns-the-save-format/">
       
       
-        <link rel="next" href="../ui/">
+        <link rel="next" href="../../engineering/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Reference material - Multiplying Frogs</title>
+        <title>0005 uGUI, not UI Toolkit - Multiplying Frogs</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#reference-material" class="md-skip">
+        <a href="#the-games-ui-is-built-in-ugui-not-ui-toolkit" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Reference material
+              0005 uGUI, not UI Toolkit
             
           </span>
         </div>
@@ -266,13 +266,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../specs/" class="md-tabs__link">
           
   
   
@@ -290,11 +288,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../adr/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -598,8 +598,6 @@
       
   
   
-    
-  
   
   
     
@@ -623,23 +621,20 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../specs/" class="md-nav__link ">
               
   
   
@@ -657,13 +652,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -683,7 +678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../product-scope/" class="md-nav__link">
+      <a href="../../specs/product-scope/" class="md-nav__link">
         
   
   
@@ -711,7 +706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rules/" class="md-nav__link">
+      <a href="../../specs/rules/" class="md-nav__link">
         
   
   
@@ -739,7 +734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../future-ideas/" class="md-nav__link">
+      <a href="../../specs/future-ideas/" class="md-nav__link">
         
   
   
@@ -764,37 +759,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reference material
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../specs/reference/" class="md-nav__link">
         
   
   
@@ -810,148 +778,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-classroom-game" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The classroom game
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The classroom game">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-rules-card-verbatim" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The rules card, verbatim
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-is-in-the-photograph" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is in the photograph
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-pile-labels" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The pile labels
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-the-photograph-does-not-settle" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What the photograph does not settle
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What the photograph does not settle">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#frogs-are-independent" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Frogs are independent
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-end-log-is-the-winning-space" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The End log is the winning space
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-start-log-is-a-floor-not-a-special-space" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The Start log is a floor, not a special space
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#still-unsettled" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Still unsettled
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-v1-fills-a-gap-the-board-leaves-open" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where v1 fills a gap the board leaves open
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -998,13 +824,10 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
@@ -1012,7 +835,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../ui/" class="md-nav__link ">
+            <a href="../../specs/ui/" class="md-nav__link ">
               
   
   
@@ -1030,7 +853,7 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
@@ -1056,7 +879,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/shared-components/" class="md-nav__link">
+      <a href="../../specs/ui/shared-components/" class="md-nav__link">
         
   
   
@@ -1084,7 +907,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/title-screen/" class="md-nav__link">
+      <a href="../../specs/ui/title-screen/" class="md-nav__link">
         
   
   
@@ -1112,7 +935,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/game-setup/" class="md-nav__link">
+      <a href="../../specs/ui/game-setup/" class="md-nav__link">
         
   
   
@@ -1140,7 +963,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/game-board/" class="md-nav__link">
+      <a href="../../specs/ui/game-board/" class="md-nav__link">
         
   
   
@@ -1168,7 +991,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/roll-and-card/" class="md-nav__link">
+      <a href="../../specs/ui/roll-and-card/" class="md-nav__link">
         
   
   
@@ -1196,7 +1019,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/working-out-grid/" class="md-nav__link">
+      <a href="../../specs/ui/working-out-grid/" class="md-nav__link">
         
   
   
@@ -1224,7 +1047,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/answer-result/" class="md-nav__link">
+      <a href="../../specs/ui/answer-result/" class="md-nav__link">
         
   
   
@@ -1252,7 +1075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/settings-dialog/" class="md-nav__link">
+      <a href="../../specs/ui/settings-dialog/" class="md-nav__link">
         
   
   
@@ -1280,7 +1103,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/end-game-confirm/" class="md-nav__link">
+      <a href="../../specs/ui/end-game-confirm/" class="md-nav__link">
         
   
   
@@ -1308,7 +1131,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/game-over/" class="md-nav__link">
+      <a href="../../specs/ui/game-over/" class="md-nav__link">
         
   
   
@@ -1336,7 +1159,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ui/mockups/" class="md-nav__link">
+      <a href="../../specs/ui/mockups/" class="md-nav__link">
         
   
   
@@ -1376,6 +1199,8 @@
       
   
   
+    
+  
   
   
     
@@ -1399,20 +1224,23 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../adr/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -1430,13 +1258,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1456,7 +1284,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+      <a href="../0001-rules-sacred-presentation-ours/" class="md-nav__link">
         
   
   
@@ -1484,7 +1312,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../adr/0002-structured-working-out-grid/" class="md-nav__link">
+      <a href="../0002-structured-working-out-grid/" class="md-nav__link">
         
   
   
@@ -1512,7 +1340,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../adr/0003-network-boundary/" class="md-nav__link">
+      <a href="../0003-network-boundary/" class="md-nav__link">
         
   
   
@@ -1540,7 +1368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+      <a href="../0004-core-owns-the-save-format/" class="md-nav__link">
         
   
   
@@ -1565,10 +1393,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1584,6 +1439,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-choice-ugui-canvas-recttransform-monobehaviours-with" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The choice: uGUI (Canvas, RectTransform, MonoBehaviours with
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2006,110 +1914,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-classroom-game" class="md-nav__link">
+  <a href="#the-choice-ugui-canvas-recttransform-monobehaviours-with" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The classroom game
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The classroom game">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-rules-card-verbatim" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The rules card, verbatim
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-is-in-the-photograph" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is in the photograph
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-pile-labels" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The pile labels
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-the-photograph-does-not-settle" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What the photograph does not settle
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="What the photograph does not settle">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#frogs-are-independent" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Frogs are independent
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-end-log-is-the-winning-space" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The End log is the winning space
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-start-log-is-a-floor-not-a-special-space" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The Start log is a floor, not a special space
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#still-unsettled" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Still unsettled
+        The choice: uGUI (Canvas, RectTransform, MonoBehaviours with
       
     </span>
   </a>
@@ -2117,10 +1925,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-v1-fills-a-gap-the-board-leaves-open" class="md-nav__link">
+  <a href="#why" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where v1 fills a gap the board leaves open
+        Why
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
       
     </span>
   </a>
@@ -2144,7 +1963,7 @@
 
 
   
-    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/reference/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/adr/0005-ugui-not-ui-toolkit.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2152,231 +1971,76 @@
   
 
 
-<h1 id="reference-material">Reference material<a class="headerlink" href="#reference-material" title="Link to this section">&para;</a></h1>
-<p>Source material for the port. Nothing on this page is a decision — it is the
-<strong>physical artifact</strong> the design contract is derived from, kept here so a claim
-about the game can be checked against the board rather than against somebody's
-summary of it.</p>
-<p>The normative statement of these rules — every one of them stated as an
-invariant for the code to be built against — is <a href="../rules/">rules of play</a>.
-This page describes the board Connor's class uses; that page describes the game
-this app implements, and the two differ where the project has recorded a rule
-change.</p>
-<h2 id="the-classroom-game">The classroom game<a class="headerlink" href="#the-classroom-game" title="Link to this section">&para;</a></h2>
-<p>Multiplying Frogs is a board game from Connor's math class. Everything in
-<code>docs/specs/</code> describes a port of it, and
-<a href="../../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a> makes it the
-authority on every rule.</p>
-<p><img alt="The Multiplying Frogs board, pieces, dice, card piles and handwritten rules card" src="classroom-game-board.jpg" /></p>
-<p><em>Photographed by Derek, 2026-08-08. Camera metadata stripped; the image is
-otherwise unmodified.</em></p>
-<h3 id="the-rules-card-verbatim">The rules card, verbatim<a class="headerlink" href="#the-rules-card-verbatim" title="Link to this section">&para;</a></h3>
-<blockquote>
-<p><strong>Directions for Multiplying Frogs</strong> — 2–8 players, 15–45 min</p>
-<p><strong>Materials:</strong> Board, Cards, Box, Peices, Calculator, Dice</p>
-<p>On your turn role the Dice then draw from the pile that matches what you
-roled. If you answer the question correctly move forward. If wrong move one
-space back.</p>
-<p><strong>First one to the end wins!</strong></p>
-</blockquote>
-<p>Spelling as written — it is handwritten, by a child or a teacher.</p>
-<h3 id="what-is-in-the-photograph">What is in the photograph<a class="headerlink" href="#what-is-in-the-photograph" title="Link to this section">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Component</th>
-<th>What it is</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Board</strong></td>
-<td>Folds down the middle. Each half holds four lanes of seven lily pads, running from a <strong>Start log</strong> to an <strong>End log</strong>. Eight lanes in total.</td>
-</tr>
-<tr>
-<td><strong>Frogs</strong></td>
-<td>Eight playing pieces, one colour each. One per player.</td>
-</tr>
-<tr>
-<td><strong>Die</strong></td>
-<td><strong>One</strong>, six-sided, visible in the box. The rules card says "Dice"; three piles × two faces each accounts for exactly six faces.</td>
-</tr>
-<tr>
-<td><strong>Card piles</strong></td>
-<td>Three, each labelled with the two die faces that send you to it.</td>
-</tr>
-<tr>
-<td><strong>Calculator</strong></td>
-<td>Listed in the materials, for <strong>checking</strong> an answer rather than computing it. Paper is not listed because paper is ambient in a classroom.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="the-pile-labels">The pile labels<a class="headerlink" href="#the-pile-labels" title="Link to this section">&para;</a></h3>
-<p>Legible in the photograph at full resolution, and matching the sample card laid
-beside each pile:</p>
-<table>
-<thead>
-<tr>
-<th>Pile label</th>
-<th>Roll</th>
-<th>Problem shape</th>
-<th>Sample card beside it</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>2 pips, 1 pip</td>
-<td><strong>1 or 2</strong></td>
-<td>2-digit × 1-digit</td>
-<td><code>68 × 5</code></td>
-</tr>
-<tr>
-<td>4 pips, 3 pips</td>
-<td><strong>3 or 4</strong></td>
-<td>2-digit × 2-digit</td>
-<td><code>22 × 41</code></td>
-</tr>
-<tr>
-<td>6 pips, 5 pips</td>
-<td><strong>5 or 6</strong></td>
-<td>3-digit × 2-digit</td>
-<td><code>331 × 41</code></td>
-</tr>
-</tbody>
-</table>
-<p>Two faces per pile, so each difficulty comes up a uniform <strong>⅓</strong> of the time.
-That distribution is what the problem generator has to reproduce.</p>
-<h2 id="what-the-photograph-does-not-settle">What the photograph does not settle<a class="headerlink" href="#what-the-photograph-does-not-settle" title="Link to this section">&para;</a></h2>
-<p>Two of these were confirmed by Derek in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/170">issue #170</a>
-after the photograph was taken. They are rules of the classroom game, recorded
-here because the board alone does not show them.</p>
-<h3 id="frogs-are-independent">Frogs are independent<a class="headerlink" href="#frogs-are-independent" title="Link to this section">&para;</a></h3>
-<p>Every player keeps their own lane for the whole game. Frogs never share a lane,
-never pass one another, and never interact. Eight lanes, eight frogs, one each.</p>
-<p>A player's entire state is therefore one number — how far up their own lane they
-are. There is no board state beyond that: no collisions, no blocking, no ordering
-between frogs.</p>
-<h3 id="the-end-log-is-the-winning-space">The End log is the winning space<a class="headerlink" href="#the-end-log-is-the-winning-space" title="Link to this section">&para;</a></h3>
-<p>A frog wins by <strong>landing on the End log</strong>, not by reaching the last lily pad.
-The lane is therefore <strong>nine positions</strong> — the Start log, seven lily pads, and
-the End log — and winning takes <strong>eight correct answers</strong> from the start.</p>
-<p>Confirmed by Derek in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/185">issue #185</a>,
-after the board wireframe needed the number of spaces in a lane and the
-photograph could not settle it. The logs are symmetric: both ends of a lane are
-real positions a frog occupies, one as the floor and one as the goal.</p>
-<h3 id="the-start-log-is-a-floor-not-a-special-space">The Start log is a floor, not a special space<a class="headerlink" href="#the-start-log-is-a-floor-not-a-special-space" title="Link to this section">&para;</a></h3>
-<p>A wrong answer moves you back one lily pad, exactly as the rules card says. The
-Start log is simply the bottom of the lane, so a wrong answer there leaves you
-where you are.</p>
-<table>
-<thead>
-<tr>
-<th>Outcome</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Correct</td>
-<td>Forward one lily pad</td>
-</tr>
-<tr>
-<td>Wrong, anywhere above the Start log</td>
-<td>Back one lily pad</td>
-</tr>
-<tr>
-<td>Wrong, on the Start log</td>
-<td>Stay</td>
-</tr>
-</tbody>
-</table>
-<p>A clamp at the bottom rather than a special case. Worth stating precisely,
-because "move back one" written without a floor is an off-by-one waiting to
-happen.</p>
-<p>Two of the three rows above are about the ends of a lane, so they are worth
-reading together:</p>
-<table>
-<thead>
-<tr>
-<th>Position</th>
-<th>What it is</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Start log</td>
-<td>Position 0. The floor — a wrong answer here moves nothing.</td>
-</tr>
-<tr>
-<td>Lily pads 1–7</td>
-<td>The ordinary spaces.</td>
-</tr>
-<tr>
-<td>End log</td>
-<td>Position 8. The goal — landing on it wins.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="still-unsettled">Still unsettled<a class="headerlink" href="#still-unsettled" title="Link to this section">&para;</a></h2>
+<h1 id="the-games-ui-is-built-in-ugui-not-ui-toolkit">The game's UI is built in uGUI, not UI Toolkit<a class="headerlink" href="#the-games-ui-is-built-in-ugui-not-ui-toolkit" title="Link to this section">&para;</a></h1>
+<p>Unity ships two UI systems, and nothing in <code>/docs</code> had said which one this game
+uses. <code>Packages/manifest.json</code> carries both <code>com.unity.ugui</code> and
+<code>com.unity.modules.uielements</code> at once — that is the set a default Unity 6
+project ships with, not a choice anybody made. The screen router
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/213">#213</a>)
+put four empty root <code>GameObject</code>s on screen and drew nothing of its own, so it
+did not have to pick either. This issue is the first one that draws a pixel,
+so it is the first one that has to decide.</p>
+<h2 id="the-choice-ugui-canvas-recttransform-monobehaviours-with">The choice: <strong>uGUI</strong> (<code>Canvas</code>, <code>RectTransform</code>, MonoBehaviours with<a class="headerlink" href="#the-choice-ugui-canvas-recttransform-monobehaviours-with" title="Link to this section">&para;</a></h2>
+<p><code>[SerializeField]</code>) — not UI Toolkit (<code>UXML</code>, <code>USS</code>, <code>UIDocument</code>).</p>
+<h2 id="why">Why<a class="headerlink" href="#why" title="Link to this section">&para;</a></h2>
+<p><strong><code>/docs</code> is already written in uGUI's terms.</strong> Every screen and shared-component
+spec page states geometry as pixels at a fixed 1920 × 1200 reference
+resolution — <a href="../../specs/ui/shared-components/#the-canvas-every-component-is-measured-in">the canvas every component is measured
+in</a>
+says outright: <em>"Unity's <code>CanvasScaler</code> is set to that same reference
+resolution."</em> <code>CanvasScaler</code> is a uGUI type with no UI Toolkit equivalent that
+means the same thing. Picking UI Toolkit would mean re-deriving how "1920 × 1200
+pixels" maps onto <code>UIDocument</code>'s length units before drawing a single button.</p>
+<p><strong><a href="../../engineering/unity-serialization/">Unity serialization</a> — the page
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md"><code>CLAUDE.md</code></a>
+rule 6 sends every agent to — is written entirely
+about uGUI's shape.</strong> Its worked examples are a <code>MonoBehaviour</code>'s serialized
+<code>[SerializeField]</code> fields and a prefab's component tree
+(<code>FrogPrefab_HasItsSpriteAndScriptWiredUp</code>). UI Toolkit's failure modes are a
+different shape — a <code>UXML</code> element name that does not match, a <code>USS</code> class that
+does not apply — that this page says nothing about. Choosing UI Toolkit would
+leave the one page that exists specifically to stop an agent guessing at Unity
+serialization silent on the serialization format the UI actually uses.</p>
+<p><strong>The existing EditMode tests already assert on this shape.</strong>
+<code>ScreenRouterAdapterTests</code> asserts on <code>GameObject.activeSelf</code> and component
+wiring built through the typed <code>MonoBehaviour</code>/<code>GameObject</code> API — the same shape
+this issue's Button tests use. Nothing in the repo is written in UI Toolkit's
+vocabulary.</p>
+<p><strong>What UI Toolkit would have bought instead:</strong> every visual in v0.2 is a
+rectangle or a circle, and USS <code>border-radius</code> draws both with no sprite
+asset at all — cheaper than uGUI's <code>Image</code>, which needs <em>some</em> sprite to render
+a rounded shape (see below). That is a real cost, and it is the only one; it is
+outweighed by re-expressing an already-written design contract before drawing
+anything.</p>
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>What the classroom game does after the first frog finishes.</strong> The card says
-  only "First one to the end wins!" and stops there. Whether Connor's class keeps
-  playing for second place is not recorded on the board or the card, and has not
-  been recalled — so it stays unknown. v1 does not wait on it; see below.</li>
-<li><strong>The full card deck is not photographed.</strong> The game generates problems rather
-  than shipping the classroom deck, and the generator's constraints have to be
-  derived from the real cards —
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/171">issue #171</a>.</li>
+<li>Every shared component and every screen is a <code>MonoBehaviour</code> hierarchy built
+  through the typed <code>GameObject</code>/<code>RectTransform</code>/<code>Image</code>/<code>Text</code> API — the same
+  pattern <code>HelloWorldScene.cs</code> and <code>ScreenRouterAdapter</code> already use — guarded
+  by EditMode tests in the <code>FrogPrefab_HasItsSpriteAndScriptWiredUp</code> style.</li>
+<li><strong>A filled rounded rectangle or circle needs a sprite for uGUI's <code>Image</code> to
+  render at all</strong>, and <a href="../../specs/ui/shared-components/">no external
+  assets</a> rules out an imported texture.
+  Each issue that draws one either uses a built-in editor UI resource
+  (<code>Resources.GetBuiltinResource&lt;Sprite&gt;(…)</code>, shipped with every Unity install —
+  not a project asset) or generates the shape procedurally at runtime, and says
+  in its PR which. <strong>This issue's Button tried the built-in resource first</strong>
+  (<code>"UI/Skin/UISprite.psd"</code>) and found it unreliable: CI on the pinned
+  <code>6000.0.81f1</code> logged <code>Failed to find UI/Skin/UISprite.psd</code> and the lookup
+  returned <code>null</code> silently, with no editor available locally to find the
+  right name for this version. It switched to generating the rounded rect
+  procedurally instead, which carries no per-version resource name to get
+  right. A later issue reaching for a built-in resource should expect the
+  same risk and consider procedural generation first rather than rediscovering
+  this the same way.</li>
+<li><code>Packages/manifest.json</code> keeps <code>com.unity.modules.uielements</code> for now — it is
+  a default Unity 6 module, not a UI Toolkit feature this project uses, and
+  removing it is a housekeeping change with no behaviour attached to it, not
+  something this decision needs to force.</li>
+<li>If a future screen turns out to need UI Toolkit's flexbox layout badly enough
+  to be worth re-opening this, that is its own ADR that supersedes this one —
+  not a screen quietly mixing both systems.</li>
 </ul>
-<h2 id="where-v1-fills-a-gap-the-board-leaves-open">Where v1 fills a gap the board leaves open<a class="headerlink" href="#where-v1-fills-a-gap-the-board-leaves-open" title="Link to this section">&para;</a></h2>
-<p>Recorded here so nobody later mistakes it for something the classroom game says.</p>
-<p><strong>Play continues after the first frog reaches the End log.</strong> The first frog home
-wins; the others keep taking turns. Derek's provisional call — <em>"for now"</em> — made
-because the board does not settle it, not because the board says so.</p>
-<p><strong>A game can be ended deliberately.</strong> Because play continues past the winner,
-a session needs a way to stop that isn't "everyone eventually finishes": a quit
-or end-game flow. This is purely ours — a cardboard game ends when you close the
-box, so there is nothing to be faithful to.</p>
-<p><strong>Anyone may end the game, and a confirm is the only thing in the way.</strong> Derek's
-call in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">issue #186</a>.
-The device cannot tell who is holding it, so restricting the exit to a
-particular player was never enforceable — what protects a game in progress is
-that the confirm names the cost before it acts. See
-<a href="../ui/end-game-confirm/">end-game confirm</a>.</p>
-<p><strong>The game also ends on its own once every frog is home.</strong> The last frog to
-reach its End log finishes the game, and the results appear without anyone
-choosing to stop. Derek's call in the same issue.</p>
-<p>Together those two decisions describe the whole of how a game finishes:</p>
-<table>
-<thead>
-<tr>
-<th>How a game ends</th>
-<th>Who caused it</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Every frog reaches its End log</td>
-<td>Nobody — the game ends itself</td>
-</tr>
-<tr>
-<td>Somebody ends it early, with a confirm</td>
-<td>Any player, on any turn</td>
-</tr>
-</tbody>
-</table>
-<p>There is no third way, and in particular there is no state where a finished
-game sits waiting to be dismissed. That is what makes the ordinary two-player
-game work without anyone ever opening the settings.</p>
-<p>Only the first of those two routes is derivable from where the frogs are: every
-frog's lane position can be checked fresh, at any moment, to see whether all of
-them are home. The second cannot — a deliberate end can happen with frogs still
-short of home, so nothing about lane position says it happened. <code>Frogs.Core</code>
-computes the first fact every time it is asked and records the second the
-moment it occurs; the game being over is the two facts combined with OR.</p>
 
 
 
