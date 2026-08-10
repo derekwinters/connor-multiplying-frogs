@@ -125,6 +125,56 @@ The order is always the same:
 If you find yourself starting in a `MonoBehaviour`, stop. The feature will end
 up testable only in an editor, and it will end up untested.
 
+## The end-to-end acceptance pass
+
+Most tests prove one piece. The **acceptance pass** is the small set that
+proves the pieces fit together into a game somebody can play from the first
+roll to the last, and it is deliberately split across the two tiers by what
+each one can honestly reach.
+
+| Seam | Proved by | Where |
+| --- | --- | --- |
+| The roster and the turn order that follows from it | scripted game | `Tests/Core/ScriptedGameTests.cs` |
+| A roll, and the pile it selects | scripted game | Core |
+| The card that pile deals, and the grid Core derives from it | scripted game | Core |
+| A right answer moving the frog forward | scripted game | Core |
+| A wrong answer moving it back | scripted game | Core |
+| The floor at the Start log | scripted game | Core |
+| A frog reaching its End log, and being recorded as a finisher | scripted game | Core |
+| Play continuing afterwards, with home frogs skipped | scripted game | Core |
+| The game ending itself once every frog is home | scripted game | Core |
+| The winner being the **first** finisher, not the last | scripted game | Core |
+| A game ended deliberately, and the standings it produces | scripted game | Core |
+| The grid **view** drawing the grid Core reported | EditMode | `Assets/Tests/EditMode/EndToEndAcceptanceTests.cs` |
+| The game-over **screen** rendering both headlines | EditMode | same |
+| The scenes the build ships keeping their components | EditMode | same |
+
+Three whole games are played at the Core tier, all from **one named seed**, so
+a failure is the same failure every run: one played until both frogs are home
+and the game ends itself, one ended deliberately with nobody home, and one
+ended deliberately with one frog home. They are *played*, not staged — a frog
+gets up its lane by answering questions the game itself dealt, because a seam
+that is never called in a real sequence is a seam that can break without any
+isolated test noticing. That is not a hypothetical: this pass is what caught
+`Game.RecordFinish` never being called from anywhere but a test, which left
+every real game with no winner.
+
+### What the acceptance pass cannot reach
+
+**There is no harness in this repo for driving the real screens end to end.**
+EditMode is an edit-mode editor session: it opens a scene without running
+`Awake`, `OnEnable` or `Start`, no coroutines run, no frames tick, and
+`Time.deltaTime` never advances. A tapped-through sequence of screens, a screen
+transition, and a timed hop cannot be observed there, and
+[PlayMode tests are not the answer](#no-playmode-tests-no-on-device-testing).
+
+So the shell tier proves the adapter-shaped things EditMode is actually for,
+and nothing pretends otherwise. Writing a real walkthrough needs a lifecycle
+driver — explicit `Initialize()` entry points, or a test driver that pumps the
+lifecycle by hand — that does not exist yet. Until it does, the only place the
+real screens are seen *running* is a build somebody installs and opens, which
+is where Derek and Connor find out whether it is fun.
+
 ## Known limitation: EditMode tests run in CI, not in agent environments
 
 Agent environments have no Unity editor and no licence. **EditMode tests cannot

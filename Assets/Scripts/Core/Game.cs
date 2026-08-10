@@ -334,15 +334,39 @@ namespace Frogs.Core
 
         /// <summary>
         /// Moves the phase from <see cref="TurnPhase.Answering"/> to
-        /// <see cref="TurnPhase.ResultShown"/>. Deciding whether the answer
-        /// was right belongs to <c>core-turn-resolution</c> (#210), not this
-        /// type — this only moves the phase along.
+        /// <see cref="TurnPhase.ResultShown"/>, and — if that answer landed
+        /// the active frog on its End log — captures its place in
+        /// <see cref="FinishingOrder"/>.
+        ///
+        /// Deciding whether the answer was right still belongs to
+        /// <c>core-turn-resolution</c> (#210), not this type: this never
+        /// grades anything and never moves a frog. It only notices that a
+        /// frog is home, which is a fact only this type can keep, because
+        /// every finisher ends up on the same
+        /// <see cref="Lane.LaneWinningPosition"/> and position cannot tell
+        /// arrival order apart afterward.
+        ///
+        /// **This is the moment, and it is Core's rather than a caller's, on
+        /// purpose.** <see cref="Lane.Resolve"/> is the only thing that moves
+        /// a frog and it can only be run while the turn is
+        /// <see cref="TurnPhase.Answering"/>; this call is the very next one
+        /// the phase machine will accept. So it is the first moment after a
+        /// move that a caller cannot skip, which makes the recording
+        /// impossible to forget — the way it was forgotten while it lived on
+        /// the shell's to-do list. Recording later, at hand-off, would miss
+        /// the last finisher of all: when the final frog gets home the game
+        /// ends itself and <see cref="CompleteHandOff"/> is never called
+        /// (docs/specs/ui/game-board.md#behaviour).
         /// </summary>
         /// <exception cref="InvalidOperationException">The turn is not answering.</exception>
         public void ShowResult()
         {
             RequirePhase(TurnPhase.Answering);
             _phase = TurnPhase.ResultShown;
+
+            // A no-op unless this turn's answer actually put the active frog
+            // on the End log — see RecordFinish.
+            RecordFinish(ActiveFrog);
         }
 
         /// <summary>
