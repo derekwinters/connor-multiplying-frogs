@@ -1737,6 +1737,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#build-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a value reaches the Unity process
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1831,6 +1842,17 @@
     <span class="md-ellipsis">
       
         The Android/ segment is the builder's, not ours
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-apks-are-checked-against-each-other-before-either-is-attached" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two APKs are checked against each other before either is attached
       
     </span>
   </a>
@@ -2538,6 +2560,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#build-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a value reaches the Unity process
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2632,6 +2665,17 @@
     <span class="md-ellipsis">
       
         The Android/ segment is the builder's, not ours
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-apks-are-checked-against-each-other-before-either-is-attached" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two APKs are checked against each other before either is attached
       
     </span>
   </a>
@@ -3311,6 +3355,67 @@ to call — a stamping step that can be forgotten will be, and a build with the
 wrong version cannot be identified afterwards.</p>
 <p>Red here almost always means a compile error the Core suite couldn't catch,
 because it lives in the Unity layer. Read the build log, not the test log.</p>
+<h4 id="build-inputs">How a value reaches the Unity process<a class="headerlink" href="#build-inputs" title="Link to this section">&para;</a></h4>
+<p><strong>On Unity's command line, via the action's <code>customParameters</code> input.</strong> Never in
+the step's <code>env:</code>.</p>
+<p><code>game-ci/unity-builder</code> does not run Unity on the runner. It runs it inside a
+container, and it forwards a <strong>fixed allow-list</strong> of environment variables into
+that container — <code>UNITY_*</code>, <code>BUILD_*</code>, <code>ANDROID_*</code>, <code>CUSTOM_PARAMETERS</code>, a
+handful of <code>GITHUB_*</code>. Nothing else. A <code>FROGS_ANDROID_PROFILE</code> set in a step's
+<code>env:</code> sits on the runner, outside the container, where the editor never looks.</p>
+<p>That failure is silent by construction. Every reader of these values treats
+"absent" as "this build did not ask for that" — which is the right answer for
+the editor's own Build button, and the wrong one here. So a build that received
+none of its inputs looks exactly like a build that wanted none of them. <code>v0.1.0</code>
+shipped a device APK and an emulator APK that were the same file, byte for byte,
+and every check upstream of the APK was green (#218).</p>
+<p><code>customParameters</code> is appended verbatim to the container's <code>unity-editor</code>
+invocation, so it does arrive:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Flag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android <code>versionCode</code></td>
+<td><code>-frogsVersionCode</code></td>
+</tr>
+<tr>
+<td>Short commit sha, for a PR build</td>
+<td><code>-frogsBuildSha</code></td>
+</tr>
+<tr>
+<td>Release-candidate number</td>
+<td><code>-frogsRcNumber</code></td>
+</tr>
+<tr>
+<td><code>applicationId</code> suffix</td>
+<td><code>-frogsApplicationIdSuffix</code></td>
+</tr>
+<tr>
+<td>Android build profile</td>
+<td><code>-frogsAndroidProfile</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>BuildInputs</code> reads the command line first and the matching <code>FROGS_*</code> variable
+second. The variables still work everywhere the container is not involved — a
+local headless <code>-executeMethod</code>, and the EditMode tests — and mean nothing in
+CI.</p>
+<p>Two things hold this in place, and both are why the rule is written down rather
+than remembered:</p>
+<ul>
+<li><strong><code>.github/scripts/tests/test_build_inputs_reach_unity.py</code></strong> fails if any
+  Unity build step sets a <code>FROGS_*</code> variable in its <code>env:</code>, if a build is not
+  told its <code>versionCode</code>, if a flag is passed with no value after it, or if two
+  builds in one workflow ask for the same profile.</li>
+<li><strong><code>BuildArguments</code></strong> throws when a flag is present with no usable value,
+  rather than reading it as absent. A build that received a broken command line
+  stops while the log is still open.</li>
+</ul>
 <h3 id="rc-build-release-candidates"><code>rc-build</code> — release candidates<a class="headerlink" href="#rc-build-release-candidates" title="Link to this section">&para;</a></h3>
 <p>An RC is a build of what is <em>about</em> to be released, produced so someone can play
 it before the release is real.</p>
@@ -3505,9 +3610,52 @@ tagged with no APK on it (#212).</p>
   because "the build produced nothing" and "nothing matched the glob" have
   completely different fixes and used to be the same message.</li>
 </ul>
-<p>The profile is applied by <code>BuildStampPreprocessor</code> from <code>FROGS_ANDROID_PROFILE</code>,
-and an unrecognised value fails the build rather than defaulting: guessing here
-ships the wrong architecture, which looks fine until someone installs it.</p>
+<p>The profile is applied by <code>BuildStampPreprocessor</code> from <code>-frogsAndroidProfile</code>
+on the Unity command line (<a href="#build-inputs">how a value gets there</a>), and an
+unrecognised value fails the build rather than defaulting: guessing here ships
+the wrong architecture, which looks fine until someone installs it.</p>
+<h4 id="the-two-apks-are-checked-against-each-other-before-either-is-attached">The two APKs are checked against each other before either is attached<a class="headerlink" href="#the-two-apks-are-checked-against-each-other-before-either-is-attached" title="Link to this section">&para;</a></h4>
+<p>Running Unity twice is not the same as getting two builds. For <code>v0.1.0</code> it was
+not: the profile never reached the editor, both invocations built the same
+thing, and the release went out with two byte-identical assets under different
+names (#218). Nothing upstream of the APK could have seen it — both builds went
+green, both files existed, both were a plausible size.</p>
+<p>So <code>.github/scripts/check_release_apks.py</code> opens them. An APK's native
+libraries live under <code>lib/&lt;abi&gt;/</code>, and those ABI names are Android's, so they
+mean the same thing in every APK ever built; IL2CPP additionally ships
+<code>libil2cpp.so</code> and Mono does not. That is enough to assert the whole profile
+table:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the two files are not byte-identical</td>
+<td>two profiles cannot produce one file</td>
+</tr>
+<tr>
+<td>device has <code>arm64-v8a</code> and nothing else</td>
+<td>the tablet's architecture, alone</td>
+</tr>
+<tr>
+<td>emulator has <code>x86_64</code> and nothing else</td>
+<td>an ARM64 APK will not install on an x86_64 emulator</td>
+</tr>
+<tr>
+<td>device ships <code>libil2cpp.so</code>, emulator does not</td>
+<td>the profile is a backend as well as an architecture</td>
+</tr>
+</tbody>
+</table>
+<p>It runs <strong>before</strong> the attach step, so a release that failed it gets no assets
+rather than the wrong ones. That is the right way round: a bad APK attached to
+a tag is a failure that surfaces on someone else's machine, days later, with no
+build log anywhere near it, while a release missing its APKs is a backfill this
+workflow already knows how to do.</p>
 <p>Both are <strong>attached to the GitHub release</strong> rather than left as workflow
 artifacts, so the tag and the thing you install are one object. A release whose
 APK lives in an expiring artifact is a release you cannot re-install in six

@@ -2693,9 +2693,15 @@ human reads, and it's on the same screen.</p>
 not by a tool. They are overwritten at build time from the values above. A
 number typed into that file is a number that disagrees with <code>/VERSION</code> on the
 first release after someone forgets it.</p>
-<p>CI passes <code>FROGS_VERSION_CODE</code> and <code>FROGS_BUILD_SHA</code> rather than letting the
-editor shell out to git, because a checkout with <code>fetch-depth: 1</code> has no history
-to count. Locally both fall back to git, and a failure says so.</p>
+<p>CI passes the version code and the sha in rather than letting the editor shell
+out to git, because a checkout with <code>fetch-depth: 1</code> has no history to count.
+Locally both fall back to git, and a failure says so.</p>
+<p>They travel as <code>-frogsVersionCode</code> and <code>-frogsBuildSha</code> <strong>on Unity's command
+line</strong>, not as environment variables: the editor runs inside a container that
+receives only <code>game-ci/unity-builder</code>'s own allow-list, so a variable set on the
+workflow step never reaches it. See
+<a href="../ci-cd/#build-inputs">how a value reaches the Unity process</a> — getting this
+wrong is silent, and did ship a wrong build (#218).</p>
 
 
 
