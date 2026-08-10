@@ -164,7 +164,9 @@ frog is where the player left it.
 no close cross. It is left by pressing one of its buttons, so a game is never
 half-answered because a sleeve brushed the glass.
 **Invariant:** the hardware back button does what the dialog's *least
-destructive* button does, and never what its most destructive one does.
+destructive* button does, and never what its most destructive one does —
+except the three dialogs whose pages make back inert (roll and card,
+working-out grid, answer result), where back does nothing.
 
 #### 3. Named constants
 
