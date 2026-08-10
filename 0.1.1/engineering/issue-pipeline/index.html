@@ -4450,6 +4450,12 @@ now have one.</p>
 as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a <code>401</code>
 says the secret is wrong rather than just failing.</p>
+<p>The API names that field <strong><code>claude_code_session_url</code></strong>. The older <code>session_url</code>
+and <code>url</code> are still accepted, but looking for only those made the success path
+unreachable and annotated every healthy fire as an error
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/240">#240</a>) —
+which is the same failure as a green line nobody believes, pointing the other
+way. An annotation that fires on every good run is one people stop reading.</p>
 <h4 id="the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required">The endpoint is the Anthropic API, so <code>anthropic-version</code> is required<a class="headerlink" href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" title="Link to this section">&para;</a></h4>
 <p><code>AI_TRIAGE_URL</code> points at an Anthropic API endpoint, and that API requires an
 <code>anthropic-version</code> header on <strong>every</strong> request. Without it the fire is refused
