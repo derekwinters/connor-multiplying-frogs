@@ -47,11 +47,27 @@ about are two dialogs a child reads as two different things happening.
 | Dialog width | `ResultDialogWidth` | 1100 px |
 | Dialog height | `ResultDialogHeight` | 620 px |
 | Mark diameter | `ResultMarkSize` | 180 px |
+| Mark ring width, wrong state | `ResultMarkRingWidth` | 8 px |
 | Mark glyph size | `ResultMarkGlyphSize` | 110 px |
 | Verdict size | `ResultVerdictSize` | 76 px |
+| Verdict top, from the panel's top edge | `ResultVerdictTop` | 70 px |
 | Consequence size | `ResultConsequenceSize` | 48 px |
+| Consequence top, from the panel's top edge | `ResultConsequenceTop` | 180 px |
 | Consequence column width | `ResultTextWidth` | 760 px |
+| Text column left, from the panel's left edge | `ResultTextLeft` | 280 px |
+| Chip top, from the panel's top edge | `ResultChipTop` | 340 px |
 | Hold before the frog hops | `ResultHopDelay` | 0.2 s |
+
+`mark`, `chip` and `controls` are all `DialogPadding` from the panel's edges —
+the shared [Dialog](shared-components.md#dialog)'s own padding, not a constant
+of this page's. `ResultMarkRingWidth` and the four rows that place `verdict`,
+`consequence` and `chip` are numbers the two committed mockups already draw;
+they are on this table so the layout is built from names rather than measured
+off the picture.
+
+The frog's hop itself runs over `FrogHopDuration`, which is the
+[game board](game-board.md#named-constants)'s constant, not this page's — the
+hop happens on that screen, after this dialog has gone.
 
 ## Elements
 
@@ -62,6 +78,13 @@ about are two dialogs a child reads as two different things happening.
 | Consequence | `Right! Green hops forward one lily pad.` | `331 × 41 = 13,571. Green hops back one lily pad.` |
 | Chip | `pad 3 → 4` | `pad 3 → 2` |
 | Button | `Blue's turn` | `Blue's turn` |
+
+The chip's move reads `pad <before> → <after>` in all three situations,
+including the floor case where nothing moved (`pad 0 → 0`). Neither mockup draws
+that one; extending the pattern rather than writing a separate sentence for it
+is a presentation call under
+[ADR-0001](../../adr/0001-rules-sacred-presentation-ours.md), and the numbers are
+the lane positions Core reports either way.
 
 The wrong state leads with *Not this time* rather than with the number, because
 the first thing a child reads should not be the size of their mistake. The
@@ -75,7 +98,7 @@ that says it is a button that passes the device to the right person.
 
 | Situation | Sentence |
 | --- | --- |
-| Right | `<Colour> hops forward one lily pad.` |
+| Right | `Right! <Colour> hops forward one lily pad.` |
 | Wrong, above the Start log | `<Colour> hops back one lily pad.` |
 | Wrong, on the Start log | `<Colour> stays on the Start log.` |
 

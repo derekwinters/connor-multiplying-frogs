@@ -96,6 +96,7 @@ lanes-across** after seeing both drawn.
 | `Roll` button width | `RollButtonWidth` | 480 px |
 | `Roll` button height | `RollButtonHeight` | 144 px |
 | `Roll` label size | `RollButtonLabelSize` | 56 px |
+| Frog hop duration | `FrogHopDuration` | 0.4 s |
 | Positions in a lane | `LanePositionCount` | 9 |
 | Correct answers needed to win | `LaneWinningPosition` | 8 |
 

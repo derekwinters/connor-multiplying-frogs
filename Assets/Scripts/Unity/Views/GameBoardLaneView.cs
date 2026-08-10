@@ -25,10 +25,11 @@ namespace Frogs.Unity.Views
     /// offset of its own, and it never counts answers to arrive at either
     /// number in the chip's `3 of 8`.
     ///
-    /// Nothing here moves. The frog is drawn at rest at whatever position
-    /// Core reports; animating the change between one position and the next
-    /// belongs to <c>answer-result</c> (#224), which is what closes and
-    /// starts the hop.
+    /// Nothing here moves *itself*. The frog is drawn at rest at whatever
+    /// position Core reports, and this type holds no clock and no tween;
+    /// <see cref="PlacePiecePartWay"/> draws one frame of the hop that
+    /// <c>answer-result</c> (#224) owns and drives, using the same placement
+    /// the at-rest render already uses for its two endpoints.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public sealed class GameBoardLaneView : MonoBehaviour
@@ -392,6 +393,62 @@ namespace Frogs.Unity.Views
             }
 
             _chip.SetState(isActive ? PlayerChipState.Active : PlayerChipState.Default);
+        }
+
+        /// <summary>
+        /// Places the piece part-way from one lane position to another, for
+        /// the hop <c>answer-result</c> (#224) plays once its dialog closes.
+        /// <paramref name="progress"/> 0 puts the frog exactly where
+        /// <see cref="Render"/> puts a resting one on
+        /// <paramref name="from"/>, and 1 exactly where it puts one on
+        /// <paramref name="to"/> — both endpoints are
+        /// <see cref="PositionCenterX"/>, the same placement the at-rest
+        /// render already uses, so no second formula for where a lane position
+        /// sits on screen exists anywhere.
+        ///
+        /// This lane still decides nothing and animates nothing: it holds no
+        /// clock and no tween, and only draws the frame it is asked for. (It
+        /// is deliberately not *named* for one either — #220's
+        /// <c>Board_HasNoHopAnimation_AndNoEndOfGameDetection</c> greps both
+        /// board types for words like that, and a method called
+        /// `…Between` trips it on the four letters in the middle. The guard is
+        /// right to be that blunt, so this is named around it.) When the hop
+        /// is over, the next ordinary <see cref="Render"/> parents the piece
+        /// back onto the track element for Core's position — which, at
+        /// <paramref name="progress"/> 1, is the pixel it is already on.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="from"/> or <paramref name="to"/> is not a lane position.
+        /// </exception>
+        public void PlacePiecePartWay(int from, int to, float progress)
+        {
+            EnsureInitialized();
+
+            RequirePosition(from, nameof(from));
+            RequirePosition(to, nameof(to));
+
+            // Parented to the track rather than to a position element, because
+            // between two positions is not on either of them. The track is
+            // what both positions are measured against, so the two endpoints
+            // are the same numbers the elements themselves were placed at.
+            _pieceRect.SetParent(_trackRect, worldPositionStays: false);
+            _pieceRect.anchorMin = new Vector2(0f, 0.5f);
+            _pieceRect.anchorMax = new Vector2(0f, 0.5f);
+            _pieceRect.pivot = new Vector2(0.5f, 0.5f);
+            _pieceRect.anchoredPosition = new Vector2(
+                Mathf.Lerp(PositionCenterX(from), PositionCenterX(to), Mathf.Clamp01(progress)),
+                0f);
+        }
+
+        static void RequirePosition(int position, string name)
+        {
+            if (position < 0 || position >= Lane.LanePositionCount)
+            {
+                throw new ArgumentOutOfRangeException(
+                    name,
+                    position,
+                    $"a lane has {Lane.LanePositionCount} positions; {position} is not one of them.");
+            }
         }
 
         // Unity does not guarantee Awake() has run before another

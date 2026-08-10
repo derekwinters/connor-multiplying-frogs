@@ -552,7 +552,18 @@ namespace Frogs.Unity.EditModeTests
                 { "SettingsButtonOutline", 4f },
                 { "RollButtonWidth", 480f },
                 { "RollButtonHeight", 144f },
-                { "RollButtonLabelSize", 56f }
+                { "RollButtonLabelSize", 56f },
+
+                // Added to game-board.md's table by #224, which is the first
+                // issue that turns it into code. It was already named in that
+                // page's own Behaviour prose — "the move is animated on this
+                // screen, after the result dialog closes, over
+                // FrogHopDuration (0.4 s)" — so this is the table catching up
+                // with the page, not a new number. The value is the board's
+                // because the hop happens here; running it is #224's, and
+                // Board_HasNoHopAnimation_AndNoEndOfGameDetection still holds
+                // this screen to playing none of it itself.
+                { "FrogHopDuration", 0.4f }
             };
 
             var laneConstants = new Dictionary<string, float>
@@ -602,21 +613,37 @@ namespace Frogs.Unity.EditModeTests
         [Test]
         public void Board_HasNoHopAnimation_AndNoEndOfGameDetection()
         {
-            // The hop is #224's and the game-over transition is #225's. This
-            // board draws every frog at rest, at whatever position Core
-            // reports, and keeps rendering whatever Core reports for as long
-            // as it is shown. This is the reviewer's grep, as a test.
+            // Running the hop is #224's and the game-over transition is
+            // #225's. This board draws every frog at rest, at whatever
+            // position Core reports, and keeps rendering whatever Core reports
+            // for as long as it is shown. This is the reviewer's grep, as a
+            // test.
             var forbidden = new[]
             {
-                "FrogHopDuration", "ResultHopDelay", "Hop", "Tween", "Coroutine",
+                "ResultHopDelay", "Hop", "Tween", "Coroutine",
                 "Animate", "Animation", "Duration", "Delay",
+                "Elapsed", "Progress", "Advance",
                 "GameOver", "IsOver", "Winner", "Standings", "FinishingOrder"
             };
+
+            // One exemption, and only this exact name. `FrogHopDuration` is a
+            // row on game-board.md's own constants table — the hop happens on
+            // this screen, so the value is this page's — and #224 references
+            // it rather than declaring a second copy of another page's number.
+            // It is a bare `const float` that nothing here reads. What this
+            // test is really about is that no *clock* lives on the board, and
+            // the words above plus the coroutine check below still forbid one.
+            var exempt = new[] { "FrogHopDuration" };
 
             foreach (var type in new[] { typeof(GameBoardScreenView), typeof(GameBoardLaneView) })
             {
                 foreach (var member in DeclaredMembers(type))
                 {
+                    if (exempt.Contains(member))
+                    {
+                        continue;
+                    }
+
                     foreach (var word in forbidden)
                     {
                         Assert.That(

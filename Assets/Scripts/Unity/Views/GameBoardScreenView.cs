@@ -62,6 +62,19 @@ namespace Frogs.Unity.Views
         public const float RollButtonHeight = 144f;
         public const float RollButtonLabelSize = 56f;
 
+        /// <summary>
+        /// How long the frog's hop takes — docs/specs/ui/game-board.md's own
+        /// row, and the board's value rather than the result dialog's: "the
+        /// move is animated on this screen, after the result dialog closes,
+        /// over <c>FrogHopDuration</c> (0.4 s), one pad's distance."
+        ///
+        /// This view still plays no motion of its own. The constant lives here
+        /// because it is this page's, and <c>answer-result</c> (#224) — which
+        /// owns the dialog that closes and starts the hop — references it
+        /// rather than declaring a second copy.
+        /// </summary>
+        public const float FrogHopDuration = 0.4f;
+
         // The other two rows of that table, `LanePositionCount` (9) and
         // `LaneWinningPosition` (8), are Frogs.Core.Lane's own constants,
         // referenced under the identical name rather than redeclared here —
@@ -306,10 +319,10 @@ namespace Frogs.Unity.Views
         /// only thing that re-enables `Roll` — never a timer, and never the
         /// passage of time.
         ///
-        /// Nothing calls this yet: roll-and-card, the working-out grid and
-        /// answer-result (#221/#223/#224) are what will. It is the seam those
-        /// issues wire into, and the stand-in this issue's tests drive
-        /// directly.
+        /// This is the seam the turn's own screens wire into.
+        /// <see cref="AnswerResultDialogView"/> (#224) calls it once the frog
+        /// has landed — after Core's hand-off, so the redraw shows the next
+        /// player's turn and, if that hop got a frog home, its `Home` chip.
         /// </summary>
         public void NotifyTurnResolved()
         {
