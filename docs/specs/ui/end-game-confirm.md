@@ -41,17 +41,33 @@ right.
 | Question size | `ConfirmQuestionSize` | 56 px |
 | Body size | `ConfirmBodySize` | 40 px |
 | Body column width | `ConfirmBodyWidth` | 1048 px |
+| Cost line spacing | `ConfirmBodyLineHeight` | 1.4× |
 
 ## Elements
 
 - **Question** — `End the game for everyone?` The words *for everyone* are the
   point of the sentence.
-- **Cost** — built from the live game state, not a fixed string:
+- **Cost** — built from the live game state, not a fixed string. **Two** of its
+  numbers are live, not one: how many frogs are still swimming, and how many
+  frogs are in the game.
 
     | Situation | Body |
     | --- | --- |
-    | Some frogs still going | `Three frogs are still swimming. Ending it now stops the game for all four players and shows the results.` |
-    | Only one frog left going | `One frog is still swimming. Ending it now stops the game for all four players and shows the results.` |
+    | Some frogs still going | `<Count> frogs are still swimming. Ending it now stops the game for all <roster> players and shows the results.` |
+    | Only one frog left going | `One frog is still swimming. Ending it now stops the game for all <roster> players and shows the results.` |
+
+    `<Count>` is how many frogs are still swimming, spelled as a capitalised
+    word — `Two`, `Three`, `Four`. `<roster>` is how many frogs are in the
+    game, spelled as a lower-case word — `two`, `three`, `four`. Neither is
+    ever a digit, and neither is ever a fixed string: a game is
+    [two to four frogs](game-setup.md#invariants), so *all four players* is
+    simply false in a game of two or three, in the one dialog whose entire
+    protection is that it says something true and specific every time.
+
+    Three frogs still swimming in a four-player game therefore reads *Three
+    frogs are still swimming. Ending it now stops the game for all four players
+    and shows the results.* — the sentence
+    [the mockup](mockups/end-game-confirm.html) draws.
 
     There is no everybody-is-home wording, and there does not need to be:
     [the game ends itself](../reference/index.md#where-v1-fills-a-gap-the-board-leaves-open)
