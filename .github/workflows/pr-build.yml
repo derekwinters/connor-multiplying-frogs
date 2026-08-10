@@ -91,8 +91,12 @@ jobs:
           restore-keys: Library-android-
 
       # The version name, versionCode, and .debug suffix are applied by
-      # BuildStampPreprocessor from these variables — a build pre-processor, so
-      # no build can be produced without them. See docs/engineering/versioning.md.
+      # BuildStampPreprocessor from these values — a build pre-processor, so no
+      # build can be produced without them. See docs/engineering/versioning.md.
+      #
+      # They go in `customParameters`, which unity-builder appends to the
+      # `unity-editor` command line, and not in `env:`, which stops at the
+      # container the editor runs inside (#218).
       - name: Build the debug APK
         if: steps.licence.outputs.present == 'true'
         uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
@@ -100,9 +104,6 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
-          FROGS_BUILD_SHA: ${{ steps.stamp.outputs.build_sha }}
-          FROGS_APPLICATION_ID_SUFFIX: .debug
         with:
           unityVersion: 6000.0.81f1
           targetPlatform: Android
@@ -112,6 +113,7 @@ jobs:
           # not be able to reach from a PR branch.
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}
           allowDirtyBuild: true
+          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsBuildSha ${{ steps.stamp.outputs.build_sha }} -frogsApplicationIdSuffix .debug
 
       - name: Upload the APK
         if: steps.licence.outputs.present == 'true'

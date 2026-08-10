@@ -16,24 +16,22 @@ namespace Frogs.EditorTools
     /// builds, CI builds, and builds started from the editor all go through
     /// here.
     ///
-    /// CI sets the environment; nothing here reads git, because a shallow
-    /// checkout has no history to count:
+    /// CI passes these on the Unity command line; nothing here reads git,
+    /// because a shallow checkout has no history to count:
     ///
-    ///     FROGS_VERSION_CODE            the Android versionCode
-    ///     FROGS_BUILD_SHA               set for a PR build, absent otherwise
-    ///     FROGS_RC_NUMBER               set for a release candidate
-    ///     FROGS_APPLICATION_ID_SUFFIX   ".debug" for a PR or RC build
-    ///     FROGS_ANDROID_PROFILE         "device" or "emulator"
+    ///     -frogsVersionCode           the Android versionCode
+    ///     -frogsBuildSha              set for a PR build, absent otherwise
+    ///     -frogsRcNumber              set for a release candidate
+    ///     -frogsApplicationIdSuffix   ".debug" for a PR or RC build
+    ///     -frogsAndroidProfile        "device" or "emulator"
+    ///
+    /// They used to be environment variables, which never reached the editor
+    /// inside CI's build container — see <see cref="BuildInputs"/> and #218.
     ///
     /// See docs/engineering/versioning.md.
     /// </summary>
     public sealed class BuildStampPreprocessor : IPreprocessBuildWithReport
     {
-        const string ApplicationIdSuffixVariable = "FROGS_APPLICATION_ID_SUFFIX";
-        const string BuildShaVariable = "FROGS_BUILD_SHA";
-        const string RcNumberVariable = "FROGS_RC_NUMBER";
-        const string AndroidProfileVariable = "FROGS_ANDROID_PROFILE";
-
         /// <summary>Early, so later pre-processors see the stamped values.</summary>
         public int callbackOrder => -100;
 
@@ -45,12 +43,12 @@ namespace Frogs.EditorTools
             // without this the app is called after the working directory.
             ProjectBootstrap.ApplyToBuild();
 
-            // Which kind of build this is, decided by which variable CI set.
+            // Which kind of build this is, decided by which value CI passed.
             // An rc number wins over a sha: a release candidate is identified
             // by its position in the queue, because "is this newer than the one
             // I tried yesterday" is not a question a sha answers by eye.
-            var rcNumber = Environment.GetEnvironmentVariable(RcNumberVariable);
-            var sha = Environment.GetEnvironmentVariable(BuildShaVariable);
+            var rcNumber = BuildInputs.RcNumber;
+            var sha = BuildInputs.BuildSha;
 
             if (!string.IsNullOrWhiteSpace(rcNumber))
             {
@@ -78,7 +76,7 @@ namespace Frogs.EditorTools
         /// </summary>
         static void ApplyAndroidProfile()
         {
-            var profile = Environment.GetEnvironmentVariable(AndroidProfileVariable);
+            var profile = BuildInputs.AndroidProfile;
 
             if (string.IsNullOrWhiteSpace(profile))
             {
@@ -104,17 +102,27 @@ namespace Frogs.EditorTools
                     break;
 
                 default:
+                    var source = BuildInputs.Describe(
+                        BuildInputs.AndroidProfileFlag, BuildInputs.AndroidProfileVariable);
+
                     throw new ArgumentException(
-                        $"{AndroidProfileVariable} is '{profile}'. It must be 'device' or "
-                        + "'emulator'; guessing would silently ship the wrong architecture.");
+                        $"The Android build profile is '{profile}'. It must be 'device' or "
+                        + "'emulator'; guessing would silently ship the wrong architecture. "
+                        + $"It comes from {source}.");
             }
 
-            Debug.Log($"Android build profile: {profile}.");
+            // Read back rather than echoing the request: this line is how a
+            // build log answers "did the profile actually take", which is the
+            // question #218 left open.
+            Debug.Log(
+                $"Android build profile: {profile} — "
+                + $"{PlayerSettings.Android.targetArchitectures}, "
+                + $"{PlayerSettings.GetScriptingBackend(NamedBuildTarget.Android)}.");
         }
 
         static void ApplyApplicationIdSuffix()
         {
-            var suffix = Environment.GetEnvironmentVariable(ApplicationIdSuffixVariable);
+            var suffix = BuildInputs.ApplicationIdSuffix;
 
             if (string.IsNullOrWhiteSpace(suffix))
             {

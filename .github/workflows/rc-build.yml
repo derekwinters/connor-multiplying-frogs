@@ -107,6 +107,9 @@ jobs:
       # Same debug signing and .debug suffix as a PR build. An RC is for trying
       # the game, and release signing needs a secret this workflow should not be
       # able to reach.
+      #
+      # `customParameters` rather than `env:`, for the reason in #218: the
+      # editor runs in a container that sees only unity-builder's own variables.
       - name: Build the release candidate
         if: steps.licence.outputs.present == 'true'
         uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
@@ -114,15 +117,13 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
-          FROGS_RC_NUMBER: ${{ steps.stamp.outputs.rc }}
-          FROGS_APPLICATION_ID_SUFFIX: .debug
         with:
           unityVersion: 6000.0.81f1
           targetPlatform: Android
           androidExportType: androidPackage
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-rc${{ steps.stamp.outputs.rc }}
           allowDirtyBuild: true
+          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsRcNumber ${{ steps.stamp.outputs.rc }} -frogsApplicationIdSuffix .debug
 
       # Artifacts only. An RC is not a release: no tag, no GitHub release.
       - name: Upload the release candidate

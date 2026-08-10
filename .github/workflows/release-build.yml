@@ -109,8 +109,16 @@ jobs:
           key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
           restore-keys: Library-android-
 
-      # No FROGS_BUILD_SHA and no FROGS_RC_NUMBER: this is the release, so the
-      # version name is bare. No applicationId suffix either — this is the app.
+      # No build sha and no rc number: this is the release, so the version name
+      # is bare. No applicationId suffix either — this is the app.
+      #
+      # `customParameters`, not `env:`. unity-builder runs the editor inside a
+      # container and forwards only its own allow-list of variables into it, so
+      # a FROGS_* variable set here would never reach Unity — which is exactly
+      # how v0.1.0 shipped two identical APKs (#218). customParameters is
+      # appended verbatim to the `unity-editor` command line, which does
+      # arrive. Guarded by
+      # .github/scripts/tests/test_build_inputs_reach_unity.py.
       - name: Build the device APK
         if: steps.licence.outputs.present == 'true'
         uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
@@ -118,8 +126,6 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
-          FROGS_ANDROID_PROFILE: device
         with:
           unityVersion: 6000.0.81f1
           targetPlatform: Android
@@ -127,6 +133,7 @@ jobs:
           buildsPath: build/device
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}
           allowDirtyBuild: true
+          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsAndroidProfile device
 
       # Its own build path, so the two APKs cannot be confused with each other —
       # they have the same version and differ only in architecture, which is not
@@ -138,8 +145,6 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          FROGS_VERSION_CODE: ${{ steps.stamp.outputs.version_code }}
-          FROGS_ANDROID_PROFILE: emulator
         with:
           unityVersion: 6000.0.81f1
           targetPlatform: Android
@@ -147,6 +152,19 @@ jobs:
           buildsPath: build/emulator
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-emulator
           allowDirtyBuild: true
+          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsAndroidProfile emulator
+
+      # Before attaching, not after. Two profiles that produced one build is a
+      # release that should not go out: an ARM64-only APK labelled "emulator"
+      # fails at install time on someone else's machine, with no build log
+      # anywhere near it. That is what v0.1.0 did (#218).
+      - name: Check the two APKs are the two builds
+        if: steps.licence.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/check_release_apks.py \
+            --device build/device/Android/multiplying-frogs-${{ steps.stamp.outputs.version }}.apk \
+            --emulator build/emulator/Android/multiplying-frogs-${{ steps.stamp.outputs.version }}-emulator.apk
 
       - name: Attach the APKs to the release
         if: steps.licence.outputs.present == 'true'
