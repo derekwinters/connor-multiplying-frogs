@@ -2322,10 +2322,22 @@ because of it. Side by side, the widest card as dealt fits.</p>
 with, and the one ADR-0002 still ends with, both written before the addition
 section could grow. As dealt, the grid ends 948 px
 into a panel whose last usable pixel is 1048 px — about 100 px of slack against
-112 px per extra row, so the section stops fitting on the <em>third</em> of its six
-allowed rows. What to do about that is
-<a href="#open-questions">open question 3</a>; the numbers are worked through under
-<a href="#mockup">Mockup</a>, and the third mockup is the picture of them.</p>
+112 px per extra row, so at full-size rows the section stops fitting on the
+<em>third</em> of its six allowed. What gives is
+<a href="#open-questions">open question 3</a>, settled: the addition rows take
+<code>GridAdditionRowHeight</code> once the section grows, and the grid fits at every
+count up to the cap. The numbers are worked through under <a href="#mockup">Mockup</a>,
+and the third mockup is the picture of them.</p>
+<p><strong>"Centred in the space left over" is the rule, in both directions.</strong>
+Horizontally that space runs from <code>DialogPadding</code> to the keypad column's left
+edge; vertically from the bottom of the header band (<code>GridHeaderHeight</code>) to the
+panel's last usable pixel (<code>DialogMaxHeight</code> less <code>DialogPadding</code>) — 908 px.
+The grid moves within that space as it grows and shrinks, which is what lets a
+six-row section sit higher up the panel than a two-row one. The two committed
+drawings hand-place the as-dealt grid at <code>top: 216</code>, about 12 px above where
+centring puts it, and 2 px apart from each other horizontally; that is what
+hand placement looks like, and the rule — not either drawing's origin — is what
+the screen is built to.</p>
 <h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2347,6 +2359,16 @@ allowed rows. What to do about that is
 <td>8 px</td>
 </tr>
 <tr>
+<td>Digit cell outline</td>
+<td><code>GridCellBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Digit cell corner radius</td>
+<td><code>GridCellRadius</code></td>
+<td>10 px</td>
+</tr>
+<tr>
 <td>Carry strip height</td>
 <td><code>GridCarryRowHeight</code></td>
 <td>56 px</td>
@@ -2357,9 +2379,24 @@ allowed rows. What to do about that is
 <td>56 × 52 px</td>
 </tr>
 <tr>
+<td>Carry box outline</td>
+<td><code>GridCarryBoxBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Carry box corner radius</td>
+<td><code>GridCarryBoxRadius</code></td>
+<td>8 px</td>
+</tr>
+<tr>
 <td>Rule line thickness</td>
 <td><code>GridRuleThickness</code></td>
 <td>6 px</td>
+</tr>
+<tr>
+<td>Addition row height, once the section is grown</td>
+<td><code>GridAdditionRowHeight</code></td>
+<td>56 px</td>
 </tr>
 <tr>
 <td>Answer row height</td>
@@ -2377,6 +2414,61 @@ allowed rows. What to do about that is
 <td>56 px</td>
 </tr>
 <tr>
+<td>Digit size in a 56 px box — a grown addition row, a carry box</td>
+<td><code>GridSmallDigitSize</code></td>
+<td>28 px</td>
+</tr>
+<tr>
+<td><code>=</code> in the operator column</td>
+<td><code>GridEqualsSize</code></td>
+<td>28 px</td>
+</tr>
+<tr>
+<td>Header band, panel top down to the bottom of the chip</td>
+<td><code>GridHeaderHeight</code></td>
+<td>140 px</td>
+</tr>
+<tr>
+<td>Header row, down from the panel's top edge</td>
+<td><code>GridHeaderTop</code></td>
+<td>44 px</td>
+</tr>
+<tr>
+<td>Gap between the header's three items</td>
+<td><code>GridHeaderGap</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td><code>Work it out</code></td>
+<td><code>GridPromptSize</code></td>
+<td>44 px</td>
+</tr>
+<tr>
+<td>Card readout pill height</td>
+<td><code>GridCardReadoutHeight</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td>Card readout pill padding, each side</td>
+<td><code>GridCardReadoutPaddingX</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Card readout pill corner radius</td>
+<td><code>GridCardReadoutRadius</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td>Card readout pill outline</td>
+<td><code>GridCardReadoutBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Card readout label</td>
+<td><code>GridCardReadoutLabelSize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
 <td>Addition rows a card is dealt</td>
 <td><code>GridAdditionRowsAtStart</code></td>
 <td>2 rows</td>
@@ -2387,6 +2479,11 @@ allowed rows. What to do about that is
 <td>6 rows</td>
 </tr>
 <tr>
+<td>Keypad, down from the panel's top edge</td>
+<td><code>KeypadTop</code></td>
+<td>216 px</td>
+</tr>
+<tr>
 <td>Keypad key, square</td>
 <td><code>KeypadKeySize</code></td>
 <td>140 px</td>
@@ -2395,6 +2492,31 @@ allowed rows. What to do about that is
 <td>Gap between keys</td>
 <td><code>KeypadKeyGap</code></td>
 <td>16 px</td>
+</tr>
+<tr>
+<td>Key corner radius</td>
+<td><code>KeypadKeyRadius</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td>Key outline</td>
+<td><code>KeypadKeyBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Digit key label</td>
+<td><code>KeypadKeyLabelSize</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Backspace glyph</td>
+<td><code>KeypadBackspaceLabelSize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td><code>clear</code> label</td>
+<td><code>KeypadClearLabelSize</code></td>
+<td>32 px</td>
 </tr>
 <tr>
 <td>Keypad width (3 keys + 2 gaps)</td>
@@ -2417,11 +2539,29 @@ allowed rows. What to do about that is
 are in this table anyway, because the number of rows the addition section starts
 and stops at is exactly the kind of number that otherwise ends up as an unnamed
 <code>2</code> in <code>Core</code> and an unnamed <code>6</code> in the Unity shell, and then only one of them
-gets changed.</p>
-<p><strong>A grown row has no size constant of its own.</strong> It is an ordinary row of
-ordinary cells: <code>GridCellSize</code> tall, <code>GridCellGap</code> below the row above it, the
-same cells the section already has. Growing the section costs
-<code>GridCellSize</code> + <code>GridCellGap</code> = 112 px of height per row and nothing else.</p>
+gets changed. They are the two rows on this table <code>Core</code> owns
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>),
+and the shell references them rather than keeping a copy.</p>
+<p><strong>Every value above is a number a drawing already fixed</strong>, except two:
+<code>GridAdditionRowHeight</code>, which is Derek's answer to
+<a href="#open-questions">open question 3</a>, and <code>GridSmallDigitSize</code>, which is what a
+digit has to shrink to in order to sit inside a 56 px-tall box. No committed
+drawing shows a digit in one — no mockup fills a carry box, and the grown
+drawing's rows are empty — so it is the one number here read off a proportion
+instead of a picture: the same share of its box's height that <code>GridDigitSize</code>
+(56 px) is of <code>GridCellSize</code> (104 px), which lands on the 28 px the drawings
+already use for their smallest glyph.</p>
+<p><strong>A grown row has a size constant of its own</strong>, and did not until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>.
+Once the section holds more rows than a card is dealt, every row in it —
+including the two that were dealt — is <code>GridAdditionRowHeight</code> tall rather than
+<code>GridCellSize</code>, with <code>GridSmallDigitSize</code> digits inside. Nothing else in the
+grid changes size, ever: the multiplicand and multiplier rows, both rule lines,
+both carry strips and the answer row are the same height at two rows as at six.
+Growing the section therefore costs <code>GridAdditionRowHeight</code> + <code>GridCellGap</code> =
+64 px per row instead of the 112 px it would cost at full size, and the first
+grown row <em>shrinks</em> the grid rather than stretching it — see
+<a href="#mockup">Mockup</a> for the whole sum.</p>
 <h3 id="how-many-columns-and-rows">How many columns and rows<a class="headerlink" href="#how-many-columns-and-rows" title="Link to this section">&para;</a></h3>
 <p>The card decides the columns. The card and the player between them decide the
 rows.</p>
@@ -2537,7 +2677,11 @@ past it.</p>
   not to do.</li>
 <li><strong>A grown row is indistinguishable from a dealt one.</strong> Same cells, same
     size, same border, no tint, no badge, nothing that says "you added this".
-    The section is scratch paper and scratch paper does not annotate itself.</li>
+    The section is scratch paper and scratch paper does not annotate itself.
+    The smaller <code>GridAdditionRowHeight</code> a grown section takes applies to <em>every</em>
+    row in it, the two dealt ones included — a section where the first two rows
+    were taller than the four below them would be exactly the "you added this"
+    marking this bullet rules out.</li>
 <li>The <code>+</code> glyph sits in the operator column of the <strong>bottom row of the
     section</strong>, wherever the bottom currently is, which is where the committed
     two-row drawing already puts it. Growing the section moves the glyph down
@@ -2560,18 +2704,36 @@ past it.</p>
   current bottom row appends another row beneath it, still above the answer row.
   That repeats each time the new bottom row is written in, until the section
   holds <code>GridAdditionRowsMax</code> rows, after which nothing more is appended. A
-  single digit is enough; the row does not have to be finished first.</li>
+  single digit is enough; the row does not have to be finished first. The whole
+  section takes <code>GridAdditionRowHeight</code> from the moment it holds more rows than
+  the card dealt it, and keeps it until it is back to that count.</li>
 <li>Nothing prompts the player to grow the section and nothing rewards it. A
   player who carries with the superscript boxes never sees a third addition row,
   and a player who has never been shown the superscript boxes never has to use
   them.</li>
-<li><strong>Whether a grown row can be taken away again is not specified here.</strong> Neither
-  <code>backspace</code> nor <code>clear</code> is described as removing a row, and neither is
-  described as leaving one behind. It is a question, not an omission — see
-  <a href="#open-questions">open question 5</a>.</li>
+<li><strong>Shrinking it again.</strong> Backspacing the last digit out of a grown row removes
+  the row (<a href="#open-questions">open question 5</a>, settled). Only the section's
+  <em>bottom</em> row can go, and only a grown one: <code>GridAdditionRowsAtStart</code> is the
+  floor, because no card is ever dealt fewer, and emptying a row further up the
+  section leaves an empty row where it is. <code>clear</code> never removes a row — it is
+  described as emptying a block, not as taking one away, and the settled answer
+  is about backspace.</li>
 <li>No timer, ever. <code>331 × 41</code> on paper takes as long as it takes.</li>
 <li>There is no <code>undo</code>, only backspace and <code>clear</code> — and <code>clear</code> empties only the
-  cell block you are in, not the whole grid.</li>
+  cell block you are in, not the whole grid. <strong>A block is a row</strong>: <code>clear</code>
+  empties every cell of the row the caret is in and touches nothing above or
+  below it. That is the narrowest reading of the sentence above, chosen in
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>
+  rather than invented — the wider readings (the section, the grid) are the ones
+  the sentence rules out.</li>
+<li>Backspace takes the digit in the caret's own cell, or — if that cell is
+  already empty — the digit most recently typed anywhere in the same block, and
+  moves the caret to wherever it just took one from. It never reaches outside
+  the block.</li>
+<li>After a digit lands, the caret steps one cell to the left, in whatever row it
+  is in, and stops at the leftmost digit column. That is the answer row's
+  right-to-left fill applied everywhere, because the addition rows and the carry
+  strips are worked out in the same direction.</li>
 <li>Hardware back does nothing.</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
@@ -2586,46 +2748,83 @@ pair for the reason they always were: "the grid shrinks to fit the card" is a
 claim best checked by looking at the biggest and the smallest next to each
 other. The easy one is now the same height as the hard one and narrower, which
 is what that claim has been reduced to.</p>
-<p><strong>The third is a question, not an agreed picture.</strong> It is the same screen as the
-first with the addition section at <code>GridAdditionRowsMax</code> instead of
-<code>GridAdditionRowsAtStart</code>, everything else identical, at today's constants — and
-at today's constants it does not fit:</p>
+<p><strong>The third is the answer to <a href="#open-questions">open question 3</a>, and it used to
+be the question.</strong> It is the same screen as the first with the addition section
+at <code>GridAdditionRowsMax</code> instead of <code>GridAdditionRowsAtStart</code>. Drawn at
+full-size addition rows — which is how it was first committed, deliberately
+overflowing, as the input to that question — it did not fit. Drawn at
+<code>GridAdditionRowHeight</code>, which is what Derek settled, it does.</p>
+<p>The space: the dialog is <code>DialogMaxHeight</code> (1104 px) tall and <code>DialogPadding</code>
+(56 px) of that is not usable, so the last usable pixel is 1048 px into the
+panel, and the header band takes the first <code>GridHeaderHeight</code> (140 px). That
+leaves <strong>908 px</strong>.</p>
+<p>Everything that is the same height at every count — two carry strips (56 each),
+the multiplicand and multiplier rows (104 each), two rule lines (6 each) and the
+answer row (128) — comes to <strong>460 px</strong>. The gaps are <code>GridCellGap</code> (8 px) between
+every pair of the 7 + <em>n</em> things stacked, so 8 × (6 + <em>n</em>). The addition rows are
+whatever <em>n</em> rows at whatever height the section is currently drawn at:</p>
 <table>
 <thead>
 <tr>
-<th></th>
+<th>Addition rows</th>
+<th>Row height</th>
 <th>Grid height</th>
-<th>Ends, measured into the panel</th>
+<th>Against the 908 px available</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>GridAdditionRowsAtStart</code> (2 rows)</td>
-<td>732 px</td>
-<td>948 px, about 100 px of slack</td>
+<td>2 — as dealt</td>
+<td><code>GridCellSize</code>, 104 px</td>
+<td>460 + 208 + 64 = <strong>732 px</strong></td>
+<td>fits, 176 px spare</td>
 </tr>
 <tr>
-<td><code>GridAdditionRowsMax</code> (6 rows)</td>
-<td>1180 px</td>
-<td>1396 px</td>
+<td>3</td>
+<td><code>GridAdditionRowHeight</code>, 56 px</td>
+<td>460 + 168 + 72 = <strong>700 px</strong></td>
+<td>fits, 208 px spare</td>
+</tr>
+<tr>
+<td>4</td>
+<td>56 px</td>
+<td>460 + 224 + 80 = <strong>764 px</strong></td>
+<td>fits, 144 px spare</td>
+</tr>
+<tr>
+<td>5</td>
+<td>56 px</td>
+<td>460 + 280 + 88 = <strong>828 px</strong></td>
+<td>fits, 80 px spare</td>
+</tr>
+<tr>
+<td>6 — the cap</td>
+<td>56 px</td>
+<td>460 + 336 + 96 = <strong>892 px</strong></td>
+<td>fits, <strong>16 px spare</strong></td>
+</tr>
+<tr>
+<td><em>6, at full-size rows</em></td>
+<td><em>104 px</em></td>
+<td><em>460 + 624 + 96 = 1180 px</em></td>
+<td><em>272 px too tall — the old third mockup</em></td>
 </tr>
 </tbody>
 </table>
-<p>The dialog is <code>DialogMaxHeight</code> (1104 px) tall and <code>DialogPadding</code> (56 px) of
-that is not usable, so the last usable pixel is 1048 px into the panel. The
-header takes the first 140 px. That leaves <strong>908 px for a grid that wants
-1180 px</strong> — 272 px too tall even shoved right up under the header, with the grid
-free to re-centre upward under the <a href="#anchors">Anchors</a> rule. The second rule
-line, the second carry strip and <strong>the answer row itself</strong> all end up below the
-bottom edge of the tablet.</p>
-<p>That overrun is drawn rather than described because it is the input to
-<a href="#open-questions">open question 3</a>. A mockup that visibly overflows is the
-correct result here: the wireframe's job was to find out what the cap costs at
-today's numbers, not to pick the fix.</p>
+<p>Two things worth saying out loud about that column of sums. <strong>The margin at the
+cap is 16 px</strong>, so this fits and does not fit comfortably: anything that grows
+the fixed 460 px — a taller answer row, a third carry strip, a heavier rule —
+pushes the six-row grid off the bottom again, and the sum above is where to
+check that. And <strong>the grid gets shorter before it gets taller</strong>: the third row
+takes the whole section down to 56 px, so growing it the first time shrinks the
+grid from 732 px to 700 px, and it only passes its as-dealt height at the fifth
+row. That is the cost of one shrunk height for the whole section rather than a
+different height at every count, and it is a visible jump the first time a
+player grows a row.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <p>Questions 2 to 5 arrived with the growable addition section
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>).
-Question 6 is older. Questions 1 and 5 are settled; 2, 3, 4 and 6 are not
+Question 6 is older. Questions 1, 3 and 5 are settled; 2, 4 and 6 are not
 answered by anything Derek has said yet.</p>
 <ul>
 <li>
@@ -2661,14 +2860,28 @@ itself is what #255 answered.</p>
   answer, because that is where the committed drawing has it.</p>
 </li>
 <li>
-<p><strong>3. What happens when the section outgrows the dialog?</strong> Not decided, and by
-  the measurements above this is not a distant edge case: the section stops
-  fitting on its <strong>third</strong> row, and at the cap the answer row is off the bottom
-  of the tablet entirely. Options include scrolling the <code>grid</code> region, shrinking
-  <code>GridCellSize</code> once the section passes some count, shrinking it for the whole
+<p><strong>3. What happens when the section outgrows the dialog? Settled: smaller
+  cells for the addition rows only.</strong> At full-size rows the section stopped
+  fitting on its <strong>third</strong>, and at the cap the answer row was off the bottom of
+  the tablet entirely. The options were scrolling the <code>grid</code> region, shrinking
+  <code>GridCellSize</code> once the section passed some count, shrinking it for the whole
   grid up front, giving the addition section its own smaller row height, or
-  lowering <code>GridAdditionRowsMax</code> to what fits — which is 2 today. Each one costs
-  something different, and picking one is a layout decision.</p>
+  lowering <code>GridAdditionRowsMax</code> to the 2 that fitted.</p>
+<p>Derek's call on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>:
+"Smaller cells for addition rows only." The section gets
+<code>GridAdditionRowHeight</code> (56 px) the moment it holds more rows than the card
+dealt it; the multiplicand and multiplier rows, both rule lines, both carry
+strips and the answer row stay exactly the size they are today, at every
+count. The problem stays full-size and legible, and the scratch paper is
+what shrinks — which is the right way round, since the scratch paper is the
+part nobody checks.</p>
+<p>The sum is in <a href="#mockup">Mockup</a> and it was re-run rather than assumed: six
+grown rows make an <strong>892 px</strong> grid in <strong>908 px</strong> of space, so it fits with
+16 px to spare, and the third mockup now draws that instead of the overflow.
+Two consequences worth knowing: the margin at the cap is thin enough that
+any future growth in the fixed rows breaks it again, and the grid gets
+<em>shorter</em> when the third row appears before it gets taller again at the
+fifth.</p>
 </li>
 <li>
 <p><strong>4. Does the one-digit card's addition section get the second rule line and
@@ -2688,11 +2901,15 @@ itself is what #255 answered.</p>
   reports the grid for a given <code>(card, addition row count)</code> snapshot, so a
   shrink is nothing more than the next snapshot's count being one lower — it
   does not need an operation of its own. <code>GridAdditionRowsAtStart</code> is the
-  floor: no snapshot may ask for fewer, because no card is ever dealt fewer.
-  What is not settled, and is not this page's or <code>Core</code>'s to settle: whether
-  removing a row the player isn't currently at (not the section's bottom row)
-  is reachable at all — that is the caret-and-keypad interaction policy, owned
-  by whichever issue builds turn interaction.</p>
+  floor: no snapshot may ask for fewer, because no card is ever dealt fewer.</p>
+<p>The interaction policy this left open — whether removing a row the player
+isn't currently at is reachable at all — was owned by whichever issue built
+turn interaction, which is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>,
+and it answered <strong>no</strong>. Only the section's bottom row is ever removed, and
+only by backspacing its last digit out; emptying a row further up leaves an
+empty row exactly where it is, and <code>clear</code> never removes a row at all. See
+<a href="#behaviour">Behaviour</a>.</p>
 </li>
 <li>
 <p><strong>6. Should the keypad have an <code>=</code>?</strong> No, currently: <code>Check it</code> is the commit,
