@@ -98,12 +98,14 @@ and the renumbering at once.
 
 ## Open questions
 
-- **Does a saved game change this screen?**
-  [ADR-0004](../../adr/0004-core-owns-the-save-format.md) puts a save format in
-  Core. If a game in progress can be resumed, the resume entry point is most
-  likely here or on the [title screen](title-screen.md), and either way it is a
-  new element that needs adding to a wireframe. Not decided; nothing on this
-  screen assumes it.
+- **Does a saved game change this screen?** **Answered: no.**
+  [#228](https://github.com/derekwinters/connor-multiplying-frogs/issues/228)
+  settled that a game in progress is re-entered from the
+  [title screen](title-screen.md), which gained a `RESUME` button beside `NEW`.
+  Nothing on this screen changes: a resumed game does not pass through setup,
+  because its roster was chosen here when that game was started.
+  [ADR-0004](../../adr/0004-core-owns-the-save-format.md)'s save format is still
+  the thing that has to exist behind that button, and it does not exist yet.
 - **Should the four colours be reorderable?** Proposed: no. Turn order is
   tap order, which is one gesture rather than two, and re-ordering is a drag
   interaction on a screen four children are all reaching at.

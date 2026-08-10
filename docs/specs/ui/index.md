@@ -15,7 +15,7 @@ Every screen and every dialog in v1, in the order a game meets them.
 
 | Page | What it is |
 | --- | --- |
-| [Title screen](title-screen.md) | The way in. One button. |
+| [Title screen](title-screen.md) | The way in. Carry on, or start a new game. |
 | [Game setup](game-setup.md) | Which frogs are playing, and in what order |
 | [Game board](game-board.md) | The pond, the lanes, and `Roll` |
 | [Roll and card](roll-and-card.md) | The die, the pile it maps to, the card you drew |
