@@ -107,6 +107,52 @@ def _post(url: str, headers: dict, body: bytes):
         return response.status, response.read().decode(errors="replace")
 
 
+def announce(issue_number: int) -> None:
+    """Say the fire is about to go out, **before** the POST.
+
+    Before, specifically. If the request hangs until the job times out, or the
+    runner dies mid-flight, a line printed afterwards is a line nobody ever
+    sees — and the log then stops at the label move, which reads as "the fire
+    was never attempted" rather than "the fire was attempted and went nowhere".
+    """
+    print(f"Sending triage webhook for issue #{issue_number}...", flush=True)
+
+
+def report(result: FireResult, issue_number: int) -> None:
+    """Print what came back, as an annotation the job summary surfaces.
+
+    The endpoint and the secret are never printed. `AI_TRIAGE_URL` is itself a
+    secret, and GitHub masks only exact matches — a host fragment reconstructed
+    into a log line is a leak nothing would catch.
+    """
+    detail = f" {result.detail}" if result.detail else ""
+
+    if result.fired:
+        print(f"Triage webhook for issue #{issue_number}: {result.outcome}.{detail}",
+              flush=True)
+        return
+
+    # Not configured is a choice not yet made, not a fault. Annotating it as an
+    # error would train everyone to ignore the annotation that matters.
+    level = "error" if result.is_error else "notice"
+    print(f"::{level}::Triage webhook for issue #{issue_number}: "
+          f"{result.outcome}.{detail}", flush=True)
+
+
+def fire_and_report(issue_number: int, repository: str, url: str, secret: str,
+                    post=None) -> FireResult:
+    """`fire`, with the outcome logged either side of it. Never raises.
+
+    The one entry point every caller should use. `fire` classifies the outcome
+    truthfully precisely so a misconfigured Routine cannot hide behind a green
+    log line — which only works if the classification is printed. See #231.
+    """
+    announce(issue_number)
+    result = fire(issue_number, repository, url, secret, post=post)
+    report(result, issue_number)
+    return result
+
+
 def fire_from_env(issue_number: int) -> FireResult:
     """`fire`, with the endpoint read from the environment.
 
@@ -116,7 +162,7 @@ def fire_from_env(issue_number: int) -> FireResult:
     and a few hours of extra latency is not a reason to report the command as
     failed.
     """
-    return fire(
+    return fire_and_report(
         issue_number,
         os.environ.get("GITHUB_REPOSITORY", ""),
         os.environ.get("AI_TRIAGE_URL"),

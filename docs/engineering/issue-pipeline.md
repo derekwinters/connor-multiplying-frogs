@@ -576,6 +576,36 @@ as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a `401`
 says the secret is wrong rather than just failing.
 
+#### And the classification is printed
+
+Classifying an outcome nobody prints buys nothing. Every fire writes two lines
+to the job log: one **before** the request saying it is about to go out, and one
+after saying what came back.
+
+Before, specifically. A line printed only afterwards is a line nobody sees when
+the request hangs until the job times out — and the log then stops at the label
+move, which reads as *the fire was never attempted* rather than *the fire was
+attempted and went nowhere*.
+
+A failed fire is a GitHub Actions `::error::` annotation. `not-configured` is a
+`::notice::`, because a secret nobody has set yet is a choice not yet made
+rather than a fault, and annotating it as an error trains everyone to ignore the
+annotation that matters.
+
+**Neither line contains the endpoint or the secret.** `AI_TRIAGE_URL` is itself
+a secret, and GitHub masks only exact matches — a host fragment reassembled into
+a log line is a leak nothing would catch.
+
+This was [#231](https://github.com/derekwinters/connor-multiplying-frogs/issues/231):
+the classification above was implemented and then discarded at every call site,
+so a Routine that never ran produced a log identical to one that worked. The
+page described the intended behaviour and the code did not deliver it; the code
+is what changed.
+
+A failed fire still never fails the command. The label move has already landed
+by then, and the nightly round will pick the issue up — the cost is latency, not
+correctness.
+
 #### The payload is not a place to put instructions
 
 The POST body's freeform text names **only the repository and the issue
