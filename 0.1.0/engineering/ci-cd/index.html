@@ -1826,6 +1826,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-android-segment-is-the-builders-not-ours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Android/ segment is the builder's, not ours
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2599,6 +2610,17 @@
     <span class="md-ellipsis">
       
         Two APKs, in two build paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-android-segment-is-the-builders-not-ours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Android/ segment is the builder's, not ours
       
     </span>
   </a>
@@ -3417,6 +3439,50 @@ permanent.</p>
 directory. The two have the same version and differ only in architecture, which
 is not visible from a filename sitting next to another filename — separate
 paths make it impossible for the wrong one to be picked up by a glob.</p>
+<h4 id="the-android-segment-is-the-builders-not-ours">The <code>Android/</code> segment is the builder's, not ours<a class="headerlink" href="#the-android-segment-is-the-builders-not-ours" title="Link to this section">&para;</a></h4>
+<p><code>game-ci/unity-builder</code> writes to <strong><code>&lt;buildsPath&gt;/&lt;targetPlatform&gt;/</code></strong> — it
+appends the platform directory itself, whether or not <code>buildsPath</code> was set. So
+the APKs land in <code>build/device/Android/</code> and <code>build/emulator/Android/</code>, and
+anything reading them must include that segment:</p>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th><code>buildsPath</code></th>
+<th>Where the APK actually lands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pr-build</code>, <code>rc-build</code></td>
+<td>default (<code>build</code>)</td>
+<td><code>build/Android/</code></td>
+</tr>
+<tr>
+<td><code>release-build</code></td>
+<td><code>build/device</code>, <code>build/emulator</code></td>
+<td><code>build/device/Android/</code>, <code>build/emulator/Android/</code></td>
+</tr>
+</tbody>
+</table>
+<p>Getting this wrong is quiet rather than loud. The attach step runs under
+<code>shopt -s nullglob</code>, so a pattern that matches nothing simply disappears — both
+Unity builds go green, the assets array comes out empty, and the step reports
+that the build produced no APK when it produced two. That is what left <code>v0.1.0</code>
+tagged with no APK on it (#212).</p>
+<p>Two things now stop it recurring:</p>
+<ul>
+<li><strong><code>.github/scripts/tests/test_build_output_paths.py</code></strong> asserts the invariant
+  across every workflow that runs a Unity build: each APK path must sit under
+  the <code>&lt;buildsPath&gt;/&lt;targetPlatform&gt;/</code> of a build in the same file, and each
+  build path must be read by something. A <code>buildsPath</code> and the glob consuming
+  it cannot drift apart, and a build profile nobody collects is a failure too.
+  It runs in <code>Gate tests</code> with the other CI-script tests.</li>
+<li><strong>The attach step names what it searched</strong>, and says for each path whether
+  the directory was missing, empty, or held files that were not <code>*.apk</code> —
+  because "the build produced nothing" and "nothing matched the glob" have
+  completely different fixes and used to be the same message.</li>
+</ul>
 <p>The profile is applied by <code>BuildStampPreprocessor</code> from <code>FROGS_ANDROID_PROFILE</code>,
 and an unrecognised value fails the build rather than defaulting: guessing here
 ships the wrong architecture, which looks fine until someone installs it.</p>
