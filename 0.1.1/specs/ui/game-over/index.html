@@ -2151,14 +2151,34 @@ worth dimming.</p>
 <td>88 px</td>
 </tr>
 <tr>
+<td>Headline top offset</td>
+<td><code>GameOverHeadlineTop</code></td>
+<td>64 px</td>
+</tr>
+<tr>
 <td>Standings column width</td>
 <td><code>StandingsRowWidth</code></td>
 <td>1200 px</td>
 </tr>
 <tr>
+<td>Standings column top offset</td>
+<td><code>StandingsColumnTop</code></td>
+<td>250 px</td>
+</tr>
+<tr>
 <td>Row height</td>
 <td><code>StandingsRowHeight</code></td>
 <td>140 px</td>
+</tr>
+<tr>
+<td>Row inner horizontal padding</td>
+<td><code>StandingsRowPadding</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td>Gap between a row's place/swatch/name/progress</td>
+<td><code>StandingsRowInnerGap</code></td>
+<td>32 px</td>
 </tr>
 <tr>
 <td>Gap between rows</td>
@@ -2171,9 +2191,19 @@ worth dimming.</p>
 <td>24 px</td>
 </tr>
 <tr>
+<td>Ordinary row border</td>
+<td><code>StandingsRowBorder</code></td>
+<td>3 px</td>
+</tr>
+<tr>
 <td>Winner row border</td>
 <td><code>StandingsWinnerBorder</code></td>
 <td>6 px</td>
+</tr>
+<tr>
+<td>Place number column width</td>
+<td><code>StandingsPlaceWidth</code></td>
+<td>80 px</td>
 </tr>
 <tr>
 <td>Place number size</td>
@@ -2195,8 +2225,19 @@ worth dimming.</p>
 <td><code>StandingsProgressSize</code></td>
 <td>44 px</td>
 </tr>
+<tr>
+<td>Rows' entry-reveal duration (total)</td>
+<td><code>StandingsRevealDuration</code></td>
+<td>0.4 s</td>
+</tr>
 </tbody>
 </table>
+<p>The <code>controls</code> row sits on the bottom safe-area line, <code>SafeMargin</code> (48 px) in
+from each edge — the same constant <a href="../title-screen/">title screen</a> and
+<a href="../game-setup/">game setup</a> already name, not a second margin of its own. The
+progress readout's denominator is <code>LaneWinningPosition</code> (8) from
+<a href="../game-board/">game board</a>; <code>LanePositionCount</code> (9) counts the Start log too
+and is not the number this readout means.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Headline</strong> — <code>&lt;Colour&gt; frog wins!</code> when a frog reached the End log. If the
