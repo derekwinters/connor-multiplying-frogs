@@ -2101,6 +2101,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#an-error-status-is-an-answer-not-a-failure-to-reach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An error status is an answer, not a failure to reach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#and-the-classification-is-printed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3229,6 +3240,17 @@
     <span class="md-ellipsis">
       
         The outcome is classified truthfully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#an-error-status-is-an-answer-not-a-failure-to-reach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An error status is an answer, not a failure to reach
       
     </span>
   </a>
@@ -4406,6 +4428,18 @@ now have one.</p>
 as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a <code>401</code>
 says the secret is wrong rather than just failing.</p>
+<h4 id="an-error-status-is-an-answer-not-a-failure-to-reach">An error status is an answer, not a failure to reach<a class="headerlink" href="#an-error-status-is-an-answer-not-a-failure-to-reach" title="Link to this section">&para;</a></h4>
+<p><code>urlopen</code> raises on any 4xx or 5xx rather than returning it, so an error status
+has to be caught and turned back into a <code>(status, body)</code> pair. Skipping that
+step costs three things at once, and
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/236">#236</a> cost
+all three: the response body is discarded, which for a <code>400</code> is the only thing
+that names the field the endpoint rejected; the classification above becomes
+unreachable on every error path, so the "your secret is wrong" message can never
+print; and every HTTP error reports as <em>"could not reach the Routine"</em>, which
+sends you looking at networking while the endpoint is up and answering.</p>
+<p>Only a genuine transport failure — a refused connection, a timeout, DNS — is
+reported as unreachable.</p>
 <h4 id="and-the-classification-is-printed">And the classification is printed<a class="headerlink" href="#and-the-classification-is-printed" title="Link to this section">&para;</a></h4>
 <p>Classifying an outcome nobody prints buys nothing. Every fire writes two lines
 to the job log: one <strong>before</strong> the request saying it is about to go out, and one
