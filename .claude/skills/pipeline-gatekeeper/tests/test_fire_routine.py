@@ -197,3 +197,83 @@ def _capture(action) -> list:
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
         action()
     return [line for line in (out.getvalue() + err.getvalue()).splitlines() if line]
+
+
+class HttpErrorTests(unittest.TestCase):
+    """An HTTP error is an answer, not a failure to reach.
+
+    `urlopen` raises `HTTPError` on 4xx/5xx, so before #236 every one of them
+    propagated to `fire`'s catch-all and was reported as a transport failure —
+    discarding the response body, which for a 400 is the only thing that says
+    what the endpoint rejected.
+    """
+
+    def test_post_returns_an_http_error_instead_of_raising(self):
+        body = '{"error": {"message": "unexpected field: text"}}'
+
+        with _urlopen_raising(_http_error(400, body)):
+            status, returned = fire_routine._post("https://x", {}, b"{}")
+
+        self.assertEqual(400, status)
+        self.assertIn("unexpected field: text", returned)
+
+    def test_the_endpoints_own_words_reach_the_reported_detail(self):
+        # The whole point: a 400 must say what the endpoint disliked.
+        with _urlopen_raising(_http_error(400, '{"error": "no such trigger"}')):
+            result = fire_routine.fire(42, "owner/repo", "https://x", "s")
+
+        self.assertFalse(result.fired)
+        self.assertEqual("http-error", result.outcome)
+        self.assertIn("no such trigger", result.detail)
+
+    def test_a_401_now_says_the_secret_is_wrong(self):
+        # This branch of `interpret_fire_response` was unreachable before.
+        with _urlopen_raising(_http_error(401, "unauthorized")):
+            result = fire_routine.fire(42, "owner/repo", "https://x", "s")
+
+        self.assertEqual("unauthorized", result.outcome)
+        self.assertIn("AI_TRIAGE_SECRET", result.detail)
+
+    def test_a_genuine_transport_failure_is_still_unreachable(self):
+        import urllib.error
+
+        with _urlopen_raising(urllib.error.URLError("connection refused")):
+            result = fire_routine.fire(42, "owner/repo", "https://x", "s")
+
+        self.assertFalse(result.fired)
+        self.assertEqual("error", result.outcome)
+        self.assertIn("Could not reach", result.detail)
+
+    def test_a_long_error_body_stays_bounded(self):
+        with _urlopen_raising(_http_error(400, "x" * 5000)):
+            result = fire_routine.fire(42, "owner/repo", "https://x", "s")
+
+        self.assertLess(len(result.detail), fire_routine.BODY_SNIPPET_LIMIT + 200)
+
+
+def _http_error(status, body):
+    import io
+    import urllib.error
+
+    return urllib.error.HTTPError(
+        "https://x", status, "Bad Request", {}, io.BytesIO(body.encode()))
+
+
+def _urlopen_raising(error):
+    """Patch the module's `urlopen` so nothing touches the network."""
+    import contextlib
+
+    @contextlib.contextmanager
+    def patched():
+        real = fire_routine.urllib.request.urlopen
+
+        def fake(*args, **kwargs):
+            raise error
+
+        fire_routine.urllib.request.urlopen = fake
+        try:
+            yield
+        finally:
+            fire_routine.urllib.request.urlopen = real
+
+    return patched()

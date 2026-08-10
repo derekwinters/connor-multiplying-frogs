@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.error
 import urllib.request
 
 BODY_SNIPPET_LIMIT = 300
@@ -99,12 +100,26 @@ def interpret_fire_response(status: int, body: str) -> FireResult:
 
 
 def _post(url: str, headers: dict, body: bytes):
+    """POST and return `(status, body)` — including for a 4xx or 5xx.
+
+    `urlopen` **raises** `HTTPError` on any error status rather than returning
+    it, so without this every one of them reached `fire`'s catch-all and was
+    reported as a failure to reach the endpoint. That threw away the response
+    body — which, for a `400`, is the only thing that says what the endpoint
+    rejected — and made `interpret_fire_response`'s error branches unreachable.
+
+    `HTTPError` is itself a response: it carries the status and is readable. So
+    it is caught and returned, and only genuine transport failures raise.
+    """
     request = urllib.request.Request(url, data=body, method="POST")
     for name, value in headers.items():
         request.add_header(name, value)
 
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return response.status, response.read().decode(errors="replace")
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return response.status, response.read().decode(errors="replace")
+    except urllib.error.HTTPError as answered:
+        return answered.code, answered.read().decode(errors="replace")
 
 
 def announce(issue_number: int) -> None:
