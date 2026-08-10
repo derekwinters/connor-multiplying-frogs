@@ -11,8 +11,7 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 
 | Screen | Mockup | Spec page |
 | --- | --- | --- |
-| Title screen — `NEW` primary | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
-| Title screen — `RESUME` primary | [`title-screen-resume-primary.html`](title-screen-resume-primary.html) | [Title screen](../title-screen.md) |
+| Title screen | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
 | Game setup | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
@@ -25,12 +24,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
 
-Three screens have more than one mockup, for two different reasons.
-
-Two of them are drawing **a state that only exists in contrast** — a state you
-have to see next to its opposite. The grid is drawn at the biggest and the
-smallest problem the game can deal, and the result dialog is drawn right and
-wrong. Both files in each pair are agreed pictures of the same screen.
+Two screens have more than one mockup, both drawing **a state that only exists
+in contrast** — a state you have to see next to its opposite. The grid is drawn
+at the biggest and the smallest problem the game can deal, and the result
+dialog is drawn right and wrong. Both files in each pair are agreed pictures of
+the same screen.
 
 The grid's **third** file is neither: it is the widest card with its addition
 section grown to the cap, drawn to find out what the cap costs at today's
@@ -41,14 +39,15 @@ the mockup is its input rather than an agreed picture. A mockup that overflows
 is doing its job here; it is cheaper to find this in a picture than in a built
 screen.
 
-The title screen's pair is **a question, not two states**. Which of `RESUME` and
-`NEW` is the primary button is
-[open on its spec page](../title-screen.md#open-questions), and the wireframe
-loop's own advice is that where there is a real choice you
-[propose two mockups](../../../engineering/ui-design-process.md#the-loop),
-because comparing two pictures is a much easier conversation than critiquing
-one. Neither file is agreed yet; when review picks one it becomes
-`title-screen.html` and the other is deleted.
+The title screen used to have a pair too — `title-screen.html` and
+`title-screen-resume-primary.html`, differing in exactly which of `RESUME` and
+`NEW` was primary, per the wireframe loop's own advice that where there is a
+real choice you
+[propose two mockups](../../../engineering/ui-design-process.md#the-loop).
+That question is
+[now settled](../title-screen.md#open-questions) — `NEW` — so
+`title-screen.html` is the agreed picture and the losing comparison file is
+deleted, per [issue #216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216).
 
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).

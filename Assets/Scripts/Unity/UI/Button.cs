@@ -282,6 +282,22 @@ namespace Frogs.Unity.UI
         }
 
         /// <summary>
+        /// Overrides the label's default <see cref="ButtonLabelSize"/>, the
+        /// same way <see cref="SetSize"/> overrides <see cref="ButtonMinWidth"/>
+        /// and <see cref="ButtonHeight"/>: the three kinds still share
+        /// identical geometry by default, but a screen may size its own
+        /// instance differently — docs/specs/ui/title-screen.md's
+        /// `TitleButtonLabelSize` (64 px) is 20 px larger than the shared
+        /// 44 px, in the same proportion as its 560 x 160 buttons are
+        /// oversized against the shared 320 x 112.
+        /// </summary>
+        public void SetLabelSize(float size)
+        {
+            EnsureInitialized();
+            _label.fontSize = Mathf.RoundToInt(size);
+        }
+
+        /// <summary>
         /// Overrides the button's default size. Never smaller than
         /// <see cref="MinTouchTarget"/> in either direction, at any
         /// caller-supplied size — docs/specs/ui/shared-components.md#button's
