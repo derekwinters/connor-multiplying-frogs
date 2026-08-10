@@ -9,6 +9,15 @@ name: docs-test
 
 on:
   pull_request:
+    # `labeled` is the one that is not obvious, and it is load-bearing: do not
+    # tidy it away. The gate's verdict depends on the PR's labels as well as on
+    # its changed files, so a `skip-docs` label added to a PR that has already
+    # failed has to start a fresh run — that is what rule 9 and the gate's own
+    # failure message promise ("you do not need to push anything"). Naming
+    # `types:` at all replaces GitHub's defaults, so the other three are here to
+    # be kept, not to be added. Asserted by
+    # .github/scripts/tests/test_docs_gate_triggers.py.
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches: [main]
   workflow_dispatch:

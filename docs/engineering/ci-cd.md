@@ -607,6 +607,12 @@ code-only PR is exactly what the reconciliation gate exists to catch. It is
 therefore also the one workflow here that is safe to mark required in branch
 protection.
 
+**And `types: [opened, synchronize, reopened, labeled]`.** The first three are
+GitHub's default set, spelled out because naming `types:` at all *replaces* the
+defaults rather than extending them. `labeled` is the addition, and it is the
+whole of [the escape hatch](#the-skip-docs-escape-hatch) working: see
+[Every input to the verdict re-runs the gate](#every-input-to-the-verdict-re-runs-the-gate).
+
 When docs changed, it builds with `mkdocs build --strict`, so a broken nav
 entry, a dead internal link, or a page missing from the nav fails the PR rather
 than shipping a broken site. No deploy — publishing is `docs-publish`'s job.
@@ -684,6 +690,32 @@ nothing else. It cannot reconcile docs, and there is nobody driving it to apply
 a label. Matched **both** by its head branch and by its `autorelease: pending`
 label, so a change to either does not silently start failing every release.
 
+#### Every input to the verdict re-runs the gate
+
+The verdict has exactly two inputs: the PR's **changed files** and the PR's
+**labels**. Both have to be able to start a fresh run, or the tick on the PR is
+answering a question nobody asked any more.
+
+| Input changes | What re-runs the gate |
+| --- | --- |
+| a commit is pushed | the `synchronize` trigger |
+| a label is added | the `labeled` trigger, or the grace poll if the run is still going |
+
+`labeled` is on the workflow for that reason and no other. It is not obvious
+from reading `docs-test.yml`, so it carries a comment saying so and
+`.github/scripts/tests/test_docs_gate_triggers.py` asserts it — the failure mode
+if it is tidied away is silent, and lands on whoever is already blocked.
+
+Because `docs-test` is grouped per PR with `cancel-in-progress: true`, a label
+applied while a run is in flight cancels that run and starts another. That is
+the right way round: the surviving run is the newer one, it is the one that saw
+the new label, and it is the one whose conclusion the branch ruleset reads.
+
+Removing a label does **not** re-run the gate, so a PR that passed on
+`skip-docs` keeps its green tick if the label is taken off again. That is a
+known gap rather than a decision — see
+[#250](https://github.com/derekwinters/connor-multiplying-frogs/issues/250).
+
 #### The grace poll
 
 A `skip-docs` label applied moments after the PR opens would otherwise produce a
@@ -695,6 +727,12 @@ So a would-be failure re-reads the PR's **live** labels for up to a minute
 inside that window is observed by the same run: **no failing run is produced at
 all.** A passing PR never waits.
 
+The poll is the pipeline's case, not a human's. `pipeline-dev` applies
+`skip-docs` in the same breath as opening the PR, so the label is always inside
+the window and a bot PR never flashes red. A person reads the failure first and
+labels afterwards, minutes later — that is the `labeled` trigger's job, and the
+poll is no substitute for it.
+
 If the label API cannot be read, the gate keeps failing. Unknown is not
 permission — a gate that passes when it cannot see the labels is a gate an
 outage switches off.
@@ -702,7 +740,9 @@ outage switches off.
 #### The `skip-docs` escape hatch
 
 For the genuinely doc-irrelevant PR — a dependency bump, a CI fix, a typo in a
-comment. Adding the label re-runs the check, so nothing needs pushing.
+comment. Adding the label re-runs the check, so nothing needs pushing: either
+the run still in flight sees it during the grace poll, or the `labeled` trigger
+starts a new one.
 
 Using it is a decision, so it goes in the PR's `## Deviations and Decisions`
 section with a reason. A `skip-docs` label with no justification is a review
