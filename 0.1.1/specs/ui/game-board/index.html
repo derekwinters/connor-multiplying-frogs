@@ -2267,14 +2267,34 @@ lanes-across</strong> after seeing both drawn.</p>
 <td>176 px</td>
 </tr>
 <tr>
+<td>Hairline under <code>header</code>, over <code>controls</code></td>
+<td><code>BoardBandOutline</code></td>
+<td>3 px</td>
+</tr>
+<tr>
 <td>Turn banner text size</td>
 <td><code>TurnBannerSize</code></td>
 <td>52 px</td>
 </tr>
 <tr>
+<td>Gap between the banner's chip and its words</td>
+<td><code>TurnBannerGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
 <td>Settings button, square</td>
 <td><code>SettingsButtonSize</code></td>
 <td>96 px</td>
+</tr>
+<tr>
+<td>Settings gear glyph size</td>
+<td><code>SettingsGlyphSize</code></td>
+<td>44 px</td>
+</tr>
+<tr>
+<td>Settings button outline</td>
+<td><code>SettingsButtonOutline</code></td>
+<td>4 px</td>
 </tr>
 <tr>
 <td><code>Roll</code> button width</td>
@@ -2336,6 +2356,11 @@ That is what the <code>of 8</code> in every chip's pad count refers to.</p>
 <td>88 px</td>
 </tr>
 <tr>
+<td>Frog piece outline</td>
+<td><code>FrogPieceOutline</code></td>
+<td>4 px</td>
+</tr>
+<tr>
 <td>Log width</td>
 <td><code>LogWidth</code></td>
 <td>176 px</td>
@@ -2344,6 +2369,16 @@ That is what the <code>of 8</code> in every chip's pad count refers to.</p>
 <td>Log height</td>
 <td><code>LogHeight</code></td>
 <td>120 px</td>
+</tr>
+<tr>
+<td>Log corner radius</td>
+<td><code>LogRadius</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>Lily pad and log outline</td>
+<td><code>TrackOutline</code></td>
+<td>3 px</td>
 </tr>
 <tr>
 <td>Gap between positions</td>
@@ -2366,6 +2401,15 @@ That is what the <code>of 8</code> in every chip's pad count refers to.</p>
 112 and eight gaps at 48 is 1520 px of track; plus a 256 px chip gutter, a 48 px
 gap and two 48 px margins, that is 1920 px on the nose. If a constant here
 changes, one of the others has to move with it.</p>
+<p>Every outline is drawn <strong>inside</strong> the element's own bounds, so <code>TrackOutline</code>,
+<code>FrogPieceOutline</code>, <code>SettingsButtonOutline</code> and <code>BoardBandOutline</code> cost the
+layout nothing and the 1920 px sum above is unaffected by any of them.</p>
+<p><code>LogRadius</code> is the log's own corner and <code>SettingsGlyphSize</code> the gear's own
+glyph. Both happen to equal a constant on
+<a href="../shared-components/">shared components</a> today — <code>ButtonRadius</code> is also 24 px
+and <code>ButtonLabelSize</code> also 44 px — and neither is that constant. The Button's
+corner and label are the Button's to restyle; the pond's logs and its gear are
+not, and they must not move when it does.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Turn banner</strong> — <code>Green frog's turn</code>, left of the header, with that frog's
