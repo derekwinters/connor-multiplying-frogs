@@ -87,8 +87,12 @@ lanes-across** after seeing both drawn.
 | Safe margin | `SafeMargin` | 48 px |
 | Header band height | `BoardHeaderHeight` | 128 px |
 | Controls band height | `BoardControlsHeight` | 176 px |
+| Hairline under `header`, over `controls` | `BoardBandOutline` | 3 px |
 | Turn banner text size | `TurnBannerSize` | 52 px |
+| Gap between the banner's chip and its words | `TurnBannerGap` | 24 px |
 | Settings button, square | `SettingsButtonSize` | 96 px |
+| Settings gear glyph size | `SettingsGlyphSize` | 44 px |
+| Settings button outline | `SettingsButtonOutline` | 4 px |
 | `Roll` button width | `RollButtonWidth` | 480 px |
 | `Roll` button height | `RollButtonHeight` | 144 px |
 | `Roll` label size | `RollButtonLabelSize` | 56 px |
@@ -110,8 +114,11 @@ The lane:
 | Lane band height | `LaneHeight` | 184 px |
 | Lily pad diameter | `LilyPadDiameter` | 112 px |
 | Frog piece diameter | `FrogPieceDiameter` | 88 px |
+| Frog piece outline | `FrogPieceOutline` | 4 px |
 | Log width | `LogWidth` | 176 px |
 | Log height | `LogHeight` | 120 px |
+| Log corner radius | `LogRadius` | 24 px |
+| Lily pad and log outline | `TrackOutline` | 3 px |
 | Gap between positions | `LanePositionGap` | 48 px |
 | Chip gutter width | `LaneGutterWidth` | 256 px |
 | Gap between chip and track | `LaneGutterGap` | 48 px |
@@ -120,6 +127,17 @@ That arithmetic is exact and worth keeping exact: two logs at 176, seven pads at
 112 and eight gaps at 48 is 1520 px of track; plus a 256 px chip gutter, a 48 px
 gap and two 48 px margins, that is 1920 px on the nose. If a constant here
 changes, one of the others has to move with it.
+
+Every outline is drawn **inside** the element's own bounds, so `TrackOutline`,
+`FrogPieceOutline`, `SettingsButtonOutline` and `BoardBandOutline` cost the
+layout nothing and the 1920 px sum above is unaffected by any of them.
+
+`LogRadius` is the log's own corner and `SettingsGlyphSize` the gear's own
+glyph. Both happen to equal a constant on
+[shared components](shared-components.md) today — `ButtonRadius` is also 24 px
+and `ButtonLabelSize` also 44 px — and neither is that constant. The Button's
+corner and label are the Button's to restyle; the pond's logs and its gear are
+not, and they must not move when it does.
 
 ## Elements
 
