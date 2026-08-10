@@ -969,11 +969,15 @@ namespace Frogs.Unity.Views
 
                         if (glyph.Length > 0)
                         {
+                            // `=` has a size of its own; `×` and `+` are the
+                            // size of a digit in the row they sit beside,
+                            // which is what shrinks the `+` along with the
+                            // section it belongs to.
                             var isEquals = glyph == EqualsGlyph;
                             label = BuildText(
                                 "Operator",
                                 cellRect,
-                                isEquals ? GridEqualsSize : GridDigitSize,
+                                isEquals ? GridEqualsSize : DigitSizeFor(row.Kind),
                                 isEquals ? LineColor : InkColor,
                                 TextAnchor.MiddleCenter);
                             label.fontStyle = FontStyle.Bold;
