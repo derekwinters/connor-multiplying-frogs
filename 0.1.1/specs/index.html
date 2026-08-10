@@ -1770,6 +1770,114 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#a-gap-is-a-stop-not-an-invitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A gap is a stop, not an invitation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A gap is a stop, not an invitation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#telling-a-rule-gap-from-a-presentation-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telling a rule gap from a presentation gap
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-first-complete-release-covers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the first complete release covers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-game" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The game
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-product" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The product
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-screens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The screens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#not-the-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Not the contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1794,13 +1902,165 @@
 
 
 <h1 id="specs">Specs<a class="headerlink" href="#specs" title="Link to this section">&para;</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Not written yet</p>
-<p>This page is a stub so the docs site builds and the navigation reflects
-what the contract will cover. It is filled in by
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/13">issue #13</a>.</p>
+<p><strong>These pages are the implementation contract.</strong> They say what Multiplying
+Frogs does — the rules it plays by, the edges of the product, and the layout of
+every screen — precisely enough that code is built from them and a pull request
+can be held against them.</p>
+<p>The <a href="../">site as a whole</a> is the design contract; this section is the
+part of it a build is checked against line by line. The
+<a href="../intro/">introduction</a> explains the game to a person and is allowed
+to be friendly about it. These pages are not friendly, on purpose: where the
+two describe the same rule, this section is the one the code follows.</p>
+<div class="admonition warning">
+<p class="admonition-title">The code and a page here cannot quietly disagree</p>
+<p>When they disagree, one of them is a bug, and <strong>which one moves is a
+decision, not an assumption</strong>. Say so on the issue and let a human pick the
+side that changes. Editing whichever was easier to change is how a contract
+stops being one.</p>
 </div>
-<p>An overview of the specification pages and how to read them.</p>
+<h2 id="a-gap-is-a-stop-not-an-invitation">A gap is a stop, not an invitation<a class="headerlink" href="#a-gap-is-a-stop-not-an-invitation" title="Link to this section">&para;</a></h2>
+<p>Behaviour these pages do not describe is behaviour nobody has decided yet. The
+response is to open a <code>type:question</code> issue naming the choice and the options,
+and to go and work on something else — never to pick the sensible-looking
+answer and leave a note about it in the pull request. A guessed mechanic that
+ships is the game drifting away from being Connor's, which is the whole reason
+for building it this way.</p>
+<h3 id="telling-a-rule-gap-from-a-presentation-gap">Telling a rule gap from a presentation gap<a class="headerlink" href="#telling-a-rule-gap-from-a-presentation-gap" title="Link to this section">&para;</a></h3>
+<p><a href="../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a> draws the line this
+section is organised around, and it is the fastest way to work out what a
+particular gap costs.</p>
+<table>
+<thead>
+<tr>
+<th>The gap is in</th>
+<th>Whose answer it is</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A <strong>rule</strong> — how far a frog moves, what a wrong answer costs, how many players there are, what winning means</td>
+<td>Connor's, via the classroom game</td>
+<td>Check <a href="reference/">reference material</a> first; the board may already settle it. If it does not, open the question and stop.</td>
+</tr>
+<tr>
+<td><strong>Presentation</strong> — layout, animation, what is tapped, what the screen shows and when</td>
+<td>The project's</td>
+<td>Design it. For anything with a layout, that means an agreed wireframe first, not a layout invented in code.</td>
+</tr>
+</tbody>
+</table>
+<p>A presentation gap is ours to fill, which is not the same as ours to skip. UI
+structure starts as a wireframe under the
+<a href="../engineering/ui-design-process/">UI design process</a> and becomes a page
+under <a href="ui/">UI</a> before any of it becomes code.</p>
+<p>Why a page here says what it says is often one level down, in
+<a href="../adr/">Decisions</a>: a spec page states what is true now, an ADR
+records what was chosen once and why.</p>
+<h2 id="what-the-first-complete-release-covers">What the first complete release covers<a class="headerlink" href="#what-the-first-complete-release-covers" title="Link to this section">&para;</a></h2>
+<p><strong>v1 is the classroom game on one tablet.</strong> Two to four players share an
+Android tablet held landscape and pass it around: roll the die, draw a card
+from the pile the roll names, work the multiplication out on screen, and hop
+one lily pad up your own lane — or one back if you got it wrong. The first frog
+onto its End log wins. That is the whole of it.</p>
+<p>It costs nothing, has no accounts and no advertising, makes no network calls,
+and keeps everything it stores on the device. Those are permanent product
+invariants rather than v1 defaults. <a href="product-scope/">Product scope</a> is the
+authority on the product's edges and states them in the form a pull request can
+be held against; what is deliberately <em>out</em> of v1 — sound, other kinds of
+arithmetic, a second board, a tutorial, players five to eight — is listed once
+in <a href="../intro/vision/#what-this-game-is-not">the vision</a>, and each item is
+parked rather than dropped.</p>
+<div class="admonition danger">
+<p class="admonition-title">One page in this section is not the contract</p>
+<p><a href="future-ideas/">Future ideas</a> is the exact opposite of one. Everything on
+it is deliberately out of scope, and finding an idea there is not
+permission to build it. It sits in this section because the ideas are about
+the game, not because any of them are agreed.</p>
+</div>
+<h2 id="pages">Pages<a class="headerlink" href="#pages" title="Link to this section">&para;</a></h2>
+<p>Grouped by what they describe. <strong>The list grows as spec pages land</strong> — a system
+with no page here is a system whose contract has not been written yet, which is
+worth knowing in itself.</p>
+<h3 id="the-game">The game<a class="headerlink" href="#the-game" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it settles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="reference/">Reference material</a></td>
+<td>The classroom board, photographed and transcribed: the rules card verbatim, the three card piles and the rolls that reach them, the nine positions in a lane, and the handful of things the board leaves open.</td>
+</tr>
+</tbody>
+</table>
+<p>The precise rules spec — every rule stated edge case by edge case for the code
+to be built against — is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/199">issue #199</a>
+and does not exist yet. Until it lands, reference material is where the rules
+are recorded, and <a href="../intro/how-to-play/">how to play</a> is the same rules in
+the friendly form.</p>
+<h3 id="the-product">The product<a class="headerlink" href="#the-product" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it settles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="product-scope/">Product scope</a></td>
+<td>The five invariants, the target device, how you get hold of the game, where the network boundary sits, and what the save is allowed to be.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-screens">The screens<a class="headerlink" href="#the-screens" title="Link to this section">&para;</a></h3>
+<p><a href="ui/">UI</a> is the layout contract: one page per screen and per dialog,
+each carrying its invariants, regions, anchors and named constants, with a 1:1
+HTML <a href="ui/mockups/">mockup</a> alongside it.</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it settles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="ui/">UI overview</a></td>
+<td>The nine screens of v1 in the order a game meets them, and the template every screen page follows.</td>
+</tr>
+<tr>
+<td><a href="ui/shared-components/">Shared components</a></td>
+<td>The pieces used on more than one screen — buttons, the player chip, the confirm dialog — specified once and referenced everywhere else.</td>
+</tr>
+<tr>
+<td><a href="ui/mockups/">Mockups</a></td>
+<td>The rendered 1920 × 1200 mockups the screen pages link to.</td>
+</tr>
+</tbody>
+</table>
+<p>The individual screen pages are listed on the
+<a href="ui/#screens">UI overview</a> rather than repeated here.</p>
+<h3 id="not-the-contract">Not the contract<a class="headerlink" href="#not-the-contract" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="future-ideas/">Future ideas</a></td>
+<td>The parking lot. Ideas deliberately not being built, each with the reason it was set aside and what it would take to promote it.</td>
+</tr>
+</tbody>
+</table>
 
 
 
