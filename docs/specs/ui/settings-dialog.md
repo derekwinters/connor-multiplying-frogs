@@ -37,6 +37,13 @@ empty space. That gap is the layout, not decoration: `Back to the game` is the
 button people reach for without looking, and it must not be adjacent to the one
 that ends everybody's game.
 
+Because that gap is the load-bearing number, the actions column is positioned
+from the **bottom of the panel up** — `End the game` sits `ButtonDestructiveGap`
+above the button row, and `How to play` sits `SettingsActionGap` above `End the
+game`. The column's top edge is whatever is left over. Laid out the other way
+round, from the top down, the gap would be a consequence of arithmetic and a
+longer label or a shorter panel could quietly close it.
+
 ## Named constants
 
 | Element | Constant | Value |
@@ -46,6 +53,7 @@ that ends everybody's game.
 | Action button width | `SettingsActionWidth` | 788 px |
 | Gap between `How to play` and `End the game` | `SettingsActionGap` | 96 px |
 | Gap below `End the game` | `ButtonDestructiveGap` | 96 px |
+| Version label's offset from the panel's bottom edge | `SettingsVersionBottomOffset` | 60 px |
 
 ## Elements
 
@@ -55,7 +63,10 @@ that ends everybody's game.
   [end-game confirm](end-game-confirm.md). Never ends anything by itself.
 - **`Back to the game`** — primary button. Closes and returns to exactly the
   board state that was there.
-- **Version** — `v0.1.0`, quiet, bottom-left.
+- **Version** — `v0.1.0`, quiet, bottom-left, at
+  [`VersionLabelSize`](title-screen.md#named-constants). The same value doing
+  the same job as the title screen's own version readout, under the identical
+  name — not a second constant for the same number.
 
 ## Behaviour
 
