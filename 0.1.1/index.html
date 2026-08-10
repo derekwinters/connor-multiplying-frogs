@@ -417,6 +417,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -433,6 +451,75 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-documentation-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this documentation is
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What this documentation is">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#who-each-section-is-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who each section is for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-decisions-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where decisions live
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to start
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1770,6 +1857,64 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-documentation-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this documentation is
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What this documentation is">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#who-each-section-is-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who each section is for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-decisions-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where decisions live
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to start
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1794,13 +1939,117 @@
 
 
 <h1 id="multiplying-frogs">Multiplying Frogs<a class="headerlink" href="#multiplying-frogs" title="Link to this section">&para;</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Not written yet</p>
-<p>This page is a stub so the docs site builds and the navigation reflects
-what the contract will cover. It is filled in by
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/9">issue #9</a>.</p>
+<p>Multiplying Frogs is a digital port of a multiplication board game from
+Connor's math class. It is pass-and-play: two to four players share one tablet
+and take turns. The board is four lanes of lily pads running from a Start log
+to an End log, with one frog per player in their own lane, and a turn is roll,
+draw, answer, move — the roll picks which of the three piles the card comes
+from, the card is a multiplication problem, and the problem is worked out on
+screen in a grid built for long multiplication. Reaching the End log is what
+winning means. Derek is building it with his son Connor, and Connor decides the
+rules, because it is his game.</p>
+<h2 id="what-this-documentation-is">What this documentation is<a class="headerlink" href="#what-this-documentation-is" title="Link to this section">&para;</a></h2>
+<p>This site is the <strong>design contract</strong>. It is the single description of what the
+game is and how it is built — not a pile of notes, not a changelog, and not
+somewhere to think out loud. Behaviour that is not written down here is
+behaviour nobody has decided yet, and the right response to finding a gap is to
+ask rather than to fill it in.</p>
+<div class="admonition warning">
+<p class="admonition-title">Code that disagrees with the docs is a bug in one of them</p>
+<p>Which one is a <strong>decision, not an assumption</strong>. Whoever finds the code and
+a page here saying different things stops and says so — in a comment on the
+issue — rather than quietly editing the code to match the page, or the page
+to match the code. A human decides which side moves, and the PR that
+resolves it says which one was treated as authoritative and why.</p>
+<p>The same rule, spelled out for agents, is in <code>CLAUDE.md</code> at the repo root
+and in <a href="engineering/agent-workflow/">Agent workflow</a>.</p>
 </div>
-<p>The landing page for the docs site: what the game is, and where to start reading.</p>
+<p>The other half of the contract is that docs land with the change they describe.
+A page here is meant to be true of the build you are holding, so a behaviour
+change and its doc update are the same PR — never a follow-up issue.</p>
+<h3 id="who-each-section-is-for">Who each section is for<a class="headerlink" href="#who-each-section-is-for" title="Link to this section">&para;</a></h3>
+<p>The site has two audiences, and every section belongs to one of them. The
+<strong>Introduction</strong> and <strong>Specs</strong> are for anyone who wants to know what the game
+is; <strong>Decisions</strong>, <strong>Engineering</strong>, and <strong>Tools</strong> are for whoever is building
+it.</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>It answers</th>
+<th>Read it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="intro/">Introduction</a></td>
+<td>What is this game, and what is it trying to be?</td>
+<td>You are new here, or explaining the game to someone</td>
+</tr>
+<tr>
+<td><a href="specs/">Specs</a></td>
+<td>Exactly how does it behave?</td>
+<td>You are about to build, test, or argue about a rule</td>
+</tr>
+<tr>
+<td><a href="adr/">Decisions</a></td>
+<td>Why is it built that way?</td>
+<td>Something looks odd and you want the trade-off behind it</td>
+</tr>
+<tr>
+<td><a href="engineering/">Engineering</a></td>
+<td>How does the work get done?</td>
+<td>You are writing code, tests, CI, or a PR</td>
+</tr>
+<tr>
+<td><a href="tools/">Tools</a></td>
+<td>What automation runs this repo?</td>
+<td>You are working on the skills or the issue pipeline</td>
+</tr>
+</tbody>
+</table>
+<p>The split that matters most is <strong>Specs versus Decisions</strong>. A spec page says what
+is true now and is edited whenever that changes; an ADR says what was chosen
+once, at a point in time, and is never rewritten — it is superseded by a later
+ADR that says so.</p>
+<h2 id="where-decisions-live">Where decisions live<a class="headerlink" href="#where-decisions-live" title="Link to this section">&para;</a></h2>
+<p><strong>Decisions are made in GitHub.</strong> An issue body, a comment thread, a PR review —
+that is where a thing gets argued out and settled, and that record keeps its
+dates, its alternatives, and the reasons the losing options lost.</p>
+<p><strong>This site is the distillation.</strong> It is the settled shape of those decisions,
+written up so nobody has to reconstruct the current rules from a fifty-comment
+thread. Two things follow:</p>
+<ul>
+<li><strong>When this site and GitHub disagree, GitHub wins.</strong> A comment from Derek
+  three days ago beats a paragraph here from three weeks ago, and the fix is to
+  update the page in the PR where you noticed it.</li>
+<li><strong>A decision that only exists on this site was never made.</strong> If it was not
+  agreed in an issue, write the issue first.</li>
+</ul>
+<p><strong><code>#NN</code> points at the deciding issue.</strong> When a page here says a rule was
+settled, it links the issue that settled it — like
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/7">issue #7</a>,
+the design conversation the four
+<a href="adr/">architectural decisions</a> came out of. The number is not
+decoration: it is how you get from "the rule is X" to "here is the conversation
+where X won", which is the only thing that tells you whether X is still right.</p>
+<p>What this site deliberately does <strong>not</strong> record is live state — no milestone
+lists, no issue counts, no "we are currently working on…". That is queried from
+GitHub, because a page that mixes conventions with state is a page that is
+always slightly out of date.</p>
+<h2 id="where-to-start">Where to start<a class="headerlink" href="#where-to-start" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong>Curious about the game</strong> — <a href="intro/vision/">Vision</a>, then
+  <a href="intro/how-to-play/">How to play</a>.</li>
+<li><strong>About to build something</strong> — <code>CLAUDE.md</code> at the repo root first, then
+  <a href="engineering/agent-workflow/">Agent workflow</a> and
+  <a href="intro/conventions/">Conventions</a>.</li>
+<li><strong>Looking for a specific rule</strong> — <a href="specs/">Specs</a>, and the
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CONTEXT.md">glossary</a>
+  if a word is doing more work than you expected.</li>
+</ul>
+<p>The <a href="https://github.com/derekwinters/connor-multiplying-frogs">repo</a> is public,
+and its README covers building the game and the site locally.</p>
 
 
 
