@@ -52,8 +52,12 @@ namespace Frogs.Unity.Views
         public const float SafeMargin = 48f;
         public const float BoardHeaderHeight = 128f;
         public const float BoardControlsHeight = 176f;
+        public const float BoardBandOutline = 3f;
         public const float TurnBannerSize = 52f;
+        public const float TurnBannerGap = 24f;
         public const float SettingsButtonSize = 96f;
+        public const float SettingsGlyphSize = 44f;
+        public const float SettingsButtonOutline = 4f;
         public const float RollButtonWidth = 480f;
         public const float RollButtonHeight = 144f;
         public const float RollButtonLabelSize = 56f;
@@ -86,11 +90,13 @@ namespace Frogs.Unity.Views
         // declared as a named spec constant.
         static readonly Color BoardBackgroundColor = new Color32(0xED, 0xF1, 0xEF, 0xFF); // mockup's --bg
         static readonly Color BandColor = new Color32(0xE2, 0xE8, 0xE5, 0xFF); // mockup's header/controls bands
+        static readonly Color BandOutlineColor = new Color32(0xB9, 0xC0, 0xBD, 0xFF); // mockup's --faint
         static readonly Color InkColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockup's --ink
 
         RectTransform _rect;
 
         RectTransform _headerRect;
+        Image _headerHairline;
         PlayerChip _turnBannerChip;
         Text _turnBannerText;
         GameBoardSettingsButton _settingsButton;
@@ -100,6 +106,7 @@ namespace Frogs.Unity.Views
         readonly Dictionary<FrogColour, GameBoardLaneView> _lanesByColour = new Dictionary<FrogColour, GameBoardLaneView>();
 
         RectTransform _controlsRect;
+        Image _controlsHairline;
         Button _rollButton;
 
         bool _initialized;
@@ -140,6 +147,26 @@ namespace Frogs.Unity.Views
             {
                 EnsureInitialized();
                 return _headerRect;
+            }
+        }
+
+        /// <summary>The hairline under `header` — <see cref="BoardBandOutline"/> tall, drawn inside the band.</summary>
+        public Image HeaderHairline
+        {
+            get
+            {
+                EnsureInitialized();
+                return _headerHairline;
+            }
+        }
+
+        /// <summary>The hairline over `controls` — <see cref="BoardBandOutline"/> tall, drawn inside the band.</summary>
+        public Image ControlsHairline
+        {
+            get
+            {
+                EnsureInitialized();
+                return _controlsHairline;
             }
         }
 
@@ -383,7 +410,7 @@ namespace Frogs.Unity.Views
             chipRect.pivot = new Vector2(0f, 0.5f);
             chipRect.anchoredPosition = new Vector2(SafeMargin, 0f);
             _turnBannerChip = chipGO.AddComponent<PlayerChip>();
-            chipRect.sizeDelta = new Vector2(GameBoardLaneView.LaneGutterWidth, PlayerChip.PlayerChipHeight);
+            chipRect.sizeDelta = new Vector2(PlayerChip.PlayerChipWidth, PlayerChip.PlayerChipHeight);
 
             var bannerGO = new GameObject("TurnBanner", typeof(RectTransform), typeof(Text));
             _turnBannerText = bannerGO.GetComponent<Text>();
@@ -403,13 +430,11 @@ namespace Frogs.Unity.Views
             bannerRect.pivot = new Vector2(0f, 0.5f);
             bannerRect.sizeDelta = Vector2.zero;
 
-            // The banner's words start where every lane's track starts: the
-            // header chip is a chip in a LaneGutterWidth gutter, and the gap
-            // after a chip before its content is LaneGutterGap. Composed from
-            // game-board.md's own constants rather than reaching for a
-            // nineteenth number — see this issue's PR.
+            // The banner's words sit TurnBannerGap past the chip beside them —
+            // the chip is the shared Player chip, so its width is that
+            // component's own constant.
             bannerRect.anchoredPosition = new Vector2(
-                SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
+                SafeMargin + PlayerChip.PlayerChipWidth + TurnBannerGap,
                 0f);
 
             var settingsGO = new GameObject("SettingsButton", typeof(RectTransform));
@@ -421,8 +446,37 @@ namespace Frogs.Unity.Views
             settingsRect.anchoredPosition = new Vector2(-SafeMargin, 0f);
 
             _settingsButton = settingsGO.AddComponent<GameBoardSettingsButton>();
-            _settingsButton.SetSize(SettingsButtonSize);
+
+            // Unity does not run Awake() on AddComponent outside play mode,
+            // and the gear sizes itself when it builds. Touch its rect so it
+            // builds now, while the header is being laid out, rather than
+            // whenever something first happens to read it.
+            settingsRect = _settingsButton.RectTransform;
+
             _settingsButton.Clicked += HandleSettingsClicked;
+
+            _headerHairline = BuildBandHairline(_headerRect, "HeaderHairline", atTop: false);
+        }
+
+        // The hairline the mockup draws under `header` and over `controls`,
+        // BoardBandOutline tall and drawn inside the band's own bounds so the
+        // band's height is untouched.
+        Image BuildBandHairline(RectTransform band, string hairlineName, bool atTop)
+        {
+            var hairlineGO = new GameObject(hairlineName, typeof(RectTransform), typeof(Image));
+            var hairline = hairlineGO.GetComponent<Image>();
+            hairline.color = BandOutlineColor;
+            hairline.raycastTarget = false;
+
+            var hairlineRect = hairline.rectTransform;
+            hairlineRect.SetParent(band, worldPositionStays: false);
+            hairlineRect.anchorMin = new Vector2(0f, atTop ? 1f : 0f);
+            hairlineRect.anchorMax = new Vector2(1f, atTop ? 1f : 0f);
+            hairlineRect.pivot = new Vector2(0.5f, atTop ? 1f : 0f);
+            hairlineRect.sizeDelta = new Vector2(0f, BoardBandOutline);
+            hairlineRect.anchoredPosition = Vector2.zero;
+
+            return hairline;
         }
 
         void BuildPond()
@@ -454,6 +508,8 @@ namespace Frogs.Unity.Views
             _controlsRect.pivot = new Vector2(0.5f, 0f);
             _controlsRect.sizeDelta = new Vector2(0f, BoardControlsHeight);
             _controlsRect.anchoredPosition = Vector2.zero;
+
+            _controlsHairline = BuildBandHairline(_controlsRect, "ControlsHairline", atTop: true);
 
             var rollGO = new GameObject("Roll", typeof(RectTransform));
             rollGO.transform.SetParent(_controlsRect, worldPositionStays: false);

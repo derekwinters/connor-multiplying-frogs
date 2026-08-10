@@ -15,6 +15,7 @@ using Frogs.Unity.Views;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
+using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
 
 namespace Frogs.Unity.EditModeTests
@@ -86,6 +87,20 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(view.TurnBannerText.fontSize, Is.EqualTo((int)GameBoardScreenView.TurnBannerSize));
 
+                // The chip at the safe margin, and the words TurnBannerGap
+                // past it — the mockup's own 48/256/24, not an approximation
+                // composed out of the lane's gutter constants.
+                Assert.That(
+                    view.TurnBannerChip.RectTransform.anchoredPosition.x,
+                    Is.EqualTo(GameBoardScreenView.SafeMargin).Within(0.001f));
+                Assert.That(
+                    view.TurnBannerText.rectTransform.anchoredPosition.x,
+                    Is.EqualTo(GameBoardScreenView.SafeMargin + PlayerChip.PlayerChipWidth + GameBoardScreenView.TurnBannerGap).Within(0.001f));
+
+                Assert.That(
+                    view.HeaderHairline.rectTransform.rect.height,
+                    Is.EqualTo(GameBoardScreenView.BoardBandOutline).Within(0.001f));
+
                 var settings = view.SettingsButton.RectTransform;
                 Assert.That(
                     settings.sizeDelta,
@@ -126,12 +141,12 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(lane.RenderedPosition, Is.EqualTo(position));
                 Assert.That(
-                    lane.Piece.transform.parent,
+                    lane.PieceRect.parent,
                     Is.SameAs(lane.PositionRects[position].transform),
                     "the piece is placed onto the track element already drawn for that position");
-                Assert.That(lane.Piece.rectTransform.anchoredPosition, Is.EqualTo(Vector2.zero), "centred on it");
+                Assert.That(lane.PieceRect.anchoredPosition, Is.EqualTo(Vector2.zero), "centred on it");
                 Assert.That(
-                    lane.Piece.rectTransform.sizeDelta,
+                    lane.PieceRect.sizeDelta,
                     Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceDiameter, GameBoardLaneView.FrogPieceDiameter)));
                 Assert.That(lane.Piece.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
             }
@@ -201,6 +216,28 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(lane.Chip.RectTransform.anchorMin.x, Is.EqualTo(0f).Within(0.001f), "chip pinned left");
                 Assert.That(lane.Chip.RectTransform.pivot.x, Is.EqualTo(0f).Within(0.001f));
                 Assert.That(lane.Chip.RectTransform.rect.width, Is.EqualTo(GameBoardLaneView.LaneGutterWidth).Within(0.001f));
+
+                // Outlines are drawn inside each element's own bounds, so
+                // they cost the 1520 px track nothing.
+                for (var index = 0; index < positions.Count; index++)
+                {
+                    var fill = lane.PositionImages[index].rectTransform;
+
+                    Assert.That(lane.PositionOutlines[index].rectTransform, Is.SameAs(positions[index]));
+                    Assert.That(fill.parent, Is.SameAs(positions[index].transform));
+                    Assert.That(
+                        fill.offsetMin,
+                        Is.EqualTo(new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline)),
+                        $"position {index}'s fill is inset by TrackOutline");
+                    Assert.That(
+                        fill.offsetMax,
+                        Is.EqualTo(new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline)));
+                }
+
+                Assert.That(
+                    lane.Piece.rectTransform.offsetMin,
+                    Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceOutline, GameBoardLaneView.FrogPieceOutline)),
+                    "the piece's fill is inset by FrogPieceOutline, so the piece is still FrogPieceDiameter across");
             }
             finally
             {
@@ -245,7 +282,7 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(game.LaneFor(FrogColour.Blue).IsHome, Is.True, "the fixture, not the assertion");
                 Assert.That(
-                    lane.Piece.transform.parent,
+                    lane.PieceRect.parent,
                     Is.SameAs(lane.PositionRects[Lane.LaneWinningPosition].transform),
                     "resting on the End log");
                 Assert.That(lane.Chip.State, Is.EqualTo(PlayerChipState.Home));
@@ -507,8 +544,12 @@ namespace Frogs.Unity.EditModeTests
                 { "SafeMargin", 48f },
                 { "BoardHeaderHeight", 128f },
                 { "BoardControlsHeight", 176f },
+                { "BoardBandOutline", 3f },
                 { "TurnBannerSize", 52f },
+                { "TurnBannerGap", 24f },
                 { "SettingsButtonSize", 96f },
+                { "SettingsGlyphSize", 44f },
+                { "SettingsButtonOutline", 4f },
                 { "RollButtonWidth", 480f },
                 { "RollButtonHeight", 144f },
                 { "RollButtonLabelSize", 56f }
@@ -519,8 +560,11 @@ namespace Frogs.Unity.EditModeTests
                 { "LaneHeight", 184f },
                 { "LilyPadDiameter", 112f },
                 { "FrogPieceDiameter", 88f },
+                { "FrogPieceOutline", 4f },
                 { "LogWidth", 176f },
                 { "LogHeight", 120f },
+                { "LogRadius", 24f },
+                { "TrackOutline", 3f },
                 { "LanePositionGap", 48f },
                 { "LaneGutterWidth", 256f },
                 { "LaneGutterGap", 48f }
@@ -529,7 +573,16 @@ namespace Frogs.Unity.EditModeTests
             AssertPublicConstantsAreExactly(typeof(GameBoardScreenView), boardConstants);
             AssertPublicConstantsAreExactly(typeof(GameBoardLaneView), laneConstants);
 
-            // The remaining two of game-board.md's eighteen are Lane's own,
+            // LogRadius and SettingsGlyphSize hold the same numbers as
+            // shared-components.md's ButtonRadius and ButtonLabelSize today,
+            // and are deliberately not those constants: the Button is free to
+            // restyle its corner and its label without moving the pond's logs
+            // or its gear. Asserted as equal-today so a future divergence is
+            // a visible, deliberate edit here rather than a silent drift.
+            Assert.That(GameBoardLaneView.LogRadius, Is.EqualTo(Button.ButtonRadius));
+            Assert.That(GameBoardScreenView.SettingsGlyphSize, Is.EqualTo(Button.ButtonLabelSize));
+
+            // The remaining two of game-board.md's constants are Lane's own,
             // reused under the same name rather than redeclared here.
             Assert.That(Lane.LanePositionCount, Is.EqualTo(9));
             Assert.That(Lane.LaneWinningPosition, Is.EqualTo(8));
@@ -617,11 +670,16 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(view.TurnBannerText.font, Is.Not.Null);
                 Assert.That(view.SettingsButton.Glyph.font, Is.Not.Null);
                 Assert.That(view.SettingsButton.Background.sprite, Is.Not.Null);
+                Assert.That(view.SettingsButton.Outline.sprite, Is.Not.Null);
+                Assert.That(view.SettingsButton.Glyph.fontSize, Is.EqualTo((int)GameBoardScreenView.SettingsGlyphSize));
 
                 var lane = view.LaneFor(FrogColour.Green);
                 Assert.That(lane.Piece.sprite, Is.Not.Null);
+                Assert.That(lane.PieceOutline.sprite, Is.Not.Null);
                 Assert.That(lane.PositionImages[0].sprite, Is.Not.Null);
                 Assert.That(lane.PositionImages[1].sprite, Is.Not.Null);
+                Assert.That(lane.PositionOutlines[0].sprite, Is.Not.Null);
+                Assert.That(lane.PositionOutlines[1].sprite, Is.Not.Null);
             }
             finally
             {

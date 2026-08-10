@@ -19,10 +19,16 @@ namespace Frogs.Unity.Views
     /// fit, this is the board's own small square button — see this issue's
     /// PR.
     ///
-    /// Its size comes from the board's <c>SettingsButtonSize</c>, which
-    /// already equals shared-components.md's <see cref="SharedButton.MinTouchTarget"/>,
-    /// so the touch-target invariant is met by construction with no extra
-    /// number.
+    /// Its size, ring and glyph are game-board.md's own
+    /// <see cref="GameBoardScreenView.SettingsButtonSize"/>,
+    /// <see cref="GameBoardScreenView.SettingsButtonOutline"/> and
+    /// <see cref="GameBoardScreenView.SettingsGlyphSize"/> — deliberately not
+    /// the Button's <c>ButtonRadius</c>/<c>ButtonLabelSize</c>, which happen
+    /// to hold the same numbers today but belong to a component that is free
+    /// to restyle without moving the pond's gear. <c>SettingsButtonSize</c>
+    /// already equals shared-components.md's
+    /// <see cref="SharedButton.MinTouchTarget"/>, so the touch-target
+    /// invariant is met by construction with no extra number.
     ///
     /// Pointer handling mirrors <see cref="SharedButton"/>'s exactly: acts on
     /// release, and only when the release lands over the button, so a finger
@@ -46,9 +52,11 @@ namespace Frogs.Unity.Views
         // (docs/specs/ui/mockups/game-board.html) — not a geometry constant
         // on any spec page's table, so not declared as a named spec constant.
         static readonly Color BackgroundColor = Color.white; // mockup's --paper
+        static readonly Color OutlineColor = new Color32(0x6C, 0x78, 0x73, 0xFF); // mockup's --line
         static readonly Color GlyphColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockup's --ink
 
         RectTransform _rect;
+        Image _outline;
         Image _background;
         Text _glyph;
 
@@ -68,7 +76,17 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The round backdrop, drawn as a flat circle.</summary>
+        /// <summary>The gear's ring — <see cref="GameBoardScreenView.SettingsButtonOutline"/> thick.</summary>
+        public Image Outline
+        {
+            get
+            {
+                EnsureInitialized();
+                return _outline;
+            }
+        }
+
+        /// <summary>The round backdrop inside the ring.</summary>
         public Image Background
         {
             get
@@ -91,13 +109,6 @@ namespace Frogs.Unity.Views
         void Awake()
         {
             EnsureInitialized();
-        }
-
-        /// <summary>Sizes the square, and the circle drawn inside it.</summary>
-        public void SetSize(float size)
-        {
-            EnsureInitialized();
-            SetSizeInternal(size);
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -147,28 +158,52 @@ namespace Frogs.Unity.Views
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
+            _rect.sizeDelta = new Vector2(
+                GameBoardScreenView.SettingsButtonSize,
+                GameBoardScreenView.SettingsButtonSize);
+
+            // The ring, then the fill inset inside it — the same two-image
+            // shape PlayerChip uses for its active ring. Each circle gets a
+            // sprite generated at its own radius rather than one sprite
+            // stretched to two sizes, so the smaller one stays round.
+            var outlineGO = new GameObject("Outline", typeof(RectTransform), typeof(Image));
+            _outline = outlineGO.GetComponent<Image>();
+            _outline.sprite = RoundedRectSprite.CreateRoundedRect(
+                Mathf.RoundToInt(GameBoardScreenView.SettingsButtonSize / 2f));
+            _outline.type = Image.Type.Sliced;
+            _outline.color = OutlineColor;
+            _outline.raycastTarget = true;
+            var outlineRect = _outline.rectTransform;
+            outlineRect.SetParent(_rect, worldPositionStays: false);
+            outlineRect.anchorMin = Vector2.zero;
+            outlineRect.anchorMax = Vector2.one;
+            outlineRect.offsetMin = Vector2.zero;
+            outlineRect.offsetMax = Vector2.zero;
+
             var backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
             _background = backgroundGO.GetComponent<Image>();
+            _background.sprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(
+                (GameBoardScreenView.SettingsButtonSize - (2f * GameBoardScreenView.SettingsButtonOutline)) / 2f));
             _background.type = Image.Type.Sliced;
             _background.color = BackgroundColor;
-            _background.raycastTarget = true;
+            _background.raycastTarget = false;
             var backgroundRect = _background.rectTransform;
             backgroundRect.SetParent(_rect, worldPositionStays: false);
             backgroundRect.anchorMin = Vector2.zero;
             backgroundRect.anchorMax = Vector2.one;
-            backgroundRect.offsetMin = Vector2.zero;
-            backgroundRect.offsetMax = Vector2.zero;
+            backgroundRect.offsetMin = new Vector2(
+                GameBoardScreenView.SettingsButtonOutline,
+                GameBoardScreenView.SettingsButtonOutline);
+            backgroundRect.offsetMax = new Vector2(
+                -GameBoardScreenView.SettingsButtonOutline,
+                -GameBoardScreenView.SettingsButtonOutline);
 
             var glyphGO = new GameObject("Glyph", typeof(RectTransform), typeof(Text));
             _glyph = glyphGO.GetComponent<Text>();
             _glyph.text = GearGlyph;
             _glyph.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
 
-            // The mockup draws the gear at the same 44 px the shared Button
-            // sets its own label at, so this names shared-components.md's
-            // `ButtonLabelSize` rather than adding a number game-board.md's
-            // tables do not have.
-            _glyph.fontSize = (int)SharedButton.ButtonLabelSize;
+            _glyph.fontSize = (int)GameBoardScreenView.SettingsGlyphSize;
             _glyph.color = GlyphColor;
             _glyph.alignment = TextAnchor.MiddleCenter;
             _glyph.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -180,16 +215,6 @@ namespace Frogs.Unity.Views
             glyphRect.anchorMax = Vector2.one;
             glyphRect.offsetMin = Vector2.zero;
             glyphRect.offsetMax = Vector2.zero;
-
-            // A default circle, so the button is drawable before SetSize —
-            // the board always calls SetSize with SettingsButtonSize.
-            SetSizeInternal(SharedButton.MinTouchTarget);
-        }
-
-        void SetSizeInternal(float size)
-        {
-            _rect.sizeDelta = new Vector2(size, size);
-            _background.sprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(size / 2f));
         }
     }
 }
