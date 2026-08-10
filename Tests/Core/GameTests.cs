@@ -404,6 +404,51 @@ namespace Frogs.Core.Tests
             Assert.That(game.FinishingOrder, Is.EqualTo(new[] { FrogColour.Orange, FrogColour.Blue }));
         }
 
+        // docs/specs/ui/game-over.md#invariants: "the winner is the frog that
+        // reached the End log first." Nothing outside Core ever announced an
+        // arrival — #211 added RecordFinish and left the wiring to a later
+        // issue, #224 declined it as belonging elsewhere, and the result was
+        // that a real game's Winner stayed null however it was played. So the
+        // arrival is recorded by the turn itself: grading can only happen
+        // while the turn is Answering, and ShowResult is the very next call
+        // the phase machine will accept, which makes it the first moment
+        // after a move that Core is guaranteed to be given.
+        [Test]
+        public void AFrogThatReachesItsEndLogOnItsTurn_IsRecordedAsAFinisher_WithoutAnybodyCallingRecordFinish()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+            AdvanceTo(game, FrogColour.Green, Lane.LaneWinningPosition - 1);
+
+            game.RollDie();
+            game.BeginAnswering();
+            game.LaneFor(game.ActiveFrog).Resolve(game.DrawnCard.Product, game.DrawnCard);
+            game.ShowResult();
+
+            Assert.That(game.LaneFor(FrogColour.Green).IsHome, Is.True, "a correct answer on pad 7 lands on the End log");
+            Assert.That(game.FinishingOrder, Is.EqualTo(new[] { FrogColour.Green }));
+            Assert.That(game.Winner, Is.EqualTo(FrogColour.Green));
+        }
+
+        // The other half of the same rule: a turn that did not land a frog
+        // home records nothing, so an arrival cannot be manufactured by
+        // taking turns.
+        [Test]
+        public void ATurnThatDoesNotLandAFrogHome_RecordsNoFinisher()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+
+            game.RollDie();
+            game.BeginAnswering();
+            game.LaneFor(game.ActiveFrog).Resolve(game.DrawnCard.Product, game.DrawnCard);
+            game.ShowResult();
+
+            Assert.That(game.LaneFor(FrogColour.Green).Position, Is.EqualTo(1));
+            Assert.That(game.FinishingOrder, Is.Empty);
+            Assert.That(game.Winner, Is.Null);
+        }
+
         // docs/specs/ui/game-over.md: "Frogs that did not finish are ranked
         // by how many lily pads they made", and the open question's own
         // wording is the current, still-open-to-change behaviour to build:

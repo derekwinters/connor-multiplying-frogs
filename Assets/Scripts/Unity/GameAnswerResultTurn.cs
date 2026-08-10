@@ -72,13 +72,13 @@ namespace Frogs.Unity
         /// <inheritdoc />
         public void CompleteHandOff()
         {
-            // Just the advance. A frog that lands on the End log also needs
-            // its place in the finishing order captured
-            // (<see cref="Game.RecordFinish"/>, #211), and this is a plausible
-            // moment to do it — but recording a finish is not this issue's,
-            // nothing here is tested against it, and a silent extra call to
-            // Core is exactly the kind of thing that goes unnoticed until it
-            // is wrong.
+            // Just the advance, and deliberately nothing else. A frog that
+            // lands on the End log has its place in the finishing order
+            // captured by Core itself, inside Game.ShowResult — the phase
+            // before this one, and the first one after a move that no caller
+            // can skip. The shell does not have to remember to announce an
+            // arrival, and must not: a second announcement from here would be
+            // a duplicate of a fact Core already holds.
             _game.CompleteHandOff();
         }
     }
