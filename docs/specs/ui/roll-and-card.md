@@ -46,16 +46,27 @@ the card; the card is what you now have to do.
 | --- | --- | --- |
 | Dialog width | `RollDialogWidth` | 1280 px |
 | Dialog height | `RollDialogHeight` | 760 px |
+| `rolled` label size | `RolledLabelSize` | 40 px |
+| Gap between the player chip and `rolled` | `RolledLabelGap` | 24 px |
+| Die group column width | `DieColumnWidth` | 400 px |
+| Die group top offset | `DieGroupTop` | 220 px |
 | Die face, square | `DieFaceSize` | 240 px |
 | Die corner radius | `DieCornerRadius` | 40 px |
+| Die border width | `DieBorderWidth` | 4 px |
+| Inset from the die's edge to the pip grid | `DiePipInset` | 34 px |
 | Die pip diameter | `DiePipDiameter` | 40 px |
 | Gap between die and pile label | `DiePileGap` | 32 px |
 | Pile label size | `PileLabelSize` | 40 px |
+| Card top offset | `CardTop` | 180 px |
 | Card width | `CardWidth` | 560 px |
 | Card height | `CardHeight` | 420 px |
 | Card corner radius | `CardRadius` | 24 px |
+| Card border width | `CardBorderWidth` | 4 px |
 | Problem text size on the card | `CardProblemSize` | 120 px |
-| Gap between the die group and the card | `RollCardGap` | 96 px |
+| Gap between the problem and its rule | `CardRuleGap` | 8 px |
+| Rule under the problem, thickness | `CardRuleThickness` | 8 px |
+| Rule under the problem, length | `CardRuleLength` | 360 px |
+| Gap between the die group and the card | `RollCardGap` | 208 px |
 | Die roll animation | `DieRollDuration` | 0.8 s |
 | Card deal animation | `CardDealDuration` | 0.3 s |
 
@@ -64,11 +75,39 @@ game — sits inside `CardWidth` with room to spare, written the way the classro
 cards are written: the two numbers stacked and right-aligned, `×` to the left of
 the second, a rule underneath.
 
+The three horizontal values across the panel add up exactly, and that is what
+fixes `RollCardGap`: the panel is `RollDialogWidth` (1280 px) less
+`DialogPadding` (56 px) on each side, so 1168 px of content, and
+`DieColumnWidth` (400) + `RollCardGap` (208) + `CardWidth` (560) is that 1168.
+`RollCardGap` read 96 px until issue #221 and could not: it left 208 px of
+content unaccounted for, and the committed mockup — the agreed wireframe — has
+always drawn 208. The mockup was treated as authoritative and the table
+corrected to match it.
+
+`DieGroupTop` and `CardTop` are measured from the inside top of the panel, the
+same way [game over](game-over.md)'s `GameOverHeadlineTop` and
+`StandingsColumnTop` are measured from the top of the canvas. They differ by
+40 px because the two groups are different heights: the taller card sits higher
+so that it and the die group are vertically centred against each other.
+
+`DieBorderWidth` and `CardBorderWidth` hold the same number as
+[shared components](shared-components.md#button)' `ButtonBorderWidth` today and
+are deliberately not that constant — the button is free to restyle its outline
+without redrawing the die or the card. The die's own vertical stack adds up the
+same way the row does: `DiePipInset` (34) either side of a three-across pip grid
+inside a `DieFaceSize` (240) square bounded by `DieBorderWidth` (4) leaves 164 px
+of grid, so each of the nine cells is 54⅔ px and a `DiePipDiameter` (40) pip sits
+centred in one with room around it.
+
 ## Elements
 
 - **Player chip** — [shared](shared-components.md#player-chip), active state.
   Four players share a tablet; the dialog says whose turn this is because the
   header behind it is dimmed.
+- **`rolled`** — the word beside the chip, `RolledLabelSize`, `RolledLabelGap`
+  past it, in the same quiet grey as a chip's second line. It is what makes
+  `whose` a sentence — *Green rolled* — rather than a chip sitting on its own,
+  and it is why this dialog needs no title of its own.
 - **Die** — one six-sided die, drawn with pips rather than a numeral. There is
   exactly one die: the rules card says "Dice", and three piles × two faces
   accounts for all six faces of one — see
