@@ -2027,13 +2027,8 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 </thead>
 <tbody>
 <tr>
-<td>Title screen — <code>NEW</code> primary</td>
+<td>Title screen</td>
 <td><a href="title-screen.html"><code>title-screen.html</code></a></td>
-<td><a href="../title-screen/">Title screen</a></td>
-</tr>
-<tr>
-<td>Title screen — <code>RESUME</code> primary</td>
-<td><a href="title-screen-resume-primary.html"><code>title-screen-resume-primary.html</code></a></td>
 <td><a href="../title-screen/">Title screen</a></td>
 </tr>
 <tr>
@@ -2093,11 +2088,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 </tr>
 </tbody>
 </table>
-<p>Three screens have more than one mockup, for two different reasons.</p>
-<p>Two of them are drawing <strong>a state that only exists in contrast</strong> — a state you
-have to see next to its opposite. The grid is drawn at the biggest and the
-smallest problem the game can deal, and the result dialog is drawn right and
-wrong. Both files in each pair are agreed pictures of the same screen.</p>
+<p>Two screens have more than one mockup, both drawing <strong>a state that only exists
+in contrast</strong> — a state you have to see next to its opposite. The grid is drawn
+at the biggest and the smallest problem the game can deal, and the result
+dialog is drawn right and wrong. Both files in each pair are agreed pictures of
+the same screen.</p>
 <p>The grid's <strong>third</strong> file is neither: it is the widest card with its addition
 section grown to the cap, drawn to find out what the cap costs at today's
 constants. The answer is that it does not fit — the answer row ends up below the
@@ -2106,14 +2101,15 @@ bottom of the tablet. That is
 the mockup is its input rather than an agreed picture. A mockup that overflows
 is doing its job here; it is cheaper to find this in a picture than in a built
 screen.</p>
-<p>The title screen's pair is <strong>a question, not two states</strong>. Which of <code>RESUME</code> and
-<code>NEW</code> is the primary button is
-<a href="../title-screen/#open-questions">open on its spec page</a>, and the wireframe
-loop's own advice is that where there is a real choice you
-<a href="../../../engineering/ui-design-process/#the-loop">propose two mockups</a>,
-because comparing two pictures is a much easier conversation than critiquing
-one. Neither file is agreed yet; when review picks one it becomes
-<code>title-screen.html</code> and the other is deleted.</p>
+<p>The title screen used to have a pair too — <code>title-screen.html</code> and
+<code>title-screen-resume-primary.html</code>, differing in exactly which of <code>RESUME</code> and
+<code>NEW</code> was primary, per the wireframe loop's own advice that where there is a
+real choice you
+<a href="../../../engineering/ui-design-process/#the-loop">propose two mockups</a>.
+That question is
+<a href="../title-screen/#open-questions">now settled</a> — <code>NEW</code> — so
+<code>title-screen.html</code> is the agreed picture and the losing comparison file is
+deleted, per <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">issue #216</a>.</p>
 <p>Each row arrives with its screen's <code>Wireframe:</code> issue. See
 <a href="../../../engineering/ui-design-process/">UI design process</a>.</p>
 <h3 id="colour-in-these-mockups-is-a-placeholder">Colour in these mockups is a placeholder<a class="headerlink" href="#colour-in-these-mockups-is-a-placeholder" title="Link to this section">&para;</a></h3>

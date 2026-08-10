@@ -2160,8 +2160,8 @@ game: carry on with the one you left, or start a new one.</p>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
 <p><strong>Invariant:</strong> the only interactive elements on this screen are <code>RESUME</code> and
 <code>NEW</code>. There is never a third. How many of the two are on screen when there is
-no saved game is <a href="#open-questions">open question 2</a>; nothing is ever <em>added</em>
-beyond these two.
+no saved game is settled — <a href="#open-questions">open question 2</a>, <code>Hidden</code> — and
+nothing is ever <em>added</em> beyond these two.
 <strong>Invariant:</strong> nothing on this screen can start a game with the wrong number of
 players. Choosing who is playing happens on <a href="../game-setup/">game setup</a>, always,
 including when you have played five games in a row. <strong><code>RESUME</code> is not an
@@ -2224,9 +2224,9 @@ else on this page.</p>
   <code>RESUME</code> is on the left and <code>NEW</code> on the right, separated by
   <code>TitleButtonGap</code>.</li>
 <li>The row is centred <strong>as a whole</strong>, not per button. That is what makes the
-  no-save case fall out for free: if <a href="#open-questions">open question 2</a> is
-  answered <code>Hidden</code>, the row contains one button and centres it, which is
-  exactly where <code>Play</code> used to sit.</li>
+  no-save case fall out for free: <a href="#open-questions">open question 2</a> settled
+  on <code>Hidden</code>, so the row contains one button and centres it, which is exactly
+  where <code>Play</code> used to sit.</li>
 <li><code>footprint</code> is pinned to the bottom-left safe area corner.</li>
 <li>On a screen that is not 16:10, the art crops and everything else keeps its
   distance from the <strong>safe area</strong>, not the screen edge.</li>
@@ -2291,16 +2291,30 @@ else on this page.</p>
 <td><code>TitleScrimOpacity</code></td>
 <td>0.35</td>
 </tr>
+<tr>
+<td>Entering fade, art and title</td>
+<td><code>TitleFadeDuration</code></td>
+<td>0.3 s</td>
+</tr>
 </tbody>
 </table>
+<p><code>TitleFadeDuration</code> is stated in <a href="#behaviour">Behaviour</a> — <em>"art and title fade
+in over <code>TitleFadeDuration</code> (0.3 s)"</em> — and is added here in the same PR that
+declares it in code
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">#216</a>),
+per <a href="../../../engineering/ui-design-process/#the-named-constants-are-the-origin-not-an-afterthought">named constants are the origin, not an
+afterthought</a>:
+a value the code needs but this table didn't have was a sign the row was
+missed, not a number free to invent.</p>
 <p><code>TitleButtonHeight</code> is larger than the shared <code>ButtonHeight</code> of 112 px, and
 <code>TitleButtonWidth</code> larger than the shared <code>ButtonMinWidth</code> of 320 px. These are
 the first buttons a child touches and there is nothing else on the screen
 competing with them for space; they are allowed to be the biggest buttons in the
 game. Both buttons take the same width and the same height, deliberately: they
-are two peer choices, and a size difference would be a second, accidental way of
-saying which one matters — which is what
-<a href="#open-questions">open question 1</a> is for the review to answer on purpose.</p>
+are two peer choices, and a size difference would have been a second,
+accidental way of saying which one matters — which
+<a href="#open-questions">open question 1</a> settles on purpose, through <code>ButtonKind</code>
+alone, instead.</p>
 <p><code>TitleButtonGap</code> is <strong>not</strong> the shared <code>ButtonGap</code> of 32 px. That value is sized
 for the shared 112 px button; scaled to a 160 px one the same proportion lands
 just under 48 px, and 48 px is already this page's <code>SafeMargin</code> and game
@@ -2356,25 +2370,25 @@ somebody will eventually apply to the wrong one. <code>TitleButtonGap</code> is 
 genuinely new number.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong><code>RESUME</code></strong> — goes back into the saved game, on the
+<li><strong><code>RESUME</code></strong> — secondary (settled, <a href="#open-questions">open question 1</a>).
+  Goes back into the saved game, on the
   <a href="../game-board/">game board</a>. It restores a roster; it never chooses one. What
   state within a turn a resumed game re-enters is the save format's business
   (<a href="../../../adr/0004-core-owns-the-save-format/">ADR-0004</a>) and is not settled
   here.</li>
-<li><strong>Its button kind is not assigned yet.</strong> Whether it is the primary or the
-    secondary of the pair is <a href="#open-questions">open question 1</a>.</li>
-<li><strong>What it does when there is no game to resume is not settled either.</strong> It
-    is <a href="#open-questions">open question 2</a>, and this page does not assume an
-    answer. The mockups draw the state where a save exists.</li>
+<li><strong>Hidden when there is no game to resume</strong> (settled, <a href="#open-questions">open question
+    2</a>) — not laid out at all, and because that is the only
+    state that exists in this v0.2 proof of concept, <code>RESUME</code> is hidden in
+    practice on every build of this screen today.</li>
 <li>Nothing on this screen writes, reads, or deletes a save. The save
     round-trip does not exist yet — it is out of the shape-only proof of
     concept (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/198">#198</a>)
     — and this wireframe draws the button without implying the mechanism behind
     it.</li>
-<li><strong><code>NEW</code></strong> — renamed from <code>Play</code>, and it goes exactly where <code>Play</code> went:
-  <a href="../game-setup/">game setup</a>. Never disabled; there is no state of this screen
-  that would justify greying it out. Its button kind is the other half of
-  <a href="#open-questions">open question 1</a>.</li>
+<li><strong><code>NEW</code></strong> — primary (settled, <a href="#open-questions">open question 1</a>). Renamed
+  from <code>Play</code>, and it goes exactly where <code>Play</code> went: <a href="../game-setup/">game
+  setup</a>. Never disabled; there is no state of this screen that
+  would justify greying it out.</li>
 <li><strong>Title</strong> — text, not a logo image, until an <code>area:art</code> issue supplies one.
   The wireframe reserves the space a wordmark would occupy.</li>
 <li><strong>Version</strong> — <code>v0.1.0</code>, from <code>/VERSION</code>. It exists so that a screenshot from a
@@ -2390,50 +2404,53 @@ genuinely new number.</p>
 <li>Nothing auto-advances. The title screen waits indefinitely.</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
-<p>Two mockups, drawn as a pair, differing in <strong>exactly one thing</strong>: which of the
-two buttons is the primary. Everything else — position, size, gap, wording — is
-identical between them, so the review is answering
-<a href="#open-questions">open question 1</a> and nothing else.</p>
 <ul>
-<li><strong><code>NEW</code> primary:</strong> <a href="../mockups/title-screen.html"><code>mockups/title-screen.html</code></a></li>
-<li><strong><code>RESUME</code> primary:</strong> <a href="../mockups/title-screen-resume-primary.html"><code>mockups/title-screen-resume-primary.html</code></a></li>
+<li><strong>The agreed picture:</strong> <a href="../mockups/title-screen.html"><code>mockups/title-screen.html</code></a> —
+  <code>NEW</code> primary, <code>RESUME</code> secondary.</li>
 </ul>
-<p><strong>Neither is the agreed picture yet.</strong> The pair is the question. Once review
-picks one, it becomes <code>title-screen.html</code> and the other file goes.</p>
-<p>Both draw the state where <strong>a save exists</strong>, so both buttons are live. That is
-the state the layout question is about; the no-save layout falls out of
-whichever answer <a href="#open-questions">open question 2</a> gets, and is drawn when that
-is answered.</p>
+<p>It used to be one of a pair, drawn to ask which of the two buttons should be
+primary — see "The invariant this page used to carry" and
+<a href="#open-questions">open question 1, settled</a> below. The losing comparison file,
+<code>title-screen-resume-primary.html</code> (<code>RESUME</code> primary), is deleted: the question
+it existed to ask is answered, and a mockup nobody can build to is not worth
+keeping around to confuse the next reader.</p>
+<p>The mockup draws the state where <strong>a save exists</strong>, so both buttons are live.
+The no-save state — <code>RESUME</code> hidden, <code>NEW</code> alone and centred — is not drawn
+separately: it is the same layout with one button removed and the row
+re-centred, which is exactly what <a href="#open-questions">the settled open question
+2</a> below says happens, and it needs no picture of its own to
+be unambiguous.</p>
 <p>The splash illustration attached to
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/168">issue #168</a>
-is the art this screen is built around. The mockups draw its region as a
+is the art this screen is built around. The mockup draws its region as a
 placeholder block rather than embedding the image, because a mockup that needs
 a network fetch is a mockup that does not open on the sofa — and because the
 wireframe is deciding <em>where the art goes</em>, not what it is.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>1. Which of <code>RESUME</code> and <code>NEW</code> is the primary button?</strong> Not decided. The
-  shared <a href="../shared-components/#button">Button</a> invariant is <em>"exactly one
-  primary button is visible at a time"</em>, so one of the two is primary and the
-  other is secondary — this is not a question the page can leave unanswered
-  forever, only one it must not answer by accident. It reads either way: <code>NEW</code>
-  inherits <code>Play</code>'s emphasis and is the button that is always there, while a
-  game sitting half-finished is arguably the likelier reason somebody opened the
-  app at all. The two mockups above are the two answers, side by side.</li>
-<li><strong>2. What does <code>RESUME</code> do when there is no game to resume?</strong> Not decided —
-  a fresh install, or after a game has finished and no save remains. Three
-  options, all buildable from the existing
-  <a href="../shared-components/#button">Button</a> states:</li>
-<li><strong>Hidden</strong> — not laid out at all. The component's <code>Hidden</code> state is
-     already <em>"not laid out at all — buttons do not leave gaps behind"</em>, and
-     because the <code>action</code> row is centred as a row, the screen then shows a
-     single centred <code>NEW</code> exactly where <code>Play</code> used to be.</li>
-<li><strong>Disabled</strong> — always laid out, at 40 % opacity and unpressable. The
-     component already has this state; it needs only a condition saying when it
-     applies.</li>
-<li><strong>Absent</strong> — <code>RESUME</code> is not built yet and the screen ships with <code>NEW</code>
-     alone until save/resume exists. This one differs from the other two in kind:
-     it makes the two-button mockup a forward record rather than a build target.</li>
+<li><strong>1. Which of <code>RESUME</code> and <code>NEW</code> is the primary button? Settled: <code>NEW</code>.</strong>
+  Derek's call, recorded on
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216#issuecomment-5241023983">issue #216</a>:
+  <code>NEW</code> is primary, <code>RESUME</code> is secondary. <code>NEW</code> inherits <code>Play</code>'s emphasis and
+  is the button that is always there — the shared
+  <a href="../shared-components/#button">Button</a> invariant, <em>"exactly one primary button
+  is visible at a time,"</em> is satisfied by <code>NEW</code> alone. The losing comparison
+  mockup (<code>RESUME</code> primary) is deleted; see <a href="#mockup">Mockup</a> above.</li>
+<li><strong>2. What does <code>RESUME</code> do when there is no game to resume? Settled: Hidden.</strong>
+  Derek's call, same comment as above: not laid out at all, the component's
+  existing <code>Hidden</code> state — <em>"not laid out at all — buttons do not leave gaps
+  behind."</em> Because the <code>action</code> row is centred as a row, this makes the
+  screen show a single centred <code>NEW</code> exactly where <code>Play</code> used to sit, with no
+  extra layout to build. In practice this is the <em>only</em> state the row is ever
+  in: the save/resume system does not exist anywhere in this v0.2 shape-only
+  proof of concept
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/198">#198</a>
+  excludes it from scope), so there is never a saved game for <code>RESUME</code> to
+  report. <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">#216</a>
+  builds the hidden/shown check as a real query a future save-system issue can
+  answer honestly, not as <code>RESUME</code> being removed outright — the <code>Disabled</code> and
+  <code>Absent</code> options this question used to weigh are not chosen; <code>RESUME</code> stays
+  a real button that is simply always hidden today.</li>
 <li><strong>Is there a <code>How to play</code> button here?</strong> Proposed: no. The rules are one
   sentence long, Connor already knows them, and
   <a href="../../future-ideas/">an in-app tutorial is parked</a>. If one is wanted it goes
