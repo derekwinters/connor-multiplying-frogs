@@ -335,6 +335,22 @@ writes the version to the log, and nothing else: what a build-proof screen
 [the wireframe loop](ui-design-process.md) rather than being invented in an
 implementation PR.
 
+### The `Game` scene is what the app actually boots into
+
+`Assets/Editor/GameScene.cs` creates `Assets/Scenes/Game.unity` the same way —
+`EditorSceneManager`, not hand-authored YAML — with a camera and nothing else.
+No probe, no layout: what a screen shows still goes through the wireframe loop
+first, and the screen router that puts content into this scene is its own,
+later issue.
+
+`Game.unity` is **first** in `ProjectSettings/EditorBuildSettings.asset` —
+index 0, which is the entry Unity boots into. `HelloWorld.unity` stays in the
+list, enabled, one slot behind it; nothing removes it, and its own EditMode
+tests still pass unchanged, because they assert presence and `enabled`, never
+position. Registering `Game.unity` by appending it, the way a first pass at
+this might do it, would leave the built APK opening into the blank Hello World
+scene forever — the ordering is the whole point, not an incidental detail.
+
 ### Naming
 
 Use the `scaffold-core` skill to create a Core type; it applies all of this and
