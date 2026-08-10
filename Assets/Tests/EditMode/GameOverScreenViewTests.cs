@@ -377,7 +377,9 @@ namespace Frogs.Unity.EditModeTests
                 // on this path — the whole reason `Play again` exists.
                 Assert.That(router.CurrentScreen, Is.EqualTo(CoreScreen.GameBoard));
                 Assert.That(router.CurrentDialog, Is.Null);
-                Assert.That(screensVisited, Does.Not.Contain(CoreScreen.GameSetup));
+                // Has.No.Member, not Does.Not.Contain: the latter binds to
+                // NUnit's substring overload and will not take a Screen.
+                Assert.That(screensVisited, Has.No.Member(CoreScreen.GameSetup));
             }
             finally
             {
