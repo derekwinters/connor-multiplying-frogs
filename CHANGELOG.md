@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.1.0...v0.1.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* **ci:** drop package-name so release-please can tag releases ([#206](https://github.com/derekwinters/connor-multiplying-frogs/issues/206)) ([9d70ab9](https://github.com/derekwinters/connor-multiplying-frogs/commit/9d70ab921297d10e61ed79670525f8be0cc8b925)), closes [#205](https://github.com/derekwinters/connor-multiplying-frogs/issues/205)
+* **ci:** read the release APKs from the directory Unity writes them to ([#215](https://github.com/derekwinters/connor-multiplying-frogs/issues/215)) ([450a5cc](https://github.com/derekwinters/connor-multiplying-frogs/commit/450a5cc6427eb9253eb89ee3ddfd5859fc42e089)), closes [#212](https://github.com/derekwinters/connor-multiplying-frogs/issues/212)
+
 ## [0.1.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.0.1...v0.1.0) (2026-08-09)
 
 
