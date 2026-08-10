@@ -2101,6 +2101,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The endpoint is the Anthropic API, so anthropic-version is required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#an-error-status-is-an-answer-not-a-failure-to-reach" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3240,6 +3251,17 @@
     <span class="md-ellipsis">
       
         The outcome is classified truthfully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The endpoint is the Anthropic API, so anthropic-version is required
       
     </span>
   </a>
@@ -4428,6 +4450,18 @@ now have one.</p>
 as fired would hide a misconfigured Routine behind a green log line for weeks.
 Everything else logs the status and a bounded snippet of the body, and a <code>401</code>
 says the secret is wrong rather than just failing.</p>
+<h4 id="the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required">The endpoint is the Anthropic API, so <code>anthropic-version</code> is required<a class="headerlink" href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" title="Link to this section">&para;</a></h4>
+<p><code>AI_TRIAGE_URL</code> points at an Anthropic API endpoint, and that API requires an
+<code>anthropic-version</code> header on <strong>every</strong> request. Without it the fire is refused
+at header validation with a <code>400</code>, before the token or the payload is examined —
+which is why a missing version reads as a malformed request rather than an auth
+failure, and why a <code>400</code> here never meant the secret was wrong.</p>
+<p>That cost real time in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/238">#238</a>:
+because the URL is a secret, nobody could see it was an <code>api.anthropic.com</code>
+endpoint, so nobody thought to ask what headers that API demands. If the fire
+ever starts failing at header validation again, the endpoint's own message names
+the header — which is the whole reason the two fixes above exist.</p>
 <h4 id="an-error-status-is-an-answer-not-a-failure-to-reach">An error status is an answer, not a failure to reach<a class="headerlink" href="#an-error-status-is-an-answer-not-a-failure-to-reach" title="Link to this section">&para;</a></h4>
 <p><code>urlopen</code> raises on any 4xx or 5xx rather than returning it, so an error status
 has to be caught and turned back into a <code>(status, body)</code> pair. Skipping that
