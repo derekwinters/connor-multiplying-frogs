@@ -55,10 +55,20 @@ namespace Frogs.Unity.UI
 
         // No imported texture, sprite, or font — docs/specs/ui/shared-components.md
         // "no external assets". A uGUI Image needs *some* sprite to draw a
-        // rounded rect rather than a plain rectangle, so this uses the sprite
-        // Unity ships with every editor and player build for exactly this
-        // purpose (ADR-0005), not a project asset.
-        const string BuiltinButtonSpriteName = "UI/Skin/UISprite.psd";
+        // rounded rect rather than a plain rectangle.
+        //
+        // This used to ask Resources.GetBuiltinResource<Sprite> for Unity's own
+        // "UI/Skin/UISprite.psd" — the built-in resource ADR-0005 names as one
+        // of the two sanctioned options. CI on 6000.0.81f1 logged
+        // "Failed to find UI/Skin/UISprite.psd" and GetBuiltinResource returned
+        // null: that resource name is either wrong or unavailable at runtime on
+        // this Unity version, and GetBuiltinResource fails silently (a null
+        // return plus a log) rather than with a catchable exception, so every
+        // Button in every test kept re-attempting and re-logging the failure.
+        // Rather than guess at a different string with no editor to check it
+        // against, this generates the rounded rect procedurally — the issue's
+        // other sanctioned option, and the one that doesn't depend on a Unity
+        // version's internal resource catalogue at all.
         const string BuiltinLabelFontName = "LegacyRuntime.ttf";
 
         static Sprite s_buttonSprite;
@@ -69,11 +79,69 @@ namespace Frogs.Unity.UI
             {
                 if (s_buttonSprite == null)
                 {
-                    s_buttonSprite = Resources.GetBuiltinResource<Sprite>(BuiltinButtonSpriteName);
+                    s_buttonSprite = CreateRoundedRectSprite(Mathf.RoundToInt(ButtonRadius));
                 }
 
                 return s_buttonSprite;
             }
+        }
+
+        const float FullyOpaqueByte = 255f;
+
+        // A square alpha-mask texture just big enough to hold one rounded
+        // corner (radius*2+1, so there is exactly one solid centre pixel),
+        // sliced with a border of `radius` on every side. uGUI's Sliced Image
+        // stretches only the 1-pixel middle band, so the corner stays exactly
+        // `radius` texture pixels regardless of how large the button's
+        // RectTransform is — the same guarantee a hand-drawn 9-slice asset
+        // would give, without importing one.
+        static Sprite CreateRoundedRectSprite(int radius)
+        {
+            radius = Mathf.Max(radius, 1);
+            var size = radius * 2 + 1;
+            var half = size / 2f;
+            var pixels = new Color32[size * size];
+
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    // Signed distance from a box of half-size `half` rounded
+                    // by `radius`, sampled at the pixel centre — the standard
+                    // rounded-box SDF. <= 0 is inside the shape.
+                    var px = x + 0.5f - half;
+                    var py = y + 0.5f - half;
+                    var dx = Mathf.Max(Mathf.Abs(px) - (half - radius), 0f);
+                    var dy = Mathf.Max(Mathf.Abs(py) - (half - radius), 0f);
+                    var distance = Mathf.Sqrt(dx * dx + dy * dy) - radius;
+
+                    // A soft one-pixel edge instead of a hard cutoff, so the
+                    // curve doesn't alias at the sizes this renders at.
+                    var alpha = Mathf.Clamp01(0.5f - distance);
+                    pixels[(y * size) + x] = new Color32(255, 255, 255, (byte)(alpha * FullyOpaqueByte));
+                }
+            }
+
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, mipChain: false)
+            {
+                name = "Frogs Button Rounded Rect (procedural)",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear
+            };
+            texture.SetPixels32(pixels);
+            texture.Apply(updateMipmaps: false, makeNoLongerReadable: false);
+
+            var rect = new Rect(0f, 0f, size, size);
+            var pivot = new Vector2(0.5f, 0.5f);
+            var border = new Vector4(radius, radius, radius, radius);
+
+            // Matches CanvasScaler's default referencePixelsPerUnit (100), so
+            // the sliced border renders as exactly `radius` UI pixels — the
+            // same 1:1 pixel-to-unit mapping every other Button constant
+            // already assumes.
+            const float pixelsPerUnit = 100f;
+            const uint extrude = 0;
+            return Sprite.Create(texture, rect, pivot, pixelsPerUnit, extrude, SpriteMeshType.FullRect, border);
         }
 
         [SerializeField] ButtonKind _kind = ButtonKind.Primary;

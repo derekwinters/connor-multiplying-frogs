@@ -59,7 +59,15 @@ anything.
   Each issue that draws one either uses a built-in editor UI resource
   (`Resources.GetBuiltinResource<Sprite>(…)`, shipped with every Unity install —
   not a project asset) or generates the shape procedurally at runtime, and says
-  in its PR which. This issue's Button uses the built-in resource; see its PR.
+  in its PR which. **This issue's Button tried the built-in resource first**
+  (`"UI/Skin/UISprite.psd"`) and found it unreliable: CI on the pinned
+  `6000.0.81f1` logged `Failed to find UI/Skin/UISprite.psd` and the lookup
+  returned `null` silently, with no editor available locally to find the
+  right name for this version. It switched to generating the rounded rect
+  procedurally instead, which carries no per-version resource name to get
+  right. A later issue reaching for a built-in resource should expect the
+  same risk and consider procedural generation first rather than rediscovering
+  this the same way.
 - `Packages/manifest.json` keeps `com.unity.modules.uielements` for now — it is
   a default Unity 6 module, not a UI Toolkit feature this project uses, and
   removing it is a housekeeping change with no behaviour attached to it, not
