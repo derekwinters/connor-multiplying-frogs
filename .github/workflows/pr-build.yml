@@ -90,25 +90,6 @@ jobs:
           key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
           restore-keys: Library-android-
 
-      # TEMPORARY — remove before merge. Runs Unity once with -executeMethod to
-      # create Assets/Scenes/Game.unity and register it in build settings, so
-      # the files it writes can be read back out of the log below and
-      # committed. See issue #209 and PR #179, which did the same for
-      # HelloWorldScene.
-      - name: Create the Game scene
-        if: steps.licence.outputs.present == 'true'
-        continue-on-error: true
-        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          unityVersion: 6000.0.81f1
-          targetPlatform: Android
-          buildMethod: Frogs.EditorTools.GameScene.EnsureReadyToBuild
-          allowDirtyBuild: true
-
       # The version name, versionCode, and .debug suffix are applied by
       # BuildStampPreprocessor from these values — a build pre-processor, so no
       # build can be produced without them. See docs/engineering/versioning.md.
@@ -153,19 +134,3 @@ jobs:
                  "(versionCode ${{ steps.stamp.outputs.version_code }}), installs alongside the" \
                  "release build as \`.debug\`." >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      # TEMPORARY — remove before merge. Last, so it lands at the end of the
-      # log where it can be read back. See issue #209 and PR #179.
-      - name: Show what Unity wrote
-        if: always()
-        run: |
-          ls -la Assets/Scenes ProjectSettings || true
-          for file in \
-            Assets/Scenes/Game.unity \
-            Assets/Scenes/Game.unity.meta \
-            ProjectSettings/EditorBuildSettings.asset
-          do
-            echo "vvvvv $file vvvvv"
-            cat "$file" 2>&1 || true
-            echo "^^^^^ $file ^^^^^"
-          done
