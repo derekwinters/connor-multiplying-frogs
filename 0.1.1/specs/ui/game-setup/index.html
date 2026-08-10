@@ -2209,11 +2209,38 @@ tapped by four children at once, reaching across each other.</p>
 <td><code>SeatOrderBadge</code></td>
 <td>72 px</td>
 </tr>
+<tr>
+<td>Gap between a seat's swatch and the content below it</td>
+<td><code>SeatContentGap</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Turn-order badge inset from the seat's corner</td>
+<td><code>SeatBadgeInset</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>Fewest frogs a game can start with</td>
+<td><code>GameSetupMinFrogs</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td>Most frogs a game can start with</td>
+<td><code>GameSetupMaxFrogs</code></td>
+<td>4</td>
+</tr>
 </tbody>
 </table>
 <p>Four seats at 360 px with three 48 px gaps is 1584 px, centred in 1920 with
 168 px either side. The row is deliberately not full-bleed: the empty space is
 what makes it obvious there are four seats and no more.</p>
+<p><code>SeatContentGap</code> and <code>SeatBadgeInset</code> distil what
+<a href="../mockups/game-setup.html"><code>mockups/game-setup.html</code></a> already draws: every seat
+column has <code>gap:32px</code> between its swatch and the content below it, and the
+turn-order badge sits at a fixed <code>left:24px; top:24px</code> inset from the seat's
+own corner. <code>GameSetupMinFrogs</code> and <code>GameSetupMaxFrogs</code> distil the Invariants
+section's own prose above ("a game cannot start with fewer than two frogs or
+more than four") into the names the code declares them under.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li>
