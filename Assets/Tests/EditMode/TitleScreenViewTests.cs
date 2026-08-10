@@ -29,9 +29,19 @@ namespace Frogs.Unity.EditModeTests
 
             try
             {
+                // Touch the properties first: unlike every property on
+                // TitleScreenView, GetComponentsInChildren is a raw Unity API
+                // call that does not funnel through EnsureInitialized(), and
+                // Awake() is not guaranteed to have run yet right after
+                // AddComponent — the same reasoning TitleScreenView's own
+                // EnsureInitialized comment gives. Without this, the search
+                // below can run against an empty hierarchy.
+                var resumeButton = view.ResumeButton;
+                var newButton = view.NewButton;
+
                 var buttons = view.GetComponentsInChildren<Button>(includeInactive: true);
 
-                Assert.That(buttons, Is.EquivalentTo(new[] { view.ResumeButton, view.NewButton }));
+                Assert.That(buttons, Is.EquivalentTo(new[] { resumeButton, newButton }));
 
                 // art, title and footprint carry no Button component at all —
                 // docs/specs/ui/title-screen.md's first invariant: "the only
