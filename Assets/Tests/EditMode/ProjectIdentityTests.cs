@@ -21,8 +21,8 @@ namespace Frogs.Unity.EditModeTests
     /// </summary>
     public sealed class ProjectIdentityTests
     {
-        const string BuildShaVariable = "FROGS_BUILD_SHA";
-        const string VersionCodeVariable = "FROGS_VERSION_CODE";
+        const string BuildShaVariable = BuildInputs.BuildShaVariable;
+        const string VersionCodeVariable = BuildInputs.VersionCodeVariable;
 
         string previousSha;
         string previousVersionCode;
@@ -31,9 +31,15 @@ namespace Frogs.Unity.EditModeTests
         public void StampADebugBuildWithoutTouchingGit()
         {
             // The pre-processor stamps a version before anything else, and the
-            // debug path reads both of these from the environment. Set, so the
-            // stamp cannot shell out to git — a shallow CI checkout has no
-            // history to count, and this test is not about the version anyway.
+            // debug path needs both of these. Set, so the stamp cannot shell
+            // out to git — a shallow CI checkout has no history to count, and
+            // this test is not about the version anyway.
+            //
+            // The environment, not the command line, because a test cannot
+            // change the process's arguments. That fallback is exactly why
+            // `BuildInputs` keeps reading the variables: in CI the values ride
+            // the Unity command line instead, which nothing in-process can
+            // fake. See docs/engineering/ci-cd.md#build-inputs.
             previousSha = Environment.GetEnvironmentVariable(BuildShaVariable);
             previousVersionCode = Environment.GetEnvironmentVariable(VersionCodeVariable);
 

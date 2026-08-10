@@ -222,6 +222,51 @@ wrong version cannot be identified afterwards.
 Red here almost always means a compile error the Core suite couldn't catch,
 because it lives in the Unity layer. Read the build log, not the test log.
 
+#### How a value reaches the Unity process {#build-inputs}
+
+**On Unity's command line, via the action's `customParameters` input.** Never in
+the step's `env:`.
+
+`game-ci/unity-builder` does not run Unity on the runner. It runs it inside a
+container, and it forwards a **fixed allow-list** of environment variables into
+that container — `UNITY_*`, `BUILD_*`, `ANDROID_*`, `CUSTOM_PARAMETERS`, a
+handful of `GITHUB_*`. Nothing else. A `FROGS_ANDROID_PROFILE` set in a step's
+`env:` sits on the runner, outside the container, where the editor never looks.
+
+That failure is silent by construction. Every reader of these values treats
+"absent" as "this build did not ask for that" — which is the right answer for
+the editor's own Build button, and the wrong one here. So a build that received
+none of its inputs looks exactly like a build that wanted none of them. `v0.1.0`
+shipped a device APK and an emulator APK that were the same file, byte for byte,
+and every check upstream of the APK was green (#218).
+
+`customParameters` is appended verbatim to the container's `unity-editor`
+invocation, so it does arrive:
+
+| Value | Flag |
+| --- | --- |
+| Android `versionCode` | `-frogsVersionCode` |
+| Short commit sha, for a PR build | `-frogsBuildSha` |
+| Release-candidate number | `-frogsRcNumber` |
+| `applicationId` suffix | `-frogsApplicationIdSuffix` |
+| Android build profile | `-frogsAndroidProfile` |
+
+`BuildInputs` reads the command line first and the matching `FROGS_*` variable
+second. The variables still work everywhere the container is not involved — a
+local headless `-executeMethod`, and the EditMode tests — and mean nothing in
+CI.
+
+Two things hold this in place, and both are why the rule is written down rather
+than remembered:
+
+- **`.github/scripts/tests/test_build_inputs_reach_unity.py`** fails if any
+  Unity build step sets a `FROGS_*` variable in its `env:`, if a build is not
+  told its `versionCode`, if a flag is passed with no value after it, or if two
+  builds in one workflow ask for the same profile.
+- **`BuildArguments`** throws when a flag is present with no usable value,
+  rather than reading it as absent. A build that received a broken command line
+  stops while the log is still open.
+
 ### `rc-build` — release candidates
 
 An RC is a build of what is *about* to be released, produced so someone can play
@@ -378,9 +423,37 @@ Two things now stop it recurring:
   because "the build produced nothing" and "nothing matched the glob" have
   completely different fixes and used to be the same message.
 
-The profile is applied by `BuildStampPreprocessor` from `FROGS_ANDROID_PROFILE`,
-and an unrecognised value fails the build rather than defaulting: guessing here
-ships the wrong architecture, which looks fine until someone installs it.
+The profile is applied by `BuildStampPreprocessor` from `-frogsAndroidProfile`
+on the Unity command line ([how a value gets there](#build-inputs)), and an
+unrecognised value fails the build rather than defaulting: guessing here ships
+the wrong architecture, which looks fine until someone installs it.
+
+#### The two APKs are checked against each other before either is attached
+
+Running Unity twice is not the same as getting two builds. For `v0.1.0` it was
+not: the profile never reached the editor, both invocations built the same
+thing, and the release went out with two byte-identical assets under different
+names (#218). Nothing upstream of the APK could have seen it — both builds went
+green, both files existed, both were a plausible size.
+
+So `.github/scripts/check_release_apks.py` opens them. An APK's native
+libraries live under `lib/<abi>/`, and those ABI names are Android's, so they
+mean the same thing in every APK ever built; IL2CPP additionally ships
+`libil2cpp.so` and Mono does not. That is enough to assert the whole profile
+table:
+
+| Check | Why |
+| --- | --- |
+| the two files are not byte-identical | two profiles cannot produce one file |
+| device has `arm64-v8a` and nothing else | the tablet's architecture, alone |
+| emulator has `x86_64` and nothing else | an ARM64 APK will not install on an x86_64 emulator |
+| device ships `libil2cpp.so`, emulator does not | the profile is a backend as well as an architecture |
+
+It runs **before** the attach step, so a release that failed it gets no assets
+rather than the wrong ones. That is the right way round: a bad APK attached to
+a tag is a failure that surfaces on someone else's machine, days later, with no
+build log anywhere near it, while a release missing its APKs is a backfill this
+workflow already knows how to do.
 
 Both are **attached to the GitHub release** rather than left as workflow
 artifacts, so the tag and the thing you install are one object. A release whose

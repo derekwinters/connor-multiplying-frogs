@@ -22,16 +22,14 @@ namespace Frogs.EditorTools
     ///     Unity -batchmode -quit -projectPath . \
     ///           -executeMethod Frogs.EditorTools.BuildStampApplier.ApplyRelease
     ///
-    /// CI sets FROGS_VERSION_CODE and FROGS_BUILD_SHA rather than making this
-    /// shell out — a checkout with `fetch-depth: 1` has no history to count.
-    /// Locally, both fall back to git.
+    /// CI passes the version code and the sha in rather than making this shell
+    /// out — a checkout with `fetch-depth: 1` has no history to count. See
+    /// <see cref="BuildInputs"/> for how they travel. Locally, both fall back
+    /// to git.
     /// </summary>
     public static class BuildStampApplier
     {
         const string VersionFileName = "VERSION";
-        const string VersionCodeVariable = "FROGS_VERSION_CODE";
-        const string BuildShaVariable = "FROGS_BUILD_SHA";
-        const string RcNumberVariable = "FROGS_RC_NUMBER";
 
         /// <summary>A release build: PlayerSettings shows the bare version.</summary>
         public static void ApplyRelease() => Apply(BuildStamp.Release(ReadVersion(), ReadCommitCount()));
@@ -72,14 +70,18 @@ namespace Frogs.EditorTools
 
         static int ReadCommitCount()
         {
-            var fromEnvironment = Environment.GetEnvironmentVariable(VersionCodeVariable);
+            var given = BuildInputs.VersionCode;
 
-            if (!string.IsNullOrWhiteSpace(fromEnvironment))
+            if (!string.IsNullOrWhiteSpace(given))
             {
-                if (!int.TryParse(fromEnvironment, out var parsed))
+                if (!int.TryParse(given, out var parsed))
                 {
+                    var source = BuildInputs.Describe(
+                        BuildInputs.VersionCodeFlag, BuildInputs.VersionCodeVariable);
+
                     throw new FormatException(
-                        $"{VersionCodeVariable} is '{fromEnvironment}', which is not a number.");
+                        $"The version code is '{given}', which is not a number. It comes "
+                        + $"from {source}.");
                 }
 
                 return parsed;
@@ -90,13 +92,17 @@ namespace Frogs.EditorTools
 
         static int ReadRcNumber()
         {
-            var value = Environment.GetEnvironmentVariable(RcNumberVariable);
+            var given = BuildInputs.RcNumber;
 
-            if (string.IsNullOrWhiteSpace(value) || !int.TryParse(value, out var parsed))
+            if (string.IsNullOrWhiteSpace(given) || !int.TryParse(given, out var parsed))
             {
+                var source = BuildInputs.Describe(
+                    BuildInputs.RcNumberFlag, BuildInputs.RcNumberVariable);
+
                 throw new FormatException(
-                    $"{RcNumberVariable} is '{value}', which is not a release-candidate "
-                    + "number. It is derived by .github/scripts/next_rc_number.py.");
+                    $"The release-candidate number is '{given}', which is not a number. "
+                    + $"It comes from {source}, and is derived by "
+                    + ".github/scripts/next_rc_number.py.");
             }
 
             return parsed;
@@ -104,11 +110,9 @@ namespace Frogs.EditorTools
 
         static string ReadCommitSha()
         {
-            var fromEnvironment = Environment.GetEnvironmentVariable(BuildShaVariable);
+            var given = BuildInputs.BuildSha;
 
-            return string.IsNullOrWhiteSpace(fromEnvironment)
-                ? Git("rev-parse --short=7 HEAD")
-                : fromEnvironment;
+            return string.IsNullOrWhiteSpace(given) ? Git("rev-parse --short=7 HEAD") : given;
         }
 
         static string Git(string arguments)
@@ -132,8 +136,10 @@ namespace Frogs.EditorTools
                 {
                     throw new InvalidOperationException(
                         $"`git {arguments}` failed with exit code {process.ExitCode}: {error}. "
-                        + $"In CI, set {VersionCodeVariable} and {BuildShaVariable} instead — a "
-                        + "shallow checkout has no history to count.");
+                        + $"In CI, pass {BuildInputs.VersionCodeFlag} and "
+                        + $"{BuildInputs.BuildShaFlag} on the Unity command line instead — a "
+                        + "shallow checkout has no history to count, and the build container "
+                        + "may have no git at all.");
                 }
 
                 return output;
