@@ -24,26 +24,21 @@ namespace Frogs.Unity
         readonly Dictionary<CoreScreen, GameObject> _screenRoots = new Dictionary<CoreScreen, GameObject>();
         readonly Dictionary<Dialog, GameObject> _dialogRoots = new Dictionary<Dialog, GameObject>();
 
+        bool _initialized;
+
         /// <summary>The Core router this adapter wires to the engine.</summary>
         public ScreenRouter Router
         {
-            get { return _router; }
+            get
+            {
+                EnsureInitialized();
+                return _router;
+            }
         }
 
         void Awake()
         {
-            foreach (CoreScreen screen in Enum.GetValues(typeof(CoreScreen)))
-            {
-                _screenRoots[screen] = CreateRoot(screen.ToString());
-            }
-
-            foreach (Dialog dialog in Enum.GetValues(typeof(Dialog)))
-            {
-                _dialogRoots[dialog] = CreateRoot(dialog.ToString());
-            }
-
-            _router.StateChanged += RefreshActiveRoots;
-            RefreshActiveRoots();
+            EnsureInitialized();
         }
 
         void OnDestroy()
@@ -68,6 +63,8 @@ namespace Frogs.Unity
         /// </summary>
         public void HandleBackButton()
         {
+            EnsureInitialized();
+
             _router.HandleBack();
 
             if (_router.AppExitRequested)
@@ -79,13 +76,45 @@ namespace Frogs.Unity
         /// <summary>The root <c>GameObject</c> for a screen — active only while it is current.</summary>
         public GameObject RootFor(CoreScreen screen)
         {
+            EnsureInitialized();
             return _screenRoots[screen];
         }
 
         /// <summary>The root <c>GameObject</c> for a dialog — active only while it is current.</summary>
         public GameObject RootFor(Dialog dialog)
         {
+            EnsureInitialized();
             return _dialogRoots[dialog];
+        }
+
+        // Unity does not guarantee Awake() runs before another component's
+        // Awake() touches this one, nor before a test calls a public method
+        // right after AddComponent — both reach this adapter with Awake()
+        // not yet having fired. Every public entry point funnels through
+        // this idempotent guard instead of trusting Awake's timing, so the
+        // roots and the StateChanged subscription exist before anything can
+        // observe them missing.
+        void EnsureInitialized()
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            _initialized = true;
+
+            foreach (CoreScreen screen in Enum.GetValues(typeof(CoreScreen)))
+            {
+                _screenRoots[screen] = CreateRoot(screen.ToString());
+            }
+
+            foreach (Dialog dialog in Enum.GetValues(typeof(Dialog)))
+            {
+                _dialogRoots[dialog] = CreateRoot(dialog.ToString());
+            }
+
+            _router.StateChanged += RefreshActiveRoots;
+            RefreshActiveRoots();
         }
 
         GameObject CreateRoot(string name)
