@@ -156,6 +156,13 @@ rows.
     `GridAdditionRowsAtStart` of them, and the player can grow the section from
     there to `GridAdditionRowsMax`.
 
+    The `rule` entries in that list are drawn separators, not rows: a straight
+    line at `GridRuleThickness`, with no cells of its own, between two row
+    kinds the shell already knows are adjacent. `Core` does not report them —
+    [#204](https://github.com/derekwinters/connor-multiplying-frogs/issues/204)
+    reports carry strip, multiplicand, multiplier, addition rows, carry strip,
+    answer row, and nothing named `Rule`.
+
 **"The addition section"** is this page's name for those rows — the block
 between the first rule line and the second, which Derek calls the `"+ "`
 section and which this page used to call the *partial-product rows*. They are
@@ -306,39 +313,34 @@ today's numbers, not to pick the fix.
 ## Open questions
 
 Questions 2 to 5 arrived with the growable addition section
-([#234](https://github.com/derekwinters/connor-multiplying-frogs/issues/234)),
-and none of them is answered by anything Derek has said. Questions 1 and 6 are
-older. Question 1 is the one that changes what `Core` builds.
+([#234](https://github.com/derekwinters/connor-multiplying-frogs/issues/234)).
+Question 6 is older. Questions 1 and 5 are settled; 2, 3, 4 and 6 are not
+answered by anything Derek has said yet.
 
-- **1. Which carry convention does Connor's class use?** The mockups put one
-  carry strip above the multiplication and one above the addition, each reused
-  across the rows it covers. The alternative is a strip attached to each
-  addition row, so a carry is never reused across two passes. Nothing is marked
-  either way, so this is about matching what he is taught — his call, not one to
-  make in code.
+- **1. Which carry convention does Connor's class use? Settled: shared
+  strip.** The mockups put one carry strip above the multiplication and one
+  above the addition, each reused across the rows it covers. The alternative
+  was a strip attached to each addition row, so a carry is never reused across
+  two passes.
 
-    This is **the one open question on this page that changes the shape of the
-    grid in `Core`**, so it is worth being exact about what depends on it.
-    Depending on it: the number of carry strips a grid has, whether that number
-    tracks the addition row count (and therefore grows during a turn), and the
-    per-row-versus-shared structure the row list above states. Not depending on
-    it: the column count, the addition section's starting count and cap, the
-    growth trigger, the fact that nothing is graded, and the overrun measured in
-    the third mockup — a per-row strip would make the overrun worse, not
-    different in kind.
+    This was **the one open question on this page that changed the shape of
+    the grid in `Core`**, which is why it is worth being exact about what
+    depended on it. Depending on it: the number of carry strips a grid has,
+    whether that number tracks the addition row count (and therefore grows
+    during a turn), and the per-row-versus-shared structure the row list above
+    states. Not depending on it: the column count, the addition section's
+    starting count and cap, the growth trigger, the fact that nothing is
+    graded, and the overrun measured in the third mockup.
 
-    `Core` and the grid screen are being built to what the mockups draw today —
-    two strips at most — which is a recorded position, not an answer. If the
-    answer is the per-row strip, this page's row list, its `Elements` section,
-    all three mockups and the grid model change together.
-    Tracked in
-    [#255](https://github.com/derekwinters/connor-multiplying-frogs/issues/255).
-    It was originally asked in
+    Derek's call on [#255](https://github.com/derekwinters/connor-multiplying-frogs/issues/255):
+    "Shared strip — matches today's mockups." `Core` and the grid screen are
+    built to what the mockups already drew — two strips at most, confirmed
+    rather than redrawn. It was originally asked in
     [#227](https://github.com/derekwinters/connor-multiplying-frogs/issues/227),
     which was carrying two questions under one title and was closed once Derek
     answered the other one — superscript carries versus written-out addition
-    rows, the change this page has just absorbed. The layout question itself was
-    never answered, so it has its own issue now.
+    rows, the change this page has already absorbed. The layout question
+    itself is what #255 answered.
 
 - **2. What happens to the second carry strip as the section grows?** Today it
   is pinned directly above the answer row. Three readings, none picked: it stays
@@ -363,11 +365,20 @@ older. Question 1 is the one that changes what `Core` builds.
   redrawn `68 × 5` mockup uses the two-digit structure because that is the only
   one this project has drawn — a default in a picture, not a decision.
 
-- **5. Can a grown row be taken away again?** Backspacing the last digit out of
-  a grown row could remove it, or leave it. Leaving it means a mis-tap costs a
-  row permanently and, near the cap, costs the ability to grow another. Removing
-  it means a row can vanish under the caret. Neither is obviously right and
-  neither is stated.
+- **5. Can a grown row be taken away again? Settled: yes.** Derek, on
+  [#204](https://github.com/derekwinters/connor-multiplying-frogs/issues/204):
+  backspacing the last digit out of a grown row removes the row. This is
+  Core-level state, not just drawing — the grid model needs a transition for
+  the addition section shrinking by one row, not only growing by one.
+  [`WorkingOutGrid`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs)
+  reports the grid for a given `(card, addition row count)` snapshot, so a
+  shrink is nothing more than the next snapshot's count being one lower — it
+  does not need an operation of its own. `GridAdditionRowsAtStart` is the
+  floor: no snapshot may ask for fewer, because no card is ever dealt fewer.
+  What is not settled, and is not this page's or `Core`'s to settle: whether
+  removing a row the player isn't currently at (not the section's bottom row)
+  is reachable at all — that is the caret-and-keypad interaction policy, owned
+  by whichever issue builds turn interaction.
 
 - **6. Should the keypad have an `=`?** No, currently: `Check it` is the commit,
   and two ways to submit is one too many.
