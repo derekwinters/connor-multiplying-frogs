@@ -30,14 +30,15 @@ at the biggest and the smallest problem the game can deal, and the result
 dialog is drawn right and wrong. Both files in each pair are agreed pictures of
 the same screen.
 
-The grid's **third** file is neither: it is the widest card with its addition
-section grown to the cap, drawn to find out what the cap costs at today's
-constants. The answer is that it does not fit — the answer row ends up below the
-bottom of the tablet. That is
-[an open question on the spec page](../working-out-grid.md#open-questions), and
-the mockup is its input rather than an agreed picture. A mockup that overflows
-is doing its job here; it is cheaper to find this in a picture than in a built
-screen.
+The grid's **third** file is the widest card with its addition section grown to
+the cap. It was drawn to find out what the cap costs, and at full-size addition
+rows the answer was that it does not fit — the answer row ended up below the
+bottom of the tablet. That overflowing drawing was the input to
+[open question 3 on the spec page](../working-out-grid.md#open-questions), and
+it did its job: it is cheaper to find that in a picture than in a built screen.
+Derek settled the question — smaller cells for the addition rows only — so the
+file now draws the answer instead: the same six rows at
+`GridAdditionRowHeight`, fitting with 16 px to spare.
 
 The title screen used to have a pair too — `title-screen.html` and
 `title-screen-resume-primary.html`, differing in exactly which of `RESUME` and
