@@ -1,0 +1,745 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using Frogs.Core;
+using Frogs.Unity.Views;
+// UnityEngine.UI also declares a Button type — the same collision
+// ButtonTests.cs, TitleScreenView.cs and GameSetupScreenViewTests.cs work
+// around — so the shared components are pulled in by explicit alias, and a
+// bare `Button` in this file always means the shared component's.
+using Button = Frogs.Unity.UI.Button;
+using ButtonKind = Frogs.Unity.UI.ButtonKind;
+using FrogColours = Frogs.Unity.UI.FrogColours;
+using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
+
+namespace Frogs.Unity.EditModeTests
+{
+    /// <summary>
+    /// The game board — issue #220, built to docs/specs/ui/game-board.md and
+    /// its committed 1:1 mockup. Written before
+    /// <see cref="GameBoardScreenView"/> exists, per
+    /// docs/engineering/testing.md's sanctioned flow: pushed unexecuted, with
+    /// CI turning these red before green — there is no editor here to watch
+    /// them fail.
+    ///
+    /// Every fact about the game — whose turn it is, where each frog sits,
+    /// whether a frog is home — is read from a real <see cref="Game"/> driven
+    /// into the state under test through its own public API. Nothing here
+    /// hands the board a number it could have computed for itself.
+    /// </summary>
+    public sealed class GameBoardScreenViewTests
+    {
+        const ulong AnySeed = 20260810UL;
+
+        // The one canvas every screen is measured in —
+        // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
+        const float CanvasWidth = 1920f;
+        const float CanvasHeight = 1200f;
+
+        [Test]
+        public void TurnBanner_NamesWhicheverFrogCoreReportsActive_AndShowsItsChipActive()
+        {
+            var game = new Game(new[] { FrogColour.Blue, FrogColour.Green }, AnySeed);
+            var view = CreateView(game);
+
+            try
+            {
+                // Blue is first in turn order, so Core reports Blue active.
+                Assert.That(view.TurnBannerText.text, Is.EqualTo("Blue frog's turn"));
+                Assert.That(view.TurnBannerChip.Label.text, Is.EqualTo("Blue"));
+                Assert.That(view.TurnBannerChip.State, Is.EqualTo(PlayerChipState.Active));
+                Assert.That(view.TurnBannerChip.Swatch.color, Is.EqualTo(FrogColours.For(FrogColour.Blue)));
+
+                // Hand the turn on in Core and ask the board again: the
+                // banner has to follow Core, not a value baked in at build.
+                PassTheTurn(game);
+                view.Refresh();
+
+                Assert.That(view.TurnBannerText.text, Is.EqualTo("Green frog's turn"));
+                Assert.That(view.TurnBannerChip.Label.text, Is.EqualTo("Green"));
+                Assert.That(view.TurnBannerChip.Swatch.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Header_IsBoardHeaderHeightTall_FullWidth_WithTheBannerLeftAndSettingsRight()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var header = view.HeaderRect;
+
+                Assert.That(header.rect.height, Is.EqualTo(GameBoardScreenView.BoardHeaderHeight).Within(0.001f));
+                Assert.That(header.rect.width, Is.EqualTo(CanvasWidth).Within(0.001f), "full width");
+                Assert.That(header.anchorMin.y, Is.EqualTo(1f), "pinned to the top");
+                Assert.That(header.anchorMax.y, Is.EqualTo(1f));
+
+                Assert.That(view.TurnBannerText.fontSize, Is.EqualTo((int)GameBoardScreenView.TurnBannerSize));
+
+                var settings = view.SettingsButton.RectTransform;
+                Assert.That(
+                    settings.sizeDelta,
+                    Is.EqualTo(new Vector2(GameBoardScreenView.SettingsButtonSize, GameBoardScreenView.SettingsButtonSize)),
+                    "a SettingsButtonSize square, not the shared Button's pill");
+
+                // Left of the header, right of the header — measured in world
+                // space so anchoring choices cannot fake it.
+                Assert.That(CenterX(view.TurnBannerChip.RectTransform), Is.LessThan(CenterX(settings)));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Settings_IsAtLeastMinTouchTarget_ByConstruction()
+        {
+            // SettingsButtonSize (96) already equals MinTouchTarget, so the
+            // shared touch-target invariant is met with no extra number.
+            Assert.That(GameBoardScreenView.SettingsButtonSize, Is.GreaterThanOrEqualTo(Button.MinTouchTarget));
+        }
+
+        [TestCase(0)]
+        [TestCase(3)]
+        [TestCase(Lane.LaneWinningPosition)]
+        public void FrogPiece_SitsOnTheTrackElementCoreReports_NotOnARecomputedOffset(int position)
+        {
+            var game = TwoFrogGame();
+            MoveTo(game, FrogColour.Green, position);
+
+            var view = CreateView(game);
+
+            try
+            {
+                var lane = view.LaneFor(FrogColour.Green);
+
+                Assert.That(lane.RenderedPosition, Is.EqualTo(position));
+                Assert.That(
+                    lane.Piece.transform.parent,
+                    Is.SameAs(lane.PositionRects[position].transform),
+                    "the piece is placed onto the track element already drawn for that position");
+                Assert.That(lane.Piece.rectTransform.anchoredPosition, Is.EqualTo(Vector2.zero), "centred on it");
+                Assert.That(
+                    lane.Piece.rectTransform.sizeDelta,
+                    Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceDiameter, GameBoardLaneView.FrogPieceDiameter)));
+                Assert.That(lane.Piece.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Track_IsStartLogSevenLilyPadsAndEndLog_AndTheLaneArithmeticLandsOn1920()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var lane = view.LaneFor(FrogColour.Green);
+                var positions = lane.PositionRects;
+
+                Assert.That(positions.Count, Is.EqualTo(Lane.LanePositionCount));
+
+                var logSize = new Vector2(GameBoardLaneView.LogWidth, GameBoardLaneView.LogHeight);
+                var padSize = new Vector2(GameBoardLaneView.LilyPadDiameter, GameBoardLaneView.LilyPadDiameter);
+
+                Assert.That(positions[0].sizeDelta, Is.EqualTo(logSize), "Start log");
+                Assert.That(positions[Lane.LaneWinningPosition].sizeDelta, Is.EqualTo(logSize), "End log");
+
+                for (var index = 1; index < Lane.LaneWinningPosition; index++)
+                {
+                    Assert.That(positions[index].sizeDelta, Is.EqualTo(padSize), $"lily pad {index}");
+                }
+
+                // Every neighbouring pair is exactly LanePositionGap apart.
+                for (var index = 1; index < positions.Count; index++)
+                {
+                    var previousRightEdge = positions[index - 1].anchoredPosition.x + (positions[index - 1].sizeDelta.x / 2f);
+                    var leftEdge = positions[index].anchoredPosition.x - (positions[index].sizeDelta.x / 2f);
+
+                    Assert.That(
+                        leftEdge - previousRightEdge,
+                        Is.EqualTo(GameBoardLaneView.LanePositionGap).Within(0.001f),
+                        $"gap before position {index}");
+                }
+
+                // The spec's own arithmetic, carried into the code as a check
+                // rather than trusted: two logs, seven pads and eight gaps is
+                // 1520 px of track; plus the chip gutter, one gutter gap and
+                // two safe margins, 1920 px on the nose.
+                var expectedTrackWidth = (2f * GameBoardLaneView.LogWidth)
+                    + ((Lane.LanePositionCount - 2) * GameBoardLaneView.LilyPadDiameter)
+                    + ((Lane.LanePositionCount - 1) * GameBoardLaneView.LanePositionGap);
+
+                Assert.That(GameBoardLaneView.TrackWidth, Is.EqualTo(expectedTrackWidth).Within(0.001f));
+                Assert.That(lane.TrackRect.sizeDelta.x, Is.EqualTo(expectedTrackWidth).Within(0.001f));
+
+                var laneWidth = GameBoardLaneView.LaneGutterWidth
+                    + GameBoardLaneView.LaneGutterGap
+                    + GameBoardLaneView.TrackWidth
+                    + (2f * GameBoardScreenView.SafeMargin);
+
+                Assert.That(laneWidth, Is.EqualTo(CanvasWidth).Within(0.001f), "the spec's 1920 px on the nose");
+                Assert.That(lane.RectTransform.rect.height, Is.EqualTo(GameBoardLaneView.LaneHeight).Within(0.001f));
+
+                // chip pinned left of the safe area, track pinned right of it.
+                Assert.That(lane.TrackRect.anchorMin.x, Is.EqualTo(1f).Within(0.001f), "track pinned right");
+                Assert.That(lane.TrackRect.pivot.x, Is.EqualTo(1f).Within(0.001f));
+                Assert.That(lane.Chip.RectTransform.anchorMin.x, Is.EqualTo(0f).Within(0.001f), "chip pinned left");
+                Assert.That(lane.Chip.RectTransform.pivot.x, Is.EqualTo(0f).Within(0.001f));
+                Assert.That(lane.Chip.RectTransform.rect.width, Is.EqualTo(GameBoardLaneView.LaneGutterWidth).Within(0.001f));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void ChipPadCount_ReadsPositionFromCore_AndTheEightFromLaneWinningPosition()
+        {
+            var game = TwoFrogGame();
+            MoveTo(game, FrogColour.Green, 3);
+
+            var view = CreateView(game);
+
+            try
+            {
+                Assert.That(view.LaneFor(FrogColour.Green).Chip.PadCountText.text, Is.EqualTo("3 of 8"));
+                Assert.That(view.LaneFor(FrogColour.Blue).Chip.PadCountText.text, Is.EqualTo("0 of 8"));
+
+                // The denominator is Lane's own constant, never a literal the
+                // board keeps a second copy of.
+                Assert.That(Lane.LaneWinningPosition, Is.EqualTo(8));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void FrogCoreReportsHome_RestsOnTheEndLog_WithItsChipInTheHomeState()
+        {
+            var game = TwoFrogGame();
+            MoveTo(game, FrogColour.Blue, Lane.LaneWinningPosition);
+
+            var view = CreateView(game);
+
+            try
+            {
+                var lane = view.LaneFor(FrogColour.Blue);
+
+                Assert.That(game.LaneFor(FrogColour.Blue).IsHome, Is.True, "the fixture, not the assertion");
+                Assert.That(
+                    lane.Piece.transform.parent,
+                    Is.SameAs(lane.PositionRects[Lane.LaneWinningPosition].transform),
+                    "resting on the End log");
+                Assert.That(lane.Chip.State, Is.EqualTo(PlayerChipState.Home));
+                Assert.That(lane.Chip.PadCountText.text, Is.EqualTo("Home!"));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        public void Pond_LaysOutOneLanePerFrog_WithTheGroupVerticallyCentred(int frogCount)
+        {
+            var roster = AllColours.Take(frogCount).ToArray();
+            var view = CreateView(new Game(roster, AnySeed));
+
+            try
+            {
+                Assert.That(view.Lanes.Count, Is.EqualTo(frogCount), "one lane per frog in the game — no placeholders");
+                Assert.That(view.Lanes.Select(lane => lane.Colour), Is.EqualTo(roster), "in turn order");
+
+                var pond = view.PondRect;
+                Assert.That(
+                    pond.rect.height,
+                    Is.EqualTo(CanvasHeight - GameBoardScreenView.BoardHeaderHeight - GameBoardScreenView.BoardControlsHeight).Within(0.001f),
+                    "pond is everything between the two pinned bands, with no gaps");
+
+                var ys = view.Lanes.Select(lane => lane.RectTransform.anchoredPosition.y).ToArray();
+
+                for (var index = 1; index < ys.Length; index++)
+                {
+                    Assert.That(ys[index], Is.LessThan(ys[index - 1]), "lanes stack downward in turn order");
+                    Assert.That(
+                        ys[index - 1] - ys[index],
+                        Is.EqualTo(GameBoardLaneView.LaneHeight).Within(0.001f),
+                        "LaneHeight per lane, stacked with no gaps");
+                }
+
+                // Centred as a group within the pond band, not top-pinned:
+                // the first lane's top edge and the last lane's bottom edge
+                // are the same distance from the pond's centre.
+                var topEdge = ys[0] + (GameBoardLaneView.LaneHeight / 2f);
+                var bottomEdge = ys[ys.Length - 1] - (GameBoardLaneView.LaneHeight / 2f);
+
+                Assert.That(topEdge + bottomEdge, Is.EqualTo(0f).Within(0.001f), "vertically centred in the pond");
+
+                if (frogCount < 4)
+                {
+                    var topPinnedY = (pond.rect.height / 2f) - (GameBoardLaneView.LaneHeight / 2f);
+                    Assert.That(ys[0], Is.Not.EqualTo(topPinnedY).Within(0.001f), "not clinging to the top");
+                }
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Roll_StartsEnabledOnAFreshBoard_AndStaysEnabledUntilFirstPressed()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                Assert.That(view.RollButton.IsDisabled, Is.False, "entering from game setup, Roll is enabled");
+
+                view.Refresh();
+                Assert.That(view.RollButton.IsDisabled, Is.False, "redrawing the board does not disable it");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Roll_FiresExactlyOnceAndDisablesImmediately_SoADoubleTapCannotRollTwice()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var rolls = 0;
+                view.RollPressed += () => rolls++;
+
+                TapButton(view.RollButton);
+
+                Assert.That(rolls, Is.EqualTo(1));
+                Assert.That(view.RollButton.IsDisabled, Is.True, "disabled the instant the press resolves");
+
+                TapButton(view.RollButton);
+
+                Assert.That(rolls, Is.EqualTo(1), "a second press before the turn resolves does nothing");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Roll_BecomesInteractableAgain_OnlyOnTheTurnResolvedSignal()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var rolls = 0;
+                view.RollPressed += () => rolls++;
+
+                TapButton(view.RollButton);
+                Assert.That(view.RollButton.IsDisabled, Is.True);
+
+                view.NotifyTurnResolved();
+
+                Assert.That(view.RollButton.IsDisabled, Is.False, "re-enabled by the signal, not by a timer");
+
+                TapButton(view.RollButton);
+                Assert.That(rolls, Is.EqualTo(2));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Controls_IsBoardControlsHeightTall_WithRollOversizedAndCentred()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var controls = view.ControlsRect;
+
+                Assert.That(controls.rect.height, Is.EqualTo(GameBoardScreenView.BoardControlsHeight).Within(0.001f));
+                Assert.That(controls.rect.width, Is.EqualTo(CanvasWidth).Within(0.001f), "full width");
+                Assert.That(controls.anchorMin.y, Is.EqualTo(0f), "pinned to the bottom");
+                Assert.That(controls.anchorMax.y, Is.EqualTo(0f));
+
+                var roll = view.RollButton;
+
+                Assert.That(
+                    roll.RectTransform.sizeDelta,
+                    Is.EqualTo(new Vector2(GameBoardScreenView.RollButtonWidth, GameBoardScreenView.RollButtonHeight)),
+                    "primary, oversized — game-board.md's own named override of the shared footprint");
+                Assert.That(roll.RectTransform.sizeDelta.x, Is.Not.EqualTo(Button.ButtonMinWidth));
+                Assert.That(roll.RectTransform.sizeDelta.y, Is.Not.EqualTo(Button.ButtonHeight));
+                Assert.That(roll.Label.fontSize, Is.EqualTo((int)GameBoardScreenView.RollButtonLabelSize));
+                Assert.That(roll.Label.text, Is.EqualTo("Roll"));
+                Assert.That(roll.Kind, Is.EqualTo(ButtonKind.Primary));
+                Assert.That(roll.RectTransform.anchoredPosition.x, Is.EqualTo(0f).Within(0.001f), "centred");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Settings_FiresOnEveryTurnPhase_AndIsNeverDisabledByTurnState()
+        {
+            var game = TwoFrogGame();
+            var view = CreateView(game);
+
+            try
+            {
+                var opened = 0;
+                view.SettingsRequested += () => opened++;
+
+                // Every phase of a turn, including the ones representing "not
+                // this player's local action" — hiding the way out of a game
+                // "would be worse".
+                var phases = new List<TurnPhase>();
+
+                phases.Add(game.Phase);
+                TapSettings(view);
+
+                game.RollDie();
+                view.Refresh();
+                phases.Add(game.Phase);
+                TapSettings(view);
+
+                game.BeginAnswering();
+                view.Refresh();
+                phases.Add(game.Phase);
+                TapSettings(view);
+
+                game.ShowResult();
+                view.Refresh();
+                phases.Add(game.Phase);
+                TapSettings(view);
+
+                game.BeginHandOff();
+                view.Refresh();
+                phases.Add(game.Phase);
+                TapSettings(view);
+
+                Assert.That(phases, Is.Unique, "the five phases really were distinct");
+                Assert.That(opened, Is.EqualTo(phases.Count), "available on any turn, at any time");
+
+                // And still available while Roll itself is disabled mid-turn.
+                TapButton(view.RollButton);
+                Assert.That(view.RollButton.IsDisabled, Is.True);
+
+                TapSettings(view);
+                Assert.That(opened, Is.EqualTo(phases.Count + 1));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void HardwareBack_InvokesTheSameOpenSettingsCallbackAsTheGear_AndNeverQuits()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var opened = 0;
+                view.SettingsRequested += () => opened++;
+
+                TapSettings(view);
+                Assert.That(opened, Is.EqualTo(1));
+
+                view.HandleHardwareBack();
+
+                Assert.That(opened, Is.EqualTo(2), "back goes through the same open-settings callback the gear uses");
+                Assert.That(view.gameObject.activeInHierarchy, Is.True, "the board is still showing");
+
+                // "It does not quit, and it never quits without the confirm."
+                // Asserted structurally as well as behaviourally: the board
+                // owns no exit path at all for a future edit to reach for.
+                var quitLike = DeclaredMembers(typeof(GameBoardScreenView))
+                    .Concat(DeclaredMembers(typeof(GameBoardLaneView)))
+                    .Where(name => name.IndexOf("Quit", StringComparison.OrdinalIgnoreCase) >= 0
+                        || name.IndexOf("Exit", StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToArray();
+
+                Assert.That(quitLike, Is.Empty, "the board has no quit or exit path of its own");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void EveryGeometryValue_IsANamedConstantFromGameBoardsTwoTables()
+        {
+            var boardConstants = new Dictionary<string, float>
+            {
+                { "SafeMargin", 48f },
+                { "BoardHeaderHeight", 128f },
+                { "BoardControlsHeight", 176f },
+                { "TurnBannerSize", 52f },
+                { "SettingsButtonSize", 96f },
+                { "RollButtonWidth", 480f },
+                { "RollButtonHeight", 144f },
+                { "RollButtonLabelSize", 56f }
+            };
+
+            var laneConstants = new Dictionary<string, float>
+            {
+                { "LaneHeight", 184f },
+                { "LilyPadDiameter", 112f },
+                { "FrogPieceDiameter", 88f },
+                { "LogWidth", 176f },
+                { "LogHeight", 120f },
+                { "LanePositionGap", 48f },
+                { "LaneGutterWidth", 256f },
+                { "LaneGutterGap", 48f }
+            };
+
+            AssertPublicConstantsAreExactly(typeof(GameBoardScreenView), boardConstants);
+            AssertPublicConstantsAreExactly(typeof(GameBoardLaneView), laneConstants);
+
+            // The remaining two of game-board.md's eighteen are Lane's own,
+            // reused under the same name rather than redeclared here.
+            Assert.That(Lane.LanePositionCount, Is.EqualTo(9));
+            Assert.That(Lane.LaneWinningPosition, Is.EqualTo(8));
+
+            foreach (var type in new[] { typeof(GameBoardScreenView), typeof(GameBoardLaneView) })
+            {
+                foreach (var name in new[] { "LanePositionCount", "LaneWinningPosition" })
+                {
+                    Assert.That(
+                        type.GetField(name, BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly),
+                        Is.Null,
+                        $"{type.Name} must reference Lane.{name}, not redeclare it");
+                }
+            }
+        }
+
+        [Test]
+        public void Board_HasNoHopAnimation_AndNoEndOfGameDetection()
+        {
+            // The hop is #224's and the game-over transition is #225's. This
+            // board draws every frog at rest, at whatever position Core
+            // reports, and keeps rendering whatever Core reports for as long
+            // as it is shown. This is the reviewer's grep, as a test.
+            var forbidden = new[]
+            {
+                "FrogHopDuration", "ResultHopDelay", "Hop", "Tween", "Coroutine",
+                "Animate", "Animation", "Duration", "Delay",
+                "GameOver", "IsOver", "Winner", "Standings", "FinishingOrder"
+            };
+
+            foreach (var type in new[] { typeof(GameBoardScreenView), typeof(GameBoardLaneView) })
+            {
+                foreach (var member in DeclaredMembers(type))
+                {
+                    foreach (var word in forbidden)
+                    {
+                        Assert.That(
+                            member.IndexOf(word, StringComparison.OrdinalIgnoreCase),
+                            Is.LessThan(0),
+                            $"{type.Name}.{member} looks like {word} — that belongs to a later issue");
+                    }
+                }
+
+                var coroutines = type
+                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                    .Where(method => typeof(IEnumerator).IsAssignableFrom(method.ReturnType))
+                    .Select(method => method.Name)
+                    .ToArray();
+
+                Assert.That(coroutines, Is.Empty, $"{type.Name} starts no coroutine — nothing here moves on its own");
+            }
+        }
+
+        [Test]
+        public void Board_AddsNoPlaceholderLanes_AndNoLastRollReadout()
+        {
+            // Both of game-board.md's open questions are left exactly as open
+            // as it leaves them.
+            var view = CreateView(new Game(new[] { FrogColour.Green, FrogColour.Pink }, AnySeed));
+
+            try
+            {
+                Assert.That(view.Lanes.Count, Is.EqualTo(2), "only the lanes in play are drawn");
+
+                var lastRollLike = DeclaredMembers(typeof(GameBoardScreenView))
+                    .Where(name => name.IndexOf("LastRoll", StringComparison.OrdinalIgnoreCase) >= 0
+                        || name.IndexOf("Placeholder", StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToArray();
+
+                Assert.That(lastRollLike, Is.Empty, "no last-roll readout, no placeholder lane");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Board_WiresItsBuiltInSpritesAndFonts_RatherThanLeavingThemMissing()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                Assert.That(view.TurnBannerText.font, Is.Not.Null);
+                Assert.That(view.SettingsButton.Glyph.font, Is.Not.Null);
+                Assert.That(view.SettingsButton.Background.sprite, Is.Not.Null);
+
+                var lane = view.LaneFor(FrogColour.Green);
+                Assert.That(lane.Piece.sprite, Is.Not.Null);
+                Assert.That(lane.PositionImages[0].sprite, Is.Not.Null);
+                Assert.That(lane.PositionImages[1].sprite, Is.Not.Null);
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        static readonly FrogColour[] AllColours =
+        {
+            FrogColour.Green, FrogColour.Blue, FrogColour.Orange, FrogColour.Pink
+        };
+
+        static Game TwoFrogGame()
+        {
+            return new Game(new[] { FrogColour.Green, FrogColour.Blue }, AnySeed);
+        }
+
+        // Drives a real Lane to `position` through its own public API — the
+        // board is never handed a position it could not have read off Core.
+        static void MoveTo(Game game, FrogColour colour, int position)
+        {
+            var lane = game.LaneFor(colour);
+
+            for (var step = 0; step < position; step++)
+            {
+                lane.MoveForward();
+            }
+
+            Assert.That(lane.Position, Is.EqualTo(position), "the fixture, not the assertion");
+        }
+
+        static void PassTheTurn(Game game)
+        {
+            game.RollDie();
+            game.BeginAnswering();
+            game.ShowResult();
+            game.BeginHandOff();
+            game.CompleteHandOff();
+        }
+
+        static IEnumerable<string> DeclaredMembers(Type type)
+        {
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic
+                | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+
+            return type.GetMembers(flags).Select(member => member.Name);
+        }
+
+        static void AssertPublicConstantsAreExactly(Type type, IDictionary<string, float> expected)
+        {
+            var constants = type
+                .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(field => field.IsLiteral && !field.IsInitOnly)
+                .ToArray();
+
+            Assert.That(
+                constants.Select(field => field.Name).OrderBy(name => name),
+                Is.EqualTo(expected.Keys.OrderBy(name => name)),
+                $"{type.Name}'s public constants are exactly game-board.md's own, under the identical names");
+
+            foreach (var field in constants)
+            {
+                Assert.That(
+                    Convert.ToSingle(field.GetValue(null)),
+                    Is.EqualTo(expected[field.Name]).Within(0.001f),
+                    $"{type.Name}.{field.Name}");
+            }
+        }
+
+        static float CenterX(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            return (corners[0].x + corners[2].x) / 2f;
+        }
+
+        static GameBoardScreenView CreateView(Game game)
+        {
+            var host = new GameObject(nameof(GameBoardScreenViewTests), typeof(RectTransform));
+            var view = host.AddComponent<GameBoardScreenView>();
+            view.Initialize(game);
+            return view;
+        }
+
+        static void TapButton(Button button)
+        {
+            var eventData = EventDataAt(button.RectTransform);
+
+            button.OnPointerDown(eventData);
+            button.OnPointerUp(eventData);
+        }
+
+        static void TapSettings(GameBoardScreenView view)
+        {
+            var target = view.SettingsButton;
+            var eventData = EventDataAt(target.RectTransform);
+
+            target.OnPointerDown(eventData);
+            target.OnPointerUp(eventData);
+        }
+
+        static PointerEventData EventDataAt(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+
+            return new PointerEventData(null)
+            {
+                position = (Vector2)(corners[0] + corners[2]) / 2f
+            };
+        }
+
+        static void Destroy(GameBoardScreenView view)
+        {
+            if (view != null)
+            {
+                UnityEngine.Object.DestroyImmediate(view.gameObject);
+            }
+        }
+    }
+}
