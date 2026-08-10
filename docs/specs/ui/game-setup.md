@@ -53,10 +53,22 @@ tapped by four children at once, reaching across each other.
 | Gap between the seat row and the hint | `HintGap` | 56 px |
 | Hint size | `SetupHintSize` | 36 px |
 | Turn-order badge diameter | `SeatOrderBadge` | 72 px |
+| Gap between a seat's swatch and the content below it | `SeatContentGap` | 32 px |
+| Turn-order badge inset from the seat's corner | `SeatBadgeInset` | 24 px |
+| Fewest frogs a game can start with | `GameSetupMinFrogs` | 2 |
+| Most frogs a game can start with | `GameSetupMaxFrogs` | 4 |
 
 Four seats at 360 px with three 48 px gaps is 1584 px, centred in 1920 with
 168 px either side. The row is deliberately not full-bleed: the empty space is
 what makes it obvious there are four seats and no more.
+
+`SeatContentGap` and `SeatBadgeInset` distil what
+[`mockups/game-setup.html`](mockups/game-setup.html) already draws: every seat
+column has `gap:32px` between its swatch and the content below it, and the
+turn-order badge sits at a fixed `left:24px; top:24px` inset from the seat's
+own corner. `GameSetupMinFrogs` and `GameSetupMaxFrogs` distil the Invariants
+section's own prose above ("a game cannot start with fewer than two frogs or
+more than four") into the names the code declares them under.
 
 ## Elements
 
