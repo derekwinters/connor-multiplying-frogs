@@ -93,9 +93,10 @@ the second, a rule underneath.
 - Nothing here decides anything. The roll has already happened in Core before
   this dialog opened; the animation is a readout of a result, not a source of
   one. That matters for testing: the die is not random *here*.
-- Hardware back does nothing — see the no-dismiss invariant. This is the one
-  place in the game where back is inert, and it is inert because the alternative
-  is losing a drawn card.
+- Hardware back does nothing — see the no-dismiss invariant. It is inert here
+  because the alternative is losing a drawn card, the same reasoning that
+  makes back inert on the [working-out grid](working-out-grid.md) and
+  [answer result](answer-result.md).
 
 ## Mockup
 
