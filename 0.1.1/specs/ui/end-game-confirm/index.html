@@ -2186,6 +2186,11 @@ right.</p>
 <td><code>ConfirmBodyWidth</code></td>
 <td>1048 px</td>
 </tr>
+<tr>
+<td>Cost line spacing</td>
+<td><code>ConfirmBodyLineHeight</code></td>
+<td>1.4×</td>
+</tr>
 </tbody>
 </table>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
@@ -2193,7 +2198,9 @@ right.</p>
 <li><strong>Question</strong> — <code>End the game for everyone?</code> The words <em>for everyone</em> are the
   point of the sentence.</li>
 <li>
-<p><strong>Cost</strong> — built from the live game state, not a fixed string:</p>
+<p><strong>Cost</strong> — built from the live game state, not a fixed string. <strong>Two</strong> of its
+  numbers are live, not one: how many frogs are still swimming, and how many
+  frogs are in the game.</p>
 <table>
 <thead>
 <tr>
@@ -2204,14 +2211,25 @@ right.</p>
 <tbody>
 <tr>
 <td>Some frogs still going</td>
-<td><code>Three frogs are still swimming. Ending it now stops the game for all four players and shows the results.</code></td>
+<td><code>&lt;Count&gt; frogs are still swimming. Ending it now stops the game for all &lt;roster&gt; players and shows the results.</code></td>
 </tr>
 <tr>
 <td>Only one frog left going</td>
-<td><code>One frog is still swimming. Ending it now stops the game for all four players and shows the results.</code></td>
+<td><code>One frog is still swimming. Ending it now stops the game for all &lt;roster&gt; players and shows the results.</code></td>
 </tr>
 </tbody>
 </table>
+<p><code>&lt;Count&gt;</code> is how many frogs are still swimming, spelled as a capitalised
+word — <code>Two</code>, <code>Three</code>, <code>Four</code>. <code>&lt;roster&gt;</code> is how many frogs are in the
+game, spelled as a lower-case word — <code>two</code>, <code>three</code>, <code>four</code>. Neither is
+ever a digit, and neither is ever a fixed string: a game is
+<a href="../game-setup/#invariants">two to four frogs</a>, so <em>all four players</em> is
+simply false in a game of two or three, in the one dialog whose entire
+protection is that it says something true and specific every time.</p>
+<p>Three frogs still swimming in a four-player game therefore reads <em>Three
+frogs are still swimming. Ending it now stops the game for all four players
+and shows the results.</em> — the sentence
+<a href="../mockups/end-game-confirm.html">the mockup</a> draws.</p>
 <p>There is no everybody-is-home wording, and there does not need to be:
 <a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">the game ends itself</a>
 the moment the last frog lands on its End log, so this dialog can never open
