@@ -42,7 +42,8 @@ only then fix it. A bug fix without a reproducing test is a bug that comes back.
 Say so. The PR body should be able to answer "what did the test say before the
 fix?" — usually one line:
 
-> `SplitsAtThreshold` failed with `Expected: 32, But was: 16` before the change.
+> `WrongAnswerOnStartLogStaysPut` failed with `Expected: 0, But was: -1` before
+> the change.
 
 An agent that cannot say this did not do step 2.
 

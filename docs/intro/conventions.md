@@ -256,7 +256,7 @@ GITHUB_TOKEN=... GITHUB_REPOSITORY=derekwinters/connor-multiplying-frogs \
 Every issue body ends with a line naming the pages in `/docs` it affects:
 
 ```
-**Spec pages touched:** docs/specs/frogs.md, docs/specs/ui/hud.md
+**Spec pages touched:** docs/specs/reference/index.md, docs/specs/ui/game-board.md
 **Spec pages touched:** none — repo config.
 ```
 
@@ -304,10 +304,10 @@ because nobody reads a closed issue's thread. Close it with a comment stating
 what was decided, in one sentence, so the thread has an answer at the bottom.
 
 **It stays open when** the decision is made but nothing has been written down
-yet, when it was answered partially ("splitting caps at 32" — but not what
-happens at the cap), or when the answer was "not yet". A question that was
-answered "not now" is a question that gets asked again later, and reopening a
-closed issue loses the thread.
+yet, when it was answered partially ("a wrong answer moves you back one" — but
+not what happens on the Start log), or when the answer was "not yet". A question
+that was answered "not now" is a question that gets asked again later, and
+reopening a closed issue loses the thread.
 
 **It becomes a task** — closed as a duplicate, with the task linked — when the
 answer turns out to be small enough to just build. Do not quietly retitle a

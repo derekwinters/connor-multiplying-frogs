@@ -223,8 +223,8 @@ Run it before pushing. CI runs it too ([CI/CD](ci-cd.md)).
 
 **The Unity layer is thin.** It reads input, hands it to Core, asks Core what the
 world looks like now, and draws that. A `MonoBehaviour` that contains a rule —
-how fast a frog moves, when it splits, what scores — is a rule in the wrong
-assembly.
+how far a frog moves, what a wrong answer costs, what winning means — is a rule
+in the wrong assembly.
 
 ### Why
 
@@ -341,51 +341,58 @@ Use the `scaffold-core` skill to create a Core type; it applies all of this and
 leaves you with a failing test, which is where a new type should start.
 
 ```bash
-python3 .claude/skills/scaffold-core/scaffold.py SplitRule --subfolder Rules
+python3 .claude/skills/scaffold-core/scaffold.py Card --subfolder Cards
 ```
 
 - Assemblies and their folders share a name: `Frogs.Core`, `Frogs.Unity`.
 - A subfolder under `Assets/Scripts/Core/` becomes a namespace segment:
-  `Rules/` is `Frogs.Core.Rules`, and its tests are `Frogs.Core.Tests.Rules`.
-- Core types are named for the game, not the engine — `Pond`, `FrogColony`,
-  `SplitRule`. If a type name only makes sense to someone who knows Unity, it
-  probably belongs in the shell.
+  `Cards/` is `Frogs.Core.Cards`, and its tests are `Frogs.Core.Tests.Cards`.
+- Core types are named for the game, not the engine — `Lane`, `LilyPad`,
+  `Card`. The words come from [`CONTEXT.md`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CONTEXT.md),
+  which is the glossary for exactly this reason. If a type name only makes sense
+  to someone who knows Unity, it probably belongs in the shell.
 - Unity-layer types that exist to display a Core type are named `<Thing>View`
   (`FrogView`), and ones that exist to feed input in are `<Thing>Input`.
 - One public type per file, file named for the type.
 
 ## Geometry, layout, and tuning values are named variables
 
-**Every size, offset, margin, spacing, duration, speed, delay, threshold, count,
-and payout is a named constant or a serialized field. Never a bare literal in a
+**Every size, offset, margin, spacing, duration, speed, delay, threshold, and
+count is a named constant or a serialized field. Never a bare literal in a
 method body.**
 
 ```csharp
 // No.
 transform.position = new Vector3(1.5f, 0.25f, 0f);
-if (colony.Count > 32) { … }
+if (position == 8) { … }
 yield return new WaitForSeconds(0.4f);
 
 // Yes.
-const int MaxColonySize = 32;
-[SerializeField] float _spawnHeight = 0.25f;
-[SerializeField] float _splitAnimationSeconds = 0.4f;
+const int LaneWinningPosition = 8;
+[SerializeField] float _lanePositionGap = 48f;
+[SerializeField] float _frogHopDuration = 0.4f;
 ```
+
+None of those three names is invented here. `LaneWinningPosition`,
+`LanePositionGap` and `FrogHopDuration` are what
+[the game board spec](../specs/ui/game-board.md) already calls those numbers,
+and a constant in the code keeps the name the spec page gave it so the two can
+be checked against each other.
 
 ### Why this is a rule and not a preference
 
-- **Tuning is the game.** Whether a frog splits after three seconds or four is
-  the difference between fun and not, and it is a question for Connor. A number
-  with a name is a number he can be asked about; `0.4f` on line 118 of a method
-  is not.
+- **Tuning is the game.** Whether a wrong answer costs a lily pad or costs
+  nothing is the difference between fun and not, and it is a question for
+  Connor. A number with a name is a number he can be asked about; `0.4f` on
+  line 118 of a method is not.
 - **A named value can be found.** Changing "the gap between lily pads" means
   finding one constant, not grepping for `1.5f` and guessing which of the eleven
   matches is the gap.
-- **A named value can be tested.** `MaxColonySize` can be asserted against;
-  `> 32` buried in a branch can only be re-typed into the test, where it will
-  agree with a bug just as happily as with correct code.
-- **The name is the documentation.** `_splitAnimationSeconds = 0.4f` says what
-  0.4 *is*. No comment required, and no comment to go stale.
+- **A named value can be tested.** `LaneWinningPosition` can be asserted
+  against; `== 8` buried in a branch can only be re-typed into the test, where
+  it will agree with a bug just as happily as with correct code.
+- **The name is the documentation.** `_frogHopDuration = 0.4f` says what 0.4
+  *is*. No comment required, and no comment to go stale.
 
 ### This includes graybox
 
@@ -401,7 +408,7 @@ Deliberately narrow:
   `count + 1` is fine; `width * 1` was never fine.
 - Loop bounds derived from a collection — `for (var i = 0; i < frogs.Count; i++)`.
 - Values inside a test that *are* the test's subject — a test asserting a frog
-  splits at 32 should say `32` where the reader can see it.
+  wins on position 8 should say `8` where the reader can see it.
 - Unity's own required literals in serialization or attribute arguments, where a
   constant is not permitted by the language.
 

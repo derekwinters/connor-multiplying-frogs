@@ -6,8 +6,8 @@ description: Create a new Core type and its failing test, following the project'
 # scaffold-core
 
 ```bash
-python3 .claude/skills/scaffold-core/scaffold.py Pond
-python3 .claude/skills/scaffold-core/scaffold.py SplitRule --subfolder Rules
+python3 .claude/skills/scaffold-core/scaffold.py Lane
+python3 .claude/skills/scaffold-core/scaffold.py Card --subfolder Cards
 ```
 
 ## Run this before any logic exists
@@ -29,8 +29,8 @@ someone who already knows the answer.
 
 Namespaces and layout follow
 [tech-stack.md](../../../docs/engineering/tech-stack.md): a subfolder becomes a
-namespace segment, so `--subfolder Rules` gives `Frogs.Core.Rules` and
-`Frogs.Core.Tests.Rules`.
+namespace segment, so `--subfolder Cards` gives `Frogs.Core.Cards` and
+`Frogs.Core.Tests.Cards`.
 
 ### Three decisions worth knowing
 
@@ -43,8 +43,8 @@ passing suite right after scaffolding tells you nothing. Running the suite
 immediately after this must go red. The failure message says what to do next:
 
 ```text
-Failed Pond_DoesTheThingTheIssueAskedFor
-  Write the first real test for Pond.
+Failed Lane_DoesTheThingTheIssueAskedFor
+  Write the first real test for Lane.
 ```
 
 **The test file gets no `.meta`.** `Tests/Core` is outside `Assets/`, so Unity
@@ -76,5 +76,5 @@ dotnet test Tests/Core/Frogs.Core.Tests.csproj
 python3 .github/scripts/run_python_tests.py scaffold-core
 ```
 
-23 tests. Everything that generates text is a pure function, and the writing is
+24 tests. Everything that generates text is a pure function, and the writing is
 tested against a temporary directory.

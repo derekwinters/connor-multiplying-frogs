@@ -110,11 +110,11 @@ list of squashed changes, one per issue.
 
 **Every PR body opens with two or three sentences saying what changed and why,
 in language Connor could follow.** Before any technical detail. No file list, no
-implementation tour, no "refactored `FrogColony` to extract an interface".
+implementation tour, no "refactored `Lane` to extract an interface".
 
-> Frogs now stop splitting once there are 32 of them, instead of filling the
-> pond until the game slows down. The cap is a number we can change later if 32
-> turns out to be too few.
+> A wrong answer while your frog is still on the Start log now leaves it where
+> it is, instead of sliding it off the bottom of the lane. The Start log is the
+> floor of a lane, so the worst a wrong answer can do down there is nothing.
 
 ### Why this and not a summary of the diff
 
@@ -158,35 +158,37 @@ Invariants are stated as their own line, marked, so they can be quoted and
 found:
 
 ```markdown
-**Invariant:** a pond never contains more than `MaxColonySize` frogs.
-**Invariant:** splitting never produces a frog outside the pond bounds.
+**Invariant:** a frog never moves below the Start log.
+**Invariant:** a turn moves one frog, by exactly one position.
 ```
 
 ### Worked example
 
-An issue says: *"Frogs should split every few seconds until the pond is full."*
+An issue says: *"A wrong answer moves the frog back one lily pad."*
 
-Outcome-only, the spec would say "frogs split until the pond is full", and this
-implementation satisfies it:
+Outcome-only, the spec would say exactly that, and this implementation
+satisfies it:
 
 ```csharp
-if (colony.Count < MaxColonySize) colony.Add(Frog.SplitFrom(parent));
+if (!correct) position -= 1;
 ```
 
-…which is wrong when a split would produce two frogs and the colony is at
-`MaxColonySize - 1`, and wrong again if two splits resolve in the same tick.
-Neither case is in the outcome, so neither is caught.
+…which is wrong on the Start log, where `position` becomes `-1` and the frog
+drops off the bottom of its lane. The outcome says nothing about the bottom of
+a lane, so nothing catches it.
 
 With invariants, the spec says:
 
-> **Invariant:** a pond never contains more than `MaxColonySize` frogs.
-> **Invariant:** a split either adds all of its offspring or none of them.
+> **Invariant:** a frog never moves below the Start log — a wrong answer there
+> leaves it where it is.
+> **Invariant:** a turn moves one frog, by exactly one position.
 
 Now the boundary cases are specified, the tests write themselves, and the PR
 can say:
 
-> **Spec invariants kept:** colony size never exceeds `MaxColonySize`
-> (`SplitStopsAtCap`), and a split is all-or-nothing (`PartialSplitRejected`).
+> **Spec invariants kept:** a wrong answer on the Start log moves nothing
+> (`WrongAnswerOnStartLogStaysPut`), and no turn moves a frog by more than one
+> position (`TurnMovesExactlyOnePosition`).
 
 Naming the test next to the invariant is what makes the claim checkable. "I kept
 the invariants" is not a claim; "this test asserts it" is.
@@ -196,10 +198,11 @@ the invariants" is not a claim; "this test asserts it" is.
 When a change **moves the contract** — the old rule was X, the new rule is Y —
 the PR body carries a blockquote note saying so:
 
-> **How the spec is changing:** previously a frog could split at any colony
-> size and the pond simply grew. From this change, splitting stops at 32,
-> because past roughly forty frogs the pond stops being readable on a phone
-> screen and the game stops being fun.
+> **How the spec is changing:** the spec used to leave the top of a lane open —
+> seven lily pads, and "first one to the end wins". From this change a lane is
+> nine positions and a frog wins by *landing on* the End log, because the Start
+> log is already a real space a frog sits on and both ends of a lane should
+> behave the same way.
 
 Three sentences: what the old rule was, what the new one is, why the new one is
 better.

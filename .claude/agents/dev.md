@@ -120,7 +120,7 @@ Closes #12
 Two or three sentences saying what changed and why, in language Connor could
 follow. No file list, no implementation tour.
 
-**Docs:** docs/specs/frogs.md — the splitting rule now caps at 32.
+**Docs:** docs/specs/ui/game-board.md — a lane is now nine positions, not eight.
 
 ## Deviations and Decisions
 

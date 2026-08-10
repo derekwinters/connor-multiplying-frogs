@@ -18,17 +18,17 @@ import hand_back  # noqa: E402
 import parse_commands  # noqa: E402
 
 ANALYSIS = """\
-Frogs keep multiplying past the limit when you tap them quickly.
+A wrong answer on the Start log moves the frog off the bottom of its lane.
 
 ## Build checklist
 
-- [ ] Check the cap at the moment the frog is added
+- [ ] Clamp a back move at the Start log
 """
 
 QUESTION = """\
 This one needs a decision before it can be planned.
 
-❓ **Needs from Derek/Connor:** should a tap on a full pond do nothing?
+❓ **Needs from Derek/Connor:** should a frog hop backwards on a wrong answer?
 """
 
 PENDING = "pending-approval"

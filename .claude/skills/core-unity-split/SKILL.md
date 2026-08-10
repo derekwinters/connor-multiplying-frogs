@@ -17,8 +17,9 @@ This is the short answer.
 >
 > Yes → `Frogs.Core`. No → `Frogs.Unity`.
 
-A splitting rule can be wrong with no screen attached. A sprite being in the
-right place cannot. That one question settles almost every case.
+Where a frog lands after a wrong answer can be wrong with no screen attached. A
+sprite being in the right place cannot. That one question settles almost every
+case.
 
 Two ways to check yourself:
 
@@ -26,8 +27,8 @@ Two ways to check yourself:
   frames, it belongs in Core.** If the only test you can imagine is "it looks
   right", it belongs in the shell — or it is a decision, not code, and belongs
   in a wireframe.
-- **If a `MonoBehaviour` contains a rule** — how fast a frog moves, when it
-  splits, what scores — that rule is in the wrong assembly.
+- **If a `MonoBehaviour` contains a rule** — how far a frog moves, what a wrong
+  answer costs, what winning means — that rule is in the wrong assembly.
 
 ## The layout
 
@@ -79,8 +80,9 @@ sealed class UnityClock : IClock {
 
 Core declares what it needs in the game's vocabulary; the shell provides it;
 tests substitute a fake and control it exactly. That last part is the point —
-`IClock` is not ceremony, it is what makes "what happens if two splits land in
-the same tick" a test rather than a thing you find out on a phone.
+`IClock` is not ceremony, it is what makes "what happens if `Roll` is tapped
+while the frog's hop is still playing" a test rather than a thing you find out
+on a tablet.
 
 ### Specific cases
 
@@ -88,7 +90,7 @@ the same tick" a test rather than a thing you find out on a phone.
 | --- | --- |
 | `Time.deltaTime` | an `IClock`, or pass elapsed seconds into the tick |
 | `Random` | an interface Core owns, seeded in tests |
-| `Vector3` | a Core type in the game's own vocabulary — a pond position, a lily index |
+| `Vector3` | a Core type in the game's own vocabulary — a position in a lane, a lily pad index |
 | `Debug.Log` | return the fact, or an interface the shell logs through |
 | `MonoBehaviour` lifecycle | a plain method the shell calls from `Update` |
 

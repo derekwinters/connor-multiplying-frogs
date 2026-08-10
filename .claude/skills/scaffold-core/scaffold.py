@@ -4,8 +4,8 @@
 Run this **before** writing any logic. It leaves you at the *start* of the red
 phase: an empty class, and a test that fails.
 
-    python3 .claude/skills/scaffold-core/scaffold.py Pond
-    python3 .claude/skills/scaffold-core/scaffold.py Pond --subfolder Rules
+    python3 .claude/skills/scaffold-core/scaffold.py Lane
+    python3 .claude/skills/scaffold-core/scaffold.py Card --subfolder Cards
 
 What it writes, following docs/engineering/tech-stack.md:
 
@@ -44,7 +44,7 @@ def validate_type_name(name: str) -> str:
     if not TYPE_NAME.match(trimmed):
         raise ValueError(
             f"'{name}' is not a usable type name. Use PascalCase with no dots or "
-            "spaces — `Pond`, `FrogColony`, `SplitRule`."
+            "spaces — `Lane`, `LilyPad`, `Card`."
         )
 
     return trimmed
