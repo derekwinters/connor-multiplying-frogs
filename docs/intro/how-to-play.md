@@ -11,9 +11,9 @@ way you would explain it to someone who has just picked the tablet up.
 
 This is the friendly version, not the exact one. The rules spec — every rule
 stated precisely, edge case by edge case, for the code to be built against — is
-[issue #199](https://github.com/derekwinters/connor-multiplying-frogs/issues/199)
-and this page will link to it once it exists. Until then, and whenever the two
-disagree, the classroom game wins: it is photographed and transcribed in
+[rules of play](../specs/rules.md), and where this page and that one disagree,
+that one is right and this one gets corrected. Behind both of them the classroom
+game wins: it is photographed and transcribed in
 [reference material](../specs/reference/index.md), and
 [ADR-0001](../adr/0001-rules-sacred-presentation-ours.md) makes it the authority
 on every rule.

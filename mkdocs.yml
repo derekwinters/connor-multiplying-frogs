@@ -90,6 +90,7 @@ nav:
   - Specs:
       - specs/index.md
       - Product scope: specs/product-scope.md
+      - Rules of play: specs/rules.md
       - Future ideas: specs/future-ideas.md
       - Reference material: specs/reference/index.md
       - UI:

@@ -5,6 +5,12 @@ Source material for the port. Nothing on this page is a decision — it is the
 about the game can be checked against the board rather than against somebody's
 summary of it.
 
+The normative statement of these rules — every one of them stated as an
+invariant for the code to be built against — is [rules of play](../rules.md).
+This page describes the board Connor's class uses; that page describes the game
+this app implements, and the two differ where the project has recorded a rule
+change.
+
 ## The classroom game
 
 Multiplying Frogs is a board game from Connor's math class. Everything in
