@@ -1067,6 +1067,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invariants-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The invariants this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1111,6 +1128,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="How many columns and rows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-derek-settled-in-his-words" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Derek settled, in his words
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-core-decides-and-what-the-player-decides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Core decides, and what the player decides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1939,6 +1984,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invariants-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The invariants this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1983,6 +2045,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="How many columns and rows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-derek-settled-in-his-words" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Derek settled, in his words
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-core-decides-and-what-the-player-decides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Core decides, and what the player decides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2070,19 +2160,60 @@ the table, paper is ambient and the working-out <em>is</em> the exercise; on a t
 there is nowhere to work.</p>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
 <p><strong>Invariant:</strong> nothing in the grid is marked. Only the answer row decides
-whether the frog moves. Carry boxes and partial-product rows are scratch paper —
-they exist so you don't lose the 3, not to be checked.
+whether the frog moves. Carry boxes and addition rows are scratch paper — they
+exist so you don't lose the 3, not to be checked.
+<strong>Invariant:</strong> a row the player grows is exactly as ungraded as every other cell
+in the grid. Growing the addition section is asking for more scratch paper, and
+scratch paper is never checked
+(<a href="../../../adr/0002-structured-working-out-grid/#two-constraints-that-keep-it-from-becoming-a-tutor">ADR-0002</a>).
+<strong>Invariant:</strong> both superscript carry strips are always on screen, on every
+card, whether or not the player uses the addition section. The two ways of
+carrying are not alternatives the game chooses between — both are drawn, and the
+player uses whichever one they were taught.
 <strong>Invariant:</strong> there is no mode and no toggle. The answer box <em>is</em> the grid's
 bottom row. A player who can do <code>68 × 5</code> in their head fills one row and
 presses <code>Check it</code>.
-<strong>Invariant:</strong> the grid is sized to the card, not to the largest possible
-problem. <code>68 × 5</code> does not get <code>331 × 41</code>'s rows.
-<strong>Invariant:</strong> the grid never has to render a shape outside the three the piles
-produce — <code>2×1</code>, <code>2×2</code>, <code>3×2</code> digits. <code>331 × 41</code> is the confirmed worst case.
+<strong>Invariant:</strong> the grid is sized to the card in its <strong>columns</strong>. <code>68 × 5</code> gets
+three digit columns and <code>331 × 41</code> gets five, so an easy card still does not
+look like homework.
+<strong>Invariant:</strong> the grid's <strong>rows</strong> are not sized to the card. Every card is
+dealt the same rows, and from there the player — not the card — decides whether
+there are more.
+<strong>Invariant:</strong> the addition section never holds more than
+<code>GridAdditionRowsMax</code> rows. The player decides when it grows; the cap decides
+when it stops.
+<strong>Invariant:</strong> the game never deals a <em>problem</em> outside the three shapes the
+piles produce — <code>2×1</code>, <code>2×2</code>, <code>3×2</code> digits. <code>331 × 41</code> is still the confirmed
+widest.
 <strong>Invariant:</strong> <code>Check it</code> is disabled until at least one digit is in the answer
 row. An empty answer is not a wrong answer.
 <strong>Invariant:</strong> this dialog cannot be dismissed. The card is drawn and the turn
 is under way.</p>
+<h3 id="the-invariants-this-page-used-to-carry">The invariants this page used to carry<a class="headerlink" href="#the-invariants-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
+<p>Until this wireframe, two of the invariants above read differently. Both were
+made false by the addition section becoming growable
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>),
+and the old wording is quoted here so the change is visible. Neither sentence is
+true anywhere else on this page.</p>
+<blockquote>
+<p><strong>Invariant:</strong> the grid is sized to the card, not to the largest possible
+problem. <code>68 × 5</code> does not get <code>331 × 41</code>'s rows.</p>
+</blockquote>
+<p>This is now true of <strong>columns only</strong>, and it is no longer true of rows at all:
+<code>68 × 5</code> gets exactly <code>331 × 41</code>'s rows, because every card starts with the same
+ones. What survives is the intent — the easy card is visibly a smaller job,
+because it is narrower.</p>
+<blockquote>
+<p><strong>Invariant:</strong> the grid never has to render a shape outside the three the
+piles produce — <code>2×1</code>, <code>2×2</code>, <code>3×2</code> digits. <code>331 × 41</code> is the confirmed worst
+case.</p>
+</blockquote>
+<p>Still true of the three <strong>problem</strong> shapes; ADR-0002's bound on the problems is
+untouched, and nothing here lets the game deal a fourth shape. It is no longer
+true of the <strong>rendered row count</strong>, which the player extends. <code>331 × 41</code> is the
+widest grid but not the tallest one — the tallest is any card whose addition
+section has been grown to <code>GridAdditionRowsMax</code>, and that grid is the same
+height whichever card it came from.</p>
 <h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2126,7 +2257,15 @@ is under way.</p>
 <p>This split is what landscape buys. In portrait the grid and the keypad have to
 share a single column, and <code>331 × 41</code> was
 <a href="../../../adr/0002-structured-working-out-grid/#consequences">the project's biggest layout unknown</a>
-because of it. Side by side, the worst case fits with room to spare.</p>
+because of it. Side by side, the widest card as dealt fits.</p>
+<p>It does <strong>not</strong> fit with room to spare — the phrase this paragraph used to end
+with, and the one ADR-0002 still ends with, both written before the addition
+section could grow. As dealt, the grid ends 948 px
+into a panel whose last usable pixel is 1048 px — about 100 px of slack against
+112 px per extra row, so the section stops fitting on the <em>third</em> of its six
+allowed rows. What to do about that is
+<a href="#open-questions">open question 3</a>; the numbers are worked through under
+<a href="#mockup">Mockup</a>, and the third mockup is the picture of them.</p>
 <h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2178,6 +2317,16 @@ because of it. Side by side, the worst case fits with room to spare.</p>
 <td>56 px</td>
 </tr>
 <tr>
+<td>Addition rows a card is dealt</td>
+<td><code>GridAdditionRowsAtStart</code></td>
+<td>2 rows</td>
+</tr>
+<tr>
+<td>Most addition rows the section can hold</td>
+<td><code>GridAdditionRowsMax</code></td>
+<td>6 rows</td>
+</tr>
+<tr>
 <td>Keypad key, square</td>
 <td><code>KeypadKeySize</code></td>
 <td>140 px</td>
@@ -2204,49 +2353,129 @@ because of it. Side by side, the worst case fits with room to spare.</p>
 </tr>
 </tbody>
 </table>
+<p><code>GridAdditionRowsAtStart</code> and <code>GridAdditionRowsMax</code> are counts, not pixels. They
+are in this table anyway, because the number of rows the addition section starts
+and stops at is exactly the kind of number that otherwise ends up as an unnamed
+<code>2</code> in <code>Core</code> and an unnamed <code>6</code> in the Unity shell, and then only one of them
+gets changed.</p>
+<p><strong>A grown row has no size constant of its own.</strong> It is an ordinary row of
+ordinary cells: <code>GridCellSize</code> tall, <code>GridCellGap</code> below the row above it, the
+same cells the section already has. Growing the section costs
+<code>GridCellSize</code> + <code>GridCellGap</code> = 112 px of height per row and nothing else.</p>
 <h3 id="how-many-columns-and-rows">How many columns and rows<a class="headerlink" href="#how-many-columns-and-rows" title="Link to this section">&para;</a></h3>
-<p>Both are decided by the card, in <code>Core</code>, and drawn by the Unity shell:</p>
+<p>The card decides the columns. The card and the player between them decide the
+rows.</p>
 <ul>
 <li><strong>Columns</strong> = the number of digits in the largest possible product for that
   card's shape, plus one operator column on the left. <code>331 × 41</code> needs five
   digit columns (<code>13571</code>); <code>68 × 5</code> needs three (<code>340</code>).</li>
 <li>
-<p><strong>Rows</strong> depend on the multiplier:</p>
+<p><strong>Rows</strong> are the same for every card, top to bottom:</p>
+<div class="highlight"><pre><span></span><code>carry strip · multiplicand · multiplier · rule ·
+addition rows · rule · carry strip · answer
+</code></pre></div>
+<p>The addition rows are the only part of that list whose count is not fixed,
+and what varies it is not the card: every card is dealt
+<code>GridAdditionRowsAtStart</code> of them, and the player can grow the section from
+there to <code>GridAdditionRowsMax</code>.</p>
+</li>
+</ul>
+<p><strong>"The addition section"</strong> is this page's name for those rows — the block
+between the first rule line and the second, which Derek calls the <code>"+ "</code>
+section and which this page used to call the <em>partial-product rows</em>. They are
+the same rows.
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+is written against the older name and means these. The section is renamed
+because a one-digit card now gets it too, and on <code>68 × 5</code> its rows are not
+partial products of anything — they are somewhere to add up.</p>
+<h4 id="what-derek-settled-in-his-words">What Derek settled, in his words<a class="headerlink" href="#what-derek-settled-in-his-words" title="Link to this section">&para;</a></h4>
+<blockquote>
+<p>Let's support both. […] The top superscript boxes can always exist. But if
+someone instead wants to add full numbers below the numbers, they can. If they
+enter numbers below the answer box, another row appears underneath it. Each
+time they add a row below, it would keep expanding. […] This is the <code>"+ "</code>
+section below the problem and above the answer.</p>
+<p>I meant below the problem above the answer</p>
+<p>Single digit</p>
+<p>Cap the rows of addition to 6, start with 2</p>
+<p>Single digit gets 2 rows too</p>
+<p>Add to bottom of addition rows, above answer row</p>
+</blockquote>
+<p>Read together: the section is the one between the problem and the answer; a
+<strong>single digit</strong> typed into it is what adds the next row; the new row is
+appended to the <strong>bottom of the section</strong>, which stays above the answer row;
+every card starts with <strong>2</strong> rows; and the section stops at <strong>6</strong>.</p>
+<h4 id="what-core-decides-and-what-the-player-decides">What <code>Core</code> decides, and what the player decides<a class="headerlink" href="#what-core-decides-and-what-the-player-decides" title="Link to this section">&para;</a></h4>
+<p>The split matters because it is the thing
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+models and <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>
+draws, and it is not the split either issue was written against.</p>
 <table>
 <thead>
 <tr>
-<th>Multiplier</th>
-<th>Rows</th>
+<th></th>
+<th>Derived from the card</th>
+<th>Player state</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1 digit (<code>68 × 5</code>)</td>
-<td>carry strip · multiplicand · multiplier · rule · answer</td>
+<td>Column count</td>
+<td>✓</td>
+<td></td>
 </tr>
 <tr>
-<td>2 digits (<code>22 × 41</code>, <code>331 × 41</code>)</td>
-<td>carry strip · multiplicand · multiplier · rule · partial product · partial product · rule · carry strip · answer</td>
+<td>Which cells are printed (the multiplicand and multiplier digits)</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Every row except the addition rows</td>
+<td>✓ — the same for every card</td>
+<td></td>
+</tr>
+<tr>
+<td>How many addition rows exist</td>
+<td>starts at <code>GridAdditionRowsAtStart</code></td>
+<td>grows from there, to <code>GridAdditionRowsMax</code></td>
+</tr>
+<tr>
+<td>Cell contents</td>
+<td></td>
+<td>✓</td>
 </tr>
 </tbody>
 </table>
-</li>
-</ul>
-<p>A one-digit multiplier has no partial products and nothing to add up, so those
-rows do not exist. That is the "sized to the card" rule doing its job: an easy
-card should not look like homework.</p>
+<p>So the grid's shape is <strong>no longer a pure function of the card</strong>. It is a
+function of the card and of how many rows the player has grown, and the second
+of those changes during a turn. It is still bounded at both ends, and by the
+same two numbers for every card the piles can deal:
+<code>GridAdditionRowsAtStart</code> rows when the card is dealt, <code>GridAdditionRowsMax</code> at
+the most. There is no card that can be dealt more, and no player who can grow
+past it.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Multiplicand and multiplier rows</strong> — printed, not editable. These two rows
   <em>are</em> the card.</li>
-<li><strong>Carry strip</strong> — dashed boxes, one per column. Two strips at most: one above
-  the multiplication and one above the final addition, which is the "twice over"
-  ADR-0002 describes. Optional to use, never checked.</li>
-<li><strong>Partial-product rows</strong> — ordinary empty cells, including the units column
-  of the second row. <strong>The placeholder zero is not pre-printed.</strong> Some
-  classrooms teach writing the <code>0</code>, some teach shifting left; leaving the cell
-  ordinary lets both work, and pre-printing it would pick one — which is the
-  thing ADR-0002 says not to do.</li>
+<li><strong>Carry strip</strong> — dashed boxes, one per column. Two strips, on every card: one
+  above the multiplication and one above the final addition, which is the "twice
+  over" ADR-0002 describes. Optional to use, never checked. <code>68 × 5</code> used to
+  have only the first, because it had nothing to add up; it has both now that it
+  has an addition section, subject to
+  <a href="#open-questions">open question 4</a>. Where the second strip goes once the
+  section grows is <a href="#open-questions">open question 2</a>.</li>
+<li><strong>Addition rows</strong> — ordinary empty cells, including the units column of every
+  row below the first. <strong>The placeholder zero is not pre-printed.</strong> Some classrooms teach
+  writing the <code>0</code>, some teach shifting left; leaving the cell ordinary lets both
+  work, and pre-printing it would pick one — which is the thing ADR-0002 says
+  not to do.</li>
+<li><strong>A grown row is indistinguishable from a dealt one.</strong> Same cells, same
+    size, same border, no tint, no badge, nothing that says "you added this".
+    The section is scratch paper and scratch paper does not annotate itself.</li>
+<li>The <code>+</code> glyph sits in the operator column of the <strong>bottom row of the
+    section</strong>, wherever the bottom currently is, which is where the committed
+    two-row drawing already puts it. Growing the section moves the glyph down
+    with it rather than stamping a <code>+</code> on every row.</li>
 <li><strong>Answer row</strong> — taller, heavier border, tinted. The only row that counts.</li>
 <li><strong>Keypad</strong> — <code>1</code>–<code>9</code>, <code>0</code>, backspace, <code>clear</code>. No decimal point, no minus:
   every answer in this game is a positive whole number.</li>
@@ -2259,29 +2488,146 @@ card should not look like homework.</p>
   is the focused one; typing fills the answer row <strong>right to left</strong>, which is
   the direction the digits are worked out in.</li>
 <li>Tapping any cell moves the caret there, so the grid can be filled in any
-  order — a player who does the partial products first, then the answer, is not
+  order — a player who fills the addition rows first, then the answer, is not
   fighting the caret.</li>
+<li><strong>Growing the addition section.</strong> Typing a single digit into the section's
+  current bottom row appends another row beneath it, still above the answer row.
+  That repeats each time the new bottom row is written in, until the section
+  holds <code>GridAdditionRowsMax</code> rows, after which nothing more is appended. A
+  single digit is enough; the row does not have to be finished first.</li>
+<li>Nothing prompts the player to grow the section and nothing rewards it. A
+  player who carries with the superscript boxes never sees a third addition row,
+  and a player who has never been shown the superscript boxes never has to use
+  them.</li>
+<li><strong>Whether a grown row can be taken away again is not specified here.</strong> Neither
+  <code>backspace</code> nor <code>clear</code> is described as removing a row, and neither is
+  described as leaving one behind. It is a question, not an omission — see
+  <a href="#open-questions">open question 5</a>.</li>
 <li>No timer, ever. <code>331 × 41</code> on paper takes as long as it takes.</li>
 <li>There is no <code>undo</code>, only backspace and <code>clear</code> — and <code>clear</code> empties only the
   cell block you are in, not the whole grid.</li>
 <li>Hardware back does nothing.</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
+<p>Three, all at 1920 × 1200.</p>
 <ul>
-<li><strong>The worst case:</strong> <a href="../mockups/working-out-grid-331x41.html"><code>mockups/working-out-grid-331x41.html</code></a></li>
-<li><strong>The easy pile:</strong> <a href="../mockups/working-out-grid-68x5.html"><code>mockups/working-out-grid-68x5.html</code></a></li>
+<li><strong>The widest card, as dealt:</strong> <a href="../mockups/working-out-grid-331x41.html"><code>mockups/working-out-grid-331x41.html</code></a></li>
+<li><strong>The easy pile, as dealt:</strong> <a href="../mockups/working-out-grid-68x5.html"><code>mockups/working-out-grid-68x5.html</code></a></li>
+<li><strong>The widest card, grown to the cap:</strong> <a href="../mockups/working-out-grid-331x41-grown.html"><code>mockups/working-out-grid-331x41-grown.html</code></a></li>
 </ul>
-<p>Two mockups, because "the grid shrinks to fit the card" is a claim best checked
-by looking at the biggest and the smallest one next to each other.</p>
+<p>The first two are the agreed pictures of the screen a card deals, and they are a
+pair for the reason they always were: "the grid shrinks to fit the card" is a
+claim best checked by looking at the biggest and the smallest next to each
+other. The easy one is now the same height as the hard one and narrower, which
+is what that claim has been reduced to.</p>
+<p><strong>The third is a question, not an agreed picture.</strong> It is the same screen as the
+first with the addition section at <code>GridAdditionRowsMax</code> instead of
+<code>GridAdditionRowsAtStart</code>, everything else identical, at today's constants — and
+at today's constants it does not fit:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Grid height</th>
+<th>Ends, measured into the panel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GridAdditionRowsAtStart</code> (2 rows)</td>
+<td>732 px</td>
+<td>948 px, about 100 px of slack</td>
+</tr>
+<tr>
+<td><code>GridAdditionRowsMax</code> (6 rows)</td>
+<td>1180 px</td>
+<td>1396 px</td>
+</tr>
+</tbody>
+</table>
+<p>The dialog is <code>DialogMaxHeight</code> (1104 px) tall and <code>DialogPadding</code> (56 px) of
+that is not usable, so the last usable pixel is 1048 px into the panel. The
+header takes the first 140 px. That leaves <strong>908 px for a grid that wants
+1180 px</strong> — 272 px too tall even shoved right up under the header, with the grid
+free to re-centre upward under the <a href="#anchors">Anchors</a> rule. The second rule
+line, the second carry strip and <strong>the answer row itself</strong> all end up below the
+bottom edge of the tablet.</p>
+<p>That overrun is drawn rather than described because it is the input to
+<a href="#open-questions">open question 3</a>. A mockup that visibly overflows is the
+correct result here: the wireframe's job was to find out what the cap costs at
+today's numbers, not to pick the fix.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
+<p>Questions 2 to 5 arrived with the growable addition section
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>),
+and none of them is answered by anything Derek has said. Questions 1 and 6 are
+older. Question 1 is the one that changes what <code>Core</code> builds.</p>
 <ul>
-<li><strong>Which carry convention does Connor's class use?</strong> The mockups put one carry
-  strip above the multiplication and one above the addition. The alternative is
-  a strip attached to each partial-product row, which avoids reusing one strip
-  across two passes. Nothing is marked either way, so this is about matching
-  what he is taught — worth asking him rather than deciding here.</li>
-<li><strong>Should the keypad have an <code>=</code>?</strong> No, currently: <code>Check it</code> is the commit,
-  and two ways to submit is one too many.</li>
+<li>
+<p><strong>1. Which carry convention does Connor's class use?</strong> The mockups put one
+  carry strip above the multiplication and one above the addition, each reused
+  across the rows it covers. The alternative is a strip attached to each
+  addition row, so a carry is never reused across two passes. Nothing is marked
+  either way, so this is about matching what he is taught — his call, not one to
+  make in code.</p>
+<p>This is <strong>the one open question on this page that changes the shape of the
+grid in <code>Core</code></strong>, so it is worth being exact about what depends on it.
+Depending on it: the number of carry strips a grid has, whether that number
+tracks the addition row count (and therefore grows during a turn), and the
+per-row-versus-shared structure the row list above states. Not depending on
+it: the column count, the addition section's starting count and cap, the
+growth trigger, the fact that nothing is graded, and the overrun measured in
+the third mockup — a per-row strip would make the overrun worse, not
+different in kind.</p>
+<p><code>Core</code> and the grid screen are being built to what the mockups draw today —
+two strips at most — which is a recorded position, not an answer. If the
+answer is the per-row strip, this page's row list, its <code>Elements</code> section,
+all three mockups and the grid model change together.
+Tracked in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/255">#255</a>.
+It was originally asked in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/227">#227</a>,
+which was carrying two questions under one title and was closed once Derek
+answered the other one — superscript carries versus written-out addition
+rows, the change this page has just absorbed. The layout question itself was
+never answered, so it has its own issue now.</p>
+</li>
+<li>
+<p><strong>2. What happens to the second carry strip as the section grows?</strong> Today it
+  is pinned directly above the answer row. Three readings, none picked: it stays
+  pinned above the answer; it follows the bottom of the growing section; or
+  every addition row gets its own — which is question 1 answered the other way,
+  arriving through the back door. The third mockup draws it pinned above the
+  answer, because that is where the committed drawing has it.</p>
+</li>
+<li>
+<p><strong>3. What happens when the section outgrows the dialog?</strong> Not decided, and by
+  the measurements above this is not a distant edge case: the section stops
+  fitting on its <strong>third</strong> row, and at the cap the answer row is off the bottom
+  of the tablet entirely. Options include scrolling the <code>grid</code> region, shrinking
+  <code>GridCellSize</code> once the section passes some count, shrinking it for the whole
+  grid up front, giving the addition section its own smaller row height, or
+  lowering <code>GridAdditionRowsMax</code> to what fits — which is 2 today. Each one costs
+  something different, and picking one is a layout decision.</p>
+</li>
+<li>
+<p><strong>4. Does the one-digit card's addition section get the second rule line and
+  the second carry strip?</strong> <code>68 × 5</code> now gets the addition rows. It is not
+  settled whether it also gets the structure that wraps them on a two-digit
+  card, or whether the rows sit under the first rule line on their own. The
+  redrawn <code>68 × 5</code> mockup uses the two-digit structure because that is the only
+  one this project has drawn — a default in a picture, not a decision.</p>
+</li>
+<li>
+<p><strong>5. Can a grown row be taken away again?</strong> Backspacing the last digit out of
+  a grown row could remove it, or leave it. Leaving it means a mis-tap costs a
+  row permanently and, near the cap, costs the ability to grow another. Removing
+  it means a row can vanish under the caret. Neither is obviously right and
+  neither is stated.</p>
+</li>
+<li>
+<p><strong>6. Should the keypad have an <code>=</code>?</strong> No, currently: <code>Check it</code> is the commit,
+  and two ways to submit is one too many.</p>
+</li>
 </ul>
 
 
