@@ -35,7 +35,10 @@ namespace Frogs.Unity.Views
     /// <see cref="IAnswerResultTurn.NextFrog"/>, which is
     /// <see cref="Game.NextActiveFrog"/> (#208) — asked while this dialog is
     /// still showing the *current* player's result, and answered without
-    /// advancing anything.
+    /// advancing anything. On the one turn that has no next player — the hop
+    /// that got the last frog home — the button falls back to
+    /// <see cref="NoNextPlayerLabel"/>, whose wording is still Connor's to
+    /// settle (#287).
     ///
     /// On a wrong answer **the correct answer is revealed and the working is
     /// not** — docs/adr/0002-structured-working-out-grid.md. There is no
@@ -129,6 +132,20 @@ namespace Frogs.Unity.Views
 
         // The button is named for the next player, never `OK`.
         const string NextTurnFormat = "{0}'s turn";
+
+        /// <summary>
+        /// What the one button reads on the one turn that has no next player —
+        /// the hop that got the last frog home.
+        ///
+        /// **This wording is not Connor's yet.** answer-result.md says the
+        /// button is "named for the next player" and says nothing about the
+        /// turn where there is not one, so this is a placeholder that keeps the
+        /// dialog working rather than a decision: it borrows game-over.md's own
+        /// words for the screen the button now leads to. Issue #287 asks Connor
+        /// what it should say, and this constant is the only thing that has to
+        /// change when he answers.
+        /// </summary>
+        public const string NoNextPlayerLabel = "Game over";
 
         // No imported font — matches Button.cs's, PlayerChip.cs's,
         // DialogPanel.cs's and WorkingOutGridView.cs's own choice, for the same
@@ -475,7 +492,12 @@ namespace Frogs.Unity.Views
             // chip has a move to show in the line Home would replace.
             _chip.SetState(PlayerChipState.Default);
 
-            _nextTurnButton.SetLabelText(string.Format(NextTurnFormat, _turn.NextFrog));
+            // Null on the hop that got the last frog home, and only then —
+            // see IAnswerResultTurn.NextFrog and NoNextPlayerLabel.
+            var next = _turn.NextFrog;
+            _nextTurnButton.SetLabelText(next.HasValue
+                ? string.Format(NextTurnFormat, next.Value)
+                : NoNextPlayerLabel);
 
             PlaceFrog();
         }

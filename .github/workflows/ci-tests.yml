@@ -149,21 +149,3 @@ jobs:
           path: artifacts
           if-no-files-found: warn
           retention-days: 14
-
-      # TEMPORARY — #285. Reverted before merge. The artifact is unreachable
-      # from an agent environment and the API serves only the log's tail, so
-      # the failing test's name is printed last and small enough to survive it.
-      - name: TEMPORARY name the failures
-        if: always()
-        run: |
-          python3 - <<'PY'
-          import xml.etree.ElementTree as ET
-          root = ET.parse("artifacts/editmode-results.xml").getroot()
-          for case in root.iter("test-case"):
-              if case.get("result") == "Failed":
-                  print("FAILED:", case.get("fullname"))
-                  for tag in ("message", "stack-trace"):
-                      node = case.find("failure/" + tag)
-                      if node is not None and node.text:
-                          print(tag, ">>", node.text.strip()[:900])
-          PY

@@ -64,6 +64,44 @@ namespace Frogs.Unity.EditModeTests
                 "the last hand-off is left uncompleted, because there is nobody to hand off to");
         }
 
+        [Test]
+        public void NextFrog_IsNobody_WhenThatHopGotTheLastFrogHome_RatherThanThrowing()
+        {
+            var game = new Game(Roster, Seed);
+
+            // One frog short of the ending, so the turn built below is the one
+            // whose answer gets the last frog home.
+            foreach (var colour in Roster)
+            {
+                var lane = game.LaneFor(colour);
+                var steps = colour == game.ActiveFrog
+                    ? Lane.LaneWinningPosition - 1
+                    : Lane.LaneWinningPosition;
+
+                for (var step = 0; step < steps; step++)
+                {
+                    lane.MoveForward();
+                }
+            }
+
+            game.RollDie();
+            var card = game.DrawnCard;
+            game.BeginAnswering();
+
+            var resolution = game.LaneFor(game.ActiveFrog).Resolve(card.Product, card);
+            game.ShowResult();
+
+            Assert.That(game.IsOver, Is.True, "the scripted position did not end the game");
+
+            var turn = new GameAnswerResultTurn(game, resolution);
+
+            // Game.NextActiveFrog throws here, and the answer-result dialog
+            // reads this on every turn to name its one button — so before this
+            // was guarded, the winning move of every completed game threw
+            // instead of showing a result.
+            Assert.That(turn.NextFrog, Is.Null, "there is no next player once every frog is home");
+        }
+
         // One turn through the phases a played turn moves through, ending with
         // the two steps GameAnswerResultTurn owns.
         static void PlayOneTurnRight(Game game)

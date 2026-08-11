@@ -15,6 +15,9 @@ namespace Frogs.Unity
     /// <see cref="Game.CompleteHandOff"/> clears the drawn card and moves the
     /// active frog on. <see cref="NextFrog"/> is read live, because it is the
     /// one fact the dialog wants *as it is now* — before hand-off has run.
+    ///
+    /// Two of its members are guarded for the last turn of a completed game,
+    /// and they sit next to each other below with one comment over both.
     /// </summary>
     public sealed class GameAnswerResultTurn : IAnswerResultTurn
     {
@@ -57,10 +60,25 @@ namespace Frogs.Unity
         /// <inheritdoc />
         public TurnResolution Resolution { get; }
 
+        // --- The turn whose hop got the last frog home ------------------------
+        //
+        // Both members below are guarded for the same one turn in a game, and
+        // they are kept together so the next person finds both.
+        //
+        // docs/specs/ui/game-board.md#behaviour: "When the last frog gets home,
+        // the game ends itself. The hop finishes, and game over follows with no
+        // input from anybody." From the moment that answer is graded there is
+        // no next player — not to name on the button, and not to pass the
+        // device to — and Core says so by throwing from both
+        // Game.NextActiveFrog and Game.CompleteHandOff. The dialog asks each of
+        // them once on every turn, including this one, so the shell answers
+        // "there is nobody" rather than letting Core's exception reach a child
+        // on the winning move.
+
         /// <inheritdoc />
-        public FrogColour NextFrog
+        public FrogColour? NextFrog
         {
-            get { return _game.NextActiveFrog; }
+            get { return _game.IsOver ? (FrogColour?)null : _game.NextActiveFrog; }
         }
 
         /// <inheritdoc />
@@ -72,13 +90,8 @@ namespace Frogs.Unity
         /// <inheritdoc />
         public void CompleteHandOff()
         {
-            // Nothing at all when that hop was the one that got the last frog
-            // home. docs/specs/ui/game-board.md#behaviour: "When the last frog
-            // gets home, the game ends itself. The hop finishes, and game over
-            // follows with no input from anybody." There is no next player to
-            // pass to, and Game.CompleteHandOff says so by throwing — so the
-            // step the spec says does not happen is the step not taken, rather
-            // than one taken and caught.
+            // The step the spec says does not happen is the step not taken,
+            // rather than one taken and caught.
             if (_game.IsOver)
             {
                 return;

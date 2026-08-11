@@ -223,6 +223,54 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
+        public void NextFrogLabel_NamesNobody_OnTheHopThatGotTheLastFrogHome()
+        {
+            var game = StartedGame(FrogColour.Green, FrogColour.Blue);
+
+            // Blue is already home and Green's answer is about to put it there
+            // too, so by the time this dialog opens there is no next player at
+            // all — the one turn in a game where there is not one.
+            var blue = game.LaneFor(FrogColour.Blue);
+            var green = game.LaneFor(FrogColour.Green);
+
+            for (var step = 0; step < Lane.LaneWinningPosition; step++)
+            {
+                blue.MoveForward();
+                if (step < Lane.LaneWinningPosition - 1)
+                {
+                    green.MoveForward();
+                }
+            }
+
+            var resolution = green.Resolve(game.DrawnCard.Product, game.DrawnCard);
+
+            Assert.That(game.IsOver, Is.True, "the scripted position did not end the game");
+
+            var view = CreateView(new GameAnswerResultTurn(game, resolution));
+
+            try
+            {
+                // Before the guard this threw out of Refresh, from Core's own
+                // "there is no next frog to advance to" — on the winning move
+                // of every completed game.
+                Assert.That(
+                    view.NextTurnButton.Label.text,
+                    Is.EqualTo(AnswerResultDialogView.NoNextPlayerLabel));
+
+                foreach (var colour in game.TurnOrder)
+                {
+                    Assert.That(
+                        view.NextTurnButton.Label.text, Does.Not.Contain(colour.ToString()),
+                        "the button names a player on a turn that has none");
+                }
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
         public void ThePanelAndEveryRegion_AreIdenticalBetweenTheRightAndWrongStates()
         {
             var right = CreateView(Right(FrogColour.Green, before: 3));
@@ -721,7 +769,7 @@ namespace Frogs.Unity.EditModeTests
 
             public TurnResolution Resolution { get; }
 
-            public FrogColour NextFrog { get; }
+            public FrogColour? NextFrog { get; }
 
             internal IReadOnlyList<string> Calls => _calls;
 
