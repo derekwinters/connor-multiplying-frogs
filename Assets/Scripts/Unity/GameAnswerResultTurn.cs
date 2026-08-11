@@ -72,8 +72,20 @@ namespace Frogs.Unity
         /// <inheritdoc />
         public void CompleteHandOff()
         {
-            // Just the advance, and deliberately nothing else. A frog that
-            // lands on the End log has its place in the finishing order
+            // Nothing at all when that hop was the one that got the last frog
+            // home. docs/specs/ui/game-board.md#behaviour: "When the last frog
+            // gets home, the game ends itself. The hop finishes, and game over
+            // follows with no input from anybody." There is no next player to
+            // pass to, and Game.CompleteHandOff says so by throwing — so the
+            // step the spec says does not happen is the step not taken, rather
+            // than one taken and caught.
+            if (_game.IsOver)
+            {
+                return;
+            }
+
+            // Otherwise just the advance, and deliberately nothing else. A frog
+            // that lands on the End log has its place in the finishing order
             // captured by Core itself, inside Game.ShowResult — the phase
             // before this one, and the first one after a move that no caller
             // can skip. The shell does not have to remember to announce an

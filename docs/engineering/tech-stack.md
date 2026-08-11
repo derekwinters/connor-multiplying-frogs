@@ -369,9 +369,8 @@ implementation PR.
 
 `Assets/Editor/GameScene.cs` creates `Assets/Scenes/Game.unity` the same way —
 `EditorSceneManager`, not hand-authored YAML — with a camera and nothing else.
-No probe, no layout: what a screen shows still goes through the wireframe loop
-first, and the screen router that puts content into this scene is its own,
-later issue.
+No probe, no layout, and **no MonoBehaviour at all**: what puts a screen on
+screen is code, not a component dropped into the scene (below).
 
 `Game.unity` is **first** in `ProjectSettings/EditorBuildSettings.asset` —
 index 0, which is the entry Unity boots into. `HelloWorld.unity` stays in the
@@ -380,6 +379,38 @@ tests still pass unchanged, because they assert presence and `enabled`, never
 position. Registering `Game.unity` by appending it, the way a first pass at
 this might do it, would leave the built APK opening into the blank Hello World
 scene forever — the ordering is the whole point, not an incidental detail.
+
+### What puts a screen on screen: a code-only entry point
+
+The scene stays empty. `Frogs.Unity.AppRoot` is the composition root, and it is
+reached from a `[RuntimeInitializeOnLoadMethod]` hook that does nothing but call
+`AppRoot.Create()`. It builds, in this order:
+
+1. the one `Canvas`, in screen-space overlay, with a `CanvasScaler` at the
+   **1920 × 1200** reference resolution every spec page is measured against;
+2. an `EventSystem` and a `StandaloneInputModule`, without which no tap reaches
+   any button;
+3. `ScreenRouterAdapter`, whose one root per `Screen` and per `Dialog` is a
+   `RectTransform` filling the canvas;
+4. one view under each of those roots, each asked to build itself immediately
+   rather than when its root first becomes active.
+
+**Why not a bootstrap component in the scene**, which is the obvious way to do
+this: a component reference in a `.unity` file is a GUID, and a GUID that drifts
+from its `.meta` comes back as a *Missing Script* that throws nothing and logs
+nothing. Adding one would also mean regenerating and re-extracting the scene the
+way #209 had to, since there is no editor in an agent environment. A code-only
+entry point has no GUID to lose and leaves `Game.unity` exactly what was
+committed and CI verified.
+
+**Nothing on `AppRoot` is serialized.** It is constructed at runtime and saved
+into no asset, so every field on it is deliberately a plain field rather than a
+`[SerializeField]` — see [Unity serialization](unity-serialization.md).
+
+The app opens on the [title screen](../specs/ui/title-screen.md), and from there
+every screen the POC has is reachable by tapping. `AppRoot` holds one
+`Frogs.Core.Game` for as long as it is being played, so the board, every dialog
+and the standings all read the same game.
 
 ### Naming
 

@@ -148,6 +148,10 @@ each one can honestly reach.
 | The grid **view** drawing the grid Core reported | EditMode | `Assets/Tests/EditMode/EndToEndAcceptanceTests.cs` |
 | The game-over **screen** rendering both headlines | EditMode | same |
 | The scenes the build ships keeping their components | EditMode | same |
+| The app building its canvas and opening on the title screen | EditMode | `Assets/Tests/EditMode/AppRootTests.cs` |
+| A whole turn tapped through, board back to board | EditMode | same |
+| A game played until every frog is home reaching game over | EditMode | same |
+| A game ended from the settings dialog's confirm reaching it too | EditMode | same |
 
 Three whole games are played at the Core tier, all from **one named seed**, so
 a failure is the same failure every run: one played until both frogs are home
@@ -159,21 +163,31 @@ isolated test noticing. That is not a hypothetical: this pass is what caught
 `Game.RecordFinish` never being called from anywhere but a test, which left
 every real game with no winner.
 
-### What the acceptance pass cannot reach
+### How the shell tier drives a walkthrough without a player
 
-**There is no harness in this repo for driving the real screens end to end.**
 EditMode is an edit-mode editor session: it opens a scene without running
 `Awake`, `OnEnable` or `Start`, no coroutines run, no frames tick, and
-`Time.deltaTime` never advances. A tapped-through sequence of screens, a screen
-transition, and a timed hop cannot be observed there, and
-[PlayMode tests are not the answer](#no-playmode-tests-no-on-device-testing).
+`Time.deltaTime` never advances. `Frogs.Unity` is written so that none of that
+is required. Every view builds itself behind its own `EnsureInitialized` guard
+rather than in `Awake`, every entering animation and the hop are advanced
+through a public `Advance`/`AdvanceFade` method rather than only from an
+`Update`, and the whole app is built by `AppRoot.Initialize()`, which the
+runtime entry point does nothing but call.
 
-So the shell tier proves the adapter-shaped things EditMode is actually for,
-and nothing pretends otherwise. Writing a real walkthrough needs a lifecycle
-driver — explicit `Initialize()` entry points, or a test driver that pumps the
-lifecycle by hand — that does not exist yet. Until it does, the only place the
-real screens are seen *running* is a build somebody installs and opens, which
-is where Derek and Connor find out whether it is fun.
+That is exactly the lifecycle driver a real walkthrough needs, so
+`AppRootTests` is one: it builds the app, taps the shared components' own
+pointer handlers, and turns the clock by hand. What it proves is that a press
+reaches Core and the right screen comes up next — the wiring, screen to screen,
+from the title screen to game over.
+
+**It still is not a device.** Nothing there renders, so nothing there can say a
+layout is readable, a tap target is reachable by a finger, or a hop looks like
+a hop. Taps are delivered by calling a handler, not by a raycast through a
+`GraphicRaycaster`, so a button covered by something else still passes. And
+[PlayMode tests are not the answer](#no-playmode-tests-no-on-device-testing) to
+any of that. The only place the real screens are seen *running* is a build
+somebody installs and opens, which is where Derek and Connor find out whether
+it is fun.
 
 ## Known limitation: EditMode tests run in CI, not in agent environments
 
