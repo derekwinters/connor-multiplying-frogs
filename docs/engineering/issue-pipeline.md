@@ -1210,7 +1210,7 @@ sections, in order:
 | --- | --- | --- |
 | 🎯 Focus | the four-slice pie for the focus milestone | focus |
 | 🔨 Ready queue | `ready-for-work`, headed by the build cap | focus |
-| 📥 Intake | `ai-triage` — waiting to be analyzed | board-wide |
+| 📥 Intake | `ai-triage` — waiting to be analyzed, plus unadmitted work | board-wide |
 | ✋ Waiting for you | `pending-approval` — waiting on Derek | board-wide |
 | ❓ Needs clarification | blocked on a question | board-wide |
 | ⏸️ Parked | set aside, listed so it can be found | board-wide |
@@ -1251,10 +1251,35 @@ The **Milestone** column is what keeps a board-wide table readable: a row
 reading `—` is an issue nobody has scheduled, which is the point of showing
 it. If every table were focus-scoped, that column would be a constant.
 
-**An issue with no pipeline-state label appears in no section**, board-wide
-scope or not. It has not been admitted, and `/admit` is how it enters. Only
-the pie counts them, in its Unplanned slice, and only inside the focus
-milestone — because the pie's job is to add up.
+#### Intake carries two piles, and flags which is which
+
+An issue with **no pipeline-state label at all** has not been `/admit`ted, and
+the nightly analysis run will never pick it up — [its entry condition is
+`ai-triage` and nothing else](#analysis--find-what-needs-triage). Left off the
+board entirely, such an issue is invisible until somebody happens to scroll
+the issue list, which on this repo meant seven of twenty-one open issues.
+
+So Intake lists both, and marks the difference:
+
+| Row | Means | Who moves it |
+| --- | --- | --- |
+| plain | `ai-triage` — the pipeline has it | tonight's analysis run |
+| `🚪 not admitted` | no state label — nothing has it | Derek, with `/admit` |
+
+The flag is not decoration. The two piles are waiting on different things, and
+an Intake row that did not say which pile it was in would make the section
+mean two contradictory things — "handled" and "stalled on you" — at a glance,
+which is the only way this section gets read.
+
+**Two issues are never listed as unadmitted**: the `dashboard` issue, which is
+the pipeline's own furniture, and any `type:epic`, which is a container whose
+children carry the work. The epic case is exactly what
+[`epic-excluded` refuses](#where-each-command-is-refused), and listing an
+issue beside a command that gets refused is worse than not listing it.
+
+Unadmitted issues stay in the pie's **Unplanned** slice, and only inside the
+focus milestone — the pie's job is to add up, and widening Intake does not
+move an issue between slices.
 
 #### Unblocker stars
 

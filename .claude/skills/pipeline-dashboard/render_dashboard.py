@@ -45,9 +45,15 @@ READY = "ready-for-work"
 IN_PROGRESS = "in-progress"
 PARKED = "parked"
 
+DASHBOARD = "dashboard"
+EPIC = "type:epic"
+
 PLANNING_LABELS = {TRIAGE, PENDING, NEEDS_CLARIFICATION}
 ACTIVE_LABELS = {READY, IN_PROGRESS}
 STATE_LABELS = PLANNING_LABELS | ACTIVE_LABELS | {PARKED}
+
+# What an Intake row says when nobody has `/admit`ted the issue.
+UNADMITTED_FLAG = "🚪 not admitted"
 
 FOCUS_MARKER = re.compile(r"<!--\s*pipeline-focus:\s*(.+?)\s*-->")
 CAP_MARKER = re.compile(r"<!--\s*pipeline-cap:\s*(.+?)\s*-->")
@@ -243,20 +249,56 @@ def _sorted_rows(issues, data):
     )
 
 
-def intake(data: dict) -> list:
-    """Everything waiting for triage, **anywhere on the board.**
+def is_unadmitted(issue) -> bool:
+    """Open, carrying no pipeline-state label, and admissible.
 
-    Deliberately not focus-scoped. `ai-triage` means the issue has not been
-    triaged, and triage is what decides its milestone — so an issue in Intake
-    typically has no milestone at all, and the ones that do are usually
-    somewhere other than the milestone currently being built. Filtering this
-    table by focus would leave it permanently empty while the work it exists
-    to surface piled up out of sight.
+    An issue nobody has `/admit`ted. It is not a triage candidate — the
+    nightly analysis run keys on `ai-triage` alone — so nothing will happen to
+    it until Derek types the command.
 
-    The Milestone column is what keeps that readable: a row reading `—` is an
-    issue nobody has scheduled, which is the point of putting it here.
+    The two exclusions are the two things `/admit` would be refused on, and
+    listing an issue beside a command that gets refused is worse than not
+    listing it. The dashboard is the pipeline's own furniture, and an epic is
+    a container whose children carry the work.
     """
-    return _sorted_rows(_active(data, TRIAGE), data)
+    labels = _labels(issue)
+
+    return (
+        issue.get("state") != "closed"
+        and not (labels & STATE_LABELS)
+        and DASHBOARD not in labels
+        and EPIC not in labels
+    )
+
+
+def intake(data: dict) -> list:
+    """Everything waiting to be looked at, **anywhere on the board.**
+
+    Two piles, and the `🚪 not admitted` flag is what tells them apart:
+
+    - **`ai-triage`** — the pipeline has it. Tonight's analysis run picks it
+      up and nothing is needed from Derek.
+    - **unadmitted** — nothing has it. Only `/admit` moves it.
+
+    They share a table because both answer "what has nobody looked at yet",
+    and a section Derek has to remember to scroll to is a section that stops
+    being read. They carry a flag because the *action* differs, and an Intake
+    row that does not say which pile it is in would mean two things at once.
+
+    Deliberately not focus-scoped, for the reason the two piles exist at all:
+    neither has been triaged, and triage is what decides an issue's milestone,
+    so most rows here have no milestone to filter on. Filtering by focus left
+    this table permanently near-empty while the work it exists to surface
+    piled up out of sight.
+
+    The Milestone column keeps that readable — a row reading `—` is an issue
+    nobody has scheduled, which is the point of putting it here.
+    """
+    # Disjoint by construction: `ai-triage` is itself a state label, so an
+    # issue carrying it is never unadmitted.
+    return _sorted_rows(
+        _active(data, TRIAGE) + [i for i in data.get("issues") or [] if is_unadmitted(i)],
+        data)
 
 
 def pending(data: dict) -> list:
@@ -375,6 +417,11 @@ def render(data: dict, focus_override=None, cap_override=None, as_of=None) -> st
         for issue in issues:
             number = issue["number"]
             title = issue.get("title", "")
+
+            # Inside the star prefix, so the highest-leverage signal still
+            # reads first on a row that carries both.
+            if is_unadmitted(issue):
+                title = f"{UNADMITTED_FLAG} — {title}"
 
             if number in stars:
                 unblocked = ", ".join(f"#{n}" for n in stars[number])

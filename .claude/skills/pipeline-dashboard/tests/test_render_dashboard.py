@@ -373,6 +373,66 @@ class AttentionSectionScopeTests(unittest.TestCase):
         self.assertEqual(sum(dash.focus_pie(data).values()), 8)
 
 
+class UnadmittedTests(unittest.TestCase):
+    """Intake also carries issues nobody has `/admit`ted, flagged as such.
+
+    They are waiting on a different thing from an `ai-triage` row — the
+    nightly run will never pick them up, only `/admit` moves them — so the
+    flag is what stops one table meaning two things.
+    """
+
+    def with_issue(self, number, title, labels, milestone=None, closed=False):
+        data = state()
+        data["issues"].append({
+            "number": number, "title": title,
+            "state": "closed" if closed else "open",
+            "labels": labels, "milestone": milestone,
+            "body": "", "native_blockers": []})
+        return data
+
+    def numbers(self, data):
+        return [i["number"] for i in dash.intake(data)]
+
+    def test_an_unadmitted_issue_is_listed_in_intake(self):
+        data = self.with_issue(30, "Never admitted", ["type:task"])
+        self.assertIn(30, self.numbers(data))
+
+    def test_an_unadmitted_issue_in_the_focus_milestone_is_listed(self):
+        self.assertIn(16, self.numbers(state()))
+
+    def test_an_unadmitted_row_is_flagged(self):
+        data = self.with_issue(30, "Never admitted", ["type:task"])
+        self.assertIn("🚪 not admitted — Never admitted", dash.render(data))
+
+    def test_an_ai_triage_row_is_not_flagged(self):
+        """The flag has to tell the two piles apart, so it cannot be on both."""
+        self.assertIn("| #18 | A later-milestone issue |", dash.render(state()))
+
+    def test_the_dashboard_issue_is_never_in_intake(self):
+        """The board is the pipeline's furniture, not work for the pipeline."""
+        self.assertNotIn(78, self.numbers(state()))
+
+    def test_an_epic_is_not_in_intake(self):
+        """`/admit` on an epic is refused, so offering it would be a dead end."""
+        data = self.with_issue(31, "The whole pond", ["type:epic"])
+        self.assertNotIn(31, self.numbers(data))
+
+    def test_a_closed_unadmitted_issue_is_not_in_intake(self):
+        data = self.with_issue(32, "Done long ago", ["type:task"], closed=True)
+        self.assertNotIn(32, self.numbers(data))
+
+    def test_a_parked_issue_is_not_treated_as_unadmitted(self):
+        """`parked` is a state label, and a deliberate one."""
+        data = self.with_issue(33, "Set aside", ["parked", "type:task"])
+        self.assertNotIn(33, self.numbers(data))
+
+    def test_the_pie_still_adds_up(self):
+        """Intake widening must not move an issue between slices."""
+        counts = dash.focus_pie(state())
+        self.assertEqual(sum(counts.values()), 8)
+        self.assertEqual(counts["Unplanned"], 2)
+
+
 class ParkedExclusionTests(unittest.TestCase):
     def parked_ready(self):
         data = state()

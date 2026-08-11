@@ -104,8 +104,26 @@ carries no version and never ships, so it can never be the focus — and a
 focus-scoped "Waiting for you" hides the milestone that exists to say Derek
 has to do something by hand.
 
-An issue with **no pipeline-state label at all** is in no section either way.
-It has not been admitted; `/admit` is what brings it in.
+## Intake carries two piles
+
+An issue with **no pipeline-state label at all** has not been `/admit`ted, and
+the nightly analysis run keys on `ai-triage` alone — so nothing will happen to
+it until Derek types the command. Leaving it off the board meant it was
+invisible until somebody scrolled the issue list.
+
+Intake lists both, flagged:
+
+| Row | Means | Who moves it |
+| --- | --- | --- |
+| plain | `ai-triage` — the pipeline has it | tonight's analysis run |
+| `🚪 not admitted` | no state label — nothing has it | Derek, with `/admit` |
+
+**Keep the flag on any row that needs it.** The two piles wait on different
+things, and an unflagged Intake means "handled" and "stalled on you" at once.
+
+The `dashboard` issue and any `type:epic` are never listed as unadmitted —
+`/admit` is refused on both, and offering a command that gets refused is worse
+than not offering it.
 
 ## Running the tests
 
@@ -113,7 +131,7 @@ It has not been admitted; `/admit` is what brings it in.
 python3 .github/scripts/run_python_tests.py pipeline-dashboard
 ```
 
-66 tests. The centrepiece is a golden-snapshot test rendering a fixture board
+75 tests. The centrepiece is a golden-snapshot test rendering a fixture board
 and comparing byte-for-byte against a committed file. A dashboard is a wall of
 generated Markdown, and a whole-board diff is the only review that catches a
 section quietly changing shape.
