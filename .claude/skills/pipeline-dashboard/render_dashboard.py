@@ -45,9 +45,15 @@ READY = "ready-for-work"
 IN_PROGRESS = "in-progress"
 PARKED = "parked"
 
+DASHBOARD = "dashboard"
+EPIC = "type:epic"
+
 PLANNING_LABELS = {TRIAGE, PENDING, NEEDS_CLARIFICATION}
 ACTIVE_LABELS = {READY, IN_PROGRESS}
 STATE_LABELS = PLANNING_LABELS | ACTIVE_LABELS | {PARKED}
+
+# What an Intake row says when nobody has `/admit`ted the issue.
+UNADMITTED_FLAG = "🚪 not admitted"
 
 FOCUS_MARKER = re.compile(r"<!--\s*pipeline-focus:\s*(.+?)\s*-->")
 CAP_MARKER = re.compile(r"<!--\s*pipeline-cap:\s*(.+?)\s*-->")
@@ -161,10 +167,15 @@ def ready_queue(data: dict, focus=None) -> list:
 
     `parked` is excluded even when it also carries `ready-for-work`. The
     Parked section is a listing, not a re-admission.
+
+    **This is the one issue table that is focus-scoped**, because it is the
+    one that predicts what the nightly builder will do — and the builder
+    builds the focus milestone. Listing an out-of-focus `ready-for-work` issue
+    here would put work in front of Derek that nothing is going to pick up.
     """
     focus = focus or resolve_focus(data)
 
-    return _sorted_rows(_active(data, focus, READY), data)
+    return _sorted_rows(_active(data, READY, focus), data)
 
 
 def _open_issues(data) -> dict:
@@ -206,15 +217,20 @@ def _is_blocked(issue, data) -> bool:
     return any(blocker in issues for blocker in blockers_of(issue))
 
 
-def _active(data, focus, label):
-    """Open, in focus, carrying `label`, and **not** parked.
+def _active(data, label, focus=None):
+    """Open, carrying `label`, and **not** parked. Board-wide unless scoped.
 
     Parked is excluded from every active queue. The Parked section is a
     listing, not a re-admission — an issue set aside by `/park` must not
     reappear in a table that says "here is what to do next".
+
+    `focus` narrows to one milestone, and **only the ready queue passes it.**
+    See `intake` for why the attention sections do not.
     """
+    issues = data.get("issues") or [] if focus is None else _focus_issues(data, focus)
+
     return [
-        issue for issue in _focus_issues(data, focus)
+        issue for issue in issues
         if issue.get("state") != "closed"
         and label in _labels(issue)
         and PARKED not in _labels(issue)
@@ -233,26 +249,89 @@ def _sorted_rows(issues, data):
     )
 
 
-def intake(data: dict, focus=None) -> list:
-    focus = focus or resolve_focus(data)
-    return _sorted_rows(_active(data, focus, TRIAGE), data)
+def is_unadmitted(issue) -> bool:
+    """Open, carrying no pipeline-state label, and admissible.
+
+    An issue nobody has `/admit`ted. It is not a triage candidate — the
+    nightly analysis run keys on `ai-triage` alone — so nothing will happen to
+    it until Derek types the command.
+
+    The two exclusions are the two things `/admit` would be refused on, and
+    listing an issue beside a command that gets refused is worse than not
+    listing it. The dashboard is the pipeline's own furniture, and an epic is
+    a container whose children carry the work.
+    """
+    labels = _labels(issue)
+
+    return (
+        issue.get("state") != "closed"
+        and not (labels & STATE_LABELS)
+        and DASHBOARD not in labels
+        and EPIC not in labels
+    )
 
 
-def pending(data: dict, focus=None) -> list:
-    focus = focus or resolve_focus(data)
-    return _sorted_rows(_active(data, focus, PENDING), data)
+def intake(data: dict) -> list:
+    """Everything waiting to be looked at, **anywhere on the board.**
+
+    Two piles, and the `🚪 not admitted` flag is what tells them apart:
+
+    - **`ai-triage`** — the pipeline has it. Tonight's analysis run picks it
+      up and nothing is needed from Derek.
+    - **unadmitted** — nothing has it. Only `/admit` moves it.
+
+    They share a table because both answer "what has nobody looked at yet",
+    and a section Derek has to remember to scroll to is a section that stops
+    being read. They carry a flag because the *action* differs, and an Intake
+    row that does not say which pile it is in would mean two things at once.
+
+    Deliberately not focus-scoped, for the reason the two piles exist at all:
+    neither has been triaged, and triage is what decides an issue's milestone,
+    so most rows here have no milestone to filter on. Filtering by focus left
+    this table permanently near-empty while the work it exists to surface
+    piled up out of sight.
+
+    The Milestone column keeps that readable — a row reading `—` is an issue
+    nobody has scheduled, which is the point of putting it here.
+    """
+    # Disjoint by construction: `ai-triage` is itself a state label, so an
+    # issue carrying it is never unadmitted.
+    return _sorted_rows(
+        _active(data, TRIAGE) + [i for i in data.get("issues") or [] if is_unadmitted(i)],
+        data)
 
 
-def needs_clarification(data: dict, focus=None) -> list:
-    focus = focus or resolve_focus(data)
-    return _sorted_rows(_active(data, focus, NEEDS_CLARIFICATION), data)
+def pending(data: dict) -> list:
+    """Everything waiting on Derek, **anywhere on the board.**
+
+    Board-wide for a blunter reason than Intake: much of this work lives in
+    `Direct Involvement Needed`, a milestone with no version that never ships
+    and therefore can never be the focus. Focus-scoping the one section titled
+    "Waiting for you" would hide exactly the issues that are waiting for him.
+    """
+    return _sorted_rows(_active(data, PENDING), data)
 
 
-def parked(data: dict, focus=None) -> list:
-    focus = focus or resolve_focus(data)
+def needs_clarification(data: dict) -> list:
+    """Everything blocked on a question, **anywhere on the board.**
+
+    A question does not stop being unanswered because it is scheduled for a
+    later milestone, and answering it early is often what lets the issue be
+    scheduled at all.
+    """
+    return _sorted_rows(_active(data, NEEDS_CLARIFICATION), data)
+
+
+def parked(data: dict) -> list:
+    """Everything set aside, **anywhere on the board.**
+
+    Parked work is listed so it can be found and unparked. An out-of-focus
+    parked issue is the one most in need of that — it is two filters away from
+    anybody noticing it again.
+    """
     return sorted(
         (
-            issue for issue in _focus_issues(data, focus)
+            issue for issue in data.get("issues") or []
             if issue.get("state") != "closed" and PARKED in _labels(issue)
         ),
         key=lambda issue: issue.get("number", 0),
@@ -339,6 +418,11 @@ def render(data: dict, focus_override=None, cap_override=None, as_of=None) -> st
             number = issue["number"]
             title = issue.get("title", "")
 
+            # Inside the star prefix, so the highest-leverage signal still
+            # reads first on a row that carries both.
+            if is_unadmitted(issue):
+                title = f"{UNADMITTED_FLAG} — {title}"
+
             if number in stars:
                 unblocked = ", ".join(f"#{n}" for n in stars[number])
                 title = f"⭐ unblocks {unblocked} — {title}"
@@ -352,18 +436,22 @@ def render(data: dict, focus_override=None, cap_override=None, as_of=None) -> st
             lines.append(
                 f"| #{number} | {title} | {issue.get('milestone') or '—'} | {blocked} |")
 
+    # Only the ready queue is focus-scoped. The sections below it say
+    # "somebody has to look at this", and an issue does not stop needing to be
+    # looked at by sitting outside the milestone currently being built —
+    # least of all one that has no milestone because nobody has triaged it.
     table(f"## 🔨 Ready queue (cap {cap})", ready_queue(data, focus),
           "Nothing is ready to build.")
-    table("## 📥 Intake", intake(data, focus), "Nothing waiting for triage.")
-    table("## ✋ Waiting for you", pending(data, focus),
+    table("## 📥 Intake", intake(data), "Nothing waiting for triage.")
+    table("## ✋ Waiting for you", pending(data),
           "Nothing waiting for approval.")
-    table("## ❓ Needs clarification", needs_clarification(data, focus),
+    table("## ❓ Needs clarification", needs_clarification(data),
           "Nothing blocked on a question.")
 
     # Read-only: parked work stays visible so it can be found and unparked,
     # but it is deliberately not a queue.
     lines += ["", "## ⏸️ Parked", ""]
-    parked_issues = parked(data, focus)
+    parked_issues = parked(data)
     if parked_issues:
         for issue in parked_issues:
             lines.append(f"- #{issue['number']} {issue.get('title', '')} — `/unpark`")

@@ -26,7 +26,10 @@ a hand edit to a rendered section disappears at the next render._
 
 ## 📥 Intake
 
-Nothing waiting for triage.
+| Issue | Title | Milestone | Blocked by |
+| --- | --- | --- | --- |
+| #16 | 🚪 not admitted — Nobody has triaged this yet | v0.0.1 | — |
+| #18 | A later-milestone issue | v0.0.2 | — |
 
 ## ✋ Waiting for you
 

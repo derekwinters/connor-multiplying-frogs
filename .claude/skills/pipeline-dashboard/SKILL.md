@@ -85,10 +85,45 @@ be a stream of meaningless edits.
 
 Settings resolve **override → marker → default**. A `/focus` naming no live
 milestone is rejected rather than stored, because a typo renders a board whose
-every section is empty — indistinguishable from a finished milestone, and the
-most misleading output this script can produce. A malformed `cap` marker falls
-back to 3, because a board that does not render is worse than one with a
-default cap.
+pie and ready queue are empty — indistinguishable from a finished milestone,
+and the most misleading output this script can produce. A malformed `cap`
+marker falls back to 3, because a board that does not render is worse than one
+with a default cap.
+
+## Focus scopes the pie and the ready queue, and nothing else
+
+Those two say *what is being built now*, and the builder builds the focus
+milestone. Intake, Waiting for you, Needs clarification and Parked say
+*somebody has to look at this*, which is true regardless of milestone — so
+they list the whole board, and the **Milestone** column tells the rows apart.
+
+Scoping them to focus hid the work most worth surfacing. An `ai-triage` issue
+has not been triaged, and triage is what assigns the milestone, so a
+focus-scoped Intake is near-empty by construction. `Direct Involvement Needed`
+carries no version and never ships, so it can never be the focus — and a
+focus-scoped "Waiting for you" hides the milestone that exists to say Derek
+has to do something by hand.
+
+## Intake carries two piles
+
+An issue with **no pipeline-state label at all** has not been `/admit`ted, and
+the nightly analysis run keys on `ai-triage` alone — so nothing will happen to
+it until Derek types the command. Leaving it off the board meant it was
+invisible until somebody scrolled the issue list.
+
+Intake lists both, flagged:
+
+| Row | Means | Who moves it |
+| --- | --- | --- |
+| plain | `ai-triage` — the pipeline has it | tonight's analysis run |
+| `🚪 not admitted` | no state label — nothing has it | Derek, with `/admit` |
+
+**Keep the flag on any row that needs it.** The two piles wait on different
+things, and an unflagged Intake means "handled" and "stalled on you" at once.
+
+The `dashboard` issue and any `type:epic` are never listed as unadmitted —
+`/admit` is refused on both, and offering a command that gets refused is worse
+than not offering it.
 
 ## Running the tests
 
@@ -96,7 +131,7 @@ default cap.
 python3 .github/scripts/run_python_tests.py pipeline-dashboard
 ```
 
-51 tests. The centrepiece is a golden-snapshot test rendering a fixture board
+75 tests. The centrepiece is a golden-snapshot test rendering a fixture board
 and comparing byte-for-byte against a committed file. A dashboard is a wall of
 generated Markdown, and a whole-board diff is the only review that catches a
 section quietly changing shape.

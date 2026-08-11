@@ -265,8 +265,9 @@ class SectionTests(unittest.TestCase):
         self.assertIn("Splash screen", rendered)
 
     def test_every_issue_table_has_a_milestone_column(self):
+        """Four tables render on the fixture: ready, intake, pending, clarify."""
         rendered = dash.render(state())
-        self.assertEqual(rendered.count("| Issue | Title | Milestone | Blocked by |"), 3)
+        self.assertEqual(rendered.count("| Issue | Title | Milestone | Blocked by |"), 4)
 
     def test_the_reconcile_section_lists_flag_findings(self):
         data = state()
@@ -309,6 +310,129 @@ class SectionTests(unittest.TestCase):
         self.assertIn("/park", rendered)
 
 
+class AttentionSectionScopeTests(unittest.TestCase):
+    """Intake, Waiting for you, Needs clarification and Parked are board-wide.
+
+    Only the pie and the ready queue are scoped to the focus milestone. The
+    sections that exist to say *somebody has to look at this* are not, because
+    the issues that most need looking at are exactly the ones no milestone has
+    been decided for yet — an `ai-triage` issue has not been triaged, and
+    triage is what assigns the milestone. Scoping Intake to the focus
+    milestone makes it structurally near-empty.
+    """
+
+    def issue(self, number, title, labels, milestone):
+        return {
+            "number": number, "title": title, "state": "open",
+            "labels": labels, "milestone": milestone,
+            "body": "", "native_blockers": []}
+
+    def with_issue(self, *args):
+        data = state()
+        data["issues"].append(self.issue(*args))
+        return data
+
+    def test_intake_lists_an_untriaged_issue_with_no_milestone(self):
+        data = self.with_issue(30, "Nobody has scheduled this", ["ai-triage"], None)
+        self.assertIn(30, [i["number"] for i in dash.intake(data)])
+
+    def test_intake_lists_an_ai_triage_issue_in_another_milestone(self):
+        self.assertIn(18, [i["number"] for i in dash.intake(state())])
+
+    def test_pending_approval_outside_the_focus_milestone_is_listed(self):
+        data = self.with_issue(
+            31, "Derek: add the signing secret", ["pending-approval"],
+            "Direct Involvement Needed")
+        self.assertIn(31, [i["number"] for i in dash.pending(data)])
+
+    def test_needs_clarification_outside_the_focus_milestone_is_listed(self):
+        data = self.with_issue(32, "App icon", ["needs-clarification"], None)
+        self.assertIn(32, [i["number"] for i in dash.needs_clarification(data)])
+
+    def test_parked_outside_the_focus_milestone_is_listed(self):
+        data = self.with_issue(33, "Sound effects", ["parked"], "v0.0.2")
+        self.assertIn(33, [i["number"] for i in dash.parked(data)])
+
+    def test_an_out_of_focus_row_names_its_own_milestone(self):
+        """The Milestone column is what tells these rows apart."""
+        rendered = dash.render(state())
+        self.assertIn("| #18 | A later-milestone issue | v0.0.2 |", rendered)
+
+    def test_a_row_with_no_milestone_renders_an_em_dash(self):
+        data = self.with_issue(30, "Nobody has scheduled this", ["ai-triage"], None)
+        self.assertIn("| #30 | Nobody has scheduled this | — |", dash.render(data))
+
+    def test_the_ready_queue_is_still_focus_scoped(self):
+        """The builder builds the focus milestone. Widening this queue would
+        put work in front of Derek that the nightly builder will not pick up."""
+        data = self.with_issue(34, "A later-milestone build", ["ready-for-work"], "v0.0.2")
+        self.assertNotIn(34, [i["number"] for i in dash.ready_queue(data)])
+
+    def test_the_pie_is_still_focus_scoped(self):
+        data = self.with_issue(35, "Elsewhere", ["ai-triage"], "v0.0.2")
+        self.assertEqual(sum(dash.focus_pie(data).values()), 8)
+
+
+class UnadmittedTests(unittest.TestCase):
+    """Intake also carries issues nobody has `/admit`ted, flagged as such.
+
+    They are waiting on a different thing from an `ai-triage` row — the
+    nightly run will never pick them up, only `/admit` moves them — so the
+    flag is what stops one table meaning two things.
+    """
+
+    def with_issue(self, number, title, labels, milestone=None, closed=False):
+        data = state()
+        data["issues"].append({
+            "number": number, "title": title,
+            "state": "closed" if closed else "open",
+            "labels": labels, "milestone": milestone,
+            "body": "", "native_blockers": []})
+        return data
+
+    def numbers(self, data):
+        return [i["number"] for i in dash.intake(data)]
+
+    def test_an_unadmitted_issue_is_listed_in_intake(self):
+        data = self.with_issue(30, "Never admitted", ["type:task"])
+        self.assertIn(30, self.numbers(data))
+
+    def test_an_unadmitted_issue_in_the_focus_milestone_is_listed(self):
+        self.assertIn(16, self.numbers(state()))
+
+    def test_an_unadmitted_row_is_flagged(self):
+        data = self.with_issue(30, "Never admitted", ["type:task"])
+        self.assertIn("🚪 not admitted — Never admitted", dash.render(data))
+
+    def test_an_ai_triage_row_is_not_flagged(self):
+        """The flag has to tell the two piles apart, so it cannot be on both."""
+        self.assertIn("| #18 | A later-milestone issue |", dash.render(state()))
+
+    def test_the_dashboard_issue_is_never_in_intake(self):
+        """The board is the pipeline's furniture, not work for the pipeline."""
+        self.assertNotIn(78, self.numbers(state()))
+
+    def test_an_epic_is_not_in_intake(self):
+        """`/admit` on an epic is refused, so offering it would be a dead end."""
+        data = self.with_issue(31, "The whole pond", ["type:epic"])
+        self.assertNotIn(31, self.numbers(data))
+
+    def test_a_closed_unadmitted_issue_is_not_in_intake(self):
+        data = self.with_issue(32, "Done long ago", ["type:task"], closed=True)
+        self.assertNotIn(32, self.numbers(data))
+
+    def test_a_parked_issue_is_not_treated_as_unadmitted(self):
+        """`parked` is a state label, and a deliberate one."""
+        data = self.with_issue(33, "Set aside", ["parked", "type:task"])
+        self.assertNotIn(33, self.numbers(data))
+
+    def test_the_pie_still_adds_up(self):
+        """Intake widening must not move an issue between slices."""
+        counts = dash.focus_pie(state())
+        self.assertEqual(sum(counts.values()), 8)
+        self.assertEqual(counts["Unplanned"], 2)
+
+
 class ParkedExclusionTests(unittest.TestCase):
     def parked_ready(self):
         data = state()
@@ -328,7 +452,7 @@ class ParkedExclusionTests(unittest.TestCase):
             "number": 30, "title": "Parked mid-triage", "state": "open",
             "labels": ["ai-triage", "parked"], "milestone": "v0.0.1",
             "body": "", "native_blockers": []})
-        self.assertEqual(dash.intake(data), [])
+        self.assertNotIn(30, [i["number"] for i in dash.intake(data)])
 
     def test_parked_still_counts_in_the_unplanned_slice(self):
         """The one deliberate exception — otherwise the pie stops adding up."""
