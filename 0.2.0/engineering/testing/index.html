@@ -1714,10 +1714,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#what-the-acceptance-pass-cannot-reach" class="md-nav__link">
+  <a href="#how-the-shell-tier-drives-a-walkthrough-without-a-player" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What the acceptance pass cannot reach
+        How the shell tier drives a walkthrough without a player
       
     </span>
   </a>
@@ -2160,10 +2160,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#what-the-acceptance-pass-cannot-reach" class="md-nav__link">
+  <a href="#how-the-shell-tier-drives-a-walkthrough-without-a-player" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What the acceptance pass cannot reach
+        How the shell tier drives a walkthrough without a player
       
     </span>
   </a>
@@ -2444,6 +2444,26 @@ each one can honestly reach.</p>
 <td>EditMode</td>
 <td>same</td>
 </tr>
+<tr>
+<td>The app building its canvas and opening on the title screen</td>
+<td>EditMode</td>
+<td><code>Assets/Tests/EditMode/AppRootTests.cs</code></td>
+</tr>
+<tr>
+<td>A whole turn tapped through, board back to board</td>
+<td>EditMode</td>
+<td>same</td>
+</tr>
+<tr>
+<td>A game played until every frog is home reaching game over</td>
+<td>EditMode</td>
+<td>same</td>
+</tr>
+<tr>
+<td>A game ended from the settings dialog's confirm reaching it too</td>
+<td>EditMode</td>
+<td>same</td>
+</tr>
 </tbody>
 </table>
 <p>Three whole games are played at the Core tier, all from <strong>one named seed</strong>, so
@@ -2455,19 +2475,28 @@ that is never called in a real sequence is a seam that can break without any
 isolated test noticing. That is not a hypothetical: this pass is what caught
 <code>Game.RecordFinish</code> never being called from anywhere but a test, which left
 every real game with no winner.</p>
-<h3 id="what-the-acceptance-pass-cannot-reach">What the acceptance pass cannot reach<a class="headerlink" href="#what-the-acceptance-pass-cannot-reach" title="Link to this section">&para;</a></h3>
-<p><strong>There is no harness in this repo for driving the real screens end to end.</strong>
-EditMode is an edit-mode editor session: it opens a scene without running
+<h3 id="how-the-shell-tier-drives-a-walkthrough-without-a-player">How the shell tier drives a walkthrough without a player<a class="headerlink" href="#how-the-shell-tier-drives-a-walkthrough-without-a-player" title="Link to this section">&para;</a></h3>
+<p>EditMode is an edit-mode editor session: it opens a scene without running
 <code>Awake</code>, <code>OnEnable</code> or <code>Start</code>, no coroutines run, no frames tick, and
-<code>Time.deltaTime</code> never advances. A tapped-through sequence of screens, a screen
-transition, and a timed hop cannot be observed there, and
-<a href="#no-playmode-tests-no-on-device-testing">PlayMode tests are not the answer</a>.</p>
-<p>So the shell tier proves the adapter-shaped things EditMode is actually for,
-and nothing pretends otherwise. Writing a real walkthrough needs a lifecycle
-driver — explicit <code>Initialize()</code> entry points, or a test driver that pumps the
-lifecycle by hand — that does not exist yet. Until it does, the only place the
-real screens are seen <em>running</em> is a build somebody installs and opens, which
-is where Derek and Connor find out whether it is fun.</p>
+<code>Time.deltaTime</code> never advances. <code>Frogs.Unity</code> is written so that none of that
+is required. Every view builds itself behind its own <code>EnsureInitialized</code> guard
+rather than in <code>Awake</code>, every entering animation and the hop are advanced
+through a public <code>Advance</code>/<code>AdvanceFade</code> method rather than only from an
+<code>Update</code>, and the whole app is built by <code>AppRoot.Initialize()</code>, which the
+runtime entry point does nothing but call.</p>
+<p>That is exactly the lifecycle driver a real walkthrough needs, so
+<code>AppRootTests</code> is one: it builds the app, taps the shared components' own
+pointer handlers, and turns the clock by hand. What it proves is that a press
+reaches Core and the right screen comes up next — the wiring, screen to screen,
+from the title screen to game over.</p>
+<p><strong>It still is not a device.</strong> Nothing there renders, so nothing there can say a
+layout is readable, a tap target is reachable by a finger, or a hop looks like
+a hop. Taps are delivered by calling a handler, not by a raycast through a
+<code>GraphicRaycaster</code>, so a button covered by something else still passes. And
+<a href="#no-playmode-tests-no-on-device-testing">PlayMode tests are not the answer</a> to
+any of that. The only place the real screens are seen <em>running</em> is a build
+somebody installs and opens, which is where Derek and Connor find out whether
+it is fun.</p>
 <h2 id="known-limitation-editmode-tests-run-in-ci-not-in-agent-environments">Known limitation: EditMode tests run in CI, not in agent environments<a class="headerlink" href="#known-limitation-editmode-tests-run-in-ci-not-in-agent-environments" title="Link to this section">&para;</a></h2>
 <p>Agent environments have no Unity editor and no licence. <strong>EditMode tests cannot
 be run there.</strong> This is a fact about the environment, not a shortcoming of the
