@@ -1,8 +1,8 @@
 """The two release APKs have to be two different builds.
 
 `release-build` runs Unity twice, once per profile in
-docs/engineering/tech-stack.md: ARM64/IL2CPP for the tablet, x86_64/Mono for a
-desktop emulator. Nothing checked that the two invocations produced anything
+docs/engineering/tech-stack.md: ARM64/IL2CPP for the tablet, x86_64/IL2CPP for
+a desktop emulator. Nothing checked that the two invocations produced anything
 different, and for `v0.1.0` they did not — the profile never reached Unity, so
 both assets were the same ARM64 file under two names. An x86_64 emulator
 refuses to install an ARM64-only APK, so the failure surfaced on someone
@@ -31,6 +31,15 @@ DEVICE_LIBS = [
     "lib/arm64-v8a/libmain.so",
 ]
 EMULATOR_LIBS = [
+    "lib/x86_64/libunity.so",
+    "lib/x86_64/libil2cpp.so",
+    "lib/x86_64/libmain.so",
+]
+
+# What a Mono build looks like — no libil2cpp.so. No profile produces one any
+# more (Unity has no Mono for 64-bit Android, issue #282), which is exactly why
+# an APK shaped like this has to be caught.
+MONO_LIBS = [
     "lib/x86_64/libunity.so",
     "lib/x86_64/libmonobdwgc-2.0.so",
     "lib/x86_64/libmain.so",
@@ -68,7 +77,7 @@ class InspectionTests(ApkFixture):
         self.assertTrue(inspect_apk(self.apk("d.apk", DEVICE_LIBS)).il2cpp)
 
     def test_a_mono_build_has_no_il2cpp(self):
-        self.assertFalse(inspect_apk(self.apk("e.apk", EMULATOR_LIBS)).il2cpp)
+        self.assertFalse(inspect_apk(self.apk("e.apk", MONO_LIBS)).il2cpp)
 
     def test_two_apks_with_the_same_bytes_have_the_same_digest(self):
         first = inspect_apk(self.apk("one.apk", DEVICE_LIBS))
@@ -128,12 +137,15 @@ class ProblemTests(ApkFixture):
         self.assertTrue(any("IL2CPP" in problem for problem in found),
                         f"expected the backend to be named; got {found}")
 
-    def test_an_emulator_apk_built_with_il2cpp_is_caught(self):
+    def test_an_emulator_apk_built_with_mono_is_caught(self):
+        """Both profiles are IL2CPP now: 64-bit Android has no Mono (#282).
+
+        A Mono x86_64 APK cannot be produced by the profile any more, so one
+        arriving here means something has been changed back to a pairing Unity
+        silently reduces to no architecture at all.
+        """
         device = inspect_apk(self.apk("device.apk", DEVICE_LIBS))
-        emulator = inspect_apk(
-            self.apk("emulator.apk",
-                     ["lib/x86_64/libunity.so", "lib/x86_64/libil2cpp.so"],
-                     filler="y"))
+        emulator = inspect_apk(self.apk("emulator.apk", MONO_LIBS, filler="y"))
 
         found = problems(device, emulator)
 

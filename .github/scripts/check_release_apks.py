@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """The two release APKs must be the two builds the docs promise.
 
-`release-build` runs Unity twice — ARM64/IL2CPP for the tablet, x86_64/Mono for
-a desktop emulator (docs/engineering/tech-stack.md). Running it twice is not
+`release-build` runs Unity twice — ARM64/IL2CPP for the tablet, x86_64/IL2CPP
+for a desktop emulator (docs/engineering/tech-stack.md). Running it twice is not
 the same as getting two builds: for `v0.1.0` the profile never reached Unity,
 both invocations built the same thing, and the release went out with two
 byte-identical assets under different names (issue #218).
@@ -16,6 +16,11 @@ those ABI names are Android's, not Unity's — `arm64-v8a` and `x86_64` mean the
 same thing in every APK ever built. IL2CPP additionally ships `libil2cpp.so`,
 and a Mono build does not, so the scripting backend is readable from the same
 listing.
+
+Both profiles are IL2CPP: Unity has no Mono for 64-bit Android, so a build that
+comes back without `libil2cpp.so` was built for a pairing Unity silently
+reduces to no architecture at all (issue #282). The ABIs are what tell the two
+profiles apart.
 
 Usage:
     python3 .github/scripts/check_release_apks.py \\
@@ -88,14 +93,19 @@ def problems(device, emulator):
             f"(sha256 {device.digest[:16]}…). Two build profiles cannot "
             f"produce one file, so neither profile reached Unity.")
 
-    found.extend(profile_problems(device, "device", DEVICE_ABI, il2cpp=True))
-    found.extend(profile_problems(emulator, "emulator", EMULATOR_ABI, il2cpp=False))
+    found.extend(profile_problems(device, "device", DEVICE_ABI))
+    found.extend(profile_problems(emulator, "emulator", EMULATOR_ABI))
 
     return found
 
 
-def profile_problems(apk, profile, abi, il2cpp):
-    """Whether one APK is the build its profile asked for."""
+def profile_problems(apk, profile, abi):
+    """Whether one APK is the build its profile asked for.
+
+    Every profile is IL2CPP, so the backend check is the same for both: 64-bit
+    Android has no Mono, and an APK without `libil2cpp.so` was built for a
+    pairing Unity cannot build (#282).
+    """
     found = []
 
     if apk.abis != {abi}:
@@ -104,15 +114,11 @@ def profile_problems(apk, profile, abi, il2cpp):
             f"{apk.name} is the '{profile}' profile, so it must contain {abi} "
             f"and nothing else. It has {listed}.")
 
-    if il2cpp and not apk.il2cpp:
+    if not apk.il2cpp:
         found.append(
             f"{apk.name} is the '{profile}' profile, which is IL2CPP, but it "
-            f"has no {IL2CPP_LIBRARY}.")
-
-    if not il2cpp and apk.il2cpp:
-        found.append(
-            f"{apk.name} is the '{profile}' profile, which is Mono, but it "
-            f"ships {IL2CPP_LIBRARY} — it was built with IL2CPP.")
+            f"has no {IL2CPP_LIBRARY} — it was built with Mono, which Unity "
+            f"cannot build for 64-bit Android.")
 
     return found
 
@@ -128,7 +134,7 @@ def main(argv=None):
     parser.add_argument("--device", required=True,
                         help="the ARM64/IL2CPP APK, for the tablet")
     parser.add_argument("--emulator", required=True,
-                        help="the x86_64/Mono APK, for a desktop emulator")
+                        help="the x86_64/IL2CPP APK, for a desktop emulator")
     arguments = parser.parse_args(argv)
 
     for path in (arguments.device, arguments.emulator):
