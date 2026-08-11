@@ -36,7 +36,7 @@ Exactly one state label per open issue.
 
 | State | Meaning | Set by | Leaves when |
 | --- | --- | --- | --- |
-| *(none)* | brand new, not yet seen | issue creation | triage picks it up |
+| *(none)* | brand new, not yet admitted | issue creation | `/admit` |
 | `ai-triage` | queued for automated triage | `/admit`, `/propose`, `/revise`, `/unpark` | triage finishes |
 | `pending-approval` | triaged; waiting on a human | triage | `/approve`, `/park` |
 | `needs-clarification` | triage could not proceed without an answer | triage | `/revise <answer>`, `/park`, or the blocker sweep |
