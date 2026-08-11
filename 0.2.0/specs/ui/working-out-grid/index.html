@@ -1,0 +1,2998 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The design contract and engineering handbook for Multiplying Frogs — a game Derek is building with his son Connor.">
+      
+      
+        <meta name="author" content="Derek Winters">
+      
+      
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.2.0/specs/ui/working-out-grid/">
+      
+      
+        <link rel="prev" href="../roll-and-card/">
+      
+      
+        <link rel="next" href="../answer-result/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Working-out grid - Multiplying Frogs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#working-out-grid" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Multiplying Frogs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Working-out grid
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Introduction
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Specs
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../adr/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../engineering/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Engineering
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../tools/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tools
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Multiplying Frogs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../intro/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Introduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../intro/vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../intro/how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../intro/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../product-scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product scope
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules of play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../future-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future ideas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference material
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shared-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../game-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invariants-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The invariants this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-many-columns-and-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How many columns and rows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How many columns and rows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-derek-settled-in-his-words" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Derek settled, in his words
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-core-decides-and-what-the-player-decides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Core decides, and what the player decides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mockups/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mockups
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../adr/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 Rules sacred, presentation ours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0002-structured-working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 The working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0003-network-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 The network boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0004 Core owns the save format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../engineering/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tech stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/agent-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/issue-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/ui-design-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI design process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/unity-serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity serialization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../tools/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Invariants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-invariants-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The invariants this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-many-columns-and-rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How many columns and rows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How many columns and rows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-derek-settled-in-his-words" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Derek settled, in his words
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-core-decides-and-what-the-player-decides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Core decides, and what the player decides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/working-out-grid.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="working-out-grid">Working-out grid<a class="headerlink" href="#working-out-grid" title="Link to this section">&para;</a></h1>
+<p>Where you actually do the multiplication. A grid with carry boxes, and a keypad
+to fill it in with.</p>
+<p>This screen is the one thing in the game the classroom game has no equivalent
+of, and
+<a href="../../../adr/0002-structured-working-out-grid/">ADR-0002</a> is why it exists: at
+the table, paper is ambient and the working-out <em>is</em> the exercise; on a tablet
+there is nowhere to work.</p>
+<h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
+<p><strong>Invariant:</strong> nothing in the grid is marked. Only the answer row decides
+whether the frog moves. Carry boxes and addition rows are scratch paper — they
+exist so you don't lose the 3, not to be checked.
+<strong>Invariant:</strong> a row the player grows is exactly as ungraded as every other cell
+in the grid. Growing the addition section is asking for more scratch paper, and
+scratch paper is never checked
+(<a href="../../../adr/0002-structured-working-out-grid/#two-constraints-that-keep-it-from-becoming-a-tutor">ADR-0002</a>).
+<strong>Invariant:</strong> both superscript carry strips are always on screen, on every
+card, whether or not the player uses the addition section. The two ways of
+carrying are not alternatives the game chooses between — both are drawn, and the
+player uses whichever one they were taught.
+<strong>Invariant:</strong> there is no mode and no toggle. The answer box <em>is</em> the grid's
+bottom row. A player who can do <code>68 × 5</code> in their head fills one row and
+presses <code>Check it</code>.
+<strong>Invariant:</strong> the grid is sized to the card in its <strong>columns</strong>. <code>68 × 5</code> gets
+three digit columns and <code>331 × 41</code> gets five, so an easy card still does not
+look like homework.
+<strong>Invariant:</strong> the grid's <strong>rows</strong> are not sized to the card. Every card is
+dealt the same rows, and from there the player — not the card — decides whether
+there are more.
+<strong>Invariant:</strong> the addition section never holds more than
+<code>GridAdditionRowsMax</code> rows. The player decides when it grows; the cap decides
+when it stops.
+<strong>Invariant:</strong> the game never deals a <em>problem</em> outside the three shapes the
+piles produce — <code>2×1</code>, <code>2×2</code>, <code>3×2</code> digits. <code>331 × 41</code> is still the confirmed
+widest.
+<strong>Invariant:</strong> <code>Check it</code> is disabled until at least one digit is in the answer
+row. An empty answer is not a wrong answer.
+<strong>Invariant:</strong> this dialog cannot be dismissed. The card is drawn and the turn
+is under way.</p>
+<h3 id="the-invariants-this-page-used-to-carry">The invariants this page used to carry<a class="headerlink" href="#the-invariants-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
+<p>Until this wireframe, two of the invariants above read differently. Both were
+made false by the addition section becoming growable
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>),
+and the old wording is quoted here so the change is visible. Neither sentence is
+true anywhere else on this page.</p>
+<blockquote>
+<p><strong>Invariant:</strong> the grid is sized to the card, not to the largest possible
+problem. <code>68 × 5</code> does not get <code>331 × 41</code>'s rows.</p>
+</blockquote>
+<p>This is now true of <strong>columns only</strong>, and it is no longer true of rows at all:
+<code>68 × 5</code> gets exactly <code>331 × 41</code>'s rows, because every card starts with the same
+ones. What survives is the intent — the easy card is visibly a smaller job,
+because it is narrower.</p>
+<blockquote>
+<p><strong>Invariant:</strong> the grid never has to render a shape outside the three the
+piles produce — <code>2×1</code>, <code>2×2</code>, <code>3×2</code> digits. <code>331 × 41</code> is the confirmed worst
+case.</p>
+</blockquote>
+<p>Still true of the three <strong>problem</strong> shapes; ADR-0002's bound on the problems is
+untouched, and nothing here lets the game deal a fourth shape. It is no longer
+true of the <strong>rendered row count</strong>, which the player extends. <code>331 × 41</code> is the
+widest grid but not the tallest one — the tallest is any card whose addition
+section has been grown to <code>GridAdditionRowsMax</code>, and that grid is the same
+height whichever card it came from.</p>
+<h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>header</code></td>
+<td>Whose turn, and the card being worked</td>
+</tr>
+<tr>
+<td><code>grid</code></td>
+<td>The working-out itself</td>
+</tr>
+<tr>
+<td><code>keypad</code></td>
+<td>Digits, backspace, clear</td>
+</tr>
+<tr>
+<td><code>submit</code></td>
+<td><code>Check it</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
+<p>A full-bleed <a href="../shared-components/#dialog">dialog</a> — <code>DialogMaxWidth</code> by
+<code>DialogMaxHeight</code>, which is the canvas inset by <code>SafeMargin</code> on every side.</p>
+<p>Inside it, two columns:</p>
+<ul>
+<li><code>keypad</code> and <code>submit</code> are pinned to the <strong>right</strong>, <code>DialogPadding</code> from the
+  panel edge. Fixed position and fixed size for every problem, so the digit keys
+  are in the same place on every turn of every game. A keypad that moves is a
+  keypad you have to look at.</li>
+<li><code>grid</code> is centred in the space left over. It is the part that changes size
+  with the problem, so it is the part that is allowed to move.</li>
+<li><code>header</code> runs along the top, left-aligned.</li>
+</ul>
+<p>This split is what landscape buys. In portrait the grid and the keypad have to
+share a single column, and <code>331 × 41</code> was
+<a href="../../../adr/0002-structured-working-out-grid/#consequences">the project's biggest layout unknown</a>
+because of it. Side by side, the widest card as dealt fits.</p>
+<p>It does <strong>not</strong> fit with room to spare — the phrase this paragraph used to end
+with, and the one ADR-0002 still ends with, both written before the addition
+section could grow. As dealt, the grid ends 948 px
+into a panel whose last usable pixel is 1048 px — about 100 px of slack against
+112 px per extra row, so at full-size rows the section stops fitting on the
+<em>third</em> of its six allowed. What gives is
+<a href="#open-questions">open question 3</a>, settled: the addition rows take
+<code>GridAdditionRowHeight</code> once the section grows, and the grid fits at every
+count up to the cap. The numbers are worked through under <a href="#mockup">Mockup</a>,
+and the third mockup is the picture of them.</p>
+<p><strong>"Centred in the space left over" is the rule, in both directions.</strong>
+Horizontally that space runs from <code>DialogPadding</code> to the keypad column's left
+edge; vertically from the bottom of the header band (<code>GridHeaderHeight</code>) to the
+panel's last usable pixel (<code>DialogMaxHeight</code> less <code>DialogPadding</code>) — 908 px.
+The grid moves within that space as it grows and shrinks, which is what lets a
+six-row section sit higher up the panel than a two-row one. The two committed
+drawings hand-place the as-dealt grid at <code>top: 216</code>, about 12 px above where
+centring puts it, and 2 px apart from each other horizontally; that is what
+hand placement looks like, and the rule — not either drawing's origin — is what
+the screen is built to.</p>
+<h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Digit cell, square</td>
+<td><code>GridCellSize</code></td>
+<td>104 px</td>
+</tr>
+<tr>
+<td>Gap between cells and between rows</td>
+<td><code>GridCellGap</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Digit cell outline</td>
+<td><code>GridCellBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Digit cell corner radius</td>
+<td><code>GridCellRadius</code></td>
+<td>10 px</td>
+</tr>
+<tr>
+<td>Carry strip height</td>
+<td><code>GridCarryRowHeight</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Carry box inside the strip</td>
+<td><code>GridCarryBoxSize</code></td>
+<td>56 × 52 px</td>
+</tr>
+<tr>
+<td>Carry box outline</td>
+<td><code>GridCarryBoxBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Carry box corner radius</td>
+<td><code>GridCarryBoxRadius</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Rule line thickness</td>
+<td><code>GridRuleThickness</code></td>
+<td>6 px</td>
+</tr>
+<tr>
+<td>Addition row height, once the section is grown</td>
+<td><code>GridAdditionRowHeight</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Answer row height</td>
+<td><code>GridAnswerRowHeight</code></td>
+<td>128 px</td>
+</tr>
+<tr>
+<td>Answer cell border</td>
+<td><code>GridAnswerBorderWidth</code></td>
+<td>6 px</td>
+</tr>
+<tr>
+<td>Digit size in a cell</td>
+<td><code>GridDigitSize</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Digit size in a 56 px box — a grown addition row, a carry box</td>
+<td><code>GridSmallDigitSize</code></td>
+<td>28 px</td>
+</tr>
+<tr>
+<td><code>=</code> in the operator column</td>
+<td><code>GridEqualsSize</code></td>
+<td>28 px</td>
+</tr>
+<tr>
+<td>Header band, panel top down to the bottom of the chip</td>
+<td><code>GridHeaderHeight</code></td>
+<td>140 px</td>
+</tr>
+<tr>
+<td>Header row, down from the panel's top edge</td>
+<td><code>GridHeaderTop</code></td>
+<td>44 px</td>
+</tr>
+<tr>
+<td>Gap between the header's three items</td>
+<td><code>GridHeaderGap</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td><code>Work it out</code></td>
+<td><code>GridPromptSize</code></td>
+<td>44 px</td>
+</tr>
+<tr>
+<td>Card readout pill height</td>
+<td><code>GridCardReadoutHeight</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td>Card readout pill padding, each side</td>
+<td><code>GridCardReadoutPaddingX</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Card readout pill corner radius</td>
+<td><code>GridCardReadoutRadius</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td>Card readout pill outline</td>
+<td><code>GridCardReadoutBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Card readout label</td>
+<td><code>GridCardReadoutLabelSize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td>Addition rows a card is dealt</td>
+<td><code>GridAdditionRowsAtStart</code></td>
+<td>2 rows</td>
+</tr>
+<tr>
+<td>Most addition rows the section can hold</td>
+<td><code>GridAdditionRowsMax</code></td>
+<td>6 rows</td>
+</tr>
+<tr>
+<td>Keypad, down from the panel's top edge</td>
+<td><code>KeypadTop</code></td>
+<td>216 px</td>
+</tr>
+<tr>
+<td>Keypad key, square</td>
+<td><code>KeypadKeySize</code></td>
+<td>140 px</td>
+</tr>
+<tr>
+<td>Gap between keys</td>
+<td><code>KeypadKeyGap</code></td>
+<td>16 px</td>
+</tr>
+<tr>
+<td>Key corner radius</td>
+<td><code>KeypadKeyRadius</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td>Key outline</td>
+<td><code>KeypadKeyBorderWidth</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Digit key label</td>
+<td><code>KeypadKeyLabelSize</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Backspace glyph</td>
+<td><code>KeypadBackspaceLabelSize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td><code>clear</code> label</td>
+<td><code>KeypadClearLabelSize</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Keypad width (3 keys + 2 gaps)</td>
+<td><code>KeypadWidth</code></td>
+<td>452 px</td>
+</tr>
+<tr>
+<td>Gap between keypad and <code>Check it</code></td>
+<td><code>KeypadSubmitGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td><code>Check it</code> height</td>
+<td><code>CheckButtonHeight</code></td>
+<td>128 px</td>
+</tr>
+</tbody>
+</table>
+<p><code>GridAdditionRowsAtStart</code> and <code>GridAdditionRowsMax</code> are counts, not pixels. They
+are in this table anyway, because the number of rows the addition section starts
+and stops at is exactly the kind of number that otherwise ends up as an unnamed
+<code>2</code> in <code>Core</code> and an unnamed <code>6</code> in the Unity shell, and then only one of them
+gets changed. They are the two rows on this table <code>Core</code> owns
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>),
+and the shell references them rather than keeping a copy.</p>
+<p><strong>Every value above is a number a drawing already fixed</strong>, except two:
+<code>GridAdditionRowHeight</code>, which is Derek's answer to
+<a href="#open-questions">open question 3</a>, and <code>GridSmallDigitSize</code>, which is what a
+digit has to shrink to in order to sit inside a 56 px-tall box. No committed
+drawing shows a digit in one — no mockup fills a carry box, and the grown
+drawing's rows are empty — so it is the one number here read off a proportion
+instead of a picture: the same share of its box's height that <code>GridDigitSize</code>
+(56 px) is of <code>GridCellSize</code> (104 px), which lands on the 28 px the drawings
+already use for their smallest glyph.</p>
+<p><strong>A grown row has a size constant of its own</strong>, and did not until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>.
+Once the section holds more rows than a card is dealt, every row in it —
+including the two that were dealt — is <code>GridAdditionRowHeight</code> tall rather than
+<code>GridCellSize</code>, with <code>GridSmallDigitSize</code> digits inside. Nothing else in the
+grid changes size, ever: the multiplicand and multiplier rows, both rule lines,
+both carry strips and the answer row are the same height at two rows as at six.
+Growing the section therefore costs <code>GridAdditionRowHeight</code> + <code>GridCellGap</code> =
+64 px per row instead of the 112 px it would cost at full size, and the first
+grown row <em>shrinks</em> the grid rather than stretching it — see
+<a href="#mockup">Mockup</a> for the whole sum.</p>
+<h3 id="how-many-columns-and-rows">How many columns and rows<a class="headerlink" href="#how-many-columns-and-rows" title="Link to this section">&para;</a></h3>
+<p>The card decides the columns. The card and the player between them decide the
+rows.</p>
+<ul>
+<li><strong>Columns</strong> = the number of digits in the largest possible product for that
+  card's shape, plus one operator column on the left. <code>331 × 41</code> needs five
+  digit columns (<code>13571</code>); <code>68 × 5</code> needs three (<code>340</code>).</li>
+<li>
+<p><strong>Rows</strong> are the same for every card, top to bottom:</p>
+<div class="highlight"><pre><span></span><code>carry strip · multiplicand · multiplier · rule ·
+addition rows · rule · carry strip · answer
+</code></pre></div>
+<p>The addition rows are the only part of that list whose count is not fixed,
+and what varies it is not the card: every card is dealt
+<code>GridAdditionRowsAtStart</code> of them, and the player can grow the section from
+there to <code>GridAdditionRowsMax</code>.</p>
+<p>The <code>rule</code> entries in that list are drawn separators, not rows: a straight
+line at <code>GridRuleThickness</code>, with no cells of its own, between two row
+kinds the shell already knows are adjacent. <code>Core</code> does not report them —
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+reports carry strip, multiplicand, multiplier, addition rows, carry strip,
+answer row, and nothing named <code>Rule</code>.</p>
+</li>
+</ul>
+<p><strong>"The addition section"</strong> is this page's name for those rows — the block
+between the first rule line and the second, which Derek calls the <code>"+ "</code>
+section and which this page used to call the <em>partial-product rows</em>. They are
+the same rows.
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+is written against the older name and means these. The section is renamed
+because a one-digit card now gets it too, and on <code>68 × 5</code> its rows are not
+partial products of anything — they are somewhere to add up.</p>
+<h4 id="what-derek-settled-in-his-words">What Derek settled, in his words<a class="headerlink" href="#what-derek-settled-in-his-words" title="Link to this section">&para;</a></h4>
+<blockquote>
+<p>Let's support both. […] The top superscript boxes can always exist. But if
+someone instead wants to add full numbers below the numbers, they can. If they
+enter numbers below the answer box, another row appears underneath it. Each
+time they add a row below, it would keep expanding. […] This is the <code>"+ "</code>
+section below the problem and above the answer.</p>
+<p>I meant below the problem above the answer</p>
+<p>Single digit</p>
+<p>Cap the rows of addition to 6, start with 2</p>
+<p>Single digit gets 2 rows too</p>
+<p>Add to bottom of addition rows, above answer row</p>
+</blockquote>
+<p>Read together: the section is the one between the problem and the answer; a
+<strong>single digit</strong> typed into it is what adds the next row; the new row is
+appended to the <strong>bottom of the section</strong>, which stays above the answer row;
+every card starts with <strong>2</strong> rows; and the section stops at <strong>6</strong>.</p>
+<h4 id="what-core-decides-and-what-the-player-decides">What <code>Core</code> decides, and what the player decides<a class="headerlink" href="#what-core-decides-and-what-the-player-decides" title="Link to this section">&para;</a></h4>
+<p>The split matters because it is the thing
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>
+models and <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>
+draws, and it is not the split either issue was written against.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Derived from the card</th>
+<th>Player state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Column count</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Which cells are printed (the multiplicand and multiplier digits)</td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Every row except the addition rows</td>
+<td>✓ — the same for every card</td>
+<td></td>
+</tr>
+<tr>
+<td>How many addition rows exist</td>
+<td>starts at <code>GridAdditionRowsAtStart</code></td>
+<td>grows from there, to <code>GridAdditionRowsMax</code></td>
+</tr>
+<tr>
+<td>Cell contents</td>
+<td></td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<p>So the grid's shape is <strong>no longer a pure function of the card</strong>. It is a
+function of the card and of how many rows the player has grown, and the second
+of those changes during a turn. It is still bounded at both ends, and by the
+same two numbers for every card the piles can deal:
+<code>GridAdditionRowsAtStart</code> rows when the card is dealt, <code>GridAdditionRowsMax</code> at
+the most. There is no card that can be dealt more, and no player who can grow
+past it.</p>
+<h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong>Multiplicand and multiplier rows</strong> — printed, not editable. These two rows
+  <em>are</em> the card.</li>
+<li><strong>Carry strip</strong> — dashed boxes, one per column. Two strips, on every card: one
+  above the multiplication and one above the final addition, which is the "twice
+  over" ADR-0002 describes. Optional to use, never checked. <code>68 × 5</code> used to
+  have only the first, because it had nothing to add up; it has both now that it
+  has an addition section, subject to
+  <a href="#open-questions">open question 4</a>. Where the second strip goes once the
+  section grows is <a href="#open-questions">open question 2</a>.</li>
+<li><strong>Addition rows</strong> — ordinary empty cells, including the units column of every
+  row below the first. <strong>The placeholder zero is not pre-printed.</strong> Some classrooms teach
+  writing the <code>0</code>, some teach shifting left; leaving the cell ordinary lets both
+  work, and pre-printing it would pick one — which is the thing ADR-0002 says
+  not to do.</li>
+<li><strong>A grown row is indistinguishable from a dealt one.</strong> Same cells, same
+    size, same border, no tint, no badge, nothing that says "you added this".
+    The section is scratch paper and scratch paper does not annotate itself.
+    The smaller <code>GridAdditionRowHeight</code> a grown section takes applies to <em>every</em>
+    row in it, the two dealt ones included — a section where the first two rows
+    were taller than the four below them would be exactly the "you added this"
+    marking this bullet rules out.</li>
+<li>The <code>+</code> glyph sits in the operator column of the <strong>bottom row of the
+    section</strong>, wherever the bottom currently is, which is where the committed
+    two-row drawing already puts it. Growing the section moves the glyph down
+    with it rather than stamping a <code>+</code> on every row.</li>
+<li><strong>Answer row</strong> — taller, heavier border, tinted. The only row that counts.</li>
+<li><strong>Keypad</strong> — <code>1</code>–<code>9</code>, <code>0</code>, backspace, <code>clear</code>. No decimal point, no minus:
+  every answer in this game is a positive whole number.</li>
+<li><strong><code>Check it</code></strong> — primary <a href="../shared-components/#button">button</a>, full keypad
+  width. Goes to <a href="../answer-result/">answer result</a>.</li>
+</ul>
+<h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
+<ul>
+<li>Entering from <a href="../roll-and-card/">roll and card</a>. The first empty answer cell
+  is the focused one; typing fills the answer row <strong>right to left</strong>, which is
+  the direction the digits are worked out in.</li>
+<li>Tapping any cell moves the caret there, so the grid can be filled in any
+  order — a player who fills the addition rows first, then the answer, is not
+  fighting the caret.</li>
+<li><strong>Growing the addition section.</strong> Typing a single digit into the section's
+  current bottom row appends another row beneath it, still above the answer row.
+  That repeats each time the new bottom row is written in, until the section
+  holds <code>GridAdditionRowsMax</code> rows, after which nothing more is appended. A
+  single digit is enough; the row does not have to be finished first. The whole
+  section takes <code>GridAdditionRowHeight</code> from the moment it holds more rows than
+  the card dealt it, and keeps it until it is back to that count.</li>
+<li>Nothing prompts the player to grow the section and nothing rewards it. A
+  player who carries with the superscript boxes never sees a third addition row,
+  and a player who has never been shown the superscript boxes never has to use
+  them.</li>
+<li><strong>Shrinking it again.</strong> Backspacing the last digit out of a grown row removes
+  the row (<a href="#open-questions">open question 5</a>, settled). Only the section's
+  <em>bottom</em> row can go, and only a grown one: <code>GridAdditionRowsAtStart</code> is the
+  floor, because no card is ever dealt fewer, and emptying a row further up the
+  section leaves an empty row where it is. <code>clear</code> never removes a row — it is
+  described as emptying a block, not as taking one away, and the settled answer
+  is about backspace.</li>
+<li>No timer, ever. <code>331 × 41</code> on paper takes as long as it takes.</li>
+<li>There is no <code>undo</code>, only backspace and <code>clear</code> — and <code>clear</code> empties only the
+  cell block you are in, not the whole grid. <strong>A block is a row</strong>: <code>clear</code>
+  empties every cell of the row the caret is in and touches nothing above or
+  below it. That is the narrowest reading of the sentence above, chosen in
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>
+  rather than invented — the wider readings (the section, the grid) are the ones
+  the sentence rules out.</li>
+<li>Backspace takes the digit in the caret's own cell, or — if that cell is
+  already empty — the digit most recently typed anywhere in the same block, and
+  moves the caret to wherever it just took one from. It never reaches outside
+  the block.</li>
+<li>After a digit lands, the caret steps one cell to the left, in whatever row it
+  is in, and stops at the leftmost digit column. That is the answer row's
+  right-to-left fill applied everywhere, because the addition rows and the carry
+  strips are worked out in the same direction.</li>
+<li>Hardware back does nothing.</li>
+</ul>
+<h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
+<p>Three, all at 1920 × 1200.</p>
+<ul>
+<li><strong>The widest card, as dealt:</strong> <a href="../mockups/working-out-grid-331x41.html"><code>mockups/working-out-grid-331x41.html</code></a></li>
+<li><strong>The easy pile, as dealt:</strong> <a href="../mockups/working-out-grid-68x5.html"><code>mockups/working-out-grid-68x5.html</code></a></li>
+<li><strong>The widest card, grown to the cap:</strong> <a href="../mockups/working-out-grid-331x41-grown.html"><code>mockups/working-out-grid-331x41-grown.html</code></a></li>
+</ul>
+<p>The first two are the agreed pictures of the screen a card deals, and they are a
+pair for the reason they always were: "the grid shrinks to fit the card" is a
+claim best checked by looking at the biggest and the smallest next to each
+other. The easy one is now the same height as the hard one and narrower, which
+is what that claim has been reduced to.</p>
+<p><strong>The third is the answer to <a href="#open-questions">open question 3</a>, and it used to
+be the question.</strong> It is the same screen as the first with the addition section
+at <code>GridAdditionRowsMax</code> instead of <code>GridAdditionRowsAtStart</code>. Drawn at
+full-size addition rows — which is how it was first committed, deliberately
+overflowing, as the input to that question — it did not fit. Drawn at
+<code>GridAdditionRowHeight</code>, which is what Derek settled, it does.</p>
+<p>The space: the dialog is <code>DialogMaxHeight</code> (1104 px) tall and <code>DialogPadding</code>
+(56 px) of that is not usable, so the last usable pixel is 1048 px into the
+panel, and the header band takes the first <code>GridHeaderHeight</code> (140 px). That
+leaves <strong>908 px</strong>.</p>
+<p>Everything that is the same height at every count — two carry strips (56 each),
+the multiplicand and multiplier rows (104 each), two rule lines (6 each) and the
+answer row (128) — comes to <strong>460 px</strong>. The gaps are <code>GridCellGap</code> (8 px) between
+every pair of the 7 + <em>n</em> things stacked, so 8 × (6 + <em>n</em>). The addition rows are
+whatever <em>n</em> rows at whatever height the section is currently drawn at:</p>
+<table>
+<thead>
+<tr>
+<th>Addition rows</th>
+<th>Row height</th>
+<th>Grid height</th>
+<th>Against the 908 px available</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 — as dealt</td>
+<td><code>GridCellSize</code>, 104 px</td>
+<td>460 + 208 + 64 = <strong>732 px</strong></td>
+<td>fits, 176 px spare</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>GridAdditionRowHeight</code>, 56 px</td>
+<td>460 + 168 + 72 = <strong>700 px</strong></td>
+<td>fits, 208 px spare</td>
+</tr>
+<tr>
+<td>4</td>
+<td>56 px</td>
+<td>460 + 224 + 80 = <strong>764 px</strong></td>
+<td>fits, 144 px spare</td>
+</tr>
+<tr>
+<td>5</td>
+<td>56 px</td>
+<td>460 + 280 + 88 = <strong>828 px</strong></td>
+<td>fits, 80 px spare</td>
+</tr>
+<tr>
+<td>6 — the cap</td>
+<td>56 px</td>
+<td>460 + 336 + 96 = <strong>892 px</strong></td>
+<td>fits, <strong>16 px spare</strong></td>
+</tr>
+<tr>
+<td><em>6, at full-size rows</em></td>
+<td><em>104 px</em></td>
+<td><em>460 + 624 + 96 = 1180 px</em></td>
+<td><em>272 px too tall — the old third mockup</em></td>
+</tr>
+</tbody>
+</table>
+<p>Two things worth saying out loud about that column of sums. <strong>The margin at the
+cap is 16 px</strong>, so this fits and does not fit comfortably: anything that grows
+the fixed 460 px — a taller answer row, a third carry strip, a heavier rule —
+pushes the six-row grid off the bottom again, and the sum above is where to
+check that. And <strong>the grid gets shorter before it gets taller</strong>: the third row
+takes the whole section down to 56 px, so growing it the first time shrinks the
+grid from 732 px to 700 px, and it only passes its as-dealt height at the fifth
+row. That is the cost of one shrunk height for the whole section rather than a
+different height at every count, and it is a visible jump the first time a
+player grows a row.</p>
+<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
+<p>Questions 2 to 5 arrived with the growable addition section
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>).
+Question 6 is older. Questions 1, 3 and 5 are settled; 2, 4 and 6 are not
+answered by anything Derek has said yet.</p>
+<ul>
+<li>
+<p><strong>1. Which carry convention does Connor's class use? Settled: shared
+  strip.</strong> The mockups put one carry strip above the multiplication and one
+  above the addition, each reused across the rows it covers. The alternative
+  was a strip attached to each addition row, so a carry is never reused across
+  two passes.</p>
+<p>This was <strong>the one open question on this page that changed the shape of
+the grid in <code>Core</code></strong>, which is why it is worth being exact about what
+depended on it. Depending on it: the number of carry strips a grid has,
+whether that number tracks the addition row count (and therefore grows
+during a turn), and the per-row-versus-shared structure the row list above
+states. Not depending on it: the column count, the addition section's
+starting count and cap, the growth trigger, the fact that nothing is
+graded, and the overrun measured in the third mockup.</p>
+<p>Derek's call on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/255">#255</a>:
+"Shared strip — matches today's mockups." <code>Core</code> and the grid screen are
+built to what the mockups already drew — two strips at most, confirmed
+rather than redrawn. It was originally asked in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/227">#227</a>,
+which was carrying two questions under one title and was closed once Derek
+answered the other one — superscript carries versus written-out addition
+rows, the change this page has already absorbed. The layout question
+itself is what #255 answered.</p>
+</li>
+<li>
+<p><strong>2. What happens to the second carry strip as the section grows?</strong> Today it
+  is pinned directly above the answer row. Three readings, none picked: it stays
+  pinned above the answer; it follows the bottom of the growing section; or
+  every addition row gets its own — which is question 1 answered the other way,
+  arriving through the back door. The third mockup draws it pinned above the
+  answer, because that is where the committed drawing has it.</p>
+</li>
+<li>
+<p><strong>3. What happens when the section outgrows the dialog? Settled: smaller
+  cells for the addition rows only.</strong> At full-size rows the section stopped
+  fitting on its <strong>third</strong>, and at the cap the answer row was off the bottom of
+  the tablet entirely. The options were scrolling the <code>grid</code> region, shrinking
+  <code>GridCellSize</code> once the section passed some count, shrinking it for the whole
+  grid up front, giving the addition section its own smaller row height, or
+  lowering <code>GridAdditionRowsMax</code> to the 2 that fitted.</p>
+<p>Derek's call on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>:
+"Smaller cells for addition rows only." The section gets
+<code>GridAdditionRowHeight</code> (56 px) the moment it holds more rows than the card
+dealt it; the multiplicand and multiplier rows, both rule lines, both carry
+strips and the answer row stay exactly the size they are today, at every
+count. The problem stays full-size and legible, and the scratch paper is
+what shrinks — which is the right way round, since the scratch paper is the
+part nobody checks.</p>
+<p>The sum is in <a href="#mockup">Mockup</a> and it was re-run rather than assumed: six
+grown rows make an <strong>892 px</strong> grid in <strong>908 px</strong> of space, so it fits with
+16 px to spare, and the third mockup now draws that instead of the overflow.
+Two consequences worth knowing: the margin at the cap is thin enough that
+any future growth in the fixed rows breaks it again, and the grid gets
+<em>shorter</em> when the third row appears before it gets taller again at the
+fifth.</p>
+</li>
+<li>
+<p><strong>4. Does the one-digit card's addition section get the second rule line and
+  the second carry strip?</strong> <code>68 × 5</code> now gets the addition rows. It is not
+  settled whether it also gets the structure that wraps them on a two-digit
+  card, or whether the rows sit under the first rule line on their own. The
+  redrawn <code>68 × 5</code> mockup uses the two-digit structure because that is the only
+  one this project has drawn — a default in a picture, not a decision.</p>
+</li>
+<li>
+<p><strong>5. Can a grown row be taken away again? Settled: yes.</strong> Derek, on
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/204">#204</a>:
+  backspacing the last digit out of a grown row removes the row. This is
+  Core-level state, not just drawing — the grid model needs a transition for
+  the addition section shrinking by one row, not only growing by one.
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>
+  reports the grid for a given <code>(card, addition row count)</code> snapshot, so a
+  shrink is nothing more than the next snapshot's count being one lower — it
+  does not need an operation of its own. <code>GridAdditionRowsAtStart</code> is the
+  floor: no snapshot may ask for fewer, because no card is ever dealt fewer.</p>
+<p>The interaction policy this left open — whether removing a row the player
+isn't currently at is reachable at all — was owned by whichever issue built
+turn interaction, which is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/223">#223</a>,
+and it answered <strong>no</strong>. Only the section's bottom row is ever removed, and
+only by backspacing its last digit out; emptying a row further up leaves an
+empty row exactly where it is, and <code>clear</code> never removes a row at all. See
+<a href="#behaviour">Behaviour</a>.</p>
+</li>
+<li>
+<p><strong>6. Should the keypad have an <code>=</code>?</strong> No, currently: <code>Check it</code> is the commit,
+  and two ways to submit is one too many.</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by Derek and Connor.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs" target="_blank" rel="noopener" title="This project on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

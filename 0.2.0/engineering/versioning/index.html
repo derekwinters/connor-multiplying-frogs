@@ -1,0 +1,2844 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The design contract and engineering handbook for Multiplying Frogs — a game Derek is building with his son Connor.">
+      
+      
+        <meta name="author" content="Derek Winters">
+      
+      
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.2.0/engineering/versioning/">
+      
+      
+        <link rel="prev" href="../testing/">
+      
+      
+        <link rel="next" href="../ci-cd/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Versioning - Multiplying Frogs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#versioning" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Multiplying Frogs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Versioning
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Introduction
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../specs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Specs
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adr/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Engineering
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tools/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tools
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Multiplying Frogs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../intro/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Introduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../specs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/product-scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product scope
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules of play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/future-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future ideas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference material
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../specs/ui/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/shared-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/mockups/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mockups
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../adr/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 Rules sacred, presentation ours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0002-structured-working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 The working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0003-network-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 The network boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0004 Core owns the save format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tech stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-is-the-source-of-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /VERSION is the source of truth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="/VERSION is the source of truth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-not-projectsettingsprojectsettingsasset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not ProjectSettings/ProjectSettings.asset?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-x-release-please-version-marker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The x-release-please-version marker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#every-consumer-strips-from-onward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Every consumer strips from # onward
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conventional-commits-drive-the-bump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conventional Commits drive the bump
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#milestone-versions-and-the-shipped-version-are-different-things" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone versions and the shipped version are different things
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-release-please-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The release-please setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The release-please setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-lives-at-non-default-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config lives at non-default paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-config-carries-no-component-and-must-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The config carries no component — and must not
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-guard-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The guard test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-release-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The release flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-the-release-flow-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use the release-flow skill
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-issue-one-pr-one-squash-commit-one-changelog-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One issue → one PR → one squash commit → one changelog entry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-build-calls-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a build calls itself
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What a build calls itself">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-version-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The version name
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-app-reads-its-own-version-back-through-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The app reads its own version back, through Core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#versioncode-is-the-commit-count-not-the-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        versionCode is the commit count, not the version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#it-is-never-hand-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        It is never hand-set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../issue-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-design-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI design process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unity-serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity serialization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../tools/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-is-the-source-of-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /VERSION is the source of truth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="/VERSION is the source of truth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-not-projectsettingsprojectsettingsasset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not ProjectSettings/ProjectSettings.asset?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-x-release-please-version-marker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The x-release-please-version marker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#every-consumer-strips-from-onward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Every consumer strips from # onward
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conventional-commits-drive-the-bump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conventional Commits drive the bump
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#milestone-versions-and-the-shipped-version-are-different-things" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone versions and the shipped version are different things
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-release-please-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The release-please setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The release-please setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-lives-at-non-default-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config lives at non-default paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-config-carries-no-component-and-must-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The config carries no component — and must not
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-guard-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The guard test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-release-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The release flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-the-release-flow-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use the release-flow skill
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-issue-one-pr-one-squash-commit-one-changelog-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One issue → one PR → one squash commit → one changelog entry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-build-calls-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a build calls itself
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What a build calls itself">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-version-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The version name
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-app-reads-its-own-version-back-through-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The app reads its own version back, through Core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#versioncode-is-the-commit-count-not-the-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        versionCode is the commit count, not the version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#it-is-never-hand-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        It is never hand-set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/engineering/versioning.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Link to this section">&para;</a></h1>
+<p>How the app gets its version number: one file, owned by one tool, moved by the
+commit messages you were writing anyway.</p>
+<h2 id="version-is-the-source-of-truth"><code>/VERSION</code> is the source of truth<a class="headerlink" href="#version-is-the-source-of-truth" title="Link to this section">&para;</a></h2>
+<p>A single file at the repo root holds the version the app reports. It is one
+line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>0.0.1 # x-release-please-version
+</code></pre></div>
+<p>Everything that needs a version reads it from here. Unity's
+<code>PlayerSettings.bundleVersion</code> is set from it at build time, the Android
+<code>versionCode</code> is derived from it, the release tag matches it, and anything at
+runtime that wants to display it reads a value that came from it.</p>
+<p><strong>Never hand-edit this file.</strong> release-please owns it. A hand edit is a version
+that disagrees with the changelog, the tag, and the git history, and the
+disagreement surfaces at the worst moment — when you are trying to work out
+which build a bug was in.</p>
+<h3 id="why-not-projectsettingsprojectsettingsasset">Why not <code>ProjectSettings/ProjectSettings.asset</code>?<a class="headerlink" href="#why-not-projectsettingsprojectsettingsasset" title="Link to this section">&para;</a></h3>
+<p>Unity already stores a <code>bundleVersion</code> in <code>ProjectSettings.asset</code>, so keeping the
+version somewhere else looks like duplication. It isn't, for four reasons:</p>
+<ul>
+<li><strong><code>ProjectSettings.asset</code> is a 200-line generated YAML blob.</strong> A tool that
+  edits one field in it has to parse Unity's serialization format and write it
+  back byte-compatibly. release-please can replace a line in a text file; it
+  cannot safely rewrite a Unity asset.</li>
+<li><strong>Every CI job would need Unity to read the version.</strong> Working out the tag for
+  a release, or the filename for an artifact, would mean booting a licensed
+  editor. Reading <code>/VERSION</code> is <code>cat</code>.</li>
+<li><strong>The editor rewrites that file constantly.</strong> Opening the project touches it.
+  A version living there produces conflicts on every merge and diffs that mix
+  "we shipped 0.2.0" with "someone's editor reordered a list".</li>
+<li><strong>A generated file is a bad home for a decision.</strong> <code>/VERSION</code> exists to be
+  read by humans and by five different tools; <code>ProjectSettings.asset</code> exists to
+  be read by Unity.</li>
+</ul>
+<p>The value is <em>injected into</em> <code>PlayerSettings</code> at build time from <code>/VERSION</code>, so
+there is still exactly one source and Unity still gets what it needs. See
+<a href="../ci-cd/">CI/CD</a>.</p>
+<h3 id="the-x-release-please-version-marker">The <code>x-release-please-version</code> marker<a class="headerlink" href="#the-x-release-please-version-marker" title="Link to this section">&para;</a></h3>
+<p>release-please's generic updater does not guess where the version is in a file.
+It rewrites <strong>only lines containing the <code>x-release-please-version</code> annotation</strong>,
+which is why the marker shares the line with the version rather than sitting
+above it.</p>
+<p><strong>Without the marker, nothing fails loudly.</strong> release-please runs, opens its
+release PR, writes the changelog, tags the release — and leaves <code>/VERSION</code> at
+its old value. You get a <code>v0.2.0</code> tag on a build that reports <code>0.1.0</code>, and the
+first sign of it is someone asking why the version on the title screen never
+changes. That is why the marker is a build-checklist item and why
+<a href="#the-guard-test">a Core guard test</a> asserts the file and the manifest agree.</p>
+<h3 id="every-consumer-strips-from-onward">Every consumer strips from <code>#</code> onward<a class="headerlink" href="#every-consumer-strips-from-onward" title="Link to this section">&para;</a></h3>
+<p>The marker lives on the version's own line, so <strong>the file's contents are not the
+version</strong> — anything reading <code>/VERSION</code> has to cut the comment off first, then
+trim.</p>
+<p>Do not reimplement that per caller. <code>Frogs.Core.AppVersion.ReadFrom(contents)</code>
+does it once, and is covered by the fast suite:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AppVersion</span><span class="p">.</span><span class="n">ReadFrom</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="s">&quot;VERSION&quot;</span><span class="p">));</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">version</span><span class="p">.</span><span class="n">Major</span><span class="p">;</span><span class="w">      </span><span class="c1">// 0</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">version</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span><span class="w"> </span><span class="c1">// &quot;0.0.1&quot;</span>
+</code></pre></div>
+<p>It throws <code>FormatException</code> on a file with only a marker and no version, and on
+anything that isn't three non-negative numbers — a malformed <code>/VERSION</code> has to
+fail at the point of reading rather than silently become <code>0.0.0</code> in a shipped
+APK.</p>
+<p>For shell consumers, the equivalent is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>cut<span class="w"> </span>-d<span class="s1">&#39;#&#39;</span><span class="w"> </span>-f1<span class="w"> </span>VERSION<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;[:space:]&#39;</span><span class="k">)</span>
+</code></pre></div>
+<h2 id="conventional-commits-drive-the-bump">Conventional Commits drive the bump<a class="headerlink" href="#conventional-commits-drive-the-bump" title="Link to this section">&para;</a></h2>
+<p>The version moves because of what the commits say. Nobody decides it.</p>
+<table>
+<thead>
+<tr>
+<th>Commit prefix</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fix:</code></td>
+<td>patch — <code>0.1.0</code> → <code>0.1.1</code></td>
+</tr>
+<tr>
+<td><code>feat:</code></td>
+<td>minor — <code>0.1.0</code> → <code>0.2.0</code></td>
+</tr>
+<tr>
+<td><code>feat!:</code> or <code>BREAKING CHANGE:</code></td>
+<td>major — <code>0.1.0</code> → <strong><code>1.0.0</code></strong></td>
+</tr>
+<tr>
+<td><code>docs:</code> <code>chore:</code> <code>ci:</code> <code>test:</code> <code>refactor:</code> <code>build:</code></td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Plain semver, with no pre-1.0 special-casing.</strong> Both of release-please's
+pre-major flags are off:</p>
+<ul>
+<li><strong><code>bump-minor-pre-major: false</code></strong> — a <code>feat:</code> bumps the minor version even
+  before 1.0. The alternative folds features into patch bumps, which makes the
+  version number stop distinguishing "we fixed something" from "there is a new
+  thing in the game" during exactly the period when new things are all that
+  happens.</li>
+<li><strong><code>bump-patch-for-minor-pre-major: false</code></strong> — same reason, from the other
+  direction.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title"><code>feat!:</code> pre-1.0 goes straight to 1.0.0</p>
+<p>With <code>bump-minor-pre-major</code> off, a breaking-change marker takes the version
+to <code>1.0.0</code> — not <code>0.2.0</code>. There is no undo: the tag and the release are
+created by the same merge.</p>
+<p>So before writing <code>!</code> or a <code>BREAKING CHANGE:</code> footer on a pre-1.0 project,
+be sure you mean it. Almost nothing in a game nobody has installed yet is
+genuinely a breaking change; there is no API and no save format anyone
+depends on. If in doubt, it's a <code>feat:</code>.</p>
+</div>
+<p>This is why the commit prefix is a rule and not a style preference: a <code>feat:</code>
+that should have been a <code>fix:</code> ships a version number that lies about what
+changed, and a stray <code>!</code> ships 1.0.</p>
+<h2 id="milestone-versions-and-the-shipped-version-are-different-things">Milestone versions and the shipped version are different things<a class="headerlink" href="#milestone-versions-and-the-shipped-version-are-different-things" title="Link to this section">&para;</a></h2>
+<p>They look alike and they are not connected.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Milestone <code>v0.1</code></th>
+<th><code>/VERSION</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it is</td>
+<td>a plan</td>
+<td>a fact</td>
+</tr>
+<tr>
+<td>Set by</td>
+<td>a human, when planning</td>
+<td>release-please, from commits</td>
+</tr>
+<tr>
+<td>Changes when</td>
+<td>scope changes</td>
+<td>a release goes out</td>
+</tr>
+<tr>
+<td>Read by</td>
+<td>triage, the dashboard</td>
+<td>the build, the tag, the app</td>
+</tr>
+</tbody>
+</table>
+<p>A milestone titled <code>v0.1</code> says "this is the batch of work we are calling 0.1".
+The shipped <code>/VERSION</code> may reach <code>0.1.0</code> before that milestone closes, or long
+after, or never — if the milestone's work all lands as <code>fix:</code> commits, the
+version could be at <code>0.0.9</code> when <code>v0.1</code> closes. <strong>That is fine.</strong> Nothing is
+broken and nothing needs reconciling.</p>
+<p>Do not add tooling to keep them in step, and do not "correct" one to match the
+other. See <a href="../../intro/conventions/">Conventions</a> for the milestone model.</p>
+<h2 id="the-release-please-setup">The release-please setup<a class="headerlink" href="#the-release-please-setup" title="Link to this section">&para;</a></h2>
+<h3 id="config-lives-at-non-default-paths">Config lives at non-default paths<a class="headerlink" href="#config-lives-at-non-default-paths" title="Link to this section">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>.github/release-please/config.json
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>.github/release-please/manifest.json
+</code></pre></div>
+<p>Not the repo root. The root of a Unity project is already crowded with
+directories Unity owns and files a human is expected to notice — <code>/VERSION</code>
+earns its place there, two pieces of tool config do not. Grouping them in one
+directory also means the whole release configuration is one thing to find. The
+workflow passes both paths explicitly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">config-file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.github/release-please/config.json</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">manifest-file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.github/release-please/manifest.json</span>
+</code></pre></div>
+<h3 id="config-summary">Config summary<a class="headerlink" href="#config-summary" title="Link to this section">&para;</a></h3>
+<ul>
+<li><strong><code>release-type: simple</code></strong> — this is not an npm package or a Go module. There
+  is no manifest with a version field for release-please to understand; there is
+  a text file and a changelog. <code>simple</code> does exactly that and nothing else.</li>
+<li><strong><code>extra-files: [{ "type": "generic", "path": "VERSION" }]</code></strong> — the entry that
+  makes release-please rewrite <code>/VERSION</code> via the generic updater and its
+  marker. This is the line that connects the tool to the source of truth;
+  without it the two drift silently.</li>
+<li><strong><code>bump-minor-pre-major: false</code></strong> and <strong><code>bump-patch-for-minor-pre-major:
+  false</code></strong> — plain semver, as described above.</li>
+<li><strong><code>include-component-in-tag: false</code></strong> — one package, so tags are <code>v0.2.0</code>
+  rather than <code>multiplying-frogs-v0.2.0</code>.</li>
+<li><strong>No component, and no <code>package-name</code> either</strong> — see below. This one is not a
+  preference; setting either stops every release from being tagged.</li>
+<li><strong>The manifest</strong> (<code>.github/release-please/manifest.json</code>) records the last
+  released version per package — <code>{".": "0.0.1"}</code>. It is generated:
+  release-please updates it in its own release PR, and a hand edit tells the
+  tool it already released something it didn't.</li>
+</ul>
+<h3 id="the-config-carries-no-component-and-must-not">The config carries no component — and must not<a class="headerlink" href="#the-config-carries-no-component-and-must-not" title="Link to this section">&para;</a></h3>
+<p>This is one root package with <code>separate-pull-requests: false</code>, so release-please
+names the release branch <code>release-please--branches--main</code>, with no
+<code>--components--</code> suffix. <strong>Nothing in the config may declare a component</strong>, and
+that means no <code>component</code> key, no <code>package-name</code> key, and
+<code>include-component-in-tag</code> left <code>false</code>.</p>
+<p>The reason is a guard inside release-please's <code>buildRelease</code>. Before tagging a
+merged release PR it compares the component it parsed out of the branch name
+against the one the config declares:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Source</th>
+<th>Value here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>branchName.component</code></td>
+<td>the release branch name</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>getBranchComponent()</code></td>
+<td><code>component</code>, else a normalized <code>package-name</code></td>
+<td>whatever you set</td>
+</tr>
+</tbody>
+</table>
+<p>If those two disagree it logs <code>PR component: undefined does not match
+configured component: …</code> and <strong>returns without building the release</strong>. The
+release PR merges, <code>/VERSION</code>, the manifest and <code>CHANGELOG.md</code> all update — and
+then there is no tag, no GitHub release, and no APK. The workflow reports
+success, because nothing failed; the release simply was not built.</p>
+<div class="admonition danger">
+<p class="admonition-title">One wrong key wedges <em>all</em> releases, not just one</p>
+<p>release-please refuses to open or update a release PR while a merged but
+untagged one is outstanding — <code>There are untagged, merged release PRs
+outstanding - aborting</code>. So a mismatch does not cost you one release. It
+costs you every release after it, until the config is fixed.</p>
+<p>It does self-heal: tagging runs before that abort, so the first push to
+<code>main</code> after the fix tags the outstanding release retroactively, at the
+commit its PR was merged at. <strong>Do not make the tag by hand</strong> — a hand-made
+tag with no matching release and no <code>autorelease: tagged</code> label leaves
+release-please trying to release the same version again.</p>
+</div>
+<p><code>include-component-in-tag: false</code> does <strong>not</strong> rescue a stray <code>package-name</code>.
+That flag is only read when composing the tag; the branch guard calls
+<code>getBranchComponent()</code>, which never looks at it.</p>
+<p><code>.github/scripts/tests/test_release_please_config.py</code> asserts both halves of
+this at once — that nothing declares a component, <em>and</em> that no branch, tag or
+title pattern interpolates <code>${component}</code> — so the two can never fall out of
+step again. It runs in the <code>scripts</code> suite:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>.github/scripts/run_python_tests.py<span class="w"> </span>scripts
+</code></pre></div>
+<h3 id="the-guard-test">The guard test<a class="headerlink" href="#the-guard-test" title="Link to this section">&para;</a></h3>
+<p><code>/VERSION</code> and <code>.github/release-please/manifest.json</code> hold the same number in
+two places, and <strong>nothing in release-please notices when they stop agreeing.</strong>
+A damaged marker leaves <code>/VERSION</code> behind while the manifest advances; releases
+keep shipping; the first symptom is a build reporting a version from three
+releases ago.</p>
+<p><code>Tests/Core/VersionDriftTests.cs</code> closes that hole with three assertions:</p>
+<table>
+<thead>
+<tr>
+<th>Assertion</th>
+<th>Catches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/VERSION</code> parses as bare semver once <code>#…</code> is stripped</td>
+<td>a hand-edit, a bad merge resolution</td>
+</tr>
+<tr>
+<td><code>/VERSION</code> still contains <code>x-release-please-version</code></td>
+<td>the marker being removed — the usual <em>cause</em></td>
+</tr>
+<tr>
+<td><code>/VERSION</code> equals the manifest's <code>"."</code> entry</td>
+<td>the drift itself</td>
+</tr>
+</tbody>
+</table>
+<p>The middle one earns its place by failing on the cause rather than waiting for
+the symptom: the run that removes the marker fails, instead of the release two
+months later.</p>
+<p>It is a plain NUnit test in the ordinary Core suite, so it costs milliseconds
+and runs on every push, with no editor and no network.</p>
+<h3 id="the-release-flow">The release flow<a class="headerlink" href="#the-release-flow" title="Link to this section">&para;</a></h3>
+<ol>
+<li>Commits land on <code>main</code>, each from one squashed PR.</li>
+<li>release-please maintains a <strong>release PR</strong> — an open PR that accumulates the
+   pending changelog and the version bump. It is rewritten on every push to
+   <code>main</code>; do not review it as a change, review it as a summary.</li>
+<li>Merging that PR <em>is</em> the release. It updates <code>/VERSION</code> and <code>CHANGELOG.md</code>,
+   creates the tag and the GitHub release, and triggers the release build, which
+   attaches the APK.</li>
+</ol>
+<h3 id="use-the-release-flow-skill">Use the <code>release-flow</code> skill<a class="headerlink" href="#use-the-release-flow-skill" title="Link to this section">&para;</a></h3>
+<p>Two things go wrong at step 3 every time, and both are silent:</p>
+<ul>
+<li><strong>The release PR can be stale.</strong> release-please rewrites it on every push to
+  <code>main</code>, but that run takes a minute and can fail. Merging a stale one ships a
+  changelog and a version that omit whatever landed after it was last written —
+  and nothing catches it afterwards, because the release itself succeeds.</li>
+<li><strong>Check runs can be parked</strong> in <code>action_required</code>, waiting for a human. A
+  parked run never finishes on its own, so merging past it means merging with
+  the checks not having run — which from the merge button looks identical to
+  merging with them green.</li>
+</ul>
+<p><code>.claude/skills/release-flow/</code> checks both before the merge, and afterwards
+verifies that all three artifacts appeared: the tag, a <em>published</em> release, and
+the <code>autorelease: tagged</code> label. Each can happen without the others — a tag with
+no release is a release nobody can download, and a missing label makes
+release-please try the same release again.</p>
+<p>The skill never edits the release PR, never approves a parked run, and never
+creates a tag by hand. release-please owns that branch and recomputes it from
+scratch on every run, so an edit is either undone or corrupts the next one.</p>
+<h2 id="one-issue-one-pr-one-squash-commit-one-changelog-entry">One issue → one PR → one squash commit → one changelog entry<a class="headerlink" href="#one-issue-one-pr-one-squash-commit-one-changelog-entry" title="Link to this section">&para;</a></h2>
+<p>The chain is only as good as its narrowest link, and every link is enforced:</p>
+<ul>
+<li><strong>One issue per PR</strong>, closed with a keyword in the PR body.</li>
+<li><strong>One PR per squash commit</strong> — <code>main</code> is squash-merge only, so a PR is exactly
+  one commit in the history.</li>
+<li><strong>The squash commit message is the PR title</strong>, which is why the PR title has
+  to be a valid Conventional Commit and why <a href="../ci-cd/">CI lints it</a>.</li>
+<li><strong>One commit → one changelog entry.</strong></li>
+</ul>
+<p>So the changelog reads as one line per issue, each traceable to a PR, an issue,
+and a version. Break any link and you get a changelog entry saying
+"feat: various improvements" pointing at a merge of eleven unrelated things,
+which is a changelog nobody reads and therefore a changelog nobody maintains.</p>
+<p>This is also why work-in-progress commits on a branch don't need to be
+Conventional Commits — they are squashed away. Only the PR title survives.</p>
+<h2 id="what-a-build-calls-itself">What a build calls itself<a class="headerlink" href="#what-a-build-calls-itself" title="Link to this section">&para;</a></h2>
+<p>Two different things, from two different sources, both applied at build time and
+never stored in <code>ProjectSettings.asset</code>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Source</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Version name</strong> (<code>PlayerSettings.bundleVersion</code>)</td>
+<td><code>/VERSION</code>, plus the commit sha on non-release builds</td>
+<td><code>0.2.3</code>, <code>0.2.3-abc1234</code></td>
+</tr>
+<tr>
+<td><strong><code>versionCode</code></strong> (Android)</td>
+<td><code>git rev-list --count main</code></td>
+<td><code>147</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>Frogs.Core.BuildStamp</code> composes both and enforces the rules; the editor script
+<code>BuildStampApplier</code> reads the file, the environment, and git, and hands the
+values over. The split is the usual one — the arithmetic is in Core where the
+fast suite covers it, and the I/O is in the shell.</p>
+<h3 id="the-version-name">The version name<a class="headerlink" href="#the-version-name" title="Link to this section">&para;</a></h3>
+<p><code>0.2.3</code> for a release. <code>0.2.3-abc1234</code> for anything built from a PR or as a
+release candidate, because a phone with four test builds on it needs to say
+which is which, and "the one from Tuesday" is not an answer.</p>
+<h3 id="the-app-reads-its-own-version-back-through-core">The app reads its own version back, through Core<a class="headerlink" href="#the-app-reads-its-own-version-back-through-core" title="Link to this section">&para;</a></h3>
+<p><code>AppVersion.ReadFromBuildName</code> is the inverse of the composition above: it takes
+the name a running build reports — Unity's <code>Application.version</code> — and drops
+whatever distinguishes that build from the plain release of the same version,
+the <code>-abc1234</code> or the <code>-rc2</code>.</p>
+<p>The running app uses it to say which build it is, because that line is the only
+evidence anybody has that <code>/VERSION</code> reached the APK rather than a default Unity
+wrote. Composing and reading are asserted as inverses in the Core suite, so a
+change to one that forgets the other fails in seconds rather than on a phone.</p>
+<h3 id="versioncode-is-the-commit-count-not-the-version"><code>versionCode</code> is the commit count, not the version<a class="headerlink" href="#versioncode-is-the-commit-count-not-the-version" title="Link to this section">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>versionCode = git rev-list --count main
+</code></pre></div>
+<p>Android orders installs by this integer and <strong>refuses to install an APK whose
+code is not greater than the installed one.</strong></p>
+<p>Deriving it from the semantic version does not survive that rule. Several builds
+share a version between releases — every PR build of <code>0.2.3</code> would produce the
+same code, so installing today's test build over yesterday's would fail, and
+the two would be indistinguishable to the system. The commit count moves with
+every commit, which is exactly the granularity the constraint needs.</p>
+<p>What it buys:</p>
+<ul>
+<li><strong>Monotonic between releases, not just across them.</strong> Every commit gets a
+  higher number than its parent.</li>
+<li><strong>Reproducible.</strong> The same commit always yields the same count, for everyone.
+  A rebuild of a tag produces the same code rather than a new one.</li>
+<li><strong>Independent of CI.</strong> No run numbers, no counters in workflow state, nothing
+  that resets when a workflow is renamed or a repository is migrated.</li>
+</ul>
+<p>The cost is legibility: <code>147</code> doesn't tell you the version at a glance the way a
+derived number would. That's the right trade — the version <em>name</em> is what a
+human reads, and it's on the same screen.</p>
+<h3 id="it-is-never-hand-set">It is never hand-set<a class="headerlink" href="#it-is-never-hand-set" title="Link to this section">&para;</a></h3>
+<p><code>ProjectSettings.asset</code>'s version fields are not edited, ever — not by a person,
+not by a tool. They are overwritten at build time from the values above. A
+number typed into that file is a number that disagrees with <code>/VERSION</code> on the
+first release after someone forgets it.</p>
+<p>CI passes the version code and the sha in rather than letting the editor shell
+out to git, because a checkout with <code>fetch-depth: 1</code> has no history to count.
+Locally both fall back to git, and a failure says so.</p>
+<p>They travel as <code>-frogsVersionCode</code> and <code>-frogsBuildSha</code> <strong>on Unity's command
+line</strong>, not as environment variables: the editor runs inside a container that
+receives only <code>game-ci/unity-builder</code>'s own allow-list, so a variable set on the
+workflow step never reaches it. See
+<a href="../ci-cd/#build-inputs">how a value reaches the Unity process</a> — getting this
+wrong is silent, and did ship a wrong build (#218).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by Derek and Connor.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs" target="_blank" rel="noopener" title="This project on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
