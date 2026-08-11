@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.2.0...v0.2.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* **app:** build and show the game at runtime, so the app is not a blank screen ([#286](https://github.com/derekwinters/connor-multiplying-frogs/issues/286)) ([cca5782](https://github.com/derekwinters/connor-multiplying-frogs/commit/cca5782656817a1973d8d330256a8ef04fbcfb63))
+* **build:** the emulator profile builds x86_64 with IL2CPP ([#283](https://github.com/derekwinters/connor-multiplying-frogs/issues/283)) ([d78c97b](https://github.com/derekwinters/connor-multiplying-frogs/commit/d78c97bb0ea8262307514b8df650be7d2957b9a8))
+
 ## [0.2.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.1.1...v0.2.0) (2026-08-10)
 
 
