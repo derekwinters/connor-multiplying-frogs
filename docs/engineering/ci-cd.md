@@ -385,7 +385,7 @@ permanent.
 | Asset | Profile | For |
 | --- | --- | --- |
 | `multiplying-frogs-0.2.0.apk` | ARM64, IL2CPP | the phone |
-| `multiplying-frogs-0.2.0-emulator.apk` | x86_64, Mono | a desktop emulator |
+| `multiplying-frogs-0.2.0-emulator.apk` | x86_64, IL2CPP | a desktop emulator |
 
 They are built into `build/device/` and `build/emulator/` rather than a shared
 directory. The two have the same version and differ only in architecture, which
@@ -447,13 +447,57 @@ table:
 | the two files are not byte-identical | two profiles cannot produce one file |
 | device has `arm64-v8a` and nothing else | the tablet's architecture, alone |
 | emulator has `x86_64` and nothing else | an ARM64 APK will not install on an x86_64 emulator |
-| device ships `libil2cpp.so`, emulator does not | the profile is a backend as well as an architecture |
+| both ship `libil2cpp.so` | 64-bit Android has no Mono, so an APK without it was built for a pairing Unity cannot build ([#282](https://github.com/derekwinters/connor-multiplying-frogs/issues/282)) |
 
 It runs **before** the attach step, so a release that failed it gets no assets
 rather than the wrong ones. That is the right way round: a bad APK attached to
 a tag is a failure that surfaces on someone else's machine, days later, with no
 build log anywhere near it, while a release missing its APKs is a backfill this
 workflow already knows how to do.
+
+It is skipped in exactly one case: when only one of the two APKs exists, so
+there is no pair to compare. Attaching a single, correctly named device APK is
+not the mislabelling this gate protects against; attaching two identical files
+still is, and that stays strict.
+
+#### A failed emulator build does not cost the release its device APK
+
+The emulator build carries `continue-on-error`, and the device build does not.
+Until `v0.2.0` neither did, and the consequence was the worst available
+outcome: the emulator build failed, the job stopped, the attach step three
+steps below never ran, and the release was **published with nothing on it** —
+while a perfectly good device APK sat on the runner until it was deleted
+(#282).
+
+So the job now finishes what it can:
+
+| | |
+| --- | --- |
+| Device build fails | the job stops. The device APK *is* the release. |
+| Emulator build fails | the device APK is still checked and attached |
+| Only one APK attached | a `::warning::` and a line in the job summary saying the release is incomplete |
+| Emulator build failed | the last step re-raises it, so the **run is still red** |
+
+The last row is the one that stops this being a papering-over. Attaching what
+built must not turn a broken build green, because a half-filled release nobody
+is told about is how the next release ships the same way. The run goes red
+*after* the attach, not instead of it.
+
+`.github/scripts/tests/test_release_partial_attach.py` asserts that shape:
+which build may continue on error and which may not, that something downstream
+reads the emulator step's `outcome` and fails on it, that the two-APK
+comparison is still invoked with both APKs, and that a partial attach warns.
+
+#### Backfilling a release that missed its APKs
+
+`workflow_dispatch` takes the tag as an **input**, and the checkout uses it:
+the build is of the source at that tag, exactly as released. The *workflow
+file* is a different matter — Actions runs the version of it that lives at the
+ref the dispatch was made against. So dispatching from `main` with
+`tag: v0.2.0` builds v0.2.0's source using today's workflow, which is what
+makes a backfill able to rescue a release whose failure was in the workflow
+rather than in the code. A fix that lives in the source at `main` does **not**
+reach a backfill of an older tag; only the next release gets it.
 
 Both are **attached to the GitHub release** rather than left as workflow
 artifacts, so the tag and the thing you install are one object. A release whose

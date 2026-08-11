@@ -60,7 +60,7 @@ around, because that is what kids play on.
 | --- | --- |
 | Primary target | Android tablets, ARM64 (`arm64-v8a`) |
 | Also runs on | Android phones |
-| Scripting backend | IL2CPP for device builds |
+| Scripting backend | IL2CPP — 64-bit Android has no other option |
 | Minimum API level | 24 (Android 7.0) |
 | Orientation | Landscape only (both ways up) |
 | Reference resolution | 1920 × 1200 (16:10) |
@@ -88,16 +88,46 @@ designed against one agreed canvas instead of each being guessed at separately.
 phone. This is what the release build produces, and what an RC build has to
 prove works.
 
-**Emulator build** — x86_64, Mono. IL2CPP cross-compiling to x86_64 is slow and
-buys nothing for a smoke test, so the emulator profile trades fidelity for a
-build that finishes while you are still looking at it. Use it for "does the app
-launch and show the right screen", never for judging performance or for anything
-shipped.
+**Emulator build** — x86_64, IL2CPP, for trying the game on a desktop emulator.
+Use it for "does the app launch and show the right screen", never for judging
+performance or for anything shipped.
 
 CI builds both: the device profile is what the release ships, and an
 emulator-targeted asset is attached alongside it so the release can be tried on
 a desktop without rebuilding. A bug that reproduces only under the emulator is a
 bug in the profile until proven otherwise.
+
+#### Both profiles are IL2CPP, and that is not a preference
+
+This page used to specify **x86_64 with Mono** for the emulator, on the
+reasoning that IL2CPP cross-compiling to x86_64 is slow and buys nothing for a
+smoke test. The reasoning about speed was right. The pairing was impossible.
+
+**Unity has no Mono for 64-bit Android.** The Mono backend compiles at runtime
+with a JIT, and that JIT is not supported on 64-bit Android, so `ARM64` and
+`x86_64` are both IL2CPP-only (Unity Manual: *Mono scripting backend*, *IL2CPP
+Overview*). Mono remains available for the 32-bit architectures, which this
+project does not build.
+
+Asking for it anyway fails in the worst possible way: nothing objects at the
+point of asking. Unity drops the architecture it cannot build, leaves
+`targetArchitectures` holding nothing, and the build dies much later with
+*"Target architecture not specified"* — a message that names neither the
+architecture nor the backend. That is what happened to the `v0.2.0` release
+(#282), the first time the emulator profile had ever actually reached a build.
+
+The emulator is x86_64, so x86_64 is the part that could not move. A slower
+emulator build is the price, and two guards keep the pairing from drifting
+back:
+
+- **`Frogs.Core.AndroidBuildSupport`** knows which architectures are 64-bit and
+  refuses to pair them with anything but IL2CPP. `BuildStampPreprocessor` reads
+  the settings back out of `PlayerSettings` after applying a profile and fails
+  the build — loudly, naming the profile — if the architecture set came back
+  empty or the pairing is one Unity cannot build. It is plain C#, so the rule is
+  covered by the two-second Core suite rather than by a release.
+- **`.github/scripts/check_release_apks.py`** opens both APKs before either is
+  attached and requires `libil2cpp.so` in each.
 
 ### The settings above are applied by the build, not stored in the repo
 

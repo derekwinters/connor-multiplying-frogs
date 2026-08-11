@@ -138,8 +138,18 @@ jobs:
       # Its own build path, so the two APKs cannot be confused with each other —
       # they have the same version and differ only in architecture, which is not
       # visible from a filename in a shared directory.
+      #
+      # `continue-on-error`, unlike the device build above: the device APK is
+      # the release, and it has already been built by the time this runs. When
+      # this step failed the job outright, the attach step three steps down
+      # never ran and the release got *nothing* — that is how v0.2.0 was
+      # published with no installable asset while a good device APK sat on the
+      # runner (#282). The run still ends red; see "Report a failed emulator
+      # build" at the bottom of this job.
       - name: Build the emulator APK
+        id: emulator
         if: steps.licence.outputs.present == 'true'
+        continue-on-error: true
         uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -158,13 +168,31 @@ jobs:
       # release that should not go out: an ARM64-only APK labelled "emulator"
       # fails at install time on someone else's machine, with no build log
       # anywhere near it. That is what v0.1.0 did (#218).
+      #
+      # Strict whenever both APKs exist, and skipped only when one genuinely
+      # does not. Attaching a single, correctly named device APK is not the
+      # mislabelling this gate protects against; attaching two identical ones
+      # still is.
       - name: Check the two APKs are the two builds
         if: steps.licence.outputs.present == 'true'
         run: |
           set -euo pipefail
-          python3 .github/scripts/check_release_apks.py \
-            --device build/device/Android/multiplying-frogs-${{ steps.stamp.outputs.version }}.apk \
-            --emulator build/emulator/Android/multiplying-frogs-${{ steps.stamp.outputs.version }}-emulator.apk
+          version="${{ steps.stamp.outputs.version }}"
+          device="build/device/Android/multiplying-frogs-$version.apk"
+          emulator="build/emulator/Android/multiplying-frogs-$version-emulator.apk"
+
+          if [ -f "$device" ] && [ -f "$emulator" ]; then
+            python3 .github/scripts/check_release_apks.py \
+              --device "$device" --emulator "$emulator"
+          elif [ -f "$device" ]; then
+            echo "::warning::Only the device APK was built, so there is no pair" \
+                 "to compare. Attaching it on its own — see the emulator build" \
+                 "step for why it is missing."
+          else
+            echo "::error::No device APK at $device. The device build is the" \
+                 "release; there is nothing worth attaching without it."
+            exit 1
+          fi
 
       - name: Attach the APKs to the release
         if: steps.licence.outputs.present == 'true'
@@ -219,6 +247,32 @@ jobs:
           for asset in "${assets[@]}"; do
             echo "- \`$(basename "$asset")\`" >> "$GITHUB_STEP_SUMMARY"
           done
+
+          # A release that got one of its two APKs is a release someone has to
+          # know about. It looks completely normal from the releases page —
+          # there is an asset, it installs, it runs — so the only place the gap
+          # can be stated is here.
+          if [ ${#assets[@]} -lt 2 ]; then
+            echo "::warning::$TAG got ${#assets[@]} of the 2 APKs. The build that" \
+                 "produced nothing is the failed step in this job."
+            echo >> "$GITHUB_STEP_SUMMARY"
+            echo "**This release is incomplete**: ${#assets[@]} of the 2 APKs." \
+                 "The other profile's build failed — see the failed step in this" \
+                 "job — so the release is missing it until this workflow is" \
+                 "re-run against \`$TAG\`." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Last, so everything above has already run: the device APK is attached,
+      # the summary is written, and only then does the job go red. Attaching
+      # what built must not turn a broken build green — a half-filled release
+      # nobody is told about is how the next one gets shipped the same way.
+      - name: Report a failed emulator build
+        if: steps.licence.outputs.present == 'true' && steps.emulator.outcome == 'failure'
+        run: |
+          echo "::error::The emulator APK did not build, so ${{ inputs.tag }} has" \
+               "only its device APK. The device build and the attach both" \
+               "succeeded; this job is red for the emulator build alone."
+          exit 1
 
       - name: Summarise a skip
         if: steps.licence.outputs.present != 'true'

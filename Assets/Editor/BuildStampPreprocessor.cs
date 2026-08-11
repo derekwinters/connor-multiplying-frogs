@@ -92,13 +92,25 @@ namespace Frogs.EditorTools
                     break;
 
                 case "emulator":
-                    // x86_64 and Mono. IL2CPP cross-compiling to x86_64 is slow
-                    // and buys nothing for a smoke test — this profile trades
-                    // fidelity for a build that finishes while you are still
-                    // looking at it.
+                    // x86_64 and IL2CPP. **IL2CPP is not a choice here.** Mono
+                    // compiles at runtime with a JIT, and Unity does not support
+                    // that JIT on 64-bit Android, so x86_64 and ARM64 are both
+                    // IL2CPP-only.
+                    //
+                    // This used to say Mono2x, on the reasoning that IL2CPP
+                    // cross-compiling to x86_64 is slow and buys nothing for a
+                    // smoke test. The speed argument was true and the pairing
+                    // was still impossible: Unity dropped the architecture it
+                    // could not build, left the set empty, and failed the build
+                    // at its prerequisites check with "Target architecture not
+                    // specified" — a message that names neither. That is issue
+                    // #282, and it took the v0.2.0 release's APKs with it.
+                    //
+                    // The emulator is x86_64, so x86_64 is the part that cannot
+                    // move. A slower build is the price.
                     PlayerSettings.Android.targetArchitectures = AndroidArchitecture.X86_64;
                     PlayerSettings.SetScriptingBackend(
-                        NamedBuildTarget.Android, ScriptingImplementation.Mono2x);
+                        NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
                     break;
 
                 default:
@@ -111,13 +123,33 @@ namespace Frogs.EditorTools
                         + $"It comes from {source}.");
             }
 
-            // Read back rather than echoing the request: this line is how a
-            // build log answers "did the profile actually take", which is the
+            // Read back rather than echoing the request: this is how a build
+            // log answers "did the profile actually take", which is the
             // question #218 left open.
-            Debug.Log(
-                $"Android build profile: {profile} — "
-                + $"{PlayerSettings.Android.targetArchitectures}, "
-                + $"{PlayerSettings.GetScriptingBackend(NamedBuildTarget.Android)}.");
+            var architectures = PlayerSettings.Android.targetArchitectures;
+            var backend = PlayerSettings.GetScriptingBackend(NamedBuildTarget.Android);
+
+            // `None` is the flags enum's empty set, and an empty set is not a
+            // reading Core should have to know Unity's spelling of.
+            var applied = architectures == AndroidArchitecture.None
+                ? string.Empty
+                : architectures.ToString();
+
+            Debug.Log($"Android build profile: {profile} — {architectures}, {backend}.");
+
+            // And then fail on it, rather than only logging it. Reading the
+            // values back was already the right instinct; a log line is only
+            // read once someone is already looking for the failure. Unity's own
+            // complaint arrives much later, from the prerequisites check, and
+            // says "Target architecture not specified" without naming the
+            // profile, the architecture, or the backend that emptied it (#282).
+            var problem = AndroidBuildSupport.AppliedProblem(profile, applied, backend.ToString());
+
+            if (problem != null)
+            {
+                throw new BuildFailedException(
+                    $"The '{profile}' Android build profile did not take. {problem}");
+            }
         }
 
         static void ApplyApplicationIdSuffix()
