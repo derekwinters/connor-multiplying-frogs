@@ -1206,21 +1206,55 @@ each time.
 `render_dashboard.py` rewrites the dashboard issue from live state. The
 sections, in order:
 
-| Section | Shows |
-| --- | --- |
-| 🎯 Focus | the four-slice pie for the focus milestone |
-| 🔨 Ready queue | `ready-for-work`, headed by the build cap |
-| 📥 Intake | `ai-triage` — waiting to be analyzed |
-| ✋ Waiting for you | `pending-approval` — waiting on Derek |
-| ❓ Needs clarification | blocked on a question |
-| ⏸️ Parked | set aside, listed so it can be found |
-| ⚠️ Reconcile | the sweep's flag findings |
-| 📅 Other milestones | progress elsewhere; finished milestones omitted |
-| 🎮 Commands | the command reference |
+| Section | Shows | Scope |
+| --- | --- | --- |
+| 🎯 Focus | the four-slice pie for the focus milestone | focus |
+| 🔨 Ready queue | `ready-for-work`, headed by the build cap | focus |
+| 📥 Intake | `ai-triage` — waiting to be analyzed | board-wide |
+| ✋ Waiting for you | `pending-approval` — waiting on Derek | board-wide |
+| ❓ Needs clarification | blocked on a question | board-wide |
+| ⏸️ Parked | set aside, listed so it can be found | board-wide |
+| ⚠️ Reconcile | the sweep's flag findings | board-wide |
+| 📅 Other milestones | progress elsewhere; finished milestones omitted | every other |
+| 🎮 Commands | the command reference | — |
 
 Every issue table carries a **Milestone** column, so the milestone is visible
 at every stage rather than only where an issue is being scheduled, and a
 **Blocked by** column linking each hard blocker.
+
+#### Only the pie and the ready queue are focus-scoped
+
+Those two answer *what is being built now*, and the builder builds the focus
+milestone. Listing an out-of-focus `ready-for-work` issue in the queue would
+put work in front of Derek that nothing is going to pick up.
+
+Every other section answers a different question — *what does somebody have to
+look at* — and an issue does not stop needing to be looked at by sitting
+outside the milestone currently being built. Scoping those to focus hides the
+work that most needs surfacing:
+
+- **Intake is the worst case.** `ai-triage` means the issue has *not* been
+  triaged, and triage is what decides its milestone — so an issue waiting for
+  triage usually has no milestone at all. A focus-scoped Intake is
+  structurally near-empty: the section reads "Nothing waiting for triage"
+  precisely because the untriaged pile is growing out of sight.
+- **`Direct Involvement Needed` can never be the focus.** It carries no
+  version and never ships, so a focus-scoped "Waiting for you" hides every
+  issue in the one milestone that exists to say *Derek has to do this by
+  hand* — which is most of them.
+- **A question is not answered by being scheduled late**, and answering it
+  early is often what lets the issue be scheduled at all.
+- **Parked work is listed so it can be found.** An out-of-focus parked issue
+  is the one most in need of that.
+
+The **Milestone** column is what keeps a board-wide table readable: a row
+reading `—` is an issue nobody has scheduled, which is the point of showing
+it. If every table were focus-scoped, that column would be a constant.
+
+**An issue with no pipeline-state label appears in no section**, board-wide
+scope or not. It has not been admitted, and `/admit` is how it enters. Only
+the pie counts them, in its Unplanned slice, and only inside the focus
+milestone — because the pie's job is to add up.
 
 #### Unblocker stars
 

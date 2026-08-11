@@ -85,10 +85,27 @@ be a stream of meaningless edits.
 
 Settings resolve **override → marker → default**. A `/focus` naming no live
 milestone is rejected rather than stored, because a typo renders a board whose
-every section is empty — indistinguishable from a finished milestone, and the
-most misleading output this script can produce. A malformed `cap` marker falls
-back to 3, because a board that does not render is worse than one with a
-default cap.
+pie and ready queue are empty — indistinguishable from a finished milestone,
+and the most misleading output this script can produce. A malformed `cap`
+marker falls back to 3, because a board that does not render is worse than one
+with a default cap.
+
+## Focus scopes the pie and the ready queue, and nothing else
+
+Those two say *what is being built now*, and the builder builds the focus
+milestone. Intake, Waiting for you, Needs clarification and Parked say
+*somebody has to look at this*, which is true regardless of milestone — so
+they list the whole board, and the **Milestone** column tells the rows apart.
+
+Scoping them to focus hid the work most worth surfacing. An `ai-triage` issue
+has not been triaged, and triage is what assigns the milestone, so a
+focus-scoped Intake is near-empty by construction. `Direct Involvement Needed`
+carries no version and never ships, so it can never be the focus — and a
+focus-scoped "Waiting for you" hides the milestone that exists to say Derek
+has to do something by hand.
+
+An issue with **no pipeline-state label at all** is in no section either way.
+It has not been admitted; `/admit` is what brings it in.
 
 ## Running the tests
 
@@ -96,7 +113,7 @@ default cap.
 python3 .github/scripts/run_python_tests.py pipeline-dashboard
 ```
 
-51 tests. The centrepiece is a golden-snapshot test rendering a fixture board
+66 tests. The centrepiece is a golden-snapshot test rendering a fixture board
 and comparing byte-for-byte against a committed file. A dashboard is a wall of
 generated Markdown, and a whole-board diff is the only review that catches a
 section quietly changing shape.
