@@ -126,6 +126,15 @@ off-by-one.
 
 ## Open questions
 
+- **What does the button say when there is no next player?** On the hop that
+  gets the *last* frog home, the game ends itself
+  ([game board](game-board.md)) and there is nobody to hand the device to — so
+  the rule above, "named for the next player", has no answer for that one turn.
+  The button is still pressed: it is what closes the dialog and starts the hop.
+  It currently reads `Game over`, borrowed from
+  [game over](game-over.md)'s own words for the screen it now leads to, as a
+  placeholder rather than a decision. Connor's to settle — asked in
+  [#287](https://github.com/derekwinters/connor-multiplying-frogs/issues/287).
 - **Does a right answer get any celebration beyond the hop?** Audio is
   [parked](../future-ideas.md), and a "correct" chime is the most likely parked
   item to be promoted. If it is, this is the screen it plays on.

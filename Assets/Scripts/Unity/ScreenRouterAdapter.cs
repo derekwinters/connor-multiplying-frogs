@@ -10,13 +10,20 @@ namespace Frogs.Unity
     /// The thin shell around <see cref="ScreenRouter"/> — issue #213. It owns
     /// the router's engine-facing surface and nothing about navigation logic:
     /// it wires the hardware back key (Android back / <c>Escape</c>) to
-    /// <see cref="ScreenRouter.HandleBack"/>, and activates the one empty
-    /// root <c>GameObject</c> per <see cref="Frogs.Core.Screen"/> and
+    /// <see cref="ScreenRouter.HandleBack"/>, and activates the one root
+    /// <c>GameObject</c> per <see cref="Frogs.Core.Screen"/> and
     /// <see cref="Dialog"/> that matches the router's current state.
     ///
-    /// It draws nothing — no marker, no text, no shapes. What a root looks
-    /// like is a later, wireframed issue; this type only decides which root
-    /// is active.
+    /// It draws nothing — no marker, no text, no shapes. A root is an empty
+    /// canvas-filling <c>RectTransform</c> and nothing else; what goes under
+    /// one is <c>AppRoot</c>'s to decide (#285), and this type only decides
+    /// which root is active.
+    ///
+    /// It is also the only thing that reads the hardware back key for the
+    /// whole app. <c>GameBoardScreenView</c> raises its own
+    /// <c>SettingsRequested</c> from the same key press, and if anything acted
+    /// on both, one press would run the back-button table twice — see
+    /// <c>AppRoot.Wire</c>.
     /// </summary>
     public sealed class ScreenRouterAdapter : MonoBehaviour
     {
@@ -117,10 +124,23 @@ namespace Frogs.Unity
             RefreshActiveRoots();
         }
 
+        // A root is a UI root: it is what a screen or a dialog is parented to,
+        // so it is a RectTransform filling whatever it is under, and a screen
+        // laid out inside it is laid out against the canvas rather than
+        // against a point. A plain Transform here would leave every child
+        // RectTransform anchored to a rect that does not exist — which draws
+        // nothing and reports nothing.
         GameObject CreateRoot(string name)
         {
-            var root = new GameObject(name);
-            root.transform.SetParent(transform, worldPositionStays: false);
+            var root = new GameObject(name, typeof(RectTransform));
+            var rect = (RectTransform)root.transform;
+
+            rect.SetParent(transform, worldPositionStays: false);
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
             root.SetActive(false);
             return root;
         }

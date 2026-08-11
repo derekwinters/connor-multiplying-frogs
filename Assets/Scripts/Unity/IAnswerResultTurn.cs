@@ -45,8 +45,16 @@ namespace Frogs.Unity
         /// are home, asked while this turn's result is still on screen and
         /// nothing has advanced. Not <see cref="Frog"/>, and not something the
         /// dialog works out by walking turn order.
+        ///
+        /// **Null on exactly one turn in a game:** the one whose hop got the
+        /// last frog home. docs/specs/ui/game-board.md#behaviour — "When the
+        /// last frog gets home, the game ends itself" — so there is no next
+        /// player to name, and <see cref="Game.NextActiveFrog"/> says so by
+        /// throwing. Nullable rather than throwing here, because the dialog
+        /// asks this question on every turn including that one, and a fact the
+        /// caller is expected to handle is a value, not an exception.
         /// </summary>
-        FrogColour NextFrog { get; }
+        FrogColour? NextFrog { get; }
 
         /// <summary>
         /// The result dialog has closed and the board is back on screen for
