@@ -1079,17 +1079,18 @@ namespace Frogs.Unity.EditModeTests
         // that tests what the view does *with* a tap. It cannot test whether
         // one ever gets there, because it bypasses the raycast — which is the
         // gap the keypad and the grid were dead in for a whole release. These
-        // five go through a real GraphicRaycaster instead.
+        // five go through the raycast instead, on a canvas, by screen
+        // position; see TappableScreen for what that can and cannot say.
         // ---------------------------------------------------------------
 
         [Test]
         public void ARaycastAtCheckIt_ReachesTheButton_WhichIsHowTheHarnessProvesItself()
         {
-            // The control. `Check it` is a shared Button, and a shared Button
-            // has raycast targets today, so this passes with the keypad and
-            // the grid still dead. It is here so that a red run below means
-            // "nothing raycastable under a key" and cannot mean "the canvas
-            // or the raycaster in this harness is set up wrong".
+            // The control, and it has already earned its place: a shared
+            // Button has a raycast target today, so this passes with the
+            // keypad and the grid still dead — and when it did *not* pass, it
+            // said the harness was wrong rather than the keypad, which is
+            // exactly what it is here to say.
             var screen = new TappableScreen(Turn(Pile.Easy));
 
             try
@@ -1274,22 +1275,37 @@ namespace Frogs.Unity.EditModeTests
         }
 
         /// <summary>
-        /// A canvas with a real <see cref="GraphicRaycaster"/> on it and the
-        /// grid under it, so a tap can be delivered the way the running app
-        /// delivers one: raycast for a <see cref="Graphic"/> at a screen
-        /// position, then walk *up* to the first ancestor that handles the
-        /// event. A component with no raycast target anywhere beneath it is
-        /// unreachable that way however good its handler is, which is all
+        /// A canvas with the grid under it, and a tap delivered the way the
+        /// running app delivers one: find the <see cref="Graphic"/> under a
+        /// screen position, then walk *up* to the first ancestor that handles
+        /// the event. A component with no raycast target anywhere beneath it
+        /// is unreachable that way however good its handler is, which is all
         /// #288 ever was.
         ///
         /// The canvas is <c>AppRoot</c>'s in shape — screen-space overlay, a
         /// design of 1920 × 1200 scaled to fit the screen the way its
         /// CanvasScaler's Expand mode scales it. It is placed by hand rather
-        /// than left to Unity because an edit-mode session ticks no frame for
-        /// Unity to place it on, and the raycaster works in screen pixels: the
-        /// whole design has to land inside whatever screen this editor
-        /// reports, or every point is outside the viewport and nothing is ever
-        /// hit.
+        /// than left to Unity, because an edit-mode session ticks no frame for
+        /// Unity to place it on and everything below works in screen pixels.
+        ///
+        /// **Why this does not call <c>GraphicRaycaster.Raycast</c>.** It was
+        /// written that way first and the answer came back from CI: the
+        /// raycaster's first filter is `graphic.depth == -1` — "hasn't been
+        /// processed by the canvas, which means it isn't actually drawn" — and
+        /// a headless editor never draws a canvas, so every graphic in this
+        /// fixture reports -1, `Check it`'s border included. It returns nothing
+        /// for every point on the screen, which is a harness that can only ever
+        /// say no.
+        ///
+        /// So the raycast is driven one level down, through the pieces the
+        /// raycaster itself is made of: the canvas's own
+        /// <see cref="GraphicRegistry"/>, the same rectangle-contains-point
+        /// test, and <see cref="Graphic.Raycast"/> — which is what honours a
+        /// <c>CanvasGroup</c> that is not blocking, or an <c>Image</c> with a
+        /// hit-test threshold. What goes with the depth filter is draw order:
+        /// this cannot say which of two overlapping targets wins. What it can
+        /// say is whether there is anything under the point to send a tap to,
+        /// which is the whole of #288.
         /// </summary>
         sealed class TappableScreen
         {
@@ -1297,21 +1313,17 @@ namespace Frogs.Unity.EditModeTests
             const float DesignHeight = 1200f;
 
             readonly GameObject _canvasGO;
-            readonly GraphicRaycaster _raycaster;
+            readonly Canvas _canvas;
 
             internal TappableScreen(IWorkingOutTurn turn, ScreenRouter router = null)
             {
                 Assert.That(Screen.width, Is.GreaterThan(0), "this editor session reports no screen to raycast against");
                 Assert.That(Screen.height, Is.GreaterThan(0), "this editor session reports no screen to raycast against");
 
-                _canvasGO = new GameObject(
-                    "RaycastCanvas",
-                    typeof(RectTransform),
-                    typeof(Canvas),
-                    typeof(GraphicRaycaster));
+                _canvasGO = new GameObject("RaycastCanvas", typeof(RectTransform), typeof(Canvas));
 
-                _canvasGO.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-                _raycaster = _canvasGO.GetComponent<GraphicRaycaster>();
+                _canvas = _canvasGO.GetComponent<Canvas>();
+                _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
                 // What Unity does to an overlay canvas on a frame that never
                 // comes here: the rect is the screen, in screen pixels, and a
@@ -1346,9 +1358,9 @@ namespace Frogs.Unity.EditModeTests
             /// </summary>
             internal GameObject TargetAt<THandler>(Vector2 screenPoint) where THandler : IEventSystemHandler
             {
-                foreach (var hit in HitsAt(screenPoint))
+                foreach (var graphic in GraphicsUnder(screenPoint))
                 {
-                    var handler = ExecuteEvents.GetEventHandler<THandler>(hit.gameObject);
+                    var handler = ExecuteEvents.GetEventHandler<THandler>(graphic.gameObject);
 
                     if (handler != null)
                     {
@@ -1392,18 +1404,50 @@ namespace Frogs.Unity.EditModeTests
                 }
             }
 
-            internal List<RaycastResult> HitsAt(Vector2 screenPoint)
+            /// <summary>
+            /// Every graphic registered against this canvas that accepts a
+            /// raycast and whose rectangle contains the point — the set the
+            /// GraphicRaycaster would pick its winner from.
+            /// </summary>
+            internal List<Graphic> GraphicsUnder(Vector2 screenPoint)
             {
-                var results = new List<RaycastResult>();
-                _raycaster.Raycast(new PointerEventData(null) { position = screenPoint }, results);
-                return results;
+                var found = new List<Graphic>();
+                var registered = GraphicRegistry.GetGraphicsForCanvas(_canvas);
+
+                for (var index = 0; index < registered.Count; index++)
+                {
+                    var graphic = registered[index];
+
+                    if (graphic == null || !graphic.raycastTarget || !graphic.isActiveAndEnabled)
+                    {
+                        continue;
+                    }
+
+                    if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, screenPoint, null))
+                    {
+                        continue;
+                    }
+
+                    // The graphic's own say: a CanvasGroup up the tree that is
+                    // not blocking raycasts, or an Image with a hit-test
+                    // threshold, refuses the tap here exactly as it would in
+                    // the running app.
+                    if (!graphic.Raycast(screenPoint, null))
+                    {
+                        continue;
+                    }
+
+                    found.Add(graphic);
+                }
+
+                return found;
             }
 
             /// <summary>
-            /// What the raycaster saw, for a failure message. A raycast that
-            /// finds nothing is worth two different fixes depending on why, so
-            /// the failure says which: no raycast target under the point, or
-            /// no raycast reaching the screen at all.
+            /// What was under the point, for a failure message. "Nothing was
+            /// hit" is worth two different fixes depending on why, so the
+            /// failure says which: nothing raycastable under the point, or
+            /// nothing raycastable in the whole view.
             /// </summary>
             internal string Describe(Vector2 screenPoint)
             {
@@ -1416,9 +1460,9 @@ namespace Frogs.Unity.EditModeTests
                     + " at " + canvasRect.position
                     + ", view scaled " + View.transform.localScale);
 
-                foreach (var hit in HitsAt(screenPoint))
+                foreach (var graphic in GraphicsUnder(screenPoint))
                 {
-                    report.AppendLine("  hit " + PathOf(hit.gameObject) + " (depth " + hit.depth + ")");
+                    report.AppendLine("  under the point: " + PathOf(graphic.gameObject));
                 }
 
                 foreach (var graphic in View.GetComponentsInChildren<Graphic>(true))
@@ -1429,9 +1473,7 @@ namespace Frogs.Unity.EditModeTests
                     }
 
                     report.AppendLine("  raycast target " + PathOf(graphic.gameObject)
-                        + " (depth " + graphic.depth
-                        + ", canvas " + (graphic.canvas == null ? "none" : graphic.canvas.name)
-                        + ", cull " + graphic.canvasRenderer.cull + ")");
+                        + " (canvas " + (graphic.canvas == null ? "none" : graphic.canvas.name) + ")");
                 }
 
                 return report.ToString();
