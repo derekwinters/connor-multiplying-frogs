@@ -13,17 +13,30 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import check_revisits as revisits  # noqa: E402
 
 
-def issue(number=10, labels=("needs-clarification",), body="", native=(), blockers_state=None):
+def issue(number=10, labels=("needs-clarification",), body="", native=(), blockers_state=None,
+          comments=()):
     return {
         "number": number,
         "labels": list(labels),
         "body": body,
         "native_blockers": list(native),
+        "comments": list(comments),
     }
 
 
 def blocker(number=20, state="open", labels=(), merged=False):
     return {"number": number, "state": state, "labels": list(labels), "merged": merged}
+
+
+def revisit_comment(cleared, author="github-actions[bot]"):
+    """A comment shaped like `Revisit.comment`, for testing recognition of it."""
+    named = ", ".join(f"#{n}" for n in cleared)
+    return {
+        "author": author,
+        "body": (f"Everything this was waiting on has cleared ({named}), so it is back in "
+                 f"the triage queue.\n\n"
+                 f"_Automatic — nothing was decided here beyond that the blocker is done._"),
+    }
 
 
 class NoBlockerTests(unittest.TestCase):
@@ -167,6 +180,36 @@ class RevisitShapeTests(unittest.TestCase):
         found = revisits.find_revisits([subject], {20: blocker(20, "closed")})[0]
 
         self.assertLessEqual(len(found.comment.splitlines()), 4)
+
+
+class AlreadyRevisitedTests(unittest.TestCase):
+    # #296: the wake-up fired once for #20, triage answered `needs-clarification`
+    # again for an unrelated open design question, and every sweep afterward saw
+    # the same resolved #20 and fired the wake-up again — forever, since a
+    # closed blocker never stops being "resolved". This is what stops it: a
+    # blocker set this issue was already woken for does not fire twice.
+
+    def test_does_not_refire_for_a_blocker_set_already_actioned(self):
+        subject = issue(body="Blocked by #20", comments=[revisit_comment([20])])
+
+        self.assertEqual([], revisits.find_revisits([subject], {20: blocker(20, "closed")}))
+
+    def test_a_hand_typed_comment_from_a_non_triage_author_does_not_count(self):
+        # Only the bot's own action suppresses the wake-up. A stranger's comment
+        # using similar words must not silently swallow a real one.
+        comment = revisit_comment([20], author="someone-else")
+        subject = issue(body="Blocked by #20", comments=[comment])
+
+        self.assertEqual(1, len(revisits.find_revisits([subject], {20: blocker(20, "closed")})))
+
+    def test_a_new_blocker_resolving_still_fires(self):
+        # Only #20 was already actioned. #21 clearing later is a genuine new
+        # wake-up, not a repeat of the old one.
+        subject = issue(body="Blocked by #20\nBlocked by #21",
+                         comments=[revisit_comment([20])])
+        snapshot = {20: blocker(20, "closed"), 21: blocker(21, "closed")}
+
+        self.assertEqual(1, len(revisits.find_revisits([subject], snapshot)))
 
 
 if __name__ == "__main__":
