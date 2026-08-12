@@ -1241,10 +1241,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#colour-in-these-mockups-is-a-placeholder" class="md-nav__link">
+  <a href="#colour-in-these-mockups-is-mostly-a-placeholder" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Colour in these mockups is a placeholder
+        Colour in these mockups is mostly a placeholder
       
     </span>
   </a>
@@ -1948,10 +1948,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#colour-in-these-mockups-is-a-placeholder" class="md-nav__link">
+  <a href="#colour-in-these-mockups-is-mostly-a-placeholder" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Colour in these mockups is a placeholder
+        Colour in these mockups is mostly a placeholder
       
     </span>
   </a>
@@ -2042,6 +2042,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 <td><a href="../game-board/">Game board</a></td>
 </tr>
 <tr>
+<td>Game board, paler water</td>
+<td><a href="game-board-paler-water.html"><code>game-board-paler-water.html</code></a></td>
+<td><a href="../game-board/">Game board</a></td>
+</tr>
+<tr>
 <td>Roll and card</td>
 <td><a href="roll-and-card.html"><code>roll-and-card.html</code></a></td>
 <td><a href="../roll-and-card/">Roll and card</a></td>
@@ -2102,6 +2107,12 @@ it did its job: it is cheaper to find that in a picture than in a built screen.
 Derek settled the question — smaller cells for the addition rows only — so the
 file now draws the answer instead: the same six rows at
 <code>GridAdditionRowHeight</code>, fitting with 16 px to spare.</p>
+<p>The game board's pair is the live one, and it is the second kind: a real
+choice, drawn twice. <code>game-board.html</code> and <code>game-board-paler-water.html</code> are
+the same canvas differing in exactly one value — the water's blue. Connor picks
+one on the tablet, the spec page takes the answer, and the losing file is
+deleted. Until then, an edit to the board's layout has to be made in <strong>both</strong>
+files, which is the cost of the pair and the reason it does not stay open long.</p>
 <p>The title screen used to have a pair too — <code>title-screen.html</code> and
 <code>title-screen-resume-primary.html</code>, differing in exactly which of <code>RESUME</code> and
 <code>NEW</code> was primary, per the wireframe loop's own advice that where there is a
@@ -2113,11 +2124,18 @@ That question is
 deleted, per <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">issue #216</a>.</p>
 <p>Each row arrives with its screen's <code>Wireframe:</code> issue. See
 <a href="../../../engineering/ui-design-process/">UI design process</a>.</p>
-<h3 id="colour-in-these-mockups-is-a-placeholder">Colour in these mockups is a placeholder<a class="headerlink" href="#colour-in-these-mockups-is-a-placeholder" title="Link to this section">&para;</a></h3>
+<h3 id="colour-in-these-mockups-is-mostly-a-placeholder">Colour in these mockups is mostly a placeholder<a class="headerlink" href="#colour-in-these-mockups-is-mostly-a-placeholder" title="Link to this section">&para;</a></h3>
 <p>The four frog colours exist so the frogs can be told apart in a picture, and the
 single green accent marks the primary action. Neither is a palette decision —
 that is an <code>area:art</code> call and it lands with the frog sprites. See
 <a href="../shared-components/#frog-colours">frog colours</a>.</p>
+<p>The game board is the first exception. Its water, logs and lily pads are a
+decision Derek made — a pond is blue, its logs brown, its lily pads green — and
+they are written down as
+<a href="../game-board/#colours">a constants table on the spec page</a>, the same as
+every dimension on that screen. The mockup receives them from there rather than
+being the place they live. The exact hues are still Connor's to settle, which
+is what the pair of board files is for.</p>
 <h2 id="what-a-mockup-is-and-is-not">What a mockup is, and is not<a class="headerlink" href="#what-a-mockup-is-and-is-not" title="Link to this section">&para;</a></h2>
 <p><strong>Is:</strong> static HTML and CSS, one file, no build step, no framework, no
 JavaScript beyond nothing at all. A picture that happens to be made of divs.</p>

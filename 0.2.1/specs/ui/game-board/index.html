@@ -1088,6 +1088,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#colours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Colours
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Colours">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#placeholder-or-settled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholder, or settled?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-water-is-the-whole-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water is the whole screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keeping-the-frogs-visible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keeping the frogs visible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bands-are-unchanged-deliberately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands are unchanged, deliberately
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#elements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2040,6 +2101,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#colours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Colours
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Colours">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#placeholder-or-settled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholder, or settled?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-water-is-the-whole-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water is the whole screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keeping-the-frogs-visible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keeping the frogs visible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bands-are-unchanged-deliberately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands are unchanged, deliberately
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#elements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2516,6 +2638,163 @@ glyph. Both happen to equal a constant on
 and <code>ButtonLabelSize</code> also 44 px — and neither is that constant. The Button's
 corner and label are the Button's to restyle; the pond's logs and its gear are
 not, and they must not move when it does.</p>
+<h2 id="colours">Colours<a class="headerlink" href="#colours" title="Link to this section">&para;</a></h2>
+<p>The board is a pond. <strong>Blue water, brown logs, green lily pads</strong> — Derek's
+decision, in his words, on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/291">issue #291</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The water — the pond, and the whole screen behind it</td>
+<td><code>PondWater</code></td>
+<td><code>#9FD8F2</code></td>
+</tr>
+<tr>
+<td>Lily pad</td>
+<td><code>LilyPadGreen</code></td>
+<td><code>#CCEAAF</code></td>
+</tr>
+<tr>
+<td>Lily pad rim</td>
+<td><code>LilyPadEdge</code></td>
+<td><code>#7FAE5E</code></td>
+</tr>
+<tr>
+<td>Log</td>
+<td><code>LogBrown</code></td>
+<td><code>#E2C79C</code></td>
+</tr>
+<tr>
+<td>Log rim</td>
+<td><code>LogEdge</code></td>
+<td><code>#A97F4F</code></td>
+</tr>
+<tr>
+<td>Header and controls bands</td>
+<td><code>BandFill</code></td>
+<td><code>#E2E8E5</code></td>
+</tr>
+<tr>
+<td>Band hairline</td>
+<td><code>BandEdge</code></td>
+<td><code>#B9C0BD</code></td>
+</tr>
+<tr>
+<td>The board's words</td>
+<td><code>BoardInk</code></td>
+<td><code>#1E2422</code></td>
+</tr>
+<tr>
+<td>Frog piece outline</td>
+<td><code>PieceEdge</code></td>
+<td>black at 35%</td>
+</tr>
+</tbody>
+</table>
+<p>The four frog colours are not here. They are one table for the whole game, on
+<a href="../shared-components/#frog-colours">shared components</a>, because a frog is the
+same frog on every screen.</p>
+<p><code>TrackOutline</code> (3 px), <code>BoardBandOutline</code> (3 px) and <code>FrogPieceOutline</code> (4 px)
+in the tables above are <strong>widths</strong>; the <code>…Edge</code> rows here are the colours drawn
+at those widths.</p>
+<h3 id="placeholder-or-settled">Placeholder, or settled?<a class="headerlink" href="#placeholder-or-settled" title="Link to this section">&para;</a></h3>
+<p><strong>Settled:</strong> the water is blue, the logs are brown, the lily pads are green.
+That is a decision, not a proposal, and nothing should quietly walk it back.</p>
+<p><strong>Not settled:</strong> which blue, which brown, which green. The exact hues are a
+taste call and they are Connor's — see
+<a href="#open-questions">the open questions</a>. The values in the table are the proposal
+drawn in the mockups, and they are what the code carries until he has looked at
+the board on the tablet. They are honest placeholders in exactly the sense the
+<a href="../shared-components/#frog-colours">frog colours</a> are, and for the same reason.</p>
+<h3 id="the-water-is-the-whole-screen">The water is the whole screen<a class="headerlink" href="#the-water-is-the-whole-screen" title="Link to this section">&para;</a></h3>
+<p><code>PondWater</code> is not the pond band's fill. It is what this screen paints to all
+four edges of the device, on any aspect ratio — the header and controls bands
+are drawn on top of it, and so is everything else.</p>
+<p>That makes the board the one screen that does not paint the app's own
+background. Every other screen paints <code>#EDF1EF</code>, and so does the scene camera,
+which is what shows for the frame before any screen has painted at all. The
+rule from
+<a href="../shared-components/#what-fills-a-screen-that-is-not-1610">the canvas every component is measured in</a>
+is unchanged and still holds here: nothing behind the canvas is ever visible,
+because this screen's own paint reaches the edges.</p>
+<h3 id="keeping-the-frogs-visible">Keeping the frogs visible<a class="headerlink" href="#keeping-the-frogs-visible" title="Link to this section">&para;</a></h3>
+<p>A blue pond behind a blue frog, and a green lily pad under a green frog, is the
+thing this change could have broken. The frog pieces are drawn <strong>on top of</strong>
+these fills, and two of the four are <code>FrogGreen</code> and <code>FrogBlue</code>.</p>
+<p>So the fills are chosen against a bar, and the bar is part of the spec:</p>
+<blockquote>
+<p><strong>Every frog colour stays clearly separable from every surface it can sit
+on</strong> — the water, a lily pad, and a log. Separable means a luminance contrast
+of at least <strong>1.9 : 1</strong> <em>and</em> a CIE L*a*b* distance (ΔE*ab) of at least
+<strong>30</strong>.</p>
+</blockquote>
+<p>Two measures, because either alone can be fooled. Contrast catches two colours
+of different hue and identical brightness, which is all a colour-blind player —
+or anyone holding the tablet in sunlight — has left. ΔE catches two colours a
+contrast ratio calls fine and nobody could name apart. The 4 px <code>PieceEdge</code>
+outline is separation on top of this, never instead of it.</p>
+<p>What the table's values measure, as <em>contrast : 1 / ΔE</em>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>The water</th>
+<th>A lily pad</th>
+<th>A log</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FrogGreen</code></td>
+<td>2.61 / 60.4</td>
+<td>3.07 / <strong>40.8</strong></td>
+<td>2.48 / 50.7</td>
+</tr>
+<tr>
+<td><code>FrogBlue</code></td>
+<td>3.47 / 46.8</td>
+<td>4.08 / 83.0</td>
+<td>3.29 / 75.5</td>
+</tr>
+<tr>
+<td><code>FrogOrange</code></td>
+<td>2.13 / 87.9</td>
+<td>2.51 / 65.8</td>
+<td><strong>2.02</strong> / 46.0</td>
+</tr>
+<tr>
+<td><code>FrogPink</code></td>
+<td>2.91 / 73.8</td>
+<td>3.42 / 89.5</td>
+<td>2.76 / 67.6</td>
+</tr>
+</tbody>
+</table>
+<p>Every pair clears the bar. The two tightest are the two the change was always
+going to squeeze: the green frog on a green lily pad (ΔE 40.8, on a bar of 30)
+and the orange frog on a brown log (contrast 2.02 : 1, on a bar of 1.9). If a
+future repaint cannot clear the bar, <strong>the surface moves, not the frog</strong> — the
+frog colours are an <code>area:art</code> decision that this page does not own.</p>
+<p>One number in that palette is deliberately low and is not about frogs: the log
+and the water are almost the same brightness (1.05 : 1) and a long way apart in
+hue (ΔE 46.3). What makes a log read as a log floating on water is its
+<code>LogEdge</code> rim, which is 2.33 : 1 against the water. That is what <code>TrackOutline</code>
+is for.</p>
+<h3 id="the-bands-are-unchanged-deliberately">The bands are unchanged, deliberately<a class="headerlink" href="#the-bands-are-unchanged-deliberately" title="Link to this section">&para;</a></h3>
+<p><code>BandFill</code> and <code>BandEdge</code> are the pale grey-green they have always been. They
+were chosen to sit against a pale board and they now sit against blue water,
+where they are a soft frame rather than a crisp one — ΔE 23 from the water.</p>
+<p>They were left alone on purpose rather than overlooked: Derek's words were
+about the pond, and repainting the chrome on the way past would have made the
+change harder to judge. Whether they now read as a frame or as leftovers is
+<a href="#open-questions">the second open question</a>, and it is a look-at-it call.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Turn banner</strong> — <code>Green frog's turn</code>, left of the header, with that frog's
@@ -2572,10 +2851,23 @@ not, and they must not move when it does.</p>
   quit, and it never quits without the confirm.</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
-<p><a href="../mockups/game-board.html"><code>mockups/game-board.html</code></a></p>
+<p><a href="../mockups/game-board.html"><code>mockups/game-board.html</code></a> — and, until Connor has
+picked the water, <a href="../mockups/game-board-paler-water.html"><code>mockups/game-board-paler-water.html</code></a>
+beside it.</p>
+<p>The two files differ in <strong>one value</strong>: <code>PondWater</code>. <code>game-board.html</code> draws the
+proposal in the table above, <code>#9FD8F2</code>; the second draws <code>#B5E3F7</code>, the same
+blue with more light in it. Everything else on the two canvases is identical to
+the pixel. Open both on the tablet, one after the other, and say which is the
+pond — comparing two pictures is a much easier conversation than critiquing
+one, and the losing file is deleted when the answer arrives, the way
+<code>title-screen-resume-primary.html</code> was.</p>
 <p>Drawn in the state that exercises every case at once: four frogs, one home on
 the End log, one still on its Start log, two mid-lane, Green to roll — and
 <strong>exactly two logs on the whole screen</strong>, which is the thing to look at.</p>
+<p>Every one of the four frogs is drawn on something it has to be legible
+against — Green and Pink on lily pads, Orange on the Start log, Blue home on
+the End log — so <a href="#keeping-the-frogs-visible">the contrast question</a> is
+visible in the picture rather than only asserted in a table.</p>
 <p>It draws the proposal on all three open questions below: the logs span the four
 lanes in play and no further, each frog sits on its own lane's centre line, and
 the corner and outline are the <code>LogRadius</code> and <code>TrackOutline</code> they always were.
@@ -2586,6 +2878,20 @@ decided against; keeping a mockup of a layout nobody is building is how a
 <code>mockups/</code> folder stops being trustworthy.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
+<li><strong>Which blue is the water?</strong> Blue is settled; this blue is not. Two are drawn
+  — <code>#9FD8F2</code> in <code>game-board.html</code> and the paler <code>#B5E3F7</code> beside it — and
+  Connor picks, on the tablet, at 1:1. Both clear
+  <a href="#keeping-the-frogs-visible">the separability bar</a>, so either can be taken as
+  it stands; a third blue of his own choosing has to be measured against that
+  bar before it lands. The same is true of <code>LogBrown</code> and <code>LilyPadGreen</code>, which
+  are drawn once each rather than twice — say if either is wrong and it gets
+  the same treatment.</li>
+<li><strong>Do the header and controls bands change?</strong> They are <code>BandFill</code>, the pale
+  grey-green chosen to sit against a pale board, and this change
+  <a href="#the-bands-are-unchanged-deliberately">deliberately left them alone</a>. Against
+  blue water they either read as a clean frame or as leftovers from the old
+  look, and that is a thing to see rather than to argue about. If they should
+  change, this is where it gets decided.</li>
 <li><strong>Do the unused lanes show?</strong> The classroom board always has eight lanes,
   whoever is playing. The mockups draw only the lanes in play, because empty
   lanes on a screen this size cost the ones in play their height. Presentation,
