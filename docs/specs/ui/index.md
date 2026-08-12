@@ -69,7 +69,7 @@ re-describing the layout each time. The [game board](game-board.md)'s three:
 | Region | Job |
 | --- | --- |
 | `header` | whose turn it is, and the settings button |
-| `pond` | the lanes — one per frog in the game |
+| `pond` | the lanes — one per frog in the game — and the two logs they share |
 | `controls` | the `Roll` button |
 
 ### 4. Anchors
