@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Frogs.Core;
 using UnityEngine;
 using UnityEngine.UI;
+using BoardColours = Frogs.Unity.UI.BoardColours;
 using FrogColours = Frogs.Unity.UI.FrogColours;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
@@ -60,16 +61,12 @@ namespace Frogs.Unity.Views
         // whatever Lane reports; the denominator is Lane.LaneWinningPosition.
         const string PadCountFormat = "{0} of {1}";
 
-        // Chrome colours copied verbatim from the committed mockup
-        // (docs/specs/ui/mockups/game-board.html) — the same line Button.cs,
-        // PlayerChip.cs and GameSetupScreenView.cs each draw for their own
-        // colours: not a geometry constant on any spec page's table, so not
-        // declared as a named spec constant.
-        static readonly Color LilyPadColor = new Color32(0xCF, 0xE0, 0xD2, 0xFF); // mockup's .pad fill
-        static readonly Color LilyPadOutlineColor = new Color32(0x9F, 0xB8, 0xA5, 0xFF); // mockup's .pad border
-        static readonly Color LogColor = new Color32(0xE0, 0xD4, 0xC3, 0xFF); // mockup's .log fill
-        static readonly Color LogOutlineColor = new Color32(0xB9, 0xA7, 0x8E, 0xFF); // mockup's .log border
-        static readonly Color PieceOutlineColor = new Color(0f, 0f, 0f, 0.35f); // mockup's .frog border
+        // The track's colours are docs/specs/ui/game-board.md § Colours,
+        // received by name from BoardColours exactly as the geometry above is
+        // received from that page's constants table. They used to be private
+        // hex values here, copied out of the mockup's CSS; issue #291 gave
+        // them a home on the spec page and this file the same relationship to
+        // them it already had to every other number on this screen.
 
         static Sprite s_logSprite;
         static Sprite s_logFillSprite;
@@ -526,7 +523,7 @@ namespace Frogs.Unity.Views
                 var outline = positionGO.GetComponent<Image>();
                 outline.sprite = isLog ? LogSprite : LilyPadSprite;
                 outline.type = Image.Type.Sliced;
-                outline.color = isLog ? LogOutlineColor : LilyPadOutlineColor;
+                outline.color = isLog ? BoardColours.LogEdge : BoardColours.LilyPadEdge;
                 outline.raycastTarget = false;
 
                 var positionRect = outline.rectTransform;
@@ -541,7 +538,7 @@ namespace Frogs.Unity.Views
                 var fill = fillGO.GetComponent<Image>();
                 fill.sprite = isLog ? LogFillSprite : LilyPadFillSprite;
                 fill.type = Image.Type.Sliced;
-                fill.color = isLog ? LogColor : LilyPadColor;
+                fill.color = isLog ? BoardColours.LogBrown : BoardColours.LilyPadGreen;
                 fill.raycastTarget = false;
 
                 var fillRect = fill.rectTransform;
@@ -568,7 +565,7 @@ namespace Frogs.Unity.Views
             _pieceOutline = pieceGO.GetComponent<Image>();
             _pieceOutline.sprite = PieceSprite;
             _pieceOutline.type = Image.Type.Sliced;
-            _pieceOutline.color = PieceOutlineColor;
+            _pieceOutline.color = BoardColours.PieceEdge;
             _pieceOutline.raycastTarget = false;
 
             _pieceRect = _pieceOutline.rectTransform;

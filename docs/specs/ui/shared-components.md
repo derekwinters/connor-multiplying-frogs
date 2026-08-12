@@ -91,15 +91,22 @@ appears there, and no element grows into it. An element that only exists on
 some devices is an element nobody can review against a mockup, and every mockup
 in this repo is drawn at exactly one size.
 
-**Invariant:** nothing behind the canvas is ever visible. The scene camera
-clears to the same background colour rather than to the engine's default sky,
-so even a frame drawn before any screen has painted is the game's own colour.
+**Invariant:** nothing behind the canvas is ever visible. Whatever a screen
+paints, it paints to all four edges, and the scene camera clears to the app's
+background rather than to the engine's default sky — so even a frame drawn
+before any screen has painted is the game's own colour.
 
-That background colour is the mockups' `--bg`, `#EDF1EF` — the colour every
-committed mockup paints its 1920 × 1200 frame. A dialog is the one screen that
-paints no background of its own: what it lays over the screen underneath is the
-[scrim](#dialog), and the scrim reaches the edges for the same reason and by
-the same rule.
+The app's background is the mockups' `--bg`, `#EDF1EF`. The title screen, game
+setup and game over paint it, and it is what the camera clears to.
+
+**The game board is the exception, and the only one.** It paints
+[`PondWater`](game-board.md#colours) instead, to the same four edges by the same
+rule, because that screen is a pond rather than a page. A screen may have a
+background of its own; what it may not do is leave any of the screen unpainted.
+
+A dialog is the one screen that paints no background at all: what it lays over
+the screen underneath is the [scrim](#dialog), and the scrim reaches the edges
+for the same reason and by the same rule.
 
 ### Why the numbers look big
 

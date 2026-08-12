@@ -205,6 +205,109 @@ and `ButtonLabelSize` also 44 px — and neither is that constant. The Button's
 corner and label are the Button's to restyle; the pond's logs and its gear are
 not, and they must not move when it does.
 
+## Colours
+
+The board is a pond. **Blue water, brown logs, green lily pads** — Derek's
+decision, in his words, on
+[issue #291](https://github.com/derekwinters/connor-multiplying-frogs/issues/291).
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| The water — the pond, and the whole screen behind it | `PondWater` | `#9FD8F2` |
+| Lily pad | `LilyPadGreen` | `#CCEAAF` |
+| Lily pad rim | `LilyPadEdge` | `#7FAE5E` |
+| Log | `LogBrown` | `#E2C79C` |
+| Log rim | `LogEdge` | `#A97F4F` |
+| Header and controls bands | `BandFill` | `#E2E8E5` |
+| Band hairline | `BandEdge` | `#B9C0BD` |
+| The board's words | `BoardInk` | `#1E2422` |
+| Frog piece outline | `PieceEdge` | black at 35% |
+
+The four frog colours are not here. They are one table for the whole game, on
+[shared components](shared-components.md#frog-colours), because a frog is the
+same frog on every screen.
+
+`TrackOutline` (3 px), `BoardBandOutline` (3 px) and `FrogPieceOutline` (4 px)
+in the tables above are **widths**; the `…Edge` rows here are the colours drawn
+at those widths.
+
+### Placeholder, or settled?
+
+**Settled:** the water is blue, the logs are brown, the lily pads are green.
+That is a decision, not a proposal, and nothing should quietly walk it back.
+
+**Not settled:** which blue, which brown, which green. The exact hues are a
+taste call and they are Connor's — see
+[the open questions](#open-questions). The values in the table are the proposal
+drawn in the mockups, and they are what the code carries until he has looked at
+the board on the tablet. They are honest placeholders in exactly the sense the
+[frog colours](shared-components.md#frog-colours) are, and for the same reason.
+
+### The water is the whole screen
+
+`PondWater` is not the pond band's fill. It is what this screen paints to all
+four edges of the device, on any aspect ratio — the header and controls bands
+are drawn on top of it, and so is everything else.
+
+That makes the board the one screen that does not paint the app's own
+background. Every other screen paints `#EDF1EF`, and so does the scene camera,
+which is what shows for the frame before any screen has painted at all. The
+rule from
+[the canvas every component is measured in](shared-components.md#what-fills-a-screen-that-is-not-1610)
+is unchanged and still holds here: nothing behind the canvas is ever visible,
+because this screen's own paint reaches the edges.
+
+### Keeping the frogs visible
+
+A blue pond behind a blue frog, and a green lily pad under a green frog, is the
+thing this change could have broken. The frog pieces are drawn **on top of**
+these fills, and two of the four are `FrogGreen` and `FrogBlue`.
+
+So the fills are chosen against a bar, and the bar is part of the spec:
+
+> **Every frog colour stays clearly separable from every surface it can sit
+> on** — the water, a lily pad, and a log. Separable means a luminance contrast
+> of at least **1.9 : 1** *and* a CIE L\*a\*b\* distance (ΔE\*ab) of at least
+> **30**.
+
+Two measures, because either alone can be fooled. Contrast catches two colours
+of different hue and identical brightness, which is all a colour-blind player —
+or anyone holding the tablet in sunlight — has left. ΔE catches two colours a
+contrast ratio calls fine and nobody could name apart. The 4 px `PieceEdge`
+outline is separation on top of this, never instead of it.
+
+What the table's values measure, as *contrast : 1 / ΔE*:
+
+| | The water | A lily pad | A log |
+| --- | --- | --- | --- |
+| `FrogGreen` | 2.61 / 60.4 | 3.07 / **40.8** | 2.48 / 50.7 |
+| `FrogBlue` | 3.47 / 46.8 | 4.08 / 83.0 | 3.29 / 75.5 |
+| `FrogOrange` | 2.13 / 87.9 | 2.51 / 65.8 | **2.02** / 46.0 |
+| `FrogPink` | 2.91 / 73.8 | 3.42 / 89.5 | 2.76 / 67.6 |
+
+Every pair clears the bar. The two tightest are the two the change was always
+going to squeeze: the green frog on a green lily pad (ΔE 40.8, on a bar of 30)
+and the orange frog on a brown log (contrast 2.02 : 1, on a bar of 1.9). If a
+future repaint cannot clear the bar, **the surface moves, not the frog** — the
+frog colours are an `area:art` decision that this page does not own.
+
+One number in that palette is deliberately low and is not about frogs: the log
+and the water are almost the same brightness (1.05 : 1) and a long way apart in
+hue (ΔE 46.3). What makes a log read as a log floating on water is its
+`LogEdge` rim, which is 2.33 : 1 against the water. That is what `TrackOutline`
+is for.
+
+### The bands are unchanged, deliberately
+
+`BandFill` and `BandEdge` are the pale grey-green they have always been. They
+were chosen to sit against a pale board and they now sit against blue water,
+where they are a soft frame rather than a crisp one — ΔE 23 from the water.
+
+They were left alone on purpose rather than overlooked: Derek's words were
+about the pond, and repainting the chrome on the way past would have made the
+change harder to judge. Whether they now read as a frame or as leftovers is
+[the second open question](#open-questions), and it is a look-at-it call.
+
 ## Elements
 
 - **Turn banner** — `Green frog's turn`, left of the header, with that frog's
@@ -262,11 +365,26 @@ not, and they must not move when it does.
 
 ## Mockup
 
-[`mockups/game-board.html`](mockups/game-board.html)
+[`mockups/game-board.html`](mockups/game-board.html) — and, until Connor has
+picked the water, [`mockups/game-board-paler-water.html`](mockups/game-board-paler-water.html)
+beside it.
+
+The two files differ in **one value**: `PondWater`. `game-board.html` draws the
+proposal in the table above, `#9FD8F2`; the second draws `#B5E3F7`, the same
+blue with more light in it. Everything else on the two canvases is identical to
+the pixel. Open both on the tablet, one after the other, and say which is the
+pond — comparing two pictures is a much easier conversation than critiquing
+one, and the losing file is deleted when the answer arrives, the way
+`title-screen-resume-primary.html` was.
 
 Drawn in the state that exercises every case at once: four frogs, one home on
 the End log, one still on its Start log, two mid-lane, Green to roll — and
 **exactly two logs on the whole screen**, which is the thing to look at.
+
+Every one of the four frogs is drawn on something it has to be legible
+against — Green and Pink on lily pads, Orange on the Start log, Blue home on
+the End log — so [the contrast question](#keeping-the-frogs-visible) is
+visible in the picture rather than only asserted in a table.
 
 It draws the proposal on all three open questions below: the logs span the four
 lanes in play and no further, each frog sits on its own lane's centre line, and
@@ -280,6 +398,20 @@ decided against; keeping a mockup of a layout nobody is building is how a
 
 ## Open questions
 
+- **Which blue is the water?** Blue is settled; this blue is not. Two are drawn
+  — `#9FD8F2` in `game-board.html` and the paler `#B5E3F7` beside it — and
+  Connor picks, on the tablet, at 1:1. Both clear
+  [the separability bar](#keeping-the-frogs-visible), so either can be taken as
+  it stands; a third blue of his own choosing has to be measured against that
+  bar before it lands. The same is true of `LogBrown` and `LilyPadGreen`, which
+  are drawn once each rather than twice — say if either is wrong and it gets
+  the same treatment.
+- **Do the header and controls bands change?** They are `BandFill`, the pale
+  grey-green chosen to sit against a pale board, and this change
+  [deliberately left them alone](#the-bands-are-unchanged-deliberately). Against
+  blue water they either read as a clean frame or as leftovers from the old
+  look, and that is a thing to see rather than to argue about. If they should
+  change, this is where it gets decided.
 - **Do the unused lanes show?** The classroom board always has eight lanes,
   whoever is playing. The mockups draw only the lanes in play, because empty
   lanes on a screen this size cost the ones in play their height. Presentation,

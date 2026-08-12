@@ -8,10 +8,11 @@
   the colours: game-board.md now has a Colours table, and --water, --pad,
   --pad-edge, --log and --log-edge below are its rows.
 
-  THE POND IS WATER. Blue water, brown logs, green lily pads — Derek's call on
-  issue #291. Blue is settled; WHICH blue is Connor's, and there are two files:
-  this one draws PondWater #9FD8F2, and game-board-paler-water.html draws
-  #B5E3F7. They differ in that one value and in nothing else. Open both.
+  THE PALER WATER. This file exists to be compared with game-board.html and for
+  no other reason. It draws PondWater as #B5E3F7 — the same blue as that file's
+  #9FD8F2 with more light in it — and every other pixel on the canvas is
+  identical. Open both on the tablet, one after the other, and say which one is
+  the pond. Whichever loses gets deleted.
 
   Every frog is drawn on something it has to be legible against — Green and
   Pink on lily pads, Orange on the Start log, Blue home on the End log — so the
@@ -46,15 +47,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Multiplying Frogs — Game board</title>
+<title>Multiplying Frogs — Game board, paler water</title>
 <style>
   :root{
     --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
     --accent:#2E7D4F; --warn:#B03A2E;
     --green:#3F8E4F; --blue:#2C6DAF; --orange:#D2762B; --pink:#C24C86;
     /* game-board.md's Colours table. The one line that differs between this
-       file and game-board-paler-water.html is --water. */
-    --water:#9FD8F2;
+       file and game-board.html is --water. */
+    --water:#B5E3F7;
     --pad:#CCEAAF; --pad-edge:#7FAE5E;
     --log:#E2C79C; --log-edge:#A97F4F;
     --band:#E2E8E5;
