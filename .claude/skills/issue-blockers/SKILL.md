@@ -74,6 +74,10 @@ and native blockers are merged. Every reader in the pipeline imports it — the
 sweep, the queue selector, the reconciler, the dashboard, the comment-event
 snapshot, and `audit` here.
 
+It owns the soft `Depends on: #N` line as well, as `text_depends_on`. That one
+had a single reader — the builder's queue order — until the gatekeeper's
+milestone-order gate became its second.
+
 ```python
 _BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
 if str(_BLOCKERS_SKILL) not in sys.path:

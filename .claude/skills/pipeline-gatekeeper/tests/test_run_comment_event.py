@@ -4,6 +4,7 @@ The API is injected as a callable, so the ordering decisions — which are the
 part that can actually be wrong — are asserted without a network call.
 """
 
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -14,14 +15,19 @@ import run_comment_event as runner  # noqa: E402
 
 OWNER = "derekwinters"
 
+ONE_ISSUE = re.compile(r"^/issues/(\d+)$")
+
 
 class RecordingApi:
     """Records every call, answers the reads the runner makes."""
 
-    def __init__(self, reactions=None, dependencies=None):
+    def __init__(self, reactions=None, dependencies=None, issues=None):
         self.calls = []
         self._reactions = reactions or []
         self._dependencies = dependencies or []
+        # The issues a dependency edge might point at, by number, in GitHub's
+        # own shape — the snapshot reads each one to learn its milestone.
+        self._issues = dict(issues or {})
 
     def __call__(self, method, path, body=None):
         self.calls.append((method, path, body))
@@ -30,6 +36,11 @@ class RecordingApi:
             return self._reactions
         if path.endswith("/blocked_by"):
             return self._dependencies
+
+        match = ONE_ISSUE.match(path)
+        if match and method == "GET":
+            return self._issues.get(int(match.group(1)), {})
+
         return {}
 
     def methods_on(self, fragment):
@@ -41,13 +52,13 @@ class RecordingApi:
 
 
 def event(body="/approve", author=OWNER, labels=("pending-approval",),
-          milestone="v0.0.1", number=10, is_dashboard=False):
+          milestone="v0.0.1", number=10, is_dashboard=False, issue_body=""):
     return {
         "issue": {
             "number": number,
             "labels": [{"name": name} for name in labels]
                       + ([{"name": "dashboard"}] if is_dashboard else []),
-            "body": "",
+            "body": issue_body,
             "milestone": {"title": milestone} if milestone else None,
         },
         "comment": {"id": 999, "body": body, "user": {"login": author, "type": "User"}},
@@ -145,6 +156,91 @@ class WatermarkTests(unittest.TestCase):
             {"content": "eyes", "user": {"login": "github-actions[bot]"}}])
         result = runner.run(event(), api, owner=OWNER, rerender=lambda **kw: None)
         self.assertFalse(result.applied)
+
+
+class GateRefusalTests(unittest.TestCase):
+    """A refused command must come back as an explanation, not an exception.
+
+    The two refusal tests above it come from the *parser* — not-owner and
+    already-watermarked — and never reach a gate. Nothing exercised a gate
+    through the runner, so two separate shape mismatches on this path went
+    unnoticed until the workflow started failing on Derek's `/approve`:
+    the snapshot hands the gates bare issue numbers where they read edges,
+    and the refusal was assembled from a `Verdict` field that does not exist.
+    """
+
+    def refuse(self, api=None, **kwargs):
+        api = api or RecordingApi()
+        result = runner.run(event(**kwargs), api, owner=OWNER, rerender=lambda **kw: None)
+        return api, result
+
+    def posted(self, api):
+        return "\n".join(
+            (body or {}).get("body", "")
+            for method, path, body in api.writes if path.endswith("/comments"))
+
+    def test_an_approve_with_no_milestone_is_explained(self):
+        api, result = self.refuse(milestone=None)
+
+        self.assertFalse(result.applied)
+        self.assertIn("milestone", self.posted(api))
+
+    def test_a_blocker_in_a_later_milestone_is_explained(self):
+        """The failure in the run: the gate read `20` where it expected an edge."""
+        api = RecordingApi(
+            issues={20: {"number": 20, "state": "open", "milestone": {"title": "v0.1"}}})
+
+        api, result = self.refuse(api=api, issue_body="Blocked by #20", milestone="v0.0.1")
+
+        self.assertFalse(result.applied)
+        self.assertIn("#20", self.posted(api))
+
+    def test_a_soft_dependency_in_a_later_milestone_is_explained(self):
+        api = RecordingApi(
+            issues={30: {"number": 30, "state": "open", "milestone": {"title": "v0.1"}}})
+
+        api, result = self.refuse(api=api, issue_body="Depends on: #30", milestone="v0.0.1")
+
+        self.assertIn("#30", self.posted(api))
+
+    def test_a_blocker_in_an_earlier_milestone_still_approves(self):
+        api = RecordingApi(
+            issues={20: {"number": 20, "state": "open", "milestone": {"title": "v0.0.1"}}})
+
+        api, result = self.refuse(api=api, issue_body="Blocked by #20", milestone="v0.1")
+
+        self.assertTrue(result.applied)
+
+    def test_a_closed_blocker_constrains_nothing(self):
+        api = RecordingApi(
+            issues={20: {"number": 20, "state": "closed", "milestone": {"title": "v0.1"}}})
+
+        api, result = self.refuse(api=api, issue_body="Blocked by #20", milestone="v0.0.1")
+
+        self.assertTrue(result.applied)
+
+    def test_a_refusal_changes_no_labels(self):
+        api, _ = self.refuse(milestone=None)
+
+        self.assertEqual([], [p for m, p, _ in api.writes if p.endswith("/labels")])
+
+    def test_a_refusal_is_watermarked(self):
+        """Or the sweep reconsiders it forever, re-posting the same refusal."""
+        api, _ = self.refuse(milestone=None)
+
+        self.assertIn("POST", api.methods_on("/reactions"))
+
+    def test_the_refusal_carries_the_gate_s_prose_not_its_skip_code(self):
+        """`Skip(reason, detail)` is a code and prose, in that order.
+
+        `Verdict` names the same pair the other way round, and swapping them
+        posts an acknowledgement reading "was not applied. approve-no-milestone"
+        — and, worse, hands `SILENT_SKIPS` a sentence to match against codes.
+        """
+        api, _ = self.refuse(milestone=None)
+
+        self.assertNotIn("approve-no-milestone", self.posted(api))
+        self.assertIn("`/milestone <title>`", self.posted(api))
 
 
 class ResultingLabelsTests(unittest.TestCase):

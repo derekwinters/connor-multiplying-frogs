@@ -181,20 +181,48 @@ it up next time.
 
 ### The snapshot
 
-`fetch_comment_event.py` turns the raw webhook payload into what the parser
-reads: the issue's number, labels, body, milestone, blockers (text ∪ native),
-whether it is the dashboard, and the comment itself. All the payload-shape
-guesswork lives there so the parser never has to know what GitHub's JSON looks
-like.
+`fetch_comment_event.py` turns the raw webhook payload into what the parser and
+the gates read: the issue's number, labels, body, milestone, blockers
+(text ∪ native), its soft `Depends on:` dependencies, whether it is the
+dashboard, and the comment itself. All the payload-shape guesswork lives there
+so the parser never has to know what GitHub's JSON looks like.
 
-It returns nothing at all for a comment on a pull request or from a bot —
-defence in depth, since the workflow filters those too, but a snapshot the
+#### A dependency is an edge, not a number
+
+`blockers` and `soft_dependencies` are lists of **edges**:
+
+```json
+{"number": 20, "state": "open", "milestone": "v0.1"}
+```
+
+Not `[20]`. The [milestone-order gate](#gate-2-milestone-order) is a comparison
+between two milestones, so it needs the blocker's own milestone and its own
+state — a list of issue numbers is not something it can answer with. The
+snapshot reads each edge's issue to fill them in, one request per edge, rather
+than trusting the dependency endpoint's payload to carry a `milestone` field:
+a shape that quietly omitted it would read as unscheduled and refuse every
+approval, and that is not a thing to guess at.
+
+An issue that is both a blocker and a `Depends on:` is one edge, the hard one.
+It is already the stronger of the two, and listing it twice only names it twice
+in the refusal.
+
+#### A partial payload is tolerated; an unreadable edge is not approved over
+
+The builder returns nothing at all for a comment on a pull request or from a
+bot — defence in depth, since the workflow filters those too, but a snapshot the
 parser *could* act on is one it eventually will.
 
-It also tolerates a partial payload rather than throwing. A failed
-dependency lookup in particular does not lose the event: the command is
-probably `/park`, which does not care, and the gates that *do* care see a
-smaller blocker list and refuse — which is the safe direction.
+It also tolerates a partial payload rather than throwing. A failed **dependency
+lookup** does not lose the event: the command is probably `/park`, which does
+not care, and the `Blocked by #N` lines in the body are still read.
+
+An edge whose **issue** cannot be read is a different case, and it is kept
+rather than dropped — as open, with no milestone, which is exactly the shape the
+order gate refuses on. Approving over a dependency nobody can see is the
+expensive direction: the issue goes ready, the builder skips it every night
+because the blocker is still open, and nothing says why. A refusal costs one
+comment.
 
 ## Replaying the comments the webhook lost
 
@@ -384,6 +412,11 @@ dashboard, the comment-event snapshot, and `audit`.
 `issue-blockers` owns them because it is the skill that documents the format —
 the same "the side that writes the format owns the recognizer" rule that put
 `has_analysis_signature` in `triage-issue`.
+
+The soft `Depends on: #42` line lives there too, as `text_depends_on`. It was a
+single-reader pattern sitting in `select_queue.py` right up until the approval
+gates became its second reader, and a second copy would have let the queue and
+the gate disagree about what the same body said.
 
 The pattern used to be written out in each reader, and the drift is silent in
 the worst way: the queue selector reads a line as a blocker and refuses to

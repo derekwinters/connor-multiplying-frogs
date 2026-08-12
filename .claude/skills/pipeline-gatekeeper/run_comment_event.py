@@ -119,8 +119,12 @@ def _apply_gates(outcome, issue):
         if verdict is None:
             actions.append(action)
         else:
+            # `Skip` is (code, prose); `Verdict` names the same pair the other
+            # way round. Swapped, the acknowledgement reads "was not applied.
+            # approve-no-milestone" and — worse — `SILENT_SKIPS` gets a
+            # sentence to match against codes like `not-owner`.
             skips.append(parse_commands.Skip(
-                verdict.reason, verdict.detail, action.command))
+                verdict.skip_reason, verdict.reason, action.command))
 
     return actions, skips
 

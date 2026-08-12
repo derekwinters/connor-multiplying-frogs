@@ -43,6 +43,43 @@ class TextBlockers(unittest.TestCase):
         self.assertEqual(set(), blocker_refs.text_blockers(None))
 
 
+class TextDependsOn(unittest.TestCase):
+    """The soft-ordering line lives here for the same reason the hard one does.
+
+    It has two readers now — the builder's queue order and the gatekeeper's
+    milestone-order gate — and two copies of a pattern is how the two disagree
+    about what the body said.
+    """
+
+    def test_a_structured_line_is_a_soft_dependency(self):
+        self.assertEqual({42}, blocker_refs.text_depends_on("Depends on: #42"))
+
+    def test_the_colonless_form_and_case_are_both_accepted(self):
+        self.assertEqual({42}, blocker_refs.text_depends_on("depends on #42"))
+
+    def test_a_blocker_is_not_a_soft_dependency(self):
+        self.assertEqual(set(), blocker_refs.text_depends_on("Blocked by #42"))
+
+    def test_a_mention_in_ordinary_prose_is_not_one(self):
+        self.assertEqual(set(), blocker_refs.text_depends_on("This depends on how #42 goes."))
+
+    def test_no_body_is_no_soft_dependencies(self):
+        self.assertEqual(set(), blocker_refs.text_depends_on(None))
+
+    def test_the_builder_reads_the_shared_pattern(self):
+        """`select_queue` orders by these lines; it must not carry its own copy."""
+        sys.path.insert(0, str(SKILLS / "pipeline-dev"))
+        try:
+            import select_queue
+
+            wider = re.compile(r"^\s*depends[\s-]+on\s*:?\s*#(\d+)\s*$",
+                               re.IGNORECASE | re.MULTILINE)
+            with mock.patch.object(blocker_refs, "TEXT_DEPENDS", wider):
+                self.assertEqual([42], select_queue.depends_on({"body": "Depends-on: #42"}))
+        finally:
+            sys.path.remove(str(SKILLS / "pipeline-dev"))
+
+
 class UnionBlockers(unittest.TestCase):
     def test_text_and_native_are_unioned(self):
         self.assertEqual([20, 21], blocker_refs.union_blockers("Blocked by #20", {21}))
@@ -107,7 +144,9 @@ def _every_reader() -> dict:
                  "comment": {"id": 5, "body": "/approve",
                              "user": {"login": "derekwinters", "type": "User"}}}
         snapshot = fetch_comment_event.build(event, _NoApi(), owner="derekwinters")
-        return snapshot["issue"]["blockers"]
+        # The snapshot carries edges, not numbers — the gates read each one's
+        # milestone. Only the recognizer is under test here.
+        return [edge["number"] for edge in snapshot["issue"]["blockers"]]
 
     return {
         "set_blocker.prose_blockers":

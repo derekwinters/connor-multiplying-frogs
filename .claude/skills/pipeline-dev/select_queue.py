@@ -21,15 +21,16 @@ import re
 import sys
 from pathlib import Path
 
-# One recognizer for `Blocked by #N`, and one union of it with the native
-# edges, shared with the skill that documents the format. A copy here that
-# drifted from the sweep's would refuse to build an issue nothing would ever
-# wake, with nothing reporting a reason. See #147.
+# One recognizer for `Blocked by #N` and one for `Depends on: #N`, and one
+# union of the first with the native edges, shared with the skill that
+# documents both formats. A copy here that drifted from the sweep's would
+# refuse to build an issue nothing would ever wake, with nothing reporting a
+# reason. See #147.
 _BLOCKERS_SKILL = Path(__file__).resolve().parents[1] / "issue-blockers"
 if str(_BLOCKERS_SKILL) not in sys.path:
     sys.path.insert(0, str(_BLOCKERS_SKILL))
 
-from blocker_refs import blockers_of  # noqa: E402
+from blocker_refs import blockers_of, text_depends_on  # noqa: E402
 
 READY_LABEL = "ready-for-work"
 PARKED_LABEL = "parked"
@@ -39,12 +40,6 @@ EPIC_LABEL = "type:epic"
 # on purpose: three issues that land beat six that half-land, and the cap is
 # the only thing standing between a quiet night and thirty open PRs.
 DEFAULT_CAP = 3
-
-# Soft ordering. Does not gate the issue — it sequences it. It has no native
-# form and exactly one reader, so unlike the blocker pattern there is nothing
-# here for it to drift from.
-TEXT_DEPENDS = re.compile(r"^\s*depends\s+on\s*:?\s*#(\d+)\s*$",
-                          re.IGNORECASE | re.MULTILINE)
 
 # GitHub's closing keywords. An issue with an open PR that *closes* it is
 # already being worked; one merely referenced by a PR is not.
@@ -60,7 +55,7 @@ def _numbers(pattern, body) -> set:
 
 def depends_on(issue: dict) -> list:
     """Soft ordering hints. Never gates — see `docs/engineering/issue-pipeline.md`."""
-    return sorted(_numbers(TEXT_DEPENDS, issue.get("body")))
+    return sorted(text_depends_on(issue.get("body")))
 
 
 def closed_by_open_pr(issue_number: int, pulls) -> bool:
