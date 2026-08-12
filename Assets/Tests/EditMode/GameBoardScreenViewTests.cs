@@ -15,6 +15,7 @@ using Frogs.Unity.Views;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
+using Image = UnityEngine.UI.Image;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
 
@@ -157,7 +158,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void Track_IsStartLogSevenLilyPadsAndEndLog_AndTheLaneArithmeticLandsOn1920()
+        public void Track_IsSevenLilyPadsBetweenTheTwoSharedLogColumns_AndTheLaneArithmeticLandsOn1920()
         {
             var view = CreateView(TwoFrogGame());
 
@@ -168,11 +169,24 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(positions.Count, Is.EqualTo(Lane.LanePositionCount));
 
-                var logSize = new Vector2(GameBoardLaneView.LogWidth, GameBoardLaneView.LogHeight);
+                // A lane is still nine positions. Seven of them are its own
+                // lily pads; the two on the ends are where this lane crosses a
+                // log the whole pond shares, so the lane holds a rect there
+                // for its piece to sit on and draws no log of its own.
+                var logColumn = new Vector2(GameBoardScreenView.LogWidth, GameBoardLaneView.LaneHeight);
                 var padSize = new Vector2(GameBoardLaneView.LilyPadDiameter, GameBoardLaneView.LilyPadDiameter);
 
-                Assert.That(positions[0].sizeDelta, Is.EqualTo(logSize), "Start log");
-                Assert.That(positions[Lane.LaneWinningPosition].sizeDelta, Is.EqualTo(logSize), "End log");
+                Assert.That(positions[0].sizeDelta, Is.EqualTo(logColumn), "the Start log's column");
+                Assert.That(positions[Lane.LaneWinningPosition].sizeDelta, Is.EqualTo(logColumn), "the End log's column");
+
+                Assert.That(
+                    positions[0].GetComponent<Image>(),
+                    Is.Null,
+                    "position 0 draws nothing: the Start log under it belongs to the pond");
+                Assert.That(
+                    positions[Lane.LaneWinningPosition].GetComponent<Image>(),
+                    Is.Null,
+                    "position 8 draws nothing: the End log under it belongs to the pond");
 
                 for (var index = 1; index < Lane.LaneWinningPosition; index++)
                 {
@@ -195,7 +209,7 @@ namespace Frogs.Unity.EditModeTests
                 // rather than trusted: two logs, seven pads and eight gaps is
                 // 1520 px of track; plus the chip gutter, one gutter gap and
                 // two safe margins, 1920 px on the nose.
-                var expectedTrackWidth = (2f * GameBoardLaneView.LogWidth)
+                var expectedTrackWidth = (2f * GameBoardScreenView.LogWidth)
                     + ((Lane.LanePositionCount - 2) * GameBoardLaneView.LilyPadDiameter)
                     + ((Lane.LanePositionCount - 1) * GameBoardLaneView.LanePositionGap);
 
@@ -217,18 +231,28 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(lane.Chip.RectTransform.pivot.x, Is.EqualTo(0f).Within(0.001f));
                 Assert.That(lane.Chip.RectTransform.rect.width, Is.EqualTo(GameBoardLaneView.LaneGutterWidth).Within(0.001f));
 
+                // The lane draws seven things and no more — the logs are the
+                // pond's now, so there is no eighth or ninth element here to
+                // walk.
+                Assert.That(
+                    lane.LilyPadFills.Count,
+                    Is.EqualTo(Lane.LanePositionCount - 2),
+                    "seven lily pads — everything else on this lane's track is somebody else's drawing");
+                Assert.That(lane.LilyPadOutlines.Count, Is.EqualTo(Lane.LanePositionCount - 2));
+
                 // Outlines are drawn inside each element's own bounds, so
                 // they cost the 1520 px track nothing.
-                for (var index = 0; index < positions.Count; index++)
+                for (var index = 0; index < lane.LilyPadFills.Count; index++)
                 {
-                    var fill = lane.PositionImages[index].rectTransform;
+                    var position = index + 1;
+                    var fill = lane.LilyPadFills[index].rectTransform;
 
-                    Assert.That(lane.PositionOutlines[index].rectTransform, Is.SameAs(positions[index]));
-                    Assert.That(fill.parent, Is.SameAs(positions[index].transform));
+                    Assert.That(lane.LilyPadOutlines[index].rectTransform, Is.SameAs(positions[position]));
+                    Assert.That(fill.parent, Is.SameAs(positions[position].transform));
                     Assert.That(
                         fill.offsetMin,
                         Is.EqualTo(new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline)),
-                        $"position {index}'s fill is inset by TrackOutline");
+                        $"position {position}'s fill is inset by TrackOutline");
                     Assert.That(
                         fill.offsetMax,
                         Is.EqualTo(new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline)));
@@ -238,6 +262,176 @@ namespace Frogs.Unity.EditModeTests
                     lane.Piece.rectTransform.offsetMin,
                     Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceOutline, GameBoardLaneView.FrogPieceOutline)),
                     "the piece's fill is inset by FrogPieceOutline, so the piece is still FrogPieceDiameter across");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        /// <summary>
+        /// The whole of #296, in one count: the board draws **two** logs,
+        /// however many frogs are playing. It used to draw a pair inside every
+        /// lane, so a four-frog game drew eight.
+        /// </summary>
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        public void Pond_DrawsOneStartLogAndOneEndLogForTheWholeBoard_NotOnePairPerLane(int frogCount)
+        {
+            var view = CreateView(new Game(AllColours.Take(frogCount).ToArray(), AnySeed));
+
+            try
+            {
+                var logs = view
+                    .GetComponentsInChildren<Transform>(true)
+                    .Select(transform => transform.name)
+                    .Where(name => name == "StartLog" || name == "EndLog")
+                    .ToArray();
+
+                Assert.That(
+                    logs.Length,
+                    Is.EqualTo(2),
+                    $"a {frogCount}-frog game draws two logs, not {2 * frogCount}");
+                Assert.That(logs, Is.Unique, "one Start log and one End log, not two of either");
+
+                // They belong to the pond, not to a lane — which is the reason
+                // there are two of them rather than two per frog.
+                Assert.That(view.StartLogOutline.transform.parent, Is.SameAs(view.PondRect.transform));
+                Assert.That(view.EndLogOutline.transform.parent, Is.SameAs(view.PondRect.transform));
+
+                // And they are drawn before the lanes are, so every frog sits
+                // on top of the log rather than under it.
+                foreach (var lane in view.Lanes)
+                {
+                    Assert.That(
+                        lane.RectTransform.GetSiblingIndex(),
+                        Is.GreaterThan(view.StartLogOutline.rectTransform.GetSiblingIndex()),
+                        "the lanes, and so the frogs, are drawn over the logs");
+                    Assert.That(
+                        lane.RectTransform.GetSiblingIndex(),
+                        Is.GreaterThan(view.EndLogOutline.rectTransform.GetSiblingIndex()));
+                }
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        /// <summary>
+        /// Derek's answer to game-board.md's first open question, on #296: the
+        /// log spans the **full pond**, not the lanes in play. So its height is
+        /// one number rather than three, and it is the same at two frogs as at
+        /// four — which is the visible difference from the mockup's proposal.
+        /// </summary>
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        public void SharedLogs_FillThePondBand_AndAreTheSameHeightAtEveryFrogCount(int frogCount)
+        {
+            var view = CreateView(new Game(AllColours.Take(frogCount).ToArray(), AnySeed));
+
+            try
+            {
+                var expected = new Vector2(GameBoardScreenView.LogWidth, GameBoardScreenView.SharedLogHeight);
+
+                Assert.That(view.StartLogOutline.rectTransform.sizeDelta, Is.EqualTo(expected));
+                Assert.That(view.EndLogOutline.rectTransform.sizeDelta, Is.EqualTo(expected));
+
+                Assert.That(
+                    GameBoardScreenView.SharedLogHeight,
+                    Is.EqualTo(view.PondRect.rect.height).Within(0.001f),
+                    "the log fills the pond band, edge to edge with the two hairlines");
+                Assert.That(
+                    GameBoardScreenView.SharedLogHeight,
+                    Is.Not.EqualTo(frogCount * GameBoardLaneView.LaneHeight).Within(0.001f),
+                    "full pond, not LaneCount x LaneHeight — the option Derek chose over the mockup's");
+
+                // Vertically centred on the pond, so it is centred on the lane
+                // stack the pond centres too.
+                Assert.That(view.StartLogOutline.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
+                Assert.That(view.EndLogOutline.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
+
+                // The rim that separates a log from the water it floats on is
+                // drawn inside the log's own bounds, as every outline on this
+                // screen is.
+                var logs = new[]
+                {
+                    new KeyValuePair<Image, Image>(view.StartLogOutline, view.StartLogFill),
+                    new KeyValuePair<Image, Image>(view.EndLogOutline, view.EndLogFill),
+                };
+
+                foreach (var log in logs)
+                {
+                    var fill = log.Value.rectTransform;
+
+                    Assert.That(fill.parent, Is.SameAs(log.Key.transform), "the fill sits inside its own log");
+                    Assert.That(
+                        fill.offsetMin,
+                        Is.EqualTo(new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline)));
+                    Assert.That(
+                        fill.offsetMax,
+                        Is.EqualTo(new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline)));
+                }
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        /// <summary>
+        /// The invariant the sharing could have broken, drawn rather than
+        /// asserted in prose: two frogs on the Start log are not sharing a
+        /// space. Each is on position 0 *of its own lane*, on its own lane's
+        /// centre line — and that line crosses the shared log, which is what
+        /// makes it a log they are both standing on.
+        /// </summary>
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        public void FrogOnASharedLog_SitsOnItsOwnLanesCentreLine_OverTheLogThePondShares(int frogCount)
+        {
+            var roster = AllColours.Take(frogCount).ToArray();
+            var game = new Game(roster, AnySeed);
+
+            // Every frog starts on the Start log; sending the last one home
+            // puts a frog on each of the two shared logs at once.
+            var homeFrog = roster[roster.Length - 1];
+            MoveTo(game, homeFrog, Lane.LaneWinningPosition);
+
+            var view = CreateView(game);
+
+            try
+            {
+                foreach (var colour in roster)
+                {
+                    var lane = view.LaneFor(colour);
+                    var log = colour == homeFrog ? view.EndLogOutline : view.StartLogOutline;
+
+                    Assert.That(
+                        CenterX(lane.PieceRect),
+                        Is.EqualTo(CenterX(log.rectTransform)).Within(0.001f),
+                        $"{colour} is in the shared log's column");
+                    Assert.That(
+                        CenterY(lane.PieceRect),
+                        Is.EqualTo(CenterY(lane.RectTransform)).Within(0.001f),
+                        $"{colour} sits on its own lane's centre line, not clustered with the others");
+
+                    var corners = new Vector3[4];
+                    log.rectTransform.GetWorldCorners(corners);
+
+                    Assert.That(
+                        CenterY(lane.PieceRect),
+                        Is.InRange(corners[0].y, corners[1].y),
+                        $"{colour}'s lane centre line crosses the shared log");
+                }
+
+                // Distinct lines, not one: the frogs are on the same drawing
+                // and visibly not in the same place.
+                var lines = view.Lanes.Select(lane => CenterY(lane.PieceRect)).ToArray();
+                Assert.That(lines, Is.Unique, "one line per lane");
             }
             finally
             {
@@ -537,7 +731,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void EveryGeometryValue_IsANamedConstantFromGameBoardsTwoTables()
+        public void EveryGeometryValue_IsANamedConstantFromGameBoardsThreeTables()
         {
             var boardConstants = new Dictionary<string, float>
             {
@@ -563,7 +757,19 @@ namespace Frogs.Unity.EditModeTests
                 // because the hop happens here; running it is #224's, and
                 // Board_HasNoHopAnimation_AndNoEndOfGameDetection still holds
                 // this screen to playing none of it itself.
-                { "FrogHopDuration", 0.4f }
+                { "FrogHopDuration", 0.4f },
+
+                // game-board.md's third table — the two shared logs. They
+                // belong to the pond rather than to a lane (#296), so their
+                // constants live with the pond's, and `LogHeight` (120 px) is
+                // gone rather than renamed: it was the height of a log sized
+                // to sit inside one 184 px lane, and there is no such thing on
+                // this board any more. `SharedLogHeight` is a flat 896 px, the
+                // pond band's own height — Derek's answer to that page's first
+                // open question, on #296 — not `LaneCount x LaneHeight`.
+                { "LogWidth", 176f },
+                { "SharedLogHeight", 896f },
+                { "LogRadius", 24f }
             };
 
             var laneConstants = new Dictionary<string, float>
@@ -572,9 +778,6 @@ namespace Frogs.Unity.EditModeTests
                 { "LilyPadDiameter", 112f },
                 { "FrogPieceDiameter", 88f },
                 { "FrogPieceOutline", 4f },
-                { "LogWidth", 176f },
-                { "LogHeight", 120f },
-                { "LogRadius", 24f },
                 { "TrackOutline", 3f },
                 { "LanePositionGap", 48f },
                 { "LaneGutterWidth", 256f },
@@ -590,8 +793,18 @@ namespace Frogs.Unity.EditModeTests
             // restyle its corner and its label without moving the pond's logs
             // or its gear. Asserted as equal-today so a future divergence is
             // a visible, deliberate edit here rather than a silent drift.
-            Assert.That(GameBoardLaneView.LogRadius, Is.EqualTo(Button.ButtonRadius));
+            Assert.That(GameBoardScreenView.LogRadius, Is.EqualTo(Button.ButtonRadius));
             Assert.That(GameBoardScreenView.SettingsGlyphSize, Is.EqualTo(Button.ButtonLabelSize));
+
+            // SharedLogHeight is the pond band's own height, not a number
+            // typed in beside it — the log fills the band, so if the header or
+            // the controls band ever changes, the log follows without anybody
+            // remembering to.
+            Assert.That(
+                GameBoardScreenView.SharedLogHeight,
+                Is.EqualTo(CanvasHeight
+                    - GameBoardScreenView.BoardHeaderHeight
+                    - GameBoardScreenView.BoardControlsHeight).Within(0.001f));
 
             // The remaining two of game-board.md's constants are Lane's own,
             // reused under the same name rather than redeclared here.
@@ -703,10 +916,13 @@ namespace Frogs.Unity.EditModeTests
                 var lane = view.LaneFor(FrogColour.Green);
                 Assert.That(lane.Piece.sprite, Is.Not.Null);
                 Assert.That(lane.PieceOutline.sprite, Is.Not.Null);
-                Assert.That(lane.PositionImages[0].sprite, Is.Not.Null);
-                Assert.That(lane.PositionImages[1].sprite, Is.Not.Null);
-                Assert.That(lane.PositionOutlines[0].sprite, Is.Not.Null);
-                Assert.That(lane.PositionOutlines[1].sprite, Is.Not.Null);
+                Assert.That(lane.LilyPadFills[0].sprite, Is.Not.Null);
+                Assert.That(lane.LilyPadOutlines[0].sprite, Is.Not.Null);
+
+                Assert.That(view.StartLogFill.sprite, Is.Not.Null);
+                Assert.That(view.StartLogOutline.sprite, Is.Not.Null);
+                Assert.That(view.EndLogFill.sprite, Is.Not.Null);
+                Assert.That(view.EndLogOutline.sprite, Is.Not.Null);
             }
             finally
             {
@@ -781,6 +997,13 @@ namespace Frogs.Unity.EditModeTests
             var corners = new Vector3[4];
             rect.GetWorldCorners(corners);
             return (corners[0].x + corners[2].x) / 2f;
+        }
+
+        static float CenterY(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            return (corners[0].y + corners[2].y) / 2f;
         }
 
         static GameBoardScreenView CreateView(Game game)

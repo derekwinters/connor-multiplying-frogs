@@ -14,6 +14,7 @@ using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
+using RoundedRectSprite = Frogs.Unity.UI.RoundedRectSprite;
 
 namespace Frogs.Unity.Views
 {
@@ -22,8 +23,16 @@ namespace Frogs.Unity.Views
     /// committed 1:1 mockup. Three horizontal bands filling the full height
     /// with no gaps: <c>header</c> (whose turn it is, and the gear),
     /// <c>pond</c> (one <see cref="GameBoardLaneView"/> per frog in the game,
-    /// stacked and vertically centred), and <c>controls</c> (the oversized
-    /// `Roll`).
+    /// stacked and vertically centred, plus the two logs they share), and
+    /// <c>controls</c> (the oversized `Roll`).
+    ///
+    /// **The logs are the pond's, not a lane's.** There is one Start log and
+    /// one End log on the board however many frogs are playing, each spanning
+    /// the whole pond band, and every frog's position 0 and position 8 are on
+    /// them (#296). That is a shared *drawing*, not a shared position: each
+    /// frog sits on its own lane's centre line, which is what keeps "frogs
+    /// never share a lane and never interact" true in the picture as well as
+    /// in the state.
     ///
     /// **It reads Core; it never computes.** Whose turn it is comes from
     /// <see cref="Game.ActiveFrog"/>, and where every frog sits comes from
@@ -42,7 +51,7 @@ namespace Frogs.Unity.Views
     ///   got home and moving off this screen is <c>unity-game-over</c> (#225),
     ///   gated on <c>core-game-end</c> (#211).
     ///
-    /// Both of game-board.md's open questions are left exactly as open as it
+    /// game-board.md's remaining open questions are left exactly as open as it
     /// leaves them: only the lanes in play are drawn, and nothing anywhere
     /// reports the last roll.
     /// </summary>
@@ -62,6 +71,31 @@ namespace Frogs.Unity.Views
         public const float RollButtonWidth = 480f;
         public const float RollButtonHeight = 144f;
         public const float RollButtonLabelSize = 56f;
+
+        // docs/specs/ui/game-board.md#named-constants — the two shared logs'
+        // own table. They are the pond's, not a lane's: there is one Start log
+        // and one End log for the whole board however many frogs are playing,
+        // and every frog's position 0 and position 8 are on them (#296).
+        public const float LogWidth = 176f;
+        public const float LogRadius = 24f;
+
+        /// <summary>
+        /// How tall a shared log is: the pond band's own height, so the log
+        /// fills the band edge to edge with the two hairlines.
+        ///
+        /// It is **the same 896 px at two, three and four frogs**. That is
+        /// Derek's answer, on #296, to the question game-board.md left open —
+        /// the log spans the full pond rather than only the lanes in play — so
+        /// this is one number rather than the `LaneCount x LaneHeight`
+        /// expression the mockup proposed. `LogHeight` (120 px) is gone rather
+        /// than renamed: it was the height of a log sized to sit inside one
+        /// 184 px lane, and there is no such thing on this board any more.
+        ///
+        /// Written as the band's arithmetic rather than as 896 so that if the
+        /// header or the controls band ever changes height, the logs follow
+        /// without anybody having to remember to move them.
+        /// </summary>
+        public const float SharedLogHeight = CanvasHeight - BoardHeaderHeight - BoardControlsHeight;
 
         /// <summary>
         /// How long the frog's hop takes — docs/specs/ui/game-board.md's own
@@ -121,6 +155,10 @@ namespace Frogs.Unity.Views
         GameBoardSettingsButton _settingsButton;
 
         RectTransform _pondRect;
+        Image _startLogOutline;
+        Image _startLogFill;
+        Image _endLogOutline;
+        Image _endLogFill;
         readonly List<GameBoardLaneView> _lanes = new List<GameBoardLaneView>();
         readonly Dictionary<FrogColour, GameBoardLaneView> _lanesByColour = new Dictionary<FrogColour, GameBoardLaneView>();
 
@@ -130,6 +168,41 @@ namespace Frogs.Unity.Views
 
         bool _initialized;
         Game _game;
+
+        static Sprite s_logSprite;
+        static Sprite s_logFillSprite;
+
+        // The log's rim and its fill are two images, the inner one inset by
+        // TrackOutline — the same two-image shape every outlined element on
+        // this screen uses. Each gets a sprite generated at its own radius
+        // rather than one sprite stretched to two sizes, so the inset one
+        // keeps its curve instead of squaring off.
+        static Sprite LogSprite
+        {
+            get
+            {
+                if (s_logSprite == null)
+                {
+                    s_logSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(LogRadius));
+                }
+
+                return s_logSprite;
+            }
+        }
+
+        static Sprite LogFillSprite
+        {
+            get
+            {
+                if (s_logFillSprite == null)
+                {
+                    s_logFillSprite = RoundedRectSprite.CreateRoundedRect(
+                        Mathf.RoundToInt(LogRadius - GameBoardLaneView.TrackOutline));
+                }
+
+                return s_logFillSprite;
+            }
+        }
 
         /// <summary>
         /// `Roll` was pressed. The board disables `Roll` before raising this
@@ -246,6 +319,53 @@ namespace Frogs.Unity.Views
             {
                 EnsureInitialized();
                 return _pondRect;
+            }
+        }
+
+        /// <summary>
+        /// `start-log` — **one** log down the left of the pond, position 0 of
+        /// every lane at once. This is its rim; <see cref="StartLogFill"/> is
+        /// the wood inside it.
+        /// </summary>
+        public Image StartLogOutline
+        {
+            get
+            {
+                EnsureInitialized();
+                return _startLogOutline;
+            }
+        }
+
+        /// <summary>The Start log's fill, inset by `TrackOutline`.</summary>
+        public Image StartLogFill
+        {
+            get
+            {
+                EnsureInitialized();
+                return _startLogFill;
+            }
+        }
+
+        /// <summary>
+        /// `end-log` — **one** log down the right of the pond, position 8 of
+        /// every lane at once, and the winning space.
+        /// </summary>
+        public Image EndLogOutline
+        {
+            get
+            {
+                EnsureInitialized();
+                return _endLogOutline;
+            }
+        }
+
+        /// <summary>The End log's fill, inset by `TrackOutline`.</summary>
+        public Image EndLogFill
+        {
+            get
+            {
+                EnsureInitialized();
+                return _endLogFill;
             }
         }
 
@@ -552,6 +672,64 @@ namespace Frogs.Unity.Views
             _pondRect.anchorMax = Vector2.one;
             _pondRect.offsetMin = new Vector2(0f, BoardControlsHeight);
             _pondRect.offsetMax = new Vector2(0f, -BoardHeaderHeight);
+
+            // The two logs the lanes share. One Start log down the left and
+            // one End log down the right, whatever the frog count — they are
+            // parts of the pond, not parts of a lane, which is the whole of
+            // #296. They are built here, before BuildLanes runs, so every
+            // frog is drawn on top of the log it is standing on rather than
+            // under it.
+            //
+            // The Start log stands in the same column every lane's track
+            // starts in: past the safe margin, the chip gutter and the gap
+            // after it. The End log is pinned to the right of the safe area,
+            // where every lane's track ends. Neither is placed by a number of
+            // its own.
+            _startLogOutline = BuildSharedLog(
+                "StartLog",
+                0f,
+                SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
+                out _startLogFill);
+
+            _endLogOutline = BuildSharedLog("EndLog", 1f, -SafeMargin, out _endLogFill);
+        }
+
+        // One shared log — LogWidth across, SharedLogHeight tall, vertically
+        // centred on the pond and so on the lane stack the pond centres too.
+        // Every lane's centre line crosses it, which is what lets a frog on a
+        // log still sit on its own lane's line.
+        Image BuildSharedLog(string logName, float edge, float offsetX, out Image fill)
+        {
+            var logGO = new GameObject(logName, typeof(RectTransform), typeof(Image));
+            var outline = logGO.GetComponent<Image>();
+            outline.sprite = LogSprite;
+            outline.type = Image.Type.Sliced;
+            outline.color = BoardColours.LogEdge;
+            outline.raycastTarget = false;
+
+            var logRect = outline.rectTransform;
+            logRect.SetParent(_pondRect, worldPositionStays: false);
+            logRect.anchorMin = new Vector2(edge, 0.5f);
+            logRect.anchorMax = new Vector2(edge, 0.5f);
+            logRect.pivot = new Vector2(edge, 0.5f);
+            logRect.sizeDelta = new Vector2(LogWidth, SharedLogHeight);
+            logRect.anchoredPosition = new Vector2(offsetX, 0f);
+
+            var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            fill = fillGO.GetComponent<Image>();
+            fill.sprite = LogFillSprite;
+            fill.type = Image.Type.Sliced;
+            fill.color = BoardColours.LogBrown;
+            fill.raycastTarget = false;
+
+            var fillRect = fill.rectTransform;
+            fillRect.SetParent(logRect, worldPositionStays: false);
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline);
+            fillRect.offsetMax = new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline);
+
+            return outline;
         }
 
         void BuildControls()

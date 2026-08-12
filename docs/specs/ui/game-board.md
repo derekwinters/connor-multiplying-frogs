@@ -41,9 +41,9 @@ The pond, in turn, is:
 
 | Part | Job |
 | --- | --- |
-| `start-log` | **One** log down the left of the pond, spanning every lane in play. It is position 0 of all of them |
+| `start-log` | **One** log down the left of the pond, spanning the whole pond band. It is position 0 of every lane |
 | `lane` × 2–4 | One per frog in the game, stacked |
-| `end-log` | **One** log down the right of the pond, spanning every lane in play. It is position 8 of all of them |
+| `end-log` | **One** log down the right of the pond, spanning the whole pond band. It is position 8 of every lane |
 
 A lane, in turn, is:
 
@@ -77,11 +77,14 @@ available:
   from each other, and from the End log.
 - `end-log` — pinned to the **right** edge of the safe area.
 
-Both logs are `SharedLogHeight` tall and vertically centred on the stack of
-lanes, so every lane's centre line crosses both of them and a frog on a log
-still sits on its own lane's line. A shorter screen loses height from `pond` and
-nothing else; the header and the controls do not shrink, because a smaller
-`Roll` button is the wrong thing to trade away.
+Both logs are `SharedLogHeight` tall, which is the height of the `pond` band
+itself: they fill it, edge to edge with the two hairlines, whether two frogs are
+playing or four. Every lane's centre line therefore crosses both of them, and a
+frog on a log still sits on its own lane's line. A shorter screen loses height
+from `pond` and nothing else — and the logs lose it with the band, because they
+are the band's height rather than a number typed in beside it. The header and
+the controls do not shrink, because a smaller `Roll` button is the wrong thing
+to trade away.
 
 ## Why the lanes run across
 
@@ -140,8 +143,9 @@ logs once for the whole pond does not change that count: a lane is still nine
 positions, and two of them are now drawn on something the lane shares.
 
 `LaneCount` is the only quantity on this page that is not fixed at design time.
-It is here because the shared logs are the first element whose size depends on
-it.
+It sizes the lane stack — `LaneCount × LaneHeight`, centred in the pond — and
+nothing else. In particular it does **not** size the logs: they fill the pond
+band whatever it is.
 
 The lane:
 
@@ -161,26 +165,26 @@ The two shared logs. They belong to the pond, so they are their own table:
 | Element | Constant | Value |
 | --- | --- | --- |
 | Log width | `LogWidth` | 176 px |
-| Log height | `SharedLogHeight` | `LaneCount × LaneHeight` |
+| Log height | `SharedLogHeight` | 896 px — `1200 − BoardHeaderHeight − BoardControlsHeight` |
 | Log corner radius | `LogRadius` | 24 px |
 
 `LogHeight` (120 px) is **gone**, not renamed to something with the same
 meaning. It was the height of a log sized to sit inside one 184 px lane, and
-there is no such thing on this board any more. `SharedLogHeight` is derived
-because a log that spans the lanes in play cannot have one value:
+there is no such thing on this board any more.
 
-| `LaneCount` | `SharedLogHeight` |
-| --- | --- |
-| 2 | 368 px |
-| 3 | 552 px |
-| 4 | 736 px |
+`SharedLogHeight` is **one number, not an expression**: the log spans the full
+pond, so it is 896 px at two frogs, at three, and at four. That is Derek's
+answer, on
+[issue #296](https://github.com/derekwinters/connor-multiplying-frogs/issues/296),
+to the question this page used to leave open — "log spans full lane space
+regardless of player count" — and it is the option the mockup did *not*
+originally draw. A two-frog game gets a full-height log with open water above
+and below its two lanes, and the board's ends do not change size when a player
+joins or leaves.
 
-There is no lane gap term in that expression because there is no lane gap:
-lanes stack flush, `LaneHeight` to `LaneHeight`. If a gap between lanes is ever
-introduced, `SharedLogHeight` gains a `(LaneCount − 1) × LaneGap` term with it.
-
-**Which lanes the log spans is [open question 1](#open-questions)** — this
-expression is the proposal drawn in the mockup, not a settled number.
+It is written as the band's own arithmetic rather than as the bare 896 because
+the log **is** the band: if `BoardHeaderHeight` or `BoardControlsHeight` ever
+moves, the logs move with it and nobody has to remember them.
 
 That horizontal arithmetic is exact and worth keeping exact, and sharing the
 logs does not disturb it, because a shared log stands in the same column its
@@ -190,9 +194,9 @@ per-lane predecessor did: two logs at 176, seven pads at 112 and eight gaps at
 the others has to move with it.
 
 Vertically, the pond band is `1200 − BoardHeaderHeight − BoardControlsHeight` =
-896 px. Four lanes at 184 px is 736 px, centred with 80 px of water above and
-below, so the tallest `SharedLogHeight` the expression can produce fits the
-pond with 160 px to spare.
+896 px, which is `SharedLogHeight` — the logs fill it exactly. Four lanes at
+184 px is 736 px, centred with 80 px of water above and below, so at four frogs
+the logs stand 80 px proud of the lane stack at each end; at two frogs, 264 px.
 
 Every outline is drawn **inside** the element's own bounds, so `TrackOutline`,
 `FrogPieceOutline`, `SettingsButtonOutline` and `BoardBandOutline` cost the
@@ -326,8 +330,8 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   has to itself. The pad a frog is on is drawn no differently from the others;
   the frog on it is the marker.
 - **Start log × 1, End log × 1** — one of each for the whole board, however many
-  frogs are playing, each spanning every lane in play. They are the ends of
-  every lane at once. The Start log is a real position a frog occupies, and a
+  frogs are playing, each filling the pond band top to bottom. They are the ends
+  of every lane at once. The Start log is a real position a frog occupies, and a
   wrong answer there leaves the frog where it is; see
   [the Start log is a floor](../reference/index.md#the-start-log-is-a-floor-not-a-special-space).
   Two to four frogs sit on the Start log at the beginning of every game and
@@ -386,11 +390,12 @@ against — Green and Pink on lily pads, Orange on the Start log, Blue home on
 the End log — so [the contrast question](#keeping-the-frogs-visible) is
 visible in the picture rather than only asserted in a table.
 
-It draws the proposal on all three open questions below: the logs span the four
-lanes in play and no further, each frog sits on its own lane's centre line, and
-the corner and outline are the `LogRadius` and `TrackOutline` they always were.
-Those are drawn so there is something to react to, not because they are
-decided.
+It draws the three questions #289 left open as Derek answered them on #296: the
+logs fill the pond band top to bottom rather than stopping at the lanes in play,
+each frog sits on its own lane's centre line, and the corner and outline are the
+`LogRadius` and `TrackOutline` they always were. Only the first of the three
+moved — the mockup originally drew a 736 px log spanning the four lanes, and was
+redrawn to 896 px when the answer arrived.
 
 The rejected lanes-up variant is not committed. It was drawn, compared, and
 decided against; keeping a mockup of a layout nobody is building is how a
@@ -419,21 +424,9 @@ decided against; keeping a mockup of a layout nobody is building is how a
 - **Does the board show what the last player rolled?** Currently no: the die
   appears in [roll and card](roll-and-card.md) and is gone. A persistent
   "last roll" readout is an element and would need adding here.
-- **Does a shared log span only the lanes in play, or the full pond?** The
-  mockup draws the first — `SharedLogHeight` is `LaneCount × LaneHeight`, so a
-  two-frog game gets a 368 px log with open water above and below it. The
-  alternative is a log of a fixed 896 px, the full height of the pond, which
-  puts a lot of wood beside empty water in a two-frog game but never changes
-  size. Both are drawable and neither is wrong; which reads better on the tablet
-  is a look-at-it call. **This one decides the `SharedLogHeight` expression** —
-  the full-pond answer replaces it with a constant 896 px.
-- **Where does a frog sit on a shared log?** The mockup keeps each piece on its
-  own lane's centre line, so the log is shared but the positions visibly are
-  not. The alternative — clustering the pieces together on the log, the way real
-  frogs would sit on a real log — looks better and reads worse, because it is
-  the one drawing on this screen that could suggest frogs interact. Worth
-  drawing if Connor wants it.
-- **Does the log keep its corner radius and its outline?** `LogRadius` (24 px)
-  and `TrackOutline` (3 px) were chosen for a 176 × 120 log. The mockup keeps
-  both on a log up to six times taller, where the same corner is a much smaller
-  fraction of the shape. It may look right; it may want a bigger radius.
+The three questions #289 left open about the shared logs are **settled**, by
+Derek on
+[issue #296](https://github.com/derekwinters/connor-multiplying-frogs/issues/296),
+and are recorded above rather than here: the log spans the full pond whatever
+the player count, a frog on a log sits on its own lane's centre line, and the
+log keeps `LogRadius` and `TrackOutline` as they are.
