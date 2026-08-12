@@ -28,10 +28,11 @@
   play — not one pair per lane. Count them: there are two logs on this canvas,
   whatever the lane count.
 
-  This drawing takes a position on the spec page's three open questions so
-  there is something to react to. None of the three is settled:
-    1. The logs span only the four lanes in play (SharedLogHeight =
-       LaneCount x LaneHeight = 736 px), not the full 896 px pond.
+  The three questions #289 left open about the logs are settled, by Derek on
+  issue #296, and this draws the answers:
+    1. The logs span the FULL POND (SharedLogHeight = 896 px), not the lanes in
+       play. Same height at two frogs as at four. This drawing used to show the
+       736 px lanes-in-play proposal; #296 chose the other one.
     2. Each frog sits on its own lane's centre line, so the log is shared and
        the positions plainly are not.
     3. LogRadius (24 px) and TrackOutline (3 px) are unchanged from the old
@@ -41,8 +42,9 @@
     48 margin + 256 chip + 48 gap
       + 176 log + 48 + (7 x 112 + 6 x 48) + 48 + 176 log
       + 48 margin = 1920.
-  Vertical: pond is 1200 - 128 - 176 = 896; four lanes at 184 = 736, centred,
-  so the lane stack and both logs run from y=208 to y=944.
+  Vertical: pond is 1200 - 128 - 176 = 896, and both logs fill it, y=128 to
+  y=1024. Four lanes at 184 = 736, centred in that band, so the lane stack runs
+  from y=208 to y=944 with the logs standing 80 px proud at each end.
 -->
 <html lang="en">
 <head>
@@ -89,7 +91,7 @@
   .sw{width:64px;height:64px;border-radius:50%;flex:none}
   .pad{width:112px;height:112px;border-radius:50%;background:var(--pad);border:3px solid var(--pad-edge);flex:none;position:relative}
   /* One per pond, not one per lane. Width is LogWidth (176); height is
-     SharedLogHeight (LaneCount x LaneHeight), set inline. */
+     SharedLogHeight (896, the whole pond band), set inline. */
   .log{position:absolute;width:176px;border-radius:24px;background:var(--log);border:3px solid var(--log-edge);
        display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6A3F}
   .frog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;
@@ -121,16 +123,16 @@
     <div class="abs gear" style="right:48px;top:16px">⚙</div>
 
     <!-- THE SHARED START LOG — one for the whole pond, position 0 of all four
-         lanes. Orange sits on it, on lane 3's centre line (y=668, i.e. 460
-         down the log). -->
-    <div class="log" style="left:352px;top:208px;height:736px">Start<span class="frog"
-         style="background:var(--orange);top:460px"></span></div>
+         lanes, filling the pond band top to bottom. Orange sits on it, on
+         lane 3's centre line (y=668, i.e. 540 down the log). -->
+    <div class="log" style="left:352px;top:128px;height:896px">Start<span class="frog"
+         style="background:var(--orange);top:540px"></span></div>
 
     <!-- THE SHARED END LOG — one for the whole pond, position 8 of all four
          lanes and the winning space. Blue is home on it, on lane 2's centre
-         line (y=484, i.e. 276 down the log). -->
-    <div class="log" style="left:1696px;top:208px;height:736px">End<span class="frog"
-         style="background:var(--blue);top:276px"></span></div>
+         line (y=484, i.e. 356 down the log). -->
+    <div class="log" style="left:1696px;top:128px;height:896px">End<span class="frog"
+         style="background:var(--blue);top:356px"></span></div>
 
     <!-- The lanes. A lane is now its chip and its own seven lily pads; both
          ends of it are drawn once, above. -->
