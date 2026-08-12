@@ -356,14 +356,22 @@ namespace Frogs.Unity.EditModeTests
                 // The rim that separates a log from the water it floats on is
                 // drawn inside the log's own bounds, as every outline on this
                 // screen is.
-                foreach (var fill in new[] { view.StartLogFill, view.EndLogFill })
+                var logs = new[]
                 {
-                    Assert.That(fill.rectTransform.parent.name, Is.AnyOf("StartLog", "EndLog"));
+                    new KeyValuePair<Image, Image>(view.StartLogOutline, view.StartLogFill),
+                    new KeyValuePair<Image, Image>(view.EndLogOutline, view.EndLogFill),
+                };
+
+                foreach (var log in logs)
+                {
+                    var fill = log.Value.rectTransform;
+
+                    Assert.That(fill.parent, Is.SameAs(log.Key.transform), "the fill sits inside its own log");
                     Assert.That(
-                        fill.rectTransform.offsetMin,
+                        fill.offsetMin,
                         Is.EqualTo(new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline)));
                     Assert.That(
-                        fill.rectTransform.offsetMax,
+                        fill.offsetMax,
                         Is.EqualTo(new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline)));
                 }
             }
