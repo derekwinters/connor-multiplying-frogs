@@ -148,6 +148,7 @@ each one can honestly reach.
 | The grid **view** drawing the grid Core reported | EditMode | `Assets/Tests/EditMode/EndToEndAcceptanceTests.cs` |
 | The game-over **screen** rendering both headlines | EditMode | same |
 | The scenes the build ships keeping their components | EditMode | same |
+| A tap reaching the working-out grid's keys and cells at all | EditMode | `Assets/Tests/EditMode/WorkingOutGridViewTests.cs` |
 | The app building its canvas and opening on the title screen | EditMode | `Assets/Tests/EditMode/AppRootTests.cs` |
 | A whole turn tapped through, board back to board | EditMode | same |
 | A game played until every frog is home reaching game over | EditMode | same |
@@ -182,12 +183,51 @@ from the title screen to game over.
 
 **It still is not a device.** Nothing there renders, so nothing there can say a
 layout is readable, a tap target is reachable by a finger, or a hop looks like
-a hop. Taps are delivered by calling a handler, not by a raycast through a
-`GraphicRaycaster`, so a button covered by something else still passes. And
+a hop. And
 [PlayMode tests are not the answer](#no-playmode-tests-no-on-device-testing) to
 any of that. The only place the real screens are seen *running* is a build
 somebody installs and opens, which is where Derek and Connor find out whether
 it is fun.
+
+### Calling a handler, and the one place that is not enough
+
+Taps are delivered by calling a handler — `OnPointerClick(...)`, or
+`OnPointerDown` and `OnPointerUp` for a shared `Button`. That is the default and
+it is the right one: it needs no canvas, it reads in one line, and what these
+tests are usually asking is what the view does *with* a tap.
+
+What it cannot ask is whether a tap ever **arrives**, because calling the
+handler skips the raycast that finds it. A component with nothing raycastable
+under it passes every test it has and is dead under a finger; a button covered
+by something else passes too. That is not hypothetical —
+[#288](https://github.com/derekwinters/connor-multiplying-frogs/issues/288): the
+working-out grid's keypad and cells were built with no raycast target anywhere
+in their subtrees, every one of their tests passed, and v0.2.1 shipped a screen
+no turn could be finished on.
+
+So `WorkingOutGridViewTests` has a second way in. It builds a canvas, scales the
+1920 × 1200 design to the screen the way `AppRoot`'s `CanvasScaler` does, and
+taps by **screen position** — find the `Graphic` under the point, then walk up
+to the first ancestor that handles the event, which is what uGUI does for a real
+finger. A control tap on `Check it`, which has always been reachable, is in
+there too, so a red run means "nothing raycastable under the key" rather than
+"the harness is wired wrong".
+
+**It does not call `GraphicRaycaster.Raycast`, and cannot.** The raycaster's
+first filter is `graphic.depth == -1` — *"hasn't been processed by the canvas,
+which means it isn't actually drawn"* — and a headless editor never draws a
+canvas, so every graphic reports `-1` and the raycaster returns nothing for
+every point on the screen. That is not a guess: the harness was written that way
+first, and the control tap is how CI said so. What it does instead is the
+raycaster's own machinery one level down — the canvas's `GraphicRegistry`, the
+same rectangle-contains-point test, and `Graphic.Raycast`, which is what honours
+a `CanvasGroup` that is not blocking. What is lost with the depth filter is
+**draw order**: these tests cannot say which of two overlapping targets wins,
+only whether there is anything under the point at all.
+
+Reach for that when the question is whether a tap can arrive. It costs a canvas
+and a scale factor in every test that uses it, and for everything after the tap
+lands, calling the handler says the same thing more plainly.
 
 ## Known limitation: EditMode tests run in CI, not in agent environments
 
