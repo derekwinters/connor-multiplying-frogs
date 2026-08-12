@@ -14,10 +14,20 @@ namespace Frogs.Unity.Views
     /// <summary>
     /// One frog's lane on the board — docs/specs/ui/game-board.md's `chip`,
     /// `track` and `piece`, built to that page's per-lane constants table.
-    /// The track is the Start log, seven lily pads and the End log, drawn
-    /// left to right (Derek's settled call — see the page's "why the lanes
-    /// run across"); the chip is the shared
-    /// <see cref="PlayerChip"/> (#219) in this lane's gutter.
+    /// The track is this lane's **seven lily pads**, drawn left to right
+    /// (Derek's settled call — see the page's "why the lanes run across"); the
+    /// chip is the shared <see cref="PlayerChip"/> (#219) in this lane's
+    /// gutter.
+    ///
+    /// A lane is still nine positions, and it still holds a rect for every one
+    /// of them. Two of those rects — position 0 and
+    /// <see cref="Lane.LaneWinningPosition"/> — draw nothing at all: they are
+    /// where this lane crosses the Start log and the End log, and those are one
+    /// drawing each for the whole pond, owned by
+    /// <see cref="GameBoardScreenView"/> (#296). A four-frog game draws two
+    /// logs, not eight. What the lane keeps is the *place*, so its piece sits
+    /// on its own lane's centre line on a log it shares with nobody's position
+    /// but its own.
     ///
     /// It reads, and never computes. Where the frog sits and whether it is
     /// home come straight off the <see cref="Lane"/> it is handed on every
@@ -40,9 +50,6 @@ namespace Frogs.Unity.Views
         public const float LilyPadDiameter = 112f;
         public const float FrogPieceDiameter = 88f;
         public const float FrogPieceOutline = 4f;
-        public const float LogWidth = 176f;
-        public const float LogHeight = 120f;
-        public const float LogRadius = 24f;
         public const float TrackOutline = 3f;
         public const float LanePositionGap = 48f;
         public const float LaneGutterWidth = 256f;
@@ -61,6 +68,12 @@ namespace Frogs.Unity.Views
         // whatever Lane reports; the denominator is Lane.LaneWinningPosition.
         const string PadCountFormat = "{0} of {1}";
 
+        // `LogWidth`, `SharedLogHeight` and `LogRadius` are game-board.md's
+        // third table, and they are not this type's either. The logs belong to
+        // the pond, so they are GameBoardScreenView's — referenced here, under
+        // the identical names, because the track's own width arithmetic still
+        // has to reserve the column each log stands in.
+
         // The track's colours are docs/specs/ui/game-board.md § Colours,
         // received by name from BoardColours exactly as the geometry above is
         // received from that page's constants table. They used to be private
@@ -68,8 +81,6 @@ namespace Frogs.Unity.Views
         // them a home on the spec page and this file the same relationship to
         // them it already had to every other number on this screen.
 
-        static Sprite s_logSprite;
-        static Sprite s_logFillSprite;
         static Sprite s_lilyPadSprite;
         static Sprite s_lilyPadFillSprite;
         static Sprite s_pieceSprite;
@@ -80,32 +91,6 @@ namespace Frogs.Unity.Views
         // Each rounded shape gets a sprite generated at its own radius rather
         // than one sprite stretched to two sizes, so the inset one keeps its
         // curve instead of squaring off.
-        static Sprite LogSprite
-        {
-            get
-            {
-                if (s_logSprite == null)
-                {
-                    s_logSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(LogRadius));
-                }
-
-                return s_logSprite;
-            }
-        }
-
-        static Sprite LogFillSprite
-        {
-            get
-            {
-                if (s_logFillSprite == null)
-                {
-                    s_logFillSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(LogRadius - TrackOutline));
-                }
-
-                return s_logFillSprite;
-            }
-        }
-
         static Sprite LilyPadSprite
         {
             get
@@ -165,15 +150,17 @@ namespace Frogs.Unity.Views
 
         /// <summary>
         /// The track's width, fixed by its nine positions rather than by the
-        /// space available — game-board.md's Anchors section. Two logs, seven
-        /// lily pads and eight gaps: the page's own arithmetic, written out
-        /// rather than trusted as the literal 1520.
+        /// space available — game-board.md's Anchors section. Two log columns,
+        /// seven lily pads and eight gaps: the page's own arithmetic, written
+        /// out rather than trusted as the literal 1520. Sharing the logs did
+        /// not disturb it, because a shared log stands in the same column its
+        /// per-lane predecessor did.
         /// </summary>
         public static float TrackWidth
         {
             get
             {
-                return (2f * LogWidth)
+                return (2f * GameBoardScreenView.LogWidth)
                     + ((Lane.LanePositionCount - 2) * LilyPadDiameter)
                     + ((Lane.LanePositionCount - 1) * LanePositionGap);
             }
@@ -181,22 +168,22 @@ namespace Frogs.Unity.Views
 
         /// <summary>
         /// The centre of one track position, measured from the track's left
-        /// edge. The Start log at index 0, seven lily pads, the End log at
-        /// <see cref="Lane.LaneWinningPosition"/>.
+        /// edge. The Start log's column at index 0, seven lily pads, the End
+        /// log's column at <see cref="Lane.LaneWinningPosition"/>.
         /// </summary>
         public static float PositionCenterX(int position)
         {
             if (position <= 0)
             {
-                return LogWidth / 2f;
+                return GameBoardScreenView.LogWidth / 2f;
             }
 
             if (position >= Lane.LaneWinningPosition)
             {
-                return TrackWidth - (LogWidth / 2f);
+                return TrackWidth - (GameBoardScreenView.LogWidth / 2f);
             }
 
-            return LogWidth
+            return GameBoardScreenView.LogWidth
                 + LanePositionGap
                 + ((position - 1) * (LilyPadDiameter + LanePositionGap))
                 + (LilyPadDiameter / 2f);
@@ -206,8 +193,8 @@ namespace Frogs.Unity.Views
         PlayerChip _chip;
         RectTransform _trackRect;
         readonly List<RectTransform> _positionRects = new List<RectTransform>();
-        readonly List<Image> _positionImages = new List<Image>();
-        readonly List<Image> _positionOutlines = new List<Image>();
+        readonly List<Image> _lilyPadFills = new List<Image>();
+        readonly List<Image> _lilyPadOutlines = new List<Image>();
         RectTransform _pieceRect;
         Image _pieceOutline;
         Image _piece;
@@ -256,7 +243,12 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The nine track positions, Start log first, End log last.</summary>
+        /// <summary>
+        /// The nine track positions, indexed by <see cref="Lane.Position"/>.
+        /// The first and last draw nothing — they are where this lane crosses
+        /// the pond's two shared logs — and the seven between them are this
+        /// lane's own lily pads.
+        /// </summary>
         public IReadOnlyList<RectTransform> PositionRects
         {
             get
@@ -267,30 +259,31 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// The nine positions' fills. Every lily pad is drawn identically —
-        /// "the pad a frog is on is drawn no differently from the others; the
-        /// frog on it is the marker."
+        /// The seven lily pads' fills — positions 1 to 7, in order, and the
+        /// whole of what this lane draws for itself. Every one is drawn
+        /// identically: "the pad a frog is on is drawn no differently from the
+        /// others; the frog on it is the marker."
         /// </summary>
-        public IReadOnlyList<Image> PositionImages
+        public IReadOnlyList<Image> LilyPadFills
         {
             get
             {
                 EnsureInitialized();
-                return _positionImages;
+                return _lilyPadFills;
             }
         }
 
         /// <summary>
-        /// The nine positions' outlines — <see cref="TrackOutline"/> thick,
-        /// drawn inside each element's own bounds so the track's width is
-        /// exactly the sum the spec's arithmetic gives.
+        /// The seven lily pads' outlines — <see cref="TrackOutline"/> thick,
+        /// drawn inside each pad's own bounds so the track's width is exactly
+        /// the sum the spec's arithmetic gives.
         /// </summary>
-        public IReadOnlyList<Image> PositionOutlines
+        public IReadOnlyList<Image> LilyPadOutlines
         {
             get
             {
                 EnsureInitialized();
-                return _positionOutlines;
+                return _lilyPadOutlines;
             }
         }
 
@@ -498,60 +491,84 @@ namespace Frogs.Unity.Views
         void BuildTrack()
         {
             // track — pinned to the right, its width fixed by its nine
-            // positions rather than by the space available.
+            // positions rather than by the space available. It is the lane's
+            // full height now that both of its ends are drawn by the pond: the
+            // rects standing in the two shared logs' columns are as tall as
+            // the lane, because the log they mark a place on runs past this
+            // lane in both directions.
             var trackGO = new GameObject("Track", typeof(RectTransform));
             _trackRect = (RectTransform)trackGO.transform;
             _trackRect.SetParent(_rect, worldPositionStays: false);
             _trackRect.anchorMin = new Vector2(1f, 0.5f);
             _trackRect.anchorMax = new Vector2(1f, 0.5f);
             _trackRect.pivot = new Vector2(1f, 0.5f);
-            _trackRect.sizeDelta = new Vector2(TrackWidth, LogHeight);
+            _trackRect.sizeDelta = new Vector2(TrackWidth, LaneHeight);
             _trackRect.anchoredPosition = Vector2.zero;
 
             for (var position = 0; position < Lane.LanePositionCount; position++)
             {
-                var isLog = position == 0 || position == Lane.LaneWinningPosition;
-                var size = isLog
-                    ? new Vector2(LogWidth, LogHeight)
-                    : new Vector2(LilyPadDiameter, LilyPadDiameter);
+                var onSharedLog = position == 0 || position == Lane.LaneWinningPosition;
 
-                var positionName = position == 0
-                    ? "StartLog"
-                    : position == Lane.LaneWinningPosition ? "EndLog" : "LilyPad" + position;
+                var positionRect = onSharedLog
+                    ? BuildSharedLogPosition(position)
+                    : BuildLilyPad(position);
 
-                var positionGO = new GameObject(positionName, typeof(RectTransform), typeof(Image));
-                var outline = positionGO.GetComponent<Image>();
-                outline.sprite = isLog ? LogSprite : LilyPadSprite;
-                outline.type = Image.Type.Sliced;
-                outline.color = isLog ? BoardColours.LogEdge : BoardColours.LilyPadEdge;
-                outline.raycastTarget = false;
-
-                var positionRect = outline.rectTransform;
                 positionRect.SetParent(_trackRect, worldPositionStays: false);
                 positionRect.anchorMin = new Vector2(0f, 0.5f);
                 positionRect.anchorMax = new Vector2(0f, 0.5f);
                 positionRect.pivot = new Vector2(0.5f, 0.5f);
-                positionRect.sizeDelta = size;
                 positionRect.anchoredPosition = new Vector2(PositionCenterX(position), 0f);
 
-                var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
-                var fill = fillGO.GetComponent<Image>();
-                fill.sprite = isLog ? LogFillSprite : LilyPadFillSprite;
-                fill.type = Image.Type.Sliced;
-                fill.color = isLog ? BoardColours.LogBrown : BoardColours.LilyPadGreen;
-                fill.raycastTarget = false;
-
-                var fillRect = fill.rectTransform;
-                fillRect.SetParent(positionRect, worldPositionStays: false);
-                fillRect.anchorMin = Vector2.zero;
-                fillRect.anchorMax = Vector2.one;
-                fillRect.offsetMin = new Vector2(TrackOutline, TrackOutline);
-                fillRect.offsetMax = new Vector2(-TrackOutline, -TrackOutline);
-
                 _positionRects.Add(positionRect);
-                _positionOutlines.Add(outline);
-                _positionImages.Add(fill);
             }
+        }
+
+        // Where this lane crosses one of the pond's two shared logs. It draws
+        // nothing — the log is one drawing for the whole board, and
+        // GameBoardScreenView owns it — and exists so the piece has this
+        // lane's own place on that log to sit at: the log's column, on this
+        // lane's centre line.
+        RectTransform BuildSharedLogPosition(int position)
+        {
+            var positionName = position == 0 ? "StartPosition" : "EndPosition";
+
+            var positionGO = new GameObject(positionName, typeof(RectTransform));
+            var positionRect = (RectTransform)positionGO.transform;
+            positionRect.sizeDelta = new Vector2(GameBoardScreenView.LogWidth, LaneHeight);
+
+            return positionRect;
+        }
+
+        RectTransform BuildLilyPad(int position)
+        {
+            var padGO = new GameObject("LilyPad" + position, typeof(RectTransform), typeof(Image));
+            var outline = padGO.GetComponent<Image>();
+            outline.sprite = LilyPadSprite;
+            outline.type = Image.Type.Sliced;
+            outline.color = BoardColours.LilyPadEdge;
+            outline.raycastTarget = false;
+
+            var padRect = outline.rectTransform;
+            padRect.sizeDelta = new Vector2(LilyPadDiameter, LilyPadDiameter);
+
+            var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            var fill = fillGO.GetComponent<Image>();
+            fill.sprite = LilyPadFillSprite;
+            fill.type = Image.Type.Sliced;
+            fill.color = BoardColours.LilyPadGreen;
+            fill.raycastTarget = false;
+
+            var fillRect = fill.rectTransform;
+            fillRect.SetParent(padRect, worldPositionStays: false);
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = new Vector2(TrackOutline, TrackOutline);
+            fillRect.offsetMax = new Vector2(-TrackOutline, -TrackOutline);
+
+            _lilyPadOutlines.Add(outline);
+            _lilyPadFills.Add(fill);
+
+            return padRect;
         }
 
         void BuildPiece()
