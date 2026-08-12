@@ -1724,6 +1724,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#calling-a-handler-and-the-one-place-that-is-not-enough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calling a handler, and the one place that is not enough
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2170,6 +2181,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#calling-a-handler-and-the-one-place-that-is-not-enough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Calling a handler, and the one place that is not enough
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2445,6 +2467,11 @@ each one can honestly reach.</p>
 <td>same</td>
 </tr>
 <tr>
+<td>A tap reaching the working-out grid's keys and cells at all</td>
+<td>EditMode</td>
+<td><code>Assets/Tests/EditMode/WorkingOutGridViewTests.cs</code></td>
+</tr>
+<tr>
 <td>The app building its canvas and opening on the title screen</td>
 <td>EditMode</td>
 <td><code>Assets/Tests/EditMode/AppRootTests.cs</code></td>
@@ -2491,12 +2518,45 @@ reaches Core and the right screen comes up next — the wiring, screen to screen
 from the title screen to game over.</p>
 <p><strong>It still is not a device.</strong> Nothing there renders, so nothing there can say a
 layout is readable, a tap target is reachable by a finger, or a hop looks like
-a hop. Taps are delivered by calling a handler, not by a raycast through a
-<code>GraphicRaycaster</code>, so a button covered by something else still passes. And
+a hop. And
 <a href="#no-playmode-tests-no-on-device-testing">PlayMode tests are not the answer</a> to
 any of that. The only place the real screens are seen <em>running</em> is a build
 somebody installs and opens, which is where Derek and Connor find out whether
 it is fun.</p>
+<h3 id="calling-a-handler-and-the-one-place-that-is-not-enough">Calling a handler, and the one place that is not enough<a class="headerlink" href="#calling-a-handler-and-the-one-place-that-is-not-enough" title="Link to this section">&para;</a></h3>
+<p>Taps are delivered by calling a handler — <code>OnPointerClick(...)</code>, or
+<code>OnPointerDown</code> and <code>OnPointerUp</code> for a shared <code>Button</code>. That is the default and
+it is the right one: it needs no canvas, it reads in one line, and what these
+tests are usually asking is what the view does <em>with</em> a tap.</p>
+<p>What it cannot ask is whether a tap ever <strong>arrives</strong>, because calling the
+handler skips the raycast that finds it. A component with nothing raycastable
+under it passes every test it has and is dead under a finger; a button covered
+by something else passes too. That is not hypothetical —
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/288">#288</a>: the
+working-out grid's keypad and cells were built with no raycast target anywhere
+in their subtrees, every one of their tests passed, and v0.2.1 shipped a screen
+no turn could be finished on.</p>
+<p>So <code>WorkingOutGridViewTests</code> has a second way in. It builds a canvas, scales the
+1920 × 1200 design to the screen the way <code>AppRoot</code>'s <code>CanvasScaler</code> does, and
+taps by <strong>screen position</strong> — find the <code>Graphic</code> under the point, then walk up
+to the first ancestor that handles the event, which is what uGUI does for a real
+finger. A control tap on <code>Check it</code>, which has always been reachable, is in
+there too, so a red run means "nothing raycastable under the key" rather than
+"the harness is wired wrong".</p>
+<p><strong>It does not call <code>GraphicRaycaster.Raycast</code>, and cannot.</strong> The raycaster's
+first filter is <code>graphic.depth == -1</code> — <em>"hasn't been processed by the canvas,
+which means it isn't actually drawn"</em> — and a headless editor never draws a
+canvas, so every graphic reports <code>-1</code> and the raycaster returns nothing for
+every point on the screen. That is not a guess: the harness was written that way
+first, and the control tap is how CI said so. What it does instead is the
+raycaster's own machinery one level down — the canvas's <code>GraphicRegistry</code>, the
+same rectangle-contains-point test, and <code>Graphic.Raycast</code>, which is what honours
+a <code>CanvasGroup</code> that is not blocking. What is lost with the depth filter is
+<strong>draw order</strong>: these tests cannot say which of two overlapping targets wins,
+only whether there is anything under the point at all.</p>
+<p>Reach for that when the question is whether a tap can arrive. It costs a canvas
+and a scale factor in every test that uses it, and for everything after the tap
+lands, calling the handler says the same thing more plainly.</p>
 <h2 id="known-limitation-editmode-tests-run-in-ci-not-in-agent-environments">Known limitation: EditMode tests run in CI, not in agent environments<a class="headerlink" href="#known-limitation-editmode-tests-run-in-ci-not-in-agent-environments" title="Link to this section">&para;</a></h2>
 <p>Agent environments have no Unity editor and no licence. <strong>EditMode tests cannot
 be run there.</strong> This is a fact about the environment, not a shortcoming of the
