@@ -20,6 +20,10 @@ using DialogPanel = Frogs.Unity.UI.DialogPanel;
 using FrogColours = Frogs.Unity.UI.FrogColours;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
+// Frogs.Core declares a Screen too — the router's, one of the game's screens —
+// and the raycast harness below wants the engine's, in pixels. Same treatment
+// as Button: a bare `Screen` in this file always means UnityEngine's.
+using Screen = UnityEngine.Screen;
 
 namespace Frogs.Unity.EditModeTests
 {
