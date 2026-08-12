@@ -412,6 +412,23 @@ Closing a wireframe issue is what "agreed" means, and a wireframe marked
 carve-out the sweep wakes the dependent on every run and triage sets it aside
 again on every run — forever, and noisily.
 
+### A blocker set wakes an issue at most once
+
+A closed blocker stays resolved forever, so without a guard, an issue that
+lands back on `needs-clarification` for *any other reason* — an open design
+question triage raised, say, unrelated to the blocker that used to hold it —
+reads as "blocker cleared, wake it up" again on the very next sweep. And the
+sweep runs on every `labeled` event, including the one the revisit itself just
+made, so this is not a rare recurrence: it is a tight loop, once per sweep,
+forever, each pass posting another "back in the triage queue" comment and
+firing triage again.
+
+The sweep reads the issue's own comment history and skips a blocker set it has
+already posted a revisit for — only a triage-authored comment counts, so a
+human typing similar words by hand can't suppress a real wake-up. A *new*
+blocker resolving later still fires normally; only a repeat of an already-
+actioned set is skipped.
+
 ### What it never touches
 
 - **`parked` issues.** Parking is a decision the owner made; only the owner

@@ -13,6 +13,7 @@ See docs/engineering/issue-pipeline.md.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,15 @@ if str(_BLOCKERS_SKILL) not in sys.path:
 
 from blocker_refs import blockers_of  # noqa: E402
 
+# `is_triage_author` — one more shared recognizer, same reason as the one
+# above: this module needs to tell its own past comments apart from anyone
+# else's without keeping a second copy of that judgment.
+_TRIAGE_SKILL = Path(__file__).resolve().parents[1] / "triage-issue"
+if str(_TRIAGE_SKILL) not in sys.path:
+    sys.path.insert(0, str(_TRIAGE_SKILL))
+
+from triage_repair import is_triage_author  # noqa: E402
+
 # The state a blocked issue is parked in by triage.
 BLOCKED_LABEL = "needs-clarification"
 TRIAGE_LABEL = "ai-triage"
@@ -37,6 +47,46 @@ WIREFRAME_LABEL = "type:wireframe"
 # be built, and holding the dependent back until it closes costs a night for
 # nothing.
 SCHEDULED_LABELS = {"ready-for-work", "in-progress"}
+
+# `Revisit.comment`'s own opening line, read back out of the issue's comment
+# history so a repeat sweep can recognize its own earlier action. The blocker
+# numbers are parsed out of what got POSTED, not recomputed, because the write
+# that matters is the one that already happened.
+_REVISIT_COMMENT = re.compile(
+    r"everything this was waiting on has cleared \(([^)]*)\)", re.IGNORECASE)
+_ISSUE_REF = re.compile(r"#(\d+)")
+
+
+def _already_revisited_for(comments, blockers) -> bool:
+    """Was this exact blocker set already actioned by a past revisit?
+
+    A closed blocker stays resolved forever, so without this check, an issue
+    that lands back on `needs-clarification` for any *other* reason — an
+    open design question triage raised, say — reads as "blocker cleared,
+    wake it up" again on every subsequent sweep. That is what turned #296
+    into an `ai-triage` / `needs-clarification` loop, once per sweep,
+    indefinitely: the wake-up fired, triage answered with a real but
+    unrelated question, and the still-closed blocker fired the same wake-up
+    again next time round.
+
+    Only a triage-authored comment counts — a human typing similar words by
+    hand is not the automatic wake-up repeating itself.
+    """
+    wanted = set(blockers)
+
+    for comment in comments or []:
+        if not is_triage_author(comment.get("author")):
+            continue
+
+        match = _REVISIT_COMMENT.search(comment.get("body") or "")
+        if not match:
+            continue
+
+        named = {int(n) for n in _ISSUE_REF.findall(match.group(1))}
+        if wanted <= named:
+            return True
+
+    return False
 
 
 class Revisit:
@@ -101,7 +151,12 @@ def find_revisits(issues: list[dict], snapshot: dict) -> list[Revisit]:
         if any(blocker is None for blocker in known):
             continue
 
-        if all(is_resolved(blocker) for blocker in known):
-            found.append(Revisit(issue["number"], blockers))
+        if not all(is_resolved(blocker) for blocker in known):
+            continue
+
+        if _already_revisited_for(issue.get("comments"), blockers):
+            continue
+
+        found.append(Revisit(issue["number"], blockers))
 
     return found
