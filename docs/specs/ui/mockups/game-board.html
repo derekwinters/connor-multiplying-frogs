@@ -7,6 +7,26 @@
   Shapes, sizes and positions only. The colours are placeholders so the frogs
   can be told apart in a picture; the palette is an area:art decision.
   Numbers here are the numbers in the spec page's constants table.
+
+  ONE Start log and ONE End log for the whole pond, spanning every lane in
+  play — not one pair per lane. Count them: there are two logs on this canvas,
+  whatever the lane count.
+
+  This drawing takes a position on the spec page's three open questions so
+  there is something to react to. None of the three is settled:
+    1. The logs span only the four lanes in play (SharedLogHeight =
+       LaneCount x LaneHeight = 736 px), not the full 896 px pond.
+    2. Each frog sits on its own lane's centre line, so the log is shared and
+       the positions plainly are not.
+    3. LogRadius (24 px) and TrackOutline (3 px) are unchanged from the old
+       176 x 120 log.
+
+  Horizontal arithmetic, unchanged by the sharing:
+    48 margin + 256 chip + 48 gap
+      + 176 log + 48 + (7 x 112 + 6 x 48) + 48 + 176 log
+      + 48 margin = 1920.
+  Vertical: pond is 1200 - 128 - 176 = 896; four lanes at 184 = 736, centred,
+  so the lane stack and both logs run from y=208 to y=944.
 -->
 <html lang="en">
 <head>
@@ -44,7 +64,9 @@
   .chip s{display:block;font-size:24px;color:#6C7873;text-decoration:none;line-height:1.2}
   .sw{width:64px;height:64px;border-radius:50%;flex:none}
   .pad{width:112px;height:112px;border-radius:50%;background:#CFE0D2;border:3px solid #9FB8A5;flex:none;position:relative}
-  .log{width:176px;height:120px;border-radius:24px;background:#E0D4C3;border:3px solid #B9A78E;flex:none;
+  /* One per pond, not one per lane. Width is LogWidth (176); height is
+     SharedLogHeight (LaneCount x LaneHeight), set inline. */
+  .log{position:absolute;width:176px;border-radius:24px;background:#E0D4C3;border:3px solid #B9A78E;
        display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A7A63}
   .frog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;
         border:4px solid rgba(0,0,0,.35)}
@@ -74,45 +96,51 @@
     </div>
     <div class="abs gear" style="right:48px;top:16px">⚙</div>
 
+    <!-- THE SHARED START LOG — one for the whole pond, position 0 of all four
+         lanes. Orange sits on it, on lane 3's centre line (y=668, i.e. 460
+         down the log). -->
+    <div class="log" style="left:352px;top:208px;height:736px">Start<span class="frog"
+         style="background:var(--orange);top:460px"></span></div>
+
+    <!-- THE SHARED END LOG — one for the whole pond, position 8 of all four
+         lanes and the winning space. Blue is home on it, on lane 2's centre
+         line (y=484, i.e. 276 down the log). -->
+    <div class="log" style="left:1696px;top:208px;height:736px">End<span class="frog"
+         style="background:var(--blue);top:276px"></span></div>
+
+    <!-- The lanes. A lane is now its chip and its own seven lily pads; both
+         ends of it are drawn once, above. -->
     <div class="abs col" style="left:0;top:208px;gap:0">
-      <!-- lane 1 green -->
+      <!-- lane 1 green, on its third lily pad -->
       <div class="row" style="height:184px;gap:0">
-        <div style="width:48px"></div><div class="chip act"><span class="sw" style="background:var(--green)"></span><span><b>Green</b><s>3 of 8</s></span></div><div style="width:48px"></div>
-        <div class="row" style="gap:48px">
-          <div class="log">Start</div>
+        <div style="width:48px"></div><div class="chip act"><span class="sw" style="background:var(--green)"></span><span><b>Green</b><s>3 of 8</s></span></div>
+        <div class="row" style="margin-left:272px;gap:48px">
           <div class="pad"></div><div class="pad"></div>
           <div class="pad"><span class="frog" style="background:var(--green)"></span></div>
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
-          <div class="log">End</div>
         </div>
       </div>
-      <!-- lane 2 blue home -->
+      <!-- lane 2 blue, home on the shared End log -->
       <div class="row" style="height:184px;gap:0">
-        <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--blue)"></span><span><b>Blue</b><s>Home!</s></span></div><div style="width:48px"></div>
-        <div class="row" style="gap:48px">
-          <div class="log">Start</div>
+        <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--blue)"></span><span><b>Blue</b><s>Home!</s></span></div>
+        <div class="row" style="margin-left:272px;gap:48px">
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
-          <div class="log" style="position:relative">End<span class="frog" style="background:var(--blue)"></span></div>
         </div>
       </div>
-      <!-- lane 3 orange start -->
+      <!-- lane 3 orange, still on the shared Start log -->
       <div class="row" style="height:184px;gap:0">
-        <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--orange)"></span><span><b>Orange</b><s>0 of 8</s></span></div><div style="width:48px"></div>
-        <div class="row" style="gap:48px">
-          <div class="log" style="position:relative">Start<span class="frog" style="background:var(--orange)"></span></div>
+        <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--orange)"></span><span><b>Orange</b><s>0 of 8</s></span></div>
+        <div class="row" style="margin-left:272px;gap:48px">
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
-          <div class="log">End</div>
         </div>
       </div>
-      <!-- lane 4 pink -->
+      <!-- lane 4 pink, on its sixth lily pad -->
       <div class="row" style="height:184px;gap:0">
-        <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--pink)"></span><span><b>Pink</b><s>6 of 8</s></span></div><div style="width:48px"></div>
-        <div class="row" style="gap:48px">
-          <div class="log">Start</div>
+        <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--pink)"></span><span><b>Pink</b><s>6 of 8</s></span></div>
+        <div class="row" style="margin-left:272px;gap:48px">
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
           <div class="pad"><span class="frog" style="background:var(--pink)"></span></div>
           <div class="pad"></div>
-          <div class="log">End</div>
         </div>
       </div>
     </div>
