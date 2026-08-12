@@ -83,16 +83,21 @@ namespace Frogs.Unity.EditModeTests
             {
                 foreach (var lane in view.Lanes)
                 {
-                    // The seven lily pads — positions 1 to 7. Position 0 and
-                    // position 8 are the logs.
-                    for (var position = 1; position < Lane.LaneWinningPosition; position++)
+                    // The seven lily pads — positions 1 to 7, and the whole of
+                    // what a lane draws for itself. Position 0 and position 8
+                    // are on the two logs the pond shares (#296).
+                    Assert.That(lane.LilyPadFills.Count, Is.EqualTo(Lane.LanePositionCount - 2));
+
+                    for (var index = 0; index < lane.LilyPadFills.Count; index++)
                     {
+                        var position = index + 1;
+
                         Assert.That(
-                            lane.PositionImages[position].color,
+                            lane.LilyPadFills[index].color,
                             Is.EqualTo(LilyPadGreen),
                             $"{lane.Colour}'s lily pad at position {position} is `LilyPadGreen`");
                         Assert.That(
-                            lane.PositionOutlines[position].color,
+                            lane.LilyPadOutlines[index].color,
                             Is.EqualTo(LilyPadEdge),
                             $"{lane.Colour}'s lily pad at position {position} has the `LilyPadEdge` rim");
                     }
@@ -111,21 +116,26 @@ namespace Frogs.Unity.EditModeTests
 
             try
             {
-                foreach (var lane in view.Lanes)
+                // Two logs for the whole pond, not a pair per lane (#296), so
+                // this walks the board rather than every lane on it.
+                var logs = new Dictionary<string, KeyValuePair<Image, Image>>
                 {
-                    foreach (var position in new[] { 0, Lane.LaneWinningPosition })
-                    {
-                        Assert.That(
-                            lane.PositionImages[position].color,
-                            Is.EqualTo(LogBrown),
-                            $"the log at position {position} is `LogBrown`");
-                        Assert.That(
-                            lane.PositionOutlines[position].color,
-                            Is.EqualTo(LogEdge),
-                            $"the log at position {position} has the `LogEdge` rim, which is what "
-                            + "separates a log from the water it floats on — the two are close in "
-                            + "brightness on purpose and far apart in hue");
-                    }
+                    { "Start", new KeyValuePair<Image, Image>(view.StartLogFill, view.StartLogOutline) },
+                    { "End", new KeyValuePair<Image, Image>(view.EndLogFill, view.EndLogOutline) },
+                };
+
+                foreach (var log in logs)
+                {
+                    Assert.That(
+                        log.Value.Key.color,
+                        Is.EqualTo(LogBrown),
+                        $"the {log.Key} log is `LogBrown`");
+                    Assert.That(
+                        log.Value.Value.color,
+                        Is.EqualTo(LogEdge),
+                        $"the {log.Key} log has the `LogEdge` rim, which is what "
+                        + "separates a log from the water it floats on — the two are close in "
+                        + "brightness on purpose and far apart in hue");
                 }
             }
             finally
