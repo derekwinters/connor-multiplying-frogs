@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Frogs.Core;
 using Frogs.Unity.Views;
+using BoardColours = Frogs.Unity.UI.BoardColours;
 using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.Unity.EditModeTests
@@ -63,11 +64,20 @@ namespace Frogs.Unity.EditModeTests
                 AssertCoversTheWholeCanvas(view.BackgroundImage.rectTransform, canvas, "the board's background");
                 AssertIsTheReferenceCanvasCentred(view.ContentRect, canvas, "the board's content");
 
+                // The board is the one screen that paints something other than
+                // the shared app background: its own water — issue #291,
+                // docs/specs/ui/game-board.md § Colours. What #290 asked of it
+                // is unchanged and asserted above: whatever it paints, it
+                // paints to every edge, so nothing behind the canvas shows.
                 Assert.That(
                     view.BackgroundImage.color,
-                    Is.EqualTo(ScreenColours.Background),
-                    "the background the whole screen is painted in is the shared screen "
-                    + "background, which is also what the camera clears to");
+                    Is.EqualTo(BoardColours.PondWater),
+                    "the board is painted in the water, and the water reaches the edges");
+                Assert.That(
+                    view.BackgroundImage.color,
+                    Is.Not.EqualTo(ScreenColours.Background),
+                    "the fixture, not the assertion — if these two are ever the same value "
+                    + "the test above proves nothing");
 
                 // The layout itself is untouched: the header and the controls
                 // band are full width *of the reference canvas*, not of the

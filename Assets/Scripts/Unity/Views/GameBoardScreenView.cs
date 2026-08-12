@@ -8,12 +8,12 @@ using UnityEngine.UI;
 // so these are pulled in by explicit alias rather than a wildcard
 // `using Frogs.Unity.UI;`, and a bare `Button`, `ButtonKind`, `FrogColours`
 // or `PlayerChip` in this file always means the shared component's.
+using BoardColours = Frogs.Unity.UI.BoardColours;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
-using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.Unity.Views
 {
@@ -97,19 +97,18 @@ namespace Frogs.Unity.Views
         // external assets).
         const string BuiltinLabelFontName = "LegacyRuntime.ttf";
 
-        // Chrome colours copied verbatim from the committed mockup
-        // (docs/specs/ui/mockups/game-board.html) — the same line Button.cs,
-        // PlayerChip.cs and GameSetupScreenView.cs each draw for their own
-        // colours: not a geometry constant on any spec page's table, so not
-        // declared as a named spec constant.
+        // The board's colours are docs/specs/ui/game-board.md § Colours,
+        // received by name from BoardColours exactly as the geometry above is
+        // received from that page's constants table.
         //
-        // The mockup's `--bg` is the exception. It is the whole screen's
-        // background rather than this screen's chrome, and the scene camera
-        // has to clear to the same value, so it lives on ScreenColours where
-        // both can read it.
-        static readonly Color BandColor = new Color32(0xE2, 0xE8, 0xE5, 0xFF); // mockup's header/controls bands
-        static readonly Color BandOutlineColor = new Color32(0xB9, 0xC0, 0xBD, 0xFF); // mockup's --faint
-        static readonly Color InkColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockup's --ink
+        // The one worth reading twice is `PondWater`. Every other screen
+        // paints ScreenColours.Background, which is also what the scene camera
+        // clears to; the board paints its own water instead, to every edge of
+        // the device, because the pond is not a rectangle inside a page — it
+        // is the whole screen. #290's rule still holds: nothing behind the
+        // canvas is ever visible, because this screen's own paint reaches the
+        // edges. What the camera clears to is unchanged, and it is what shows
+        // for the frame before *any* screen has painted.
 
         RectTransform _rect;
         RectTransform _contentRect;
@@ -423,7 +422,7 @@ namespace Frogs.Unity.Views
         {
             var backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
             _background = backgroundGO.GetComponent<Image>();
-            _background.color = ScreenColours.Background;
+            _background.color = BoardColours.PondWater;
             _background.raycastTarget = false;
             var backgroundRect = _background.rectTransform;
             backgroundRect.SetParent(_rect, worldPositionStays: false);
@@ -454,7 +453,7 @@ namespace Frogs.Unity.Views
             // shorter screen.
             var headerGO = new GameObject("Header", typeof(RectTransform), typeof(Image));
             var headerImage = headerGO.GetComponent<Image>();
-            headerImage.color = BandColor;
+            headerImage.color = BoardColours.BandFill;
             headerImage.raycastTarget = false;
 
             _headerRect = headerImage.rectTransform;
@@ -480,7 +479,7 @@ namespace Frogs.Unity.Views
             _turnBannerText.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
             _turnBannerText.fontSize = (int)TurnBannerSize;
             _turnBannerText.fontStyle = FontStyle.Bold;
-            _turnBannerText.color = InkColor;
+            _turnBannerText.color = BoardColours.BoardInk;
             _turnBannerText.alignment = TextAnchor.MiddleLeft;
             _turnBannerText.horizontalOverflow = HorizontalWrapMode.Overflow;
             _turnBannerText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -528,7 +527,7 @@ namespace Frogs.Unity.Views
         {
             var hairlineGO = new GameObject(hairlineName, typeof(RectTransform), typeof(Image));
             var hairline = hairlineGO.GetComponent<Image>();
-            hairline.color = BandOutlineColor;
+            hairline.color = BoardColours.BandEdge;
             hairline.raycastTarget = false;
 
             var hairlineRect = hairline.rectTransform;
@@ -561,7 +560,7 @@ namespace Frogs.Unity.Views
             // is the wrong thing to trade away, so this band does not shrink.
             var controlsGO = new GameObject("Controls", typeof(RectTransform), typeof(Image));
             var controlsImage = controlsGO.GetComponent<Image>();
-            controlsImage.color = BandColor;
+            controlsImage.color = BoardColours.BandFill;
             controlsImage.raycastTarget = false;
 
             _controlsRect = controlsImage.rectTransform;

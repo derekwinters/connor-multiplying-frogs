@@ -14,6 +14,7 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Title screen | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
 | Game setup | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
+| Game board, paler water | [`game-board-paler-water.html`](game-board-paler-water.html) | [Game board](../game-board.md) |
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
@@ -40,6 +41,13 @@ Derek settled the question — smaller cells for the addition rows only — so t
 file now draws the answer instead: the same six rows at
 `GridAdditionRowHeight`, fitting with 16 px to spare.
 
+The game board's pair is the live one, and it is the second kind: a real
+choice, drawn twice. `game-board.html` and `game-board-paler-water.html` are
+the same canvas differing in exactly one value — the water's blue. Connor picks
+one on the tablet, the spec page takes the answer, and the losing file is
+deleted. Until then, an edit to the board's layout has to be made in **both**
+files, which is the cost of the pair and the reason it does not stay open long.
+
 The title screen used to have a pair too — `title-screen.html` and
 `title-screen-resume-primary.html`, differing in exactly which of `RESUME` and
 `NEW` was primary, per the wireframe loop's own advice that where there is a
@@ -53,12 +61,20 @@ deleted, per [issue #216](https://github.com/derekwinters/connor-multiplying-fro
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
 
-### Colour in these mockups is a placeholder
+### Colour in these mockups is mostly a placeholder
 
 The four frog colours exist so the frogs can be told apart in a picture, and the
 single green accent marks the primary action. Neither is a palette decision —
 that is an `area:art` call and it lands with the frog sprites. See
 [frog colours](../shared-components.md#frog-colours).
+
+The game board is the first exception. Its water, logs and lily pads are a
+decision Derek made — a pond is blue, its logs brown, its lily pads green — and
+they are written down as
+[a constants table on the spec page](../game-board.md#colours), the same as
+every dimension on that screen. The mockup receives them from there rather than
+being the place they live. The exact hues are still Connor's to settle, which
+is what the pair of board files is for.
 
 ## What a mockup is, and is not
 
