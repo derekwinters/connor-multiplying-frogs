@@ -2043,6 +2043,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-blocker-set-wakes-an-issue-at-most-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A blocker set wakes an issue at most once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-it-never-touches" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3222,6 +3233,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-blocker-set-wakes-an-issue-at-most-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A blocker set wakes an issue at most once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-it-never-touches" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4392,6 +4414,20 @@ is not enough.</p>
 <code>ready-for-work</code> is still a picture nobody has said yes to. Without the
 carve-out the sweep wakes the dependent on every run and triage sets it aside
 again on every run — forever, and noisily.</p>
+<h3 id="a-blocker-set-wakes-an-issue-at-most-once">A blocker set wakes an issue at most once<a class="headerlink" href="#a-blocker-set-wakes-an-issue-at-most-once" title="Link to this section">&para;</a></h3>
+<p>A closed blocker stays resolved forever, so without a guard, an issue that
+lands back on <code>needs-clarification</code> for <em>any other reason</em> — an open design
+question triage raised, say, unrelated to the blocker that used to hold it —
+reads as "blocker cleared, wake it up" again on the very next sweep. And the
+sweep runs on every <code>labeled</code> event, including the one the revisit itself just
+made, so this is not a rare recurrence: it is a tight loop, once per sweep,
+forever, each pass posting another "back in the triage queue" comment and
+firing triage again.</p>
+<p>The sweep reads the issue's own comment history and skips a blocker set it has
+already posted a revisit for — only a triage-authored comment counts, so a
+human typing similar words by hand can't suppress a real wake-up. A <em>new</em>
+blocker resolving later still fires normally; only a repeat of an already-
+actioned set is skipped.</p>
 <h3 id="what-it-never-touches">What it never touches<a class="headerlink" href="#what-it-never-touches" title="Link to this section">&para;</a></h3>
 <ul>
 <li><strong><code>parked</code> issues.</strong> Parking is a decision the owner made; only the owner
