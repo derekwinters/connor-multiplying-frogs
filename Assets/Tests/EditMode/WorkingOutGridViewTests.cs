@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,6 +20,10 @@ using DialogPanel = Frogs.Unity.UI.DialogPanel;
 using FrogColours = Frogs.Unity.UI.FrogColours;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
+// Frogs.Core declares a Screen too — the router's, one of the game's screens —
+// and the raycast harness below wants the engine's, in pixels. Same treatment
+// as Button: a bare `Screen` in this file always means UnityEngine's.
+using Screen = UnityEngine.Screen;
 
 namespace Frogs.Unity.EditModeTests
 {
@@ -1064,6 +1069,434 @@ namespace Frogs.Unity.EditModeTests
             finally
             {
                 Destroy(view);
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Whether a tap arrives at all (#288).
+        //
+        // Every other test in this file taps by calling `OnPointerClick`, and
+        // that tests what the view does *with* a tap. It cannot test whether
+        // one ever gets there, because it bypasses the raycast — which is the
+        // gap the keypad and the grid were dead in for a whole release. These
+        // five go through the raycast instead, on a canvas, by screen
+        // position; see TappableScreen for what that can and cannot say.
+        // ---------------------------------------------------------------
+
+        [Test]
+        public void ARaycastAtCheckIt_ReachesTheButton_WhichIsHowTheHarnessProvesItself()
+        {
+            // The control, and it has already earned its place: a shared
+            // Button has a raycast target today, so this passes with the
+            // keypad and the grid still dead — and when it did *not* pass, it
+            // said the harness was wrong rather than the keypad, which is
+            // exactly what it is here to say.
+            var screen = new TappableScreen(Turn(Pile.Easy));
+
+            try
+            {
+                var button = screen.View.CheckItButton;
+                var point = CentreOf(button.RectTransform);
+
+                Assert.That(
+                    screen.TargetAt<IPointerDownHandler>(point),
+                    Is.SameAs(button.gameObject),
+                    screen.Describe(point));
+            }
+            finally
+            {
+                screen.Destroy();
+            }
+        }
+
+        [Test]
+        public void ARaycastAtEveryKeypadKey_ReachesThatKey()
+        {
+            var screen = new TappableScreen(Turn(Pile.Easy));
+
+            try
+            {
+                // All twelve, one at a time: `1`–`9`, backspace, `0`, `clear`.
+                // Twelve keys resolving to twelve different keys is also the
+                // answer to "the tap area is the key, not the gap between
+                // them" — a hit area spilling into its neighbour would land
+                // two of these on the same key.
+                foreach (var key in screen.View.Keys)
+                {
+                    var point = CentreOf(key.RectTransform);
+
+                    Assert.That(
+                        screen.TargetAt<IPointerClickHandler>(point),
+                        Is.SameAs(key.gameObject),
+                        key.name + " cannot be tapped." + Environment.NewLine + screen.Describe(point));
+                }
+            }
+            finally
+            {
+                screen.Destroy();
+            }
+        }
+
+        [Test]
+        public void ARaycastAtAnEditableCellOrACarryBox_ReachesThatCell_AndTwoAdjacentOnesReachTwoDifferentCells()
+        {
+            var screen = new TappableScreen(Turn(Pile.Easy));
+
+            try
+            {
+                var view = screen.View;
+
+                var reachable = new[]
+                {
+                    CellAt(view, GridRowKind.AnswerRow, 0, EasyColumnCount - 1),
+                    CellAt(view, GridRowKind.AnswerRow, 0, EasyColumnCount - 2),
+                    CellAt(view, GridRowKind.AdditionRow, 0, EasyColumnCount - 1),
+                    // The carry boxes are editable too — scratch paper you can
+                    // write in is scratch paper you can tap.
+                    CellAt(view, GridRowKind.CarryStrip, 0, 1),
+                    CellAt(view, GridRowKind.CarryStrip, 1, 1)
+                };
+
+                foreach (var cell in reachable)
+                {
+                    var point = CentreOf(cell.RectTransform);
+
+                    Assert.That(cell.IsEditable, Is.True, "the fixture picked a cell nobody can type in");
+                    Assert.That(
+                        screen.TargetAt<IPointerClickHandler>(point),
+                        Is.SameAs(cell.gameObject),
+                        cell.RowKind + " cell " + cell.Column + " cannot be tapped."
+                            + Environment.NewLine + screen.Describe(point));
+                }
+
+                // And the two next to each other are two, not one: the tap
+                // area is the cell's own box.
+                Assert.That(
+                    screen.TargetAt<IPointerClickHandler>(CentreOf(reachable[0].RectTransform)),
+                    Is.Not.SameAs(screen.TargetAt<IPointerClickHandler>(CentreOf(reachable[1].RectTransform))));
+            }
+            finally
+            {
+                screen.Destroy();
+            }
+        }
+
+        [Test]
+        public void ARaycastAtAPrintedDigitOrTheOperatorColumn_ReachesNothing()
+        {
+            var screen = new TappableScreen(Turn(Pile.Easy));
+
+            try
+            {
+                var view = screen.View;
+
+                // The card's own digits and the `×` are not cells the caret
+                // can go to, and HandleCellTapped's early return says so. That
+                // return stays a real guard only while these are unhittable —
+                // a hit that is then ignored is a different design.
+                var unreachable = new[]
+                {
+                    CellAt(view, GridRowKind.Multiplicand, 0, EasyColumnCount - 1),
+                    CellAt(view, GridRowKind.Multiplier, 0, EasyColumnCount - 1),
+                    CellAt(view, GridRowKind.Multiplier, 0, 0)
+                };
+
+                foreach (var cell in unreachable)
+                {
+                    var point = CentreOf(cell.RectTransform);
+
+                    Assert.That(cell.IsEditable, Is.False, "the fixture picked a cell the player can type in");
+                    Assert.That(
+                        screen.TargetAt<IPointerClickHandler>(point),
+                        Is.Null,
+                        cell.RowKind + " cell " + cell.Column + " takes a tap and should not."
+                            + Environment.NewLine + screen.Describe(point));
+                }
+            }
+            finally
+            {
+                screen.Destroy();
+            }
+        }
+
+        [Test]
+        public void AWholeTurn_TappedThroughTheRaycaster_FillsTheAnswer_EnablesCheckIt_AndLandsOnTheAnswerResult()
+        {
+            // The test that would have caught #288: a turn played the way the
+            // tablet plays one, from the first tap on the grid to the dialog
+            // that comes next. Nothing here calls a handler by hand.
+            var turn = Turn(Pile.Easy);
+            var router = new ScreenRouter();
+            router.OpenDialog(Frogs.Core.Dialog.WorkingOutGrid);
+
+            var screen = new TappableScreen(turn, router);
+
+            try
+            {
+                var view = screen.View;
+
+                Assert.That(view.CheckItButton.IsDisabled, Is.True, "an empty answer is not a wrong answer");
+
+                screen.TapAt(CentreOf(CellAt(view, GridRowKind.AnswerRow, 0, EasyColumnCount - 1).RectTransform));
+
+                // `340` again: the largest product the easy shape holds, and
+                // deliberately not this card's, so nothing can pass by the
+                // grid quietly grading it.
+                screen.TapAt(CentreOf(KeyFor(view, 0).RectTransform));
+                screen.TapAt(CentreOf(KeyFor(view, 4).RectTransform));
+                screen.TapAt(CentreOf(KeyFor(view, 3).RectTransform));
+
+                Assert.That(view.AnswerText, Is.EqualTo("340"), "three taps on the keypad, three digits in the answer row");
+                Assert.That(view.CheckItButton.IsDisabled, Is.False, "a digit is in, so the turn can be finished");
+
+                screen.TapAt(CentreOf(view.CheckItButton.RectTransform));
+
+                Assert.That(turn.Submitted, Is.EqualTo(new[] { 340 }));
+                Assert.That(
+                    router.CurrentDialog,
+                    Is.EqualTo(Frogs.Core.Dialog.AnswerResult),
+                    "the way out of the dialog that cannot be dismissed");
+            }
+            finally
+            {
+                screen.Destroy();
+            }
+        }
+
+        static WorkingOutKeypadKey KeyFor(WorkingOutGridView view, int digit)
+        {
+            return view.Keys.Single(key => key.Kind == KeypadKeyKind.Digit && key.Digit == digit);
+        }
+
+        static Vector2 CentreOf(RectTransform rect)
+        {
+            var corners = Corners(rect);
+            return (Vector2)(corners[0] + corners[2]) / 2f;
+        }
+
+        /// <summary>
+        /// A canvas with the grid under it, and a tap delivered the way the
+        /// running app delivers one: find the <see cref="Graphic"/> under a
+        /// screen position, then walk *up* to the first ancestor that handles
+        /// the event. A component with no raycast target anywhere beneath it
+        /// is unreachable that way however good its handler is, which is all
+        /// #288 ever was.
+        ///
+        /// The canvas is <c>AppRoot</c>'s in shape — screen-space overlay, a
+        /// design of 1920 × 1200 scaled to fit the screen the way its
+        /// CanvasScaler's Expand mode scales it. It is placed by hand rather
+        /// than left to Unity, because an edit-mode session ticks no frame for
+        /// Unity to place it on and everything below works in screen pixels.
+        ///
+        /// **Why this does not call <c>GraphicRaycaster.Raycast</c>.** It was
+        /// written that way first and the answer came back from CI: the
+        /// raycaster's first filter is `graphic.depth == -1` — "hasn't been
+        /// processed by the canvas, which means it isn't actually drawn" — and
+        /// a headless editor never draws a canvas, so every graphic in this
+        /// fixture reports -1, `Check it`'s border included. It returns nothing
+        /// for every point on the screen, which is a harness that can only ever
+        /// say no.
+        ///
+        /// So the raycast is driven one level down, through the pieces the
+        /// raycaster itself is made of: the canvas's own
+        /// <see cref="GraphicRegistry"/>, the same rectangle-contains-point
+        /// test, and <see cref="Graphic.Raycast"/> — which is what honours a
+        /// <c>CanvasGroup</c> that is not blocking, or an <c>Image</c> with a
+        /// hit-test threshold. What goes with the depth filter is draw order:
+        /// this cannot say which of two overlapping targets wins. What it can
+        /// say is whether there is anything under the point to send a tap to,
+        /// which is the whole of #288.
+        /// </summary>
+        sealed class TappableScreen
+        {
+            const float DesignWidth = 1920f;
+            const float DesignHeight = 1200f;
+
+            readonly GameObject _canvasGO;
+            readonly Canvas _canvas;
+
+            internal TappableScreen(IWorkingOutTurn turn, ScreenRouter router = null)
+            {
+                Assert.That(Screen.width, Is.GreaterThan(0), "this editor session reports no screen to raycast against");
+                Assert.That(Screen.height, Is.GreaterThan(0), "this editor session reports no screen to raycast against");
+
+                _canvasGO = new GameObject("RaycastCanvas", typeof(RectTransform), typeof(Canvas));
+
+                _canvas = _canvasGO.GetComponent<Canvas>();
+                _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+                // What Unity does to an overlay canvas on a frame that never
+                // comes here: the rect is the screen, in screen pixels, and a
+                // world position is therefore a screen position.
+                var canvasRect = (RectTransform)_canvasGO.transform;
+                canvasRect.sizeDelta = new Vector2(Screen.width, Screen.height);
+                canvasRect.localScale = Vector3.one;
+                canvasRect.position = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
+
+                var host = new GameObject(nameof(WorkingOutGridViewTests), typeof(RectTransform));
+                var hostRect = (RectTransform)host.transform;
+                hostRect.SetParent(canvasRect, worldPositionStays: false);
+
+                // CanvasScaler's Expand: the design never gets cropped, so it
+                // shrinks to whichever of the two axes is tighter.
+                var scale = Mathf.Min(Screen.width / DesignWidth, Screen.height / DesignHeight);
+                hostRect.localScale = new Vector3(scale, scale, 1f);
+
+                View = host.AddComponent<WorkingOutGridView>();
+                View.Initialize(turn, router);
+
+                Canvas.ForceUpdateCanvases();
+            }
+
+            internal WorkingOutGridView View { get; }
+
+            /// <summary>
+            /// The first thing under <paramref name="screenPoint"/> that could
+            /// receive <typeparamref name="THandler"/>, or null. The scrim and
+            /// the panel are raycast targets of their own and neither handles
+            /// anything, so they are stepped over rather than counted as a hit.
+            /// </summary>
+            internal GameObject TargetAt<THandler>(Vector2 screenPoint) where THandler : IEventSystemHandler
+            {
+                foreach (var graphic in GraphicsUnder(screenPoint))
+                {
+                    var handler = ExecuteEvents.GetEventHandler<THandler>(graphic.gameObject);
+
+                    if (handler != null)
+                    {
+                        return handler;
+                    }
+                }
+
+                return null;
+            }
+
+            /// <summary>
+            /// A tap, in StandaloneInputModule's own order: pointer down and
+            /// pointer up to whatever handles them, then the click.
+            /// </summary>
+            internal void TapAt(Vector2 screenPoint)
+            {
+                var eventData = new PointerEventData(null)
+                {
+                    position = screenPoint,
+                    pressPosition = screenPoint
+                };
+
+                var pressed = TargetAt<IPointerDownHandler>(screenPoint);
+                var clicked = TargetAt<IPointerClickHandler>(screenPoint);
+
+                if (pressed == null && clicked == null)
+                {
+                    Assert.Fail("nothing under " + screenPoint + " can take a tap."
+                        + Environment.NewLine + Describe(screenPoint));
+                }
+
+                if (pressed != null)
+                {
+                    ExecuteEvents.Execute(pressed, eventData, ExecuteEvents.pointerDownHandler);
+                    ExecuteEvents.Execute(pressed, eventData, ExecuteEvents.pointerUpHandler);
+                }
+
+                if (clicked != null)
+                {
+                    ExecuteEvents.Execute(clicked, eventData, ExecuteEvents.pointerClickHandler);
+                }
+            }
+
+            /// <summary>
+            /// Every graphic registered against this canvas that accepts a
+            /// raycast and whose rectangle contains the point — the set the
+            /// GraphicRaycaster would pick its winner from.
+            /// </summary>
+            internal List<Graphic> GraphicsUnder(Vector2 screenPoint)
+            {
+                var found = new List<Graphic>();
+                var registered = GraphicRegistry.GetGraphicsForCanvas(_canvas);
+
+                for (var index = 0; index < registered.Count; index++)
+                {
+                    var graphic = registered[index];
+
+                    if (graphic == null || !graphic.raycastTarget || !graphic.isActiveAndEnabled)
+                    {
+                        continue;
+                    }
+
+                    if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, screenPoint, null))
+                    {
+                        continue;
+                    }
+
+                    // The graphic's own say: a CanvasGroup up the tree that is
+                    // not blocking raycasts, or an Image with a hit-test
+                    // threshold, refuses the tap here exactly as it would in
+                    // the running app.
+                    if (!graphic.Raycast(screenPoint, null))
+                    {
+                        continue;
+                    }
+
+                    found.Add(graphic);
+                }
+
+                return found;
+            }
+
+            /// <summary>
+            /// What was under the point, for a failure message. "Nothing was
+            /// hit" is worth two different fixes depending on why, so the
+            /// failure says which: nothing raycastable under the point, or
+            /// nothing raycastable in the whole view.
+            /// </summary>
+            internal string Describe(Vector2 screenPoint)
+            {
+                var report = new StringBuilder();
+                var canvasRect = (RectTransform)_canvasGO.transform;
+
+                report.AppendLine("point " + screenPoint
+                    + " on a " + Screen.width + " x " + Screen.height + " screen");
+                report.AppendLine("canvas rect " + canvasRect.rect
+                    + " at " + canvasRect.position
+                    + ", view scaled " + View.transform.localScale);
+
+                foreach (var graphic in GraphicsUnder(screenPoint))
+                {
+                    report.AppendLine("  under the point: " + PathOf(graphic.gameObject));
+                }
+
+                foreach (var graphic in View.GetComponentsInChildren<Graphic>(true))
+                {
+                    if (!graphic.raycastTarget)
+                    {
+                        continue;
+                    }
+
+                    report.AppendLine("  raycast target " + PathOf(graphic.gameObject)
+                        + " (canvas " + (graphic.canvas == null ? "none" : graphic.canvas.name) + ")");
+                }
+
+                return report.ToString();
+            }
+
+            internal void Destroy()
+            {
+                if (_canvasGO != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(_canvasGO);
+                }
+            }
+
+            static string PathOf(GameObject target)
+            {
+                var path = target.name;
+
+                for (var parent = target.transform.parent; parent != null; parent = parent.parent)
+                {
+                    path = parent.name + "/" + path;
+                }
+
+                return path;
             }
         }
 

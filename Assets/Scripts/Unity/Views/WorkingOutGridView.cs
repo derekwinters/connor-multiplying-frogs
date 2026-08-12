@@ -990,6 +990,25 @@ namespace Frogs.Unity.Views
             }
 
             cell.Describe(row.Kind, ordinal, kind, column, border, fill, label);
+
+            // What a tap actually lands on. `BuildBox` and `BuildText` turn the
+            // raycast off on everything they make, which is right for the card
+            // readout and the printed digits and was wrong here: a cell whose
+            // whole subtree refuses the raycast is a cell uGUI's
+            // GraphicRaycaster never finds, so `OnPointerClick` never fires and
+            // the caret never moves (#288). The outline takes it and the fill
+            // and the label do not — Button, GameBoardSettingsButton and the
+            // setup screen's seats all draw the line in the same place.
+            //
+            // Gated on IsEditable, which is the predicate HandleCellTapped
+            // already guards on: a printed digit and the operator column stay
+            // unhittable, so that guard keeps meaning what it says rather than
+            // becoming the only thing between a tap and a caret in the card.
+            if (cell.IsEditable && border != null)
+            {
+                border.raycastTarget = true;
+            }
+
             cell.Tapped += HandleCellTapped;
             return cell;
         }
@@ -1138,6 +1157,13 @@ namespace Frogs.Unity.Views
                 KeypadKeyBorderWidth,
                 LineColor,
                 out fill);
+
+            // The key's hit area: the outline, covering the whole key, with the
+            // fill and the label refusing the raycast underneath it. Without
+            // it there is nothing raycastable anywhere under `Key` + label, so
+            // the GraphicRaycaster never finds the key and the keypad types
+            // nothing (#288).
+            border.raycastTarget = true;
 
             var text = BuildText("Label", border.rectTransform, labelSize, InkColor, TextAnchor.MiddleCenter);
             text.fontStyle = FontStyle.Bold;
