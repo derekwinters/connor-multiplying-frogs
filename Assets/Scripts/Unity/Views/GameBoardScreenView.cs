@@ -13,6 +13,7 @@ using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
+using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.Unity.Views
 {
@@ -101,12 +102,18 @@ namespace Frogs.Unity.Views
         // PlayerChip.cs and GameSetupScreenView.cs each draw for their own
         // colours: not a geometry constant on any spec page's table, so not
         // declared as a named spec constant.
-        static readonly Color BoardBackgroundColor = new Color32(0xED, 0xF1, 0xEF, 0xFF); // mockup's --bg
+        //
+        // The mockup's `--bg` is the exception. It is the whole screen's
+        // background rather than this screen's chrome, and the scene camera
+        // has to clear to the same value, so it lives on ScreenColours where
+        // both can read it.
         static readonly Color BandColor = new Color32(0xE2, 0xE8, 0xE5, 0xFF); // mockup's header/controls bands
         static readonly Color BandOutlineColor = new Color32(0xB9, 0xC0, 0xBD, 0xFF); // mockup's --faint
         static readonly Color InkColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockup's --ink
 
         RectTransform _rect;
+        RectTransform _contentRect;
+        Image _background;
 
         RectTransform _headerRect;
         Image _headerHairline;
@@ -143,13 +150,33 @@ namespace Frogs.Unity.Views
         /// </summary>
         public event Action SettingsRequested;
 
-        /// <summary>The screen's own <see cref="RectTransform"/>, sized to the full 1920 x 1200 reference canvas.</summary>
+        /// <summary>The screen's own <see cref="RectTransform"/>, filling the whole canvas — which is the reference canvas or larger.</summary>
         public RectTransform RectTransform
         {
             get
             {
                 EnsureInitialized();
                 return _rect;
+            }
+        }
+
+        /// <summary>The paint that reaches every edge of the screen, whatever the device's aspect ratio.</summary>
+        public Image BackgroundImage
+        {
+            get
+            {
+                EnsureInitialized();
+                return _background;
+            }
+        }
+
+        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred.</summary>
+        public RectTransform ContentRect
+        {
+            get
+            {
+                EnsureInitialized();
+                return _contentRect;
             }
         }
 
@@ -376,12 +403,17 @@ namespace Frogs.Unity.Views
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
-            _rect.anchorMin = new Vector2(0.5f, 0.5f);
-            _rect.anchorMax = new Vector2(0.5f, 0.5f);
-            _rect.pivot = new Vector2(0.5f, 0.5f);
-            _rect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            // The root fills the whole canvas, which on a device that is not
+            // 16:10 is larger than the 1920 x 1200 reference — see
+            // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
+            // Only the background hangs off it. Everything that is laid out in
+            // reference pixels hangs off `Content` instead, so the extra space
+            // a wider or taller device gives us is painted and nothing else.
+            StretchToFill(_rect);
 
             BuildBackground();
+            BuildContent();
+
             BuildHeader();
             BuildPond();
             BuildControls();
@@ -390,12 +422,30 @@ namespace Frogs.Unity.Views
         void BuildBackground()
         {
             var backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
-            var background = backgroundGO.GetComponent<Image>();
-            background.color = BoardBackgroundColor;
-            background.raycastTarget = false;
-            var backgroundRect = background.rectTransform;
+            _background = backgroundGO.GetComponent<Image>();
+            _background.color = ScreenColours.Background;
+            _background.raycastTarget = false;
+            var backgroundRect = _background.rectTransform;
             backgroundRect.SetParent(_rect, worldPositionStays: false);
+
+            // The canvas, not the reference rectangle: this is the paint that
+            // reaches the edge of the screen whatever shape the screen is.
             StretchToFill(backgroundRect);
+        }
+
+        void BuildContent()
+        {
+            // The reference canvas, centred — exactly the rect the root used
+            // to be, so every child below keeps the anchors, sizes and offsets
+            // it already had and nothing on the board moves by a pixel.
+            var contentGO = new GameObject("Content", typeof(RectTransform));
+            _contentRect = (RectTransform)contentGO.transform;
+            _contentRect.SetParent(_rect, worldPositionStays: false);
+            _contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            _contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            _contentRect.pivot = new Vector2(0.5f, 0.5f);
+            _contentRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            _contentRect.anchoredPosition = Vector2.zero;
         }
 
         void BuildHeader()
@@ -408,7 +458,7 @@ namespace Frogs.Unity.Views
             headerImage.raycastTarget = false;
 
             _headerRect = headerImage.rectTransform;
-            _headerRect.SetParent(_rect, worldPositionStays: false);
+            _headerRect.SetParent(_contentRect, worldPositionStays: false);
             _headerRect.anchorMin = new Vector2(0f, 1f);
             _headerRect.anchorMax = new Vector2(1f, 1f);
             _headerRect.pivot = new Vector2(0.5f, 1f);
@@ -498,7 +548,7 @@ namespace Frogs.Unity.Views
             // loses height from here and nothing else.
             var pondGO = new GameObject("Pond", typeof(RectTransform));
             _pondRect = (RectTransform)pondGO.transform;
-            _pondRect.SetParent(_rect, worldPositionStays: false);
+            _pondRect.SetParent(_contentRect, worldPositionStays: false);
             _pondRect.anchorMin = Vector2.zero;
             _pondRect.anchorMax = Vector2.one;
             _pondRect.offsetMin = new Vector2(0f, BoardControlsHeight);
@@ -515,7 +565,7 @@ namespace Frogs.Unity.Views
             controlsImage.raycastTarget = false;
 
             _controlsRect = controlsImage.rectTransform;
-            _controlsRect.SetParent(_rect, worldPositionStays: false);
+            _controlsRect.SetParent(_contentRect, worldPositionStays: false);
             _controlsRect.anchorMin = new Vector2(0f, 0f);
             _controlsRect.anchorMax = new Vector2(1f, 0f);
             _controlsRect.pivot = new Vector2(0.5f, 0f);

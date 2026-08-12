@@ -13,6 +13,7 @@ using CoreScreen = Frogs.Core.Screen;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
+using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.Unity.Views
 {
@@ -215,6 +216,8 @@ namespace Frogs.Unity.Views
         }
 
         RectTransform _rect;
+        RectTransform _contentRect;
+        Image _background;
 
         RectTransform _headerRect;
         Text _headerText;
@@ -235,13 +238,33 @@ namespace Frogs.Unity.Views
         ScreenRouter _router;
         Func<ulong> _seedFactory = DefaultSeedFactory;
 
-        /// <summary>The screen's own <see cref="RectTransform"/>, sized to the full 1920 x 1200 reference canvas.</summary>
+        /// <summary>The screen's own <see cref="RectTransform"/>, filling the whole canvas — which is the reference canvas or larger.</summary>
         public RectTransform RectTransform
         {
             get
             {
                 EnsureInitialized();
                 return _rect;
+            }
+        }
+
+        /// <summary>The paint that reaches every edge of the screen, whatever the device's aspect ratio.</summary>
+        public Image BackgroundImage
+        {
+            get
+            {
+                EnsureInitialized();
+                return _background;
+            }
+        }
+
+        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred.</summary>
+        public RectTransform ContentRect
+        {
+            get
+            {
+                EnsureInitialized();
+                return _contentRect;
             }
         }
 
@@ -468,15 +491,51 @@ namespace Frogs.Unity.Views
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
-            _rect.anchorMin = new Vector2(0.5f, 0.5f);
-            _rect.anchorMax = new Vector2(0.5f, 0.5f);
-            _rect.pivot = new Vector2(0.5f, 0.5f);
-            _rect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            // The root fills the whole canvas, which on a device that is not
+            // 16:10 is larger than the 1920 x 1200 reference — see
+            // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
+            // Only the background hangs off it. Everything laid out in
+            // reference pixels hangs off `Content` instead, so the extra space
+            // a wider or taller device gives us is painted and nothing else.
+            StretchToFill(_rect);
+
+            BuildBackground();
+            BuildContent();
 
             BuildHeader();
             BuildSeats();
             BuildHint();
             BuildControls();
+        }
+
+        void BuildBackground()
+        {
+            // The paint that reaches the edge of the screen on any aspect
+            // ratio — the mockups' `--bg`, which every mockup sets on its
+            // 1920 x 1200 frame and which nothing here painted until now.
+            var backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
+            _background = backgroundGO.GetComponent<Image>();
+            _background.color = ScreenColours.Background;
+            _background.raycastTarget = false;
+
+            var backgroundRect = _background.rectTransform;
+            backgroundRect.SetParent(_rect, worldPositionStays: false);
+            StretchToFill(backgroundRect);
+        }
+
+        void BuildContent()
+        {
+            // The reference canvas, centred — exactly the rect the root used
+            // to be, so every child below keeps the anchors, sizes and offsets
+            // it already had and nothing on this screen moves by a pixel.
+            var contentGO = new GameObject("Content", typeof(RectTransform));
+            _contentRect = (RectTransform)contentGO.transform;
+            _contentRect.SetParent(_rect, worldPositionStays: false);
+            _contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            _contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            _contentRect.pivot = new Vector2(0.5f, 0.5f);
+            _contentRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            _contentRect.anchoredPosition = Vector2.zero;
         }
 
         void BuildHeader()
@@ -494,7 +553,7 @@ namespace Frogs.Unity.Views
             _headerText.raycastTarget = false;
 
             _headerRect = _headerText.rectTransform;
-            _headerRect.SetParent(_rect, worldPositionStays: false);
+            _headerRect.SetParent(_contentRect, worldPositionStays: false);
             _headerRect.anchorMin = new Vector2(0.5f, 1f);
             _headerRect.anchorMax = new Vector2(0.5f, 1f);
             _headerRect.pivot = new Vector2(0.5f, 1f);
@@ -514,7 +573,7 @@ namespace Frogs.Unity.Views
 
             var seatsGO = new GameObject("Seats", typeof(RectTransform));
             _seatsRect = (RectTransform)seatsGO.transform;
-            _seatsRect.SetParent(_rect, worldPositionStays: false);
+            _seatsRect.SetParent(_contentRect, worldPositionStays: false);
             _seatsRect.anchorMin = new Vector2(0.5f, 0.5f);
             _seatsRect.anchorMax = new Vector2(0.5f, 0.5f);
             _seatsRect.pivot = new Vector2(0.5f, 0.5f);
@@ -666,7 +725,7 @@ namespace Frogs.Unity.Views
             _hintText.raycastTarget = false;
 
             _hintRect = _hintText.rectTransform;
-            _hintRect.SetParent(_rect, worldPositionStays: false);
+            _hintRect.SetParent(_contentRect, worldPositionStays: false);
             _hintRect.anchorMin = new Vector2(0.5f, 0.5f);
             _hintRect.anchorMax = new Vector2(0.5f, 0.5f);
             _hintRect.pivot = new Vector2(0.5f, 0.5f);
@@ -680,7 +739,7 @@ namespace Frogs.Unity.Views
             // SafeMargin from their edge, pinned to the bottom safe area.
             var controlsGO = new GameObject("Controls", typeof(RectTransform));
             _controlsRect = (RectTransform)controlsGO.transform;
-            _controlsRect.SetParent(_rect, worldPositionStays: false);
+            _controlsRect.SetParent(_contentRect, worldPositionStays: false);
             StretchToFill(_controlsRect);
 
             _backButton = CreateControlButton("Back", ButtonKind.Secondary, BackLabel);

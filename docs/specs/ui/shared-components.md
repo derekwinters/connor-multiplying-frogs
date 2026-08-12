@@ -69,6 +69,38 @@ designed against — see
 `CanvasScaler` is set to that same reference resolution, so a constant written
 here is the constant the code sets, with no conversion in between.
 
+### What fills a screen that is not 16:10
+
+The target tablet is 1920 × 1200 exactly, but the game runs on whatever screen
+it is opened on, and the `CanvasScaler` is set to **expand** — the canvas is
+never smaller than the reference in either direction, so nothing drawn at
+1920 × 1200 is ever cropped off an edge. The cost of that choice is that on any
+other aspect ratio the canvas is *larger* than the reference in one direction,
+and something has to fill the difference.
+
+**Invariant:** the screen's background reaches all four edges of the screen, on
+every aspect ratio.
+
+**Invariant:** everything laid out is laid out in the 1920 × 1200 reference
+canvas, centred on the screen. The extra space a wider or taller device gives
+us is margin, not layout — every constant on every screen page keeps meaning
+exactly what it says.
+
+**Invariant:** the extra space is background and nothing else. No element
+appears there, and no element grows into it. An element that only exists on
+some devices is an element nobody can review against a mockup, and every mockup
+in this repo is drawn at exactly one size.
+
+**Invariant:** nothing behind the canvas is ever visible. The scene camera
+clears to the same background colour rather than to the engine's default sky,
+so even a frame drawn before any screen has painted is the game's own colour.
+
+That background colour is the mockups' `--bg`, `#EDF1EF` — the colour every
+committed mockup paints its 1920 × 1200 frame. A dialog is the one screen that
+paints no background of its own: what it lays over the screen underneath is the
+[scrim](#dialog), and the scrim reaches the edges for the same reason and by
+the same rule.
+
 ### Why the numbers look big
 
 `MinTouchTarget` is 96 px, which is roughly double what a UI guideline for
