@@ -1823,6 +1823,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The snapshot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-dependency-is-an-edge-not-a-number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A dependency is an edge, not a number
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A partial payload is tolerated; an unreadable edge is not approved over
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -3012,6 +3040,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="The snapshot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-dependency-is-an-edge-not-a-number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A dependency is an edge, not a number
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A partial payload is tolerated; an unreadable edge is not approved over
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4206,18 +4262,38 @@ And if the reactions cannot be read at all, the comment is treated as <em>alread
 claimed</em> — re-applying a command is worse than skipping one, and the sweep picks
 it up next time.</p>
 <h3 id="the-snapshot">The snapshot<a class="headerlink" href="#the-snapshot" title="Link to this section">&para;</a></h3>
-<p><code>fetch_comment_event.py</code> turns the raw webhook payload into what the parser
-reads: the issue's number, labels, body, milestone, blockers (text ∪ native),
-whether it is the dashboard, and the comment itself. All the payload-shape
-guesswork lives there so the parser never has to know what GitHub's JSON looks
-like.</p>
-<p>It returns nothing at all for a comment on a pull request or from a bot —
-defence in depth, since the workflow filters those too, but a snapshot the
+<p><code>fetch_comment_event.py</code> turns the raw webhook payload into what the parser and
+the gates read: the issue's number, labels, body, milestone, blockers
+(text ∪ native), its soft <code>Depends on:</code> dependencies, whether it is the
+dashboard, and the comment itself. All the payload-shape guesswork lives there
+so the parser never has to know what GitHub's JSON looks like.</p>
+<h4 id="a-dependency-is-an-edge-not-a-number">A dependency is an edge, not a number<a class="headerlink" href="#a-dependency-is-an-edge-not-a-number" title="Link to this section">&para;</a></h4>
+<p><code>blockers</code> and <code>soft_dependencies</code> are lists of <strong>edges</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;open&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;milestone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v0.1&quot;</span><span class="p">}</span>
+</code></pre></div>
+<p>Not <code>[20]</code>. The <a href="#gate-2-milestone-order">milestone-order gate</a> is a comparison
+between two milestones, so it needs the blocker's own milestone and its own
+state — a list of issue numbers is not something it can answer with. The
+snapshot reads each edge's issue to fill them in, one request per edge, rather
+than trusting the dependency endpoint's payload to carry a <code>milestone</code> field:
+a shape that quietly omitted it would read as unscheduled and refuse every
+approval, and that is not a thing to guess at.</p>
+<p>An issue that is both a blocker and a <code>Depends on:</code> is one edge, the hard one.
+It is already the stronger of the two, and listing it twice only names it twice
+in the refusal.</p>
+<h4 id="a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over">A partial payload is tolerated; an unreadable edge is not approved over<a class="headerlink" href="#a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over" title="Link to this section">&para;</a></h4>
+<p>The builder returns nothing at all for a comment on a pull request or from a
+bot — defence in depth, since the workflow filters those too, but a snapshot the
 parser <em>could</em> act on is one it eventually will.</p>
-<p>It also tolerates a partial payload rather than throwing. A failed
-dependency lookup in particular does not lose the event: the command is
-probably <code>/park</code>, which does not care, and the gates that <em>do</em> care see a
-smaller blocker list and refuse — which is the safe direction.</p>
+<p>It also tolerates a partial payload rather than throwing. A failed <strong>dependency
+lookup</strong> does not lose the event: the command is probably <code>/park</code>, which does
+not care, and the <code>Blocked by #N</code> lines in the body are still read.</p>
+<p>An edge whose <strong>issue</strong> cannot be read is a different case, and it is kept
+rather than dropped — as open, with no milestone, which is exactly the shape the
+order gate refuses on. Approving over a dependency nobody can see is the
+expensive direction: the issue goes ready, the builder skips it every night
+because the blocker is still open, and nothing says why. A refusal costs one
+comment.</p>
 <h2 id="replaying-the-comments-the-webhook-lost">Replaying the comments the webhook lost<a class="headerlink" href="#replaying-the-comments-the-webhook-lost" title="Link to this section">&para;</a></h2>
 <p><code>gatekeeper-comment</code> fires on <code>issue_comment: created</code>. When that delivery is
 dropped — a webhook that never arrives, a workflow that fails to start, a run
@@ -4374,6 +4450,10 @@ dashboard, the comment-event snapshot, and <code>audit</code>.</p>
 <p><code>issue-blockers</code> owns them because it is the skill that documents the format —
 the same "the side that writes the format owns the recognizer" rule that put
 <code>has_analysis_signature</code> in <code>triage-issue</code>.</p>
+<p>The soft <code>Depends on: #42</code> line lives there too, as <code>text_depends_on</code>. It was a
+single-reader pattern sitting in <code>select_queue.py</code> right up until the approval
+gates became its second reader, and a second copy would have let the queue and
+the gate disagree about what the same body said.</p>
 <p>The pattern used to be written out in each reader, and the drift is silent in
 the worst way: the queue selector reads a line as a blocker and refuses to
 build the issue, the sweep does not and so never wakes it, and the dashboard
@@ -4440,8 +4520,8 @@ comment naming the cleared blockers — so the transition is visible in the
 thread rather than being a label that changed itself overnight.</p>
 <h2 id="focus-and-cap-live-on-the-dashboard-issue"><code>/focus</code> and <code>/cap</code> live on the dashboard issue<a class="headerlink" href="#focus-and-cap-live-on-the-dashboard-issue" title="Link to this section">&para;</a></h2>
 <p>Both are stored as HTML-comment markers in the body of the dashboard issue:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cm">&lt;!-- pipeline-focus: v0.0.1 --&gt;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cm">&lt;!-- pipeline-cap: 3 --&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cm">&lt;!-- pipeline-focus: v0.0.1 --&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cm">&lt;!-- pipeline-cap: 3 --&gt;</span>
 </code></pre></div>
 <p>Each setting resolves <strong>override → marker → default</strong>: an explicit <code>/focus</code> or
 <code>/cap</code> on this run wins, otherwise the marker currently in the body, otherwise
@@ -4482,14 +4562,14 @@ that body.</p>
 is in focus is friction in exactly the wrong place.</p>
 <h2 id="fetching-live-milestones">Fetching live milestones<a class="headerlink" href="#fetching-live-milestones" title="Link to this section">&para;</a></h2>
 <p>Never hard-code a milestone list. Read it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="err">GET /repos/{owner}/{repo}/milestones?state=open&amp;per_page=100</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">GET /repos/{owner}/{repo}/milestones?state=open&amp;per_page=100</span>
 </code></pre></div>
 <h3 id="the-gotcha-milestone-takes-a-number">The gotcha: <code>milestone</code> takes a number<a class="headerlink" href="#the-gotcha-milestone-takes-a-number" title="Link to this section">&para;</a></h3>
 <p>When setting a milestone on an issue, the field takes the milestone's <strong>number</strong>,
 not its title:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">PATCH /repos/{owner}/{repo}/issues/{issue_number}</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="err">{&quot;milestone&quot;: 2}          ✅</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="err">{&quot;milestone&quot;: &quot;v0.1&quot;}     ❌ 422, or silently wrong</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">PATCH /repos/{owner}/{repo}/issues/{issue_number}</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">{&quot;milestone&quot;: 2}          ✅</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">{&quot;milestone&quot;: &quot;v0.1&quot;}     ❌ 422, or silently wrong</span>
 </code></pre></div>
 <p>So anything accepting a title — <code>/milestone v0.1</code>, a triage decision — resolves
 title → number against the live list first, and refuses if the title doesn't
@@ -4796,7 +4876,7 @@ queue they had never reached.</p>
 posted, so the run looked successful from outside; only the label was missing,
 and no exit code, artifact, or test reports a missing label.</p>
 <p>So it is one call that does both writes or neither:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">hand_back</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;pending-approval&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">hand_back</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;pending-approval&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>It <strong>refuses before it writes</strong> in two cases, so a rejected hand-back leaves the
 issue exactly as it was rather than half-written:</p>
