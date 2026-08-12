@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.2.1...v0.3.0) (2026-08-12)
+
+
+### Features
+
+* **game-board:** one Start log and one End log for the whole pond ([#309](https://github.com/derekwinters/connor-multiplying-frogs/issues/309)) ([d219e57](https://github.com/derekwinters/connor-multiplying-frogs/commit/d219e5779b8e8315da44c63ff7f711c3d410726a)), closes [#296](https://github.com/derekwinters/connor-multiplying-frogs/issues/296)
+* **ui:** the pond reads as water — blue water, brown logs, green lily pads ([#302](https://github.com/derekwinters/connor-multiplying-frogs/issues/302)) ([364053a](https://github.com/derekwinters/connor-multiplying-frogs/commit/364053ad7489cb82888cfabf04e5ab00cc6aa752))
+
+
+### Bug Fixes
+
+* **gatekeeper:** let a gate refusal explain itself instead of crashing ([#307](https://github.com/derekwinters/connor-multiplying-frogs/issues/307)) ([de00c3b](https://github.com/derekwinters/connor-multiplying-frogs/commit/de00c3b9f5d4e089776d1c0735c512197cb544a4)), closes [#196](https://github.com/derekwinters/connor-multiplying-frogs/issues/196)
+* **pipeline:** show every issue that needs attention, not only the focus milestone's ([#293](https://github.com/derekwinters/connor-multiplying-frogs/issues/293)) ([04bda5a](https://github.com/derekwinters/connor-multiplying-frogs/commit/04bda5ac23aa1a6e49067247ac7e4704fd460b76))
+* **pipeline:** stop the auto-revisit sweep re-waking an issue forever ([#306](https://github.com/derekwinters/connor-multiplying-frogs/issues/306)) ([6f52f5a](https://github.com/derekwinters/connor-multiplying-frogs/commit/6f52f5a8e323cc111f99b29b8af18a3928ec3fe7))
+* **ui:** paint the background to the edge of the screen ([#300](https://github.com/derekwinters/connor-multiplying-frogs/issues/300)) ([142949a](https://github.com/derekwinters/connor-multiplying-frogs/commit/142949a771f69527cee510d45488747dbebc3d9e))
+* **working-out-grid:** let the keypad and the cells take a tap ([#295](https://github.com/derekwinters/connor-multiplying-frogs/issues/295)) ([f20a1bd](https://github.com/derekwinters/connor-multiplying-frogs/commit/f20a1bd27c96a2b7e530ff7fb16cd3ccf1496a9c))
+
 ## [0.2.1](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.2.0...v0.2.1) (2026-08-11)
 
 
