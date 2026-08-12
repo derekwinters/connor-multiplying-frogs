@@ -39,10 +39,27 @@ import re
 # pass. "This is similar to #42" is not a dependency either.
 TEXT_BLOCKER = re.compile(r"^\s*blocked\s+by\s*:?\s*#(\d+)\s*$", re.IGNORECASE | re.MULTILINE)
 
+# "Depends on: #42", "depends on #42". Soft ordering — it never gates the
+# builder, it only sequences the queue and the approval gates' milestone check.
+# It lives beside the hard pattern because it now has two readers, and two
+# copies of a line-recognizer is exactly how the readers came to disagree about
+# what a body said. See #147.
+TEXT_DEPENDS = re.compile(r"^\s*depends\s+on\s*:?\s*#(\d+)\s*$", re.IGNORECASE | re.MULTILINE)
+
 
 def text_blockers(body) -> set[int]:
     """Issue numbers named as blockers in a body — which is the wrong place."""
     return {int(number) for number in TEXT_BLOCKER.findall(body or "")}
+
+
+def text_depends_on(body) -> set[int]:
+    """Issue numbers named as soft ordering hints in a body.
+
+    Not blockers: `Depends on:` says "this goes better afterwards", and reading
+    it as a hard blocker turns a preference into a gate the builder refuses to
+    pass.
+    """
+    return {int(number) for number in TEXT_DEPENDS.findall(body or "")}
 
 
 def union_blockers(body, native) -> list[int]:
