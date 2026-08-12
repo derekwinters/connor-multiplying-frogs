@@ -338,10 +338,14 @@ namespace Frogs.Unity.UI
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
-            _rect.anchorMin = new Vector2(0.5f, 0.5f);
-            _rect.anchorMax = new Vector2(0.5f, 0.5f);
-            _rect.pivot = new Vector2(0.5f, 0.5f);
-            _rect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            // The whole canvas, not the reference rectangle. The scrim hangs
+            // off this, and "a dialog always dims what is behind it" has to
+            // stay true on a device whose canvas is bigger than 1920 x 1200 —
+            // a scrim that stopped at the reference would leave the screen
+            // underneath undimmed in a strip down each side. The panel itself
+            // is centre-anchored, so it does not move when this grows:
+            // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
+            StretchToFill(_rect);
 
             _canvasGroup = GetComponent<CanvasGroup>();
             if (_canvasGroup == null)

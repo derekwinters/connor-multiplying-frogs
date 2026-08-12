@@ -9,6 +9,7 @@ using CoreScreen = Frogs.Core.Screen;
 // or `ButtonKind` in this file always means the shared component's.
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
+using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.Unity.Views
 {
@@ -72,6 +73,8 @@ namespace Frogs.Unity.Views
         static readonly Color VersionColor = new Color32(0x6C, 0x78, 0x73, 0xFF); // mockups' --line
 
         RectTransform _rect;
+        RectTransform _contentRect;
+        Image _background;
 
         RectTransform _backdropRect;
         CanvasGroup _backdropCanvasGroup;
@@ -93,13 +96,33 @@ namespace Frogs.Unity.Views
         ScreenRouter _router;
         ISavedGameQuery _savedGameQuery = new NoSavedGameQuery();
 
-        /// <summary>The screen's own <see cref="RectTransform"/>, sized to the full 1920 x 1200 reference canvas.</summary>
+        /// <summary>The screen's own <see cref="RectTransform"/>, filling the whole canvas — which is the reference canvas or larger.</summary>
         public RectTransform RectTransform
         {
             get
             {
                 EnsureInitialized();
                 return _rect;
+            }
+        }
+
+        /// <summary>The paint that reaches every edge of the screen, whatever the device's aspect ratio.</summary>
+        public Image BackgroundImage
+        {
+            get
+            {
+                EnsureInitialized();
+                return _background;
+            }
+        }
+
+        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred.</summary>
+        public RectTransform ContentRect
+        {
+            get
+            {
+                EnsureInitialized();
+                return _contentRect;
             }
         }
 
@@ -312,14 +335,56 @@ namespace Frogs.Unity.Views
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
-            _rect.anchorMin = new Vector2(0.5f, 0.5f);
-            _rect.anchorMax = new Vector2(0.5f, 0.5f);
-            _rect.pivot = new Vector2(0.5f, 0.5f);
-            _rect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            // The root fills the whole canvas, which on a device that is not
+            // 16:10 is larger than the 1920 x 1200 reference — see
+            // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
+            // Only the background hangs off it. Everything laid out in
+            // reference pixels hangs off `Content` instead.
+            StretchToFill(_rect);
+
+            BuildBackground();
+            BuildContent();
 
             BuildBackdrop();
             BuildAction();
             BuildFootprint();
+        }
+
+        void BuildBackground()
+        {
+            // The paint that reaches the edge of the screen on any aspect
+            // ratio. It sits *under* the backdrop rather than being part of
+            // it, because the backdrop fades in and this must not: the first
+            // frame of the title screen is this colour, not whatever is
+            // behind the canvas.
+            var backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
+            _background = backgroundGO.GetComponent<Image>();
+            _background.color = ScreenColours.Background;
+            _background.raycastTarget = false;
+
+            var backgroundRect = _background.rectTransform;
+            backgroundRect.SetParent(_rect, worldPositionStays: false);
+            StretchToFill(backgroundRect);
+        }
+
+        void BuildContent()
+        {
+            // The reference canvas, centred — exactly the rect the root used
+            // to be, so every child below keeps the anchors and offsets it
+            // already had and nothing on the title screen moves.
+            //
+            // The splash art is in here rather than on the background, so it
+            // keeps the shape it is drawn at. An illustration stretched to
+            // whatever proportions a device happens to have is the one thing a
+            // 1:1 mockup cannot describe.
+            var contentGO = new GameObject("Content", typeof(RectTransform));
+            _contentRect = (RectTransform)contentGO.transform;
+            _contentRect.SetParent(_rect, worldPositionStays: false);
+            _contentRect.anchorMin = new Vector2(0.5f, 0.5f);
+            _contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            _contentRect.pivot = new Vector2(0.5f, 0.5f);
+            _contentRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            _contentRect.anchoredPosition = Vector2.zero;
         }
 
         void BuildBackdrop()
@@ -329,7 +394,7 @@ namespace Frogs.Unity.Views
             // "Neither button animates."
             var backdropGO = new GameObject("Backdrop", typeof(RectTransform), typeof(CanvasGroup));
             _backdropRect = (RectTransform)backdropGO.transform;
-            _backdropRect.SetParent(_rect, worldPositionStays: false);
+            _backdropRect.SetParent(_contentRect, worldPositionStays: false);
             StretchToFill(_backdropRect);
 
             _backdropCanvasGroup = backdropGO.GetComponent<CanvasGroup>();
@@ -378,7 +443,7 @@ namespace Frogs.Unity.Views
             // settled open question 1.
             var actionGO = new GameObject("Action", typeof(RectTransform));
             _actionRect = (RectTransform)actionGO.transform;
-            _actionRect.SetParent(_rect, worldPositionStays: false);
+            _actionRect.SetParent(_contentRect, worldPositionStays: false);
             StretchToFill(_actionRect);
 
             _resumeButton = CreateActionButton("Resume", ButtonKind.Secondary, ResumeLabel);
@@ -412,7 +477,7 @@ namespace Frogs.Unity.Views
             // footprint — version string, bottom-left, small and quiet.
             var footprintGO = new GameObject("Footprint", typeof(RectTransform));
             _footprintRect = (RectTransform)footprintGO.transform;
-            _footprintRect.SetParent(_rect, worldPositionStays: false);
+            _footprintRect.SetParent(_contentRect, worldPositionStays: false);
             StretchToFill(_footprintRect);
 
             var versionGO = new GameObject("Version", typeof(RectTransform), typeof(Text));

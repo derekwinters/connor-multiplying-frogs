@@ -74,11 +74,6 @@ namespace Frogs.Unity.Views
         // - `VersionLabelSize` is title-screen.md's — the same value doing the
         //   same job, a quiet version readout bottom-left.
 
-        // The one canvas every screen is measured in —
-        // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
-        const float CanvasWidth = 1920f;
-        const float CanvasHeight = 1200f;
-
         const string TitleLabel = "Settings";
         const string HowToPlayLabel = "How to play";
         const string EndGameLabel = "End the game";
@@ -125,7 +120,7 @@ namespace Frogs.Unity.Views
         /// </summary>
         public event Action EndGameConfirmRequested;
 
-        /// <summary>The view's own <see cref="RectTransform"/>, sized to the full 1920 x 1200 reference canvas.</summary>
+        /// <summary>The view's own <see cref="RectTransform"/>, filling the whole canvas — which is the reference canvas or larger.</summary>
         public RectTransform RectTransform
         {
             get
@@ -301,10 +296,12 @@ namespace Frogs.Unity.Views
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
-            _rect.anchorMin = new Vector2(0.5f, 0.5f);
-            _rect.anchorMax = new Vector2(0.5f, 0.5f);
-            _rect.pivot = new Vector2(0.5f, 0.5f);
-            _rect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            // The whole canvas, not the 1920 x 1200 reference rectangle. This
+            // dialog paints no background of its own — what it lays over the
+            // screen is the shared Dialog's scrim, and that has to reach the
+            // edges on a device that is not 16:10. The panel underneath is
+            // centre-anchored, so it does not move.
+            StretchToFill(_rect);
 
             BuildDialog();
             BuildActions();

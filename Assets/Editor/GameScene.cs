@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.EditorTools
 {
@@ -99,7 +100,19 @@ namespace Frogs.EditorTools
             // A camera, so the app renders a screen rather than nothing.
             // Nothing else — what a screen looks like is a wireframe decision,
             // not something this tool gets to invent.
-            new GameObject(CameraName, typeof(Camera));
+            var camera = new GameObject(CameraName, typeof(Camera)).GetComponent<Camera>();
+
+            // Clearing to the screens' own background rather than to Unity's
+            // stock skybox. A new camera defaults to the skybox, and that
+            // gradient is what showed around the game before #290 — so this is
+            // set here as well as in the committed scene, or regenerating the
+            // asset would quietly put the bug back.
+            //
+            // Belt-and-braces: every screen paints this colour to the edge of
+            // the canvas itself. This is what a frame drawn before any of them
+            // has painted looks like.
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = ScreenColours.Background;
 
             if (!EditorSceneManager.SaveScene(scene, AssetPath))
             {
