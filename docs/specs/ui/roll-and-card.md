@@ -106,8 +106,11 @@ centred in one with room around it.
   header behind it is dimmed.
 - **`rolled`** — the word beside the chip, `RolledLabelSize`, `RolledLabelGap`
   past it, in the same quiet grey as a chip's second line. It is what makes
-  `whose` a sentence — *Green rolled* — rather than a chip sitting on its own,
-  and it is why this dialog needs no title of its own.
+  `whose` a sentence — *Green rolled*, or *Connor rolled* once that frog has
+  been renamed on [game setup](game-setup.md) — rather than a chip sitting on
+  its own, and it is why this dialog needs no title of its own. The word beside
+  the chip is `rolled` and only `rolled`; nothing is appended to the name
+  inside the chip to make the sentence read.
 - **Die** — one six-sided die, drawn with pips rather than a numeral. There is
   exactly one die: the rules card says "Dice", and three piles × two faces
   accounts for all six faces of one — see

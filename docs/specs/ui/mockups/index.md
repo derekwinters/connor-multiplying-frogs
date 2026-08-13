@@ -12,7 +12,10 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Screen | Mockup | Spec page |
 | --- | --- | --- |
 | Title screen | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
-| Game setup | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
+| Game setup, at rest with names | [`game-setup-names-set.html`](game-setup-names-set.html) | [Game setup](../game-setup.md) |
+| Game setup, naming a frog | [`game-setup-name-edit-inline.html`](game-setup-name-edit-inline.html) | [Game setup](../game-setup.md) |
+| Game setup, naming a frog — the alternative | [`game-setup-name-edit-pencil.html`](game-setup-name-edit-pencil.html) | [Game setup](../game-setup.md) |
+| Game setup, before names | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
 | Game board, paler water | [`game-board-paler-water.html`](game-board-paler-water.html) | [Game board](../game-board.md) |
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
@@ -47,6 +50,19 @@ the same canvas differing in exactly one value — the water's blue. Connor pick
 one on the tablet, the spec page takes the answer, and the losing file is
 deleted. Until then, an edit to the board's layout has to be made in **both**
 files, which is the cost of the pair and the reason it does not stay open long.
+
+Game setup has **four** files, which is three more than a screen should need,
+and each has a different job. `game-setup-names-set.html` is the screen at
+rest and the one to build from. The two `name-edit-` files are the third kind
+of pair — a real choice drawn twice, differing only in which part of a seat
+means *edit* and which means *remove* — and Derek picked the inline one, so the
+pencil file stays as the record of the comparison rather than as a live option.
+`game-setup.html` is the fourth kind: a **superseded** drawing, of the screen
+before frogs had editable names and before the seat grew from 440 px to 480 px.
+It is kept for the same reason
+[`working-out-grid.md`](../working-out-grid.md) keeps the invariants it used to
+carry — the history of a layout is worth more than the disk it costs — and it
+is marked on its spec page as not to be built from.
 
 The title screen used to have a pair too — `title-screen.html` and
 `title-screen-resume-primary.html`, differing in exactly which of `RESUME` and

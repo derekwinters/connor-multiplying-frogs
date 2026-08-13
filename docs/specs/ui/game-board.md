@@ -314,9 +314,21 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 
 ## Elements
 
-- **Turn banner** — `Green frog's turn`, left of the header, with that frog's
+- **Turn banner** — `Green's turn`, left of the header, with that frog's
   [player chip](shared-components.md#player-chip) in its active state. The
-  wording is the frog's colour name, because frogs have no other name.
+  wording is the frog's **name and nothing else** — `Green's turn` for a frog
+  still on its default, `Connor's turn` for one that has been renamed on
+  [game setup](game-setup.md).
+
+    It used to read `Green frog's turn`, and the reason given was that frogs
+    have no other name. They do now, so the justification went with the word:
+    `Connor frog's turn` is not a sentence anybody would write. Rather than
+    compose the banner one way for a default name and another way for a typed
+    one — a rule with an edge case in it, living in a format string — nothing
+    appends anything to a name, ever. The cost is that an un-renamed frog's
+    banner loses a word, which is
+    [#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310)
+    question 4, settled by Derek.
 - **Settings button** — top right, `SettingsButtonSize` square, a gear. Opens
   the [settings dialog](settings-dialog.md). Available on any turn, at any
   time, including while it is not your turn — it is the way out of a game and

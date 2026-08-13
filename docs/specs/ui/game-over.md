@@ -21,7 +21,7 @@ resume the game that just ended.
 
 | Region | Job |
 | --- | --- |
-| `headline` | `Blue frog wins!` |
+| `headline` | `Blue wins!` |
 | `standings` | One row per frog, in finishing order |
 | `controls` | `Back to the title` and `Play again` |
 
@@ -68,16 +68,30 @@ and is not the number this readout means.
 
 ## Elements
 
-- **Headline** — `<Colour> frog wins!` when a frog reached the End log. If the
-  game was ended before anybody got home, it reads `Game over` instead, because
-  announcing a winner who did not win is worse than announcing nobody.
-- **Standings row × 2–4** — place number, frog swatch, colour name, and how far
+- **Headline** — `<Name> wins!` when a frog reached the End log — the frog's
+  name and nothing appended to it, so `Blue wins!` for a frog still on its
+  default and `Connor wins!` for one renamed on
+  [game setup](game-setup.md). If the game was ended before anybody got home,
+  it reads `Game over` instead, because announcing a winner who did not win is
+  worse than announcing nobody.
+
+    It used to read `<Colour> frog wins!`. The word went for the same reason it
+    went from the [game board](game-board.md)'s turn banner: `Connor frog
+    wins!` is not a sentence, and composing the headline one way for a default
+    name and another for a typed one is a rule with an edge case in it. Nothing
+    appends anything to a name. See
+    [#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310)
+    question 4.
+- **Standings row × 2–4** — place number, frog swatch, name, and how far
   it got: `Home — 8 of 8` for a finisher, `6 of 8` for everyone else. The winner
   row is drawn heavier; every row is otherwise identical, because second place
   and last place are the same kind of fact.
 - **`Play again`** — primary [button](shared-components.md#button). Starts a new
-  game with **the same frogs, in the same turn order**, straight to the
-  [game board](game-board.md) with everyone back on their Start log.
+  game with **the same frogs, in the same turn order, under the same names**,
+  straight to the [game board](game-board.md) with everyone back on their Start
+  log. The names come along because the frogs do: this button skips
+  [game setup](game-setup.md), so there is nowhere for a name to be re-entered
+  and no reason to make anybody re-enter it.
 - **`Back to the title`** — secondary button. Returns to the
   [title screen](title-screen.md).
 
@@ -93,8 +107,8 @@ through the title screen.
 
     | Route | What the headline says |
     | --- | --- |
-    | The last frog reaches its End log, and the game ends itself | `<Colour> frog wins!` |
-    | `End the game` confirmed from [end-game confirm](end-game-confirm.md) | `<Colour> frog wins!` if anyone got home, otherwise `Game over` |
+    | The last frog reaches its End log, and the game ends itself | `<Name> wins!` |
+    | `End the game` confirmed from [end-game confirm](end-game-confirm.md) | `<Name> wins!` if anyone got home, otherwise `Game over` |
 
     The first route needs no input from anybody. When the last frog lands on its
     End log, the hop finishes, and this screen follows — see

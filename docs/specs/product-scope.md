@@ -165,16 +165,27 @@ long version and the reasoning; the part that constrains the product is short:
 | Audience | Connor first, kids like him second |
 | Session length | 15–45 minutes, from the classroom rules card |
 | Players | 2–4 in v1, sharing one device, pass-and-play |
-| Reading and typing | No player ever types anything but digits |
+| Reading and typing | Digits to answer with, and a player's own name. Nothing else |
 
-That last row is a real product constraint rather than a UI preference. Players
-are identified by frog colour, exactly as the cardboard pieces are, and the only
-keyboard in the game is the
-[digit keypad](ui/working-out-grid.md) for entering an answer — because asking
-four children to each type a name buys a soft keyboard, a misspelling, an
-editing flow, and, reliably, somebody typing something rude about somebody else.
-The reasoning is on
-[the player chip](ui/shared-components.md#player-chip).
+That last row is a real product constraint rather than a UI preference, and it
+is narrower than it looks. There are exactly two keyboards in the game, both
+drawn by the game rather than by Android: the
+[digit keypad](ui/working-out-grid.md) for entering an answer, and the
+[letter keyboard on game setup](ui/game-setup.md#the-keyboard) for naming a
+frog. Nowhere else does a player type, and nothing a player types goes anywhere
+— there is no network, no account, and nothing is kept once the game ends.
+
+**The row used to read "No player ever types anything but digits."** Derek
+reversed it in
+[#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310):
+frogs are named by their players now, starting from the colour name. The
+argument the old rule rested on — that asking four children to each type a name
+buys a soft keyboard, a misspelling, an editing flow, and, reliably, somebody
+typing something rude about somebody else — is kept in full on
+[the player chip](ui/shared-components.md#why-there-is-now-typing), along with
+why each of those costs was accepted. The short version: three of the four are
+the feature, and the fourth is contained by the game being offline and
+forgetting everything.
 
 **The 2–4 cap is a v1 scope fact, not a rule of the classroom game** — the rules
 card says 2–8, and the change is Derek's, recorded in

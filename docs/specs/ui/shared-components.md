@@ -275,13 +275,34 @@ Used by: [game board](game-board.md), [roll and card](roll-and-card.md),
 
 #### 2. Invariants
 
-**Invariant:** a frog is identified by its colour **and** its colour's name, in
-words, always together. Colour alone excludes a colour-blind player from knowing
-whose turn it is, in a game where four players share one screen.
+**Invariant:** a frog is identified by its colour **and** a word, always
+together, and never by colour alone. The word is the frog's name: its colour's
+name by default, or whatever was typed on
+[game setup](game-setup.md) instead. Colour alone excludes a colour-blind
+player from knowing whose turn it is, in a game where four players share one
+screen.
 **Invariant:** the chip for the player whose turn it is is visibly different
 from every other chip on screen, by something other than colour.
-**Invariant:** no chip anywhere contains a name a player typed. See
-[why there is no typing](#why-there-is-no-typing).
+**Invariant:** nothing is ever appended to a frog's name. The chip shows the
+name and only the name — not `Blue frog`, not `Blue (you)`.
+**Invariant:** the chip never refuses or alters a name it is given; if a name
+does not fit, the chip truncates it with an ellipsis. A readout is not where a
+limit is enforced. The limit is `PlayerNameMaxLength`, and
+[game setup](game-setup.md#where-playernamemaxlength-comes-from-and-why-a-count-is-not-enough)
+is where it is enforced.
+
+The identification invariant was previously worded as colour **and its
+colour's name** — literally the colour word. That letter cannot survive a
+rename: a chip reading `Connor` beside a blue swatch says "Blue" nowhere. Its
+purpose survives intact, because a typed name is also a word, and the reason
+the rule exists is that a colour-blind player needs something other than the
+swatch to read. So the rule now requires a word rather than that specific word.
+
+**Two frogs may end up with the same word**, which is the one case where the
+identifying word stops identifying. Nothing prevents it. They are two children
+sitting next to each other who chose the same name on purpose, and they can
+sort it out; the swatch still tells them apart, and colour-plus-word is still
+what the chip shows.
 
 #### 3. Named constants
 
@@ -305,13 +326,30 @@ so they win: `PlayerChipLabelSize` is corrected to 32 px, and
 `PlayerChipPadCountSize` — a value this table previously had no name for at
 all — is added at 24 px.
 
+**The label column is 128 px, and it is tighter than it looks.**
+`PlayerChipWidth` 256 less 20 px padding either side, less
+`PlayerSwatchDiameter` 64, less `PlayerChipSwatchGap` 24, leaves 128 px for the
+name and the pad count. The pad count fits easily at 24 px. The name often does
+not: `Orange` renders at 132 px at `PlayerChipLabelSize` 32 and overflows by
+4 px — the game's own longest default name, overflowing before anybody has
+typed anything. This is why the chip truncates rather than refuses, per the
+invariant above, and why `PlayerNameMaxLength` is derived from the setup seat
+instead of from here. Widening the chip is not free: `PlayerChipWidth` is part
+of the [game board](game-board.md)'s lane arithmetic, so it is a board layout
+change and would need its own wireframe.
+
 #### 4. States
 
 | State | Appearance |
 | --- | --- |
-| Default | Swatch, colour name, pad count |
+| Default | Swatch, name, pad count |
 | Active (this player's turn) | `PlayerChipActiveRing` ring, label at full weight |
 | Home (frog has finished) | Pad count replaced by `Home!` |
+
+The Default row said "colour name" until names became editable. It is the same
+row: the chip has always drawn the frog's name, and until
+[#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310) a
+frog's name was always its colour's.
 
 The Active row dropped "filled background": the mockups' `.chip.act` rule
 gives the ring and the bold weight but leaves the base chip background
@@ -345,17 +383,42 @@ element's four colour constants for its own swatch.
 The chip is a readout on every screen that uses it. It has no button state in
 v0.2 — no tap handler, on any screen, in any state.
 
-#### Why there is no typing
+#### Why there is now typing
 
-Four players share one tablet, and the setup screen is the first thing they
-touch. Asking four children to each type a name means a soft keyboard, a
-misspelling, an editing flow, and — reliably — somebody typing something rude
-about somebody else. Frogs are identified by colour, exactly as the classroom
-pieces are, and the whole of setup is tapping the colour you want.
+A frog's name can be typed, on [game setup](game-setup.md) and nowhere else.
+This reverses a rule this page used to carry, and the old reasoning is kept
+below rather than deleted, because it was right about what it predicted.
 
-This is a **presentation** decision under
-[ADR-0001](../../adr/0001-rules-sacred-presentation-ours.md): the cardboard
-pieces have no names either.
+**What this page used to say:**
+
+> Four players share one tablet, and the setup screen is the first thing they
+> touch. Asking four children to each type a name means a soft keyboard, a
+> misspelling, an editing flow, and — reliably — somebody typing something rude
+> about somebody else. Frogs are identified by colour, exactly as the classroom
+> pieces are, and the whole of setup is tapping the colour you want.
+
+Derek asked for editable names anyway, in
+[#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310),
+and per [CLAUDE.md](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md)
+an explicit instruction from Derek beats the docs. Three of the four costs that
+paragraph predicts are simply accepted — the keyboard, the misspellings and the
+editing flow **are** the feature, and they are specified on the setup page
+rather than worked around.
+
+The fourth is worth a sentence, because it is the one that sounds like a safety
+question. The app is fully offline, with no accounts and no network, so a rude
+name reaches exactly the four children already sitting at the table who could
+have said it out loud. That is a different thing from a name other people see,
+and it is why this is a taste call rather than a safety one.
+
+**What survives untouched** is the accessibility rule, in a rewritten form: a
+frog is still identified by a word and never by colour alone. See the
+invariants above. That rule was never about the word being a colour.
+
+This remains a **presentation** decision under
+[ADR-0001](../../adr/0001-rules-sacred-presentation-ours.md). The cardboard
+pieces have no names; the game they came from does not care what a player is
+called, and neither does any rule in it.
 
 ---
 
