@@ -57,6 +57,11 @@ namespace Frogs.Unity.EditModeTests
         const int EasyColumnCount = 4;
         const int HardColumnCount = 6;
 
+        // The operator column is column 0 on every row, and is never typed
+        // into; the digit columns run from the one after it to the last.
+        const int OperatorColumnIndex = 0;
+        const int FirstDigitColumn = OperatorColumnIndex + 1;
+
         [Test]
         public void Grid_ForTheEasyShape_DrawsCoresOwnRowSequence_WithARuleUnderTheMultiplierAndUnderTheSection()
         {
@@ -283,7 +288,51 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void Caret_OpensOnTheRightmostAnswerCell_AndEachDigitFillsTheNextCellToItsLeft()
+        public void TypingAnAnswerStraightIn_SubmitsTheNumberThatWasTyped()
+        {
+            // #305, as Derek reported it from the tablet. A player who knows
+            // `68 × 5` is 340 types 3, 4, 0 — the order anybody writes a
+            // number — without tapping anything first.
+            //
+            // Before this issue the caret opened on the *rightmost* answer
+            // cell and stepped left, so those keystrokes landed as `__3`,
+            // `_43`, `043`, and `Check it` submitted **43**: the
+            // multiplication done correctly and the frog left where it was.
+            // The only way to enter 340 was to tap each box in turn, which is
+            // the workaround the report describes rather than a preference.
+            var turn = Turn(Pile.Easy);
+            var router = new ScreenRouter();
+            router.OpenDialog(Frogs.Core.Dialog.WorkingOutGrid);
+
+            var view = CreateView(turn, router);
+
+            try
+            {
+                var answerRow = RowIndexOf(view, GridRowKind.AnswerRow);
+
+                Assert.That(
+                    view.CaretCell,
+                    Is.EqualTo(view.Cells[answerRow][FirstDigitColumn]),
+                    "the answer row's leftmost digit column, so the first digit typed is the first digit read");
+
+                Type(view, 3);
+                Type(view, 4);
+                Type(view, 0);
+
+                Assert.That(view.AnswerText, Is.EqualTo("340"), "the number on the screen is the number that was typed");
+
+                Tap(view.CheckItButton);
+
+                Assert.That(turn.Submitted, Is.EqualTo(new[] { 340 }), "and the number submitted is the same one again");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Caret_OpensOnTheLeftmostAnswerCell_AndEachDigitFillsTheNextCellToItsRight()
         {
             var view = CreateView(Turn(Pile.Hard));
 
@@ -293,23 +342,122 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(
                     view.CaretCell,
-                    Is.EqualTo(view.Cells[answerRow][HardColumnCount - 1]),
-                    "the first empty answer cell, filling right to left");
+                    Is.EqualTo(view.Cells[answerRow][FirstDigitColumn]),
+                    "the leftmost digit column, filling left to right");
 
                 Type(view, 1);
-                Assert.That(view.Cells[answerRow][HardColumnCount - 1].Content, Is.EqualTo("1"));
-                Assert.That(view.CaretCell, Is.EqualTo(view.Cells[answerRow][HardColumnCount - 2]));
+                Assert.That(view.Cells[answerRow][FirstDigitColumn].Content, Is.EqualTo("1"));
+                Assert.That(view.CaretCell, Is.EqualTo(view.Cells[answerRow][FirstDigitColumn + 1]));
 
-                Type(view, 7);
-                Assert.That(view.Cells[answerRow][HardColumnCount - 2].Content, Is.EqualTo("7"));
+                Type(view, 3);
+                Assert.That(view.Cells[answerRow][FirstDigitColumn + 1].Content, Is.EqualTo("3"));
 
                 Type(view, 5);
-                Type(view, 3);
+                Type(view, 7);
                 Type(view, 1);
 
-                // Typed units-first, which is the direction the digits are
-                // worked out in — and reads left to right as the answer.
+                // Typed the way it is written and read the way it is written:
+                // one direction to learn, and it is the reading one.
                 Assert.That(view.AnswerText, Is.EqualTo("13571"));
+                Assert.That(
+                    view.CaretCell,
+                    Is.EqualTo(view.Cells[answerRow][HardColumnCount - 1]),
+                    "and the caret has come to rest on the last digit column");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void Caret_StopsAtTheLastDigitColumn_SoAnOverlongAnswerOverwritesItRatherThanEscapingTheRow()
+        {
+            // The mirror of the bound the leftward caret used to hold at the
+            // first digit column. A player who keeps typing past the width of
+            // the grid must not wrap to the next row, walk into the operator
+            // column, or leave the row at all — the last box just takes the
+            // newest digit.
+            var view = CreateView(Turn(Pile.Easy));
+
+            try
+            {
+                var answerRow = RowIndexOf(view, GridRowKind.AnswerRow);
+                var lastColumn = EasyColumnCount - 1;
+
+                // The `=` the answer row's operator column is drawn with, so
+                // the assertion below is "still that" rather than "empty".
+                var operatorGlyph = view.Cells[answerRow][OperatorColumnIndex].Content;
+
+                Type(view, 3);
+                Type(view, 4);
+                Type(view, 0);
+
+                Assert.That(view.CaretCell, Is.EqualTo(view.Cells[answerRow][lastColumn]));
+
+                Type(view, 7);
+
+                Assert.That(view.AnswerText, Is.EqualTo("347"), "the last box took the new digit");
+                Assert.That(view.CaretCell, Is.EqualTo(view.Cells[answerRow][lastColumn]), "and the caret stayed on it");
+
+                Type(view, 9);
+
+                Assert.That(view.AnswerText, Is.EqualTo("349"), "however many more are typed");
+                Assert.That(view.CaretCell, Is.EqualTo(view.Cells[answerRow][lastColumn]));
+
+                // Nothing escaped the row: not into the operator column, and
+                // not into the row above.
+                Assert.That(
+                    view.Cells[answerRow][OperatorColumnIndex].Content,
+                    Is.EqualTo(operatorGlyph),
+                    "the operator column is not somewhere a digit can go");
+                Assert.That(
+                    view.Cells[RowIndexOf(view, GridRowKind.CarryStrip, 1)]
+                        .Where(cell => cell.IsEditable)
+                        .All(cell => cell.Content.Length == 0),
+                    Is.True,
+                    "and no digit reached the strip above the answer row");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void AShortAnswerTypedFromATappedCell_StaysInTheColumnsItWasTappedInto()
+        {
+            // The consequence of boxes-as-slots that Derek chose deliberately:
+            // the grid does not shuffle a short answer into place. `68 × 5`'s
+            // shape gets three digit columns, and a two-digit answer typed
+            // from the middle box occupies the middle and the right. Lining an
+            // answer up under the columns is the player's job.
+            var turn = Turn(Pile.Easy);
+            var router = new ScreenRouter();
+            router.OpenDialog(Frogs.Core.Dialog.WorkingOutGrid);
+
+            var view = CreateView(turn, router);
+
+            try
+            {
+                var answerRow = RowIndexOf(view, GridRowKind.AnswerRow);
+                var middleColumn = FirstDigitColumn + 1;
+
+                Tap(view.Cells[answerRow][middleColumn]);
+                Type(view, 3);
+                Type(view, 6);
+
+                Assert.That(view.Cells[answerRow][FirstDigitColumn].Content, Is.Empty, "the box that was not tapped into");
+                Assert.That(view.Cells[answerRow][middleColumn].Content, Is.EqualTo("3"));
+                Assert.That(view.Cells[answerRow][EasyColumnCount - 1].Content, Is.EqualTo("6"));
+
+                // And grading does not care which columns they landed in —
+                // ADR-0002 checks the answer row's *value*, and only that.
+                Assert.That(view.AnswerText, Is.EqualTo("36"));
+
+                Tap(view.CheckItButton);
+
+                Assert.That(turn.Submitted, Is.EqualTo(new[] { 36 }));
             }
             finally
             {
@@ -374,20 +522,20 @@ namespace Frogs.Unity.EditModeTests
                 // The answer row: two digits, then backspace with the caret on
                 // an empty cell — it takes the last one entered in this row,
                 // and leaves the addition row alone.
-                Tap(CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 1));
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn));
                 Type(view, 2);
                 Type(view, 8);
 
-                Assert.That(view.AnswerText, Is.EqualTo("82"));
+                Assert.That(view.AnswerText, Is.EqualTo("28"));
 
-                Tap(CellAt(view, GridRowKind.AnswerRow, 0, 1));
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 1));
                 Backspace(view);
 
                 Assert.That(view.AnswerText, Is.EqualTo("2"), "the last digit entered in this block, and only it");
                 Assert.That(additionCell.Content, Is.EqualTo("4"), "nothing outside the caret's block moved");
 
                 // Now with the caret's own cell filled: that digit goes.
-                Tap(CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 1));
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn));
                 Backspace(view);
 
                 Assert.That(view.AnswerText, Is.Empty);
@@ -419,12 +567,12 @@ namespace Frogs.Unity.EditModeTests
                 Tap(additionCell);
                 Type(view, 6);
 
-                Tap(CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 1));
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn));
                 Type(view, 1);
                 Type(view, 2);
                 Type(view, 3);
 
-                Assert.That(view.AnswerText, Is.EqualTo("321"));
+                Assert.That(view.AnswerText, Is.EqualTo("123"));
 
                 Clear(view);
 
@@ -470,10 +618,10 @@ namespace Frogs.Unity.EditModeTests
                 // A deliberately wrong answer, so the test cannot pass by the
                 // grid quietly grading anything: `340` is the largest product
                 // the easy shape can hold and is not this card's.
-                Tap(CellAt(view, GridRowKind.AnswerRow, 0, EasyColumnCount - 1));
-                Type(view, 0);
-                Type(view, 4);
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn));
                 Type(view, 3);
+                Type(view, 4);
+                Type(view, 0);
 
                 Assert.That(view.AnswerText, Is.EqualTo("340"));
 
@@ -1028,7 +1176,7 @@ namespace Frogs.Unity.EditModeTests
                 // far is right or wrong.
                 var before = CellColours(view);
 
-                Tap(CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 1));
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn));
                 Type(view, 9);
                 Type(view, 9);
                 Type(view, 9);
@@ -1424,14 +1572,15 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(view.CheckItButton.IsDisabled, Is.True, "an empty answer is not a wrong answer");
 
-                screen.TapAt(CentreOf(CellAt(view, GridRowKind.AnswerRow, 0, EasyColumnCount - 1).RectTransform));
+                screen.TapAt(CentreOf(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn).RectTransform));
 
                 // `340` again: the largest product the easy shape holds, and
                 // deliberately not this card's, so nothing can pass by the
-                // grid quietly grading it.
-                screen.TapAt(CentreOf(KeyFor(view, 0).RectTransform));
-                screen.TapAt(CentreOf(KeyFor(view, 4).RectTransform));
+                // grid quietly grading it. Typed in reading order, which
+                // since #305 is also the order the boxes fill in.
                 screen.TapAt(CentreOf(KeyFor(view, 3).RectTransform));
+                screen.TapAt(CentreOf(KeyFor(view, 4).RectTransform));
+                screen.TapAt(CentreOf(KeyFor(view, 0).RectTransform));
 
                 Assert.That(view.AnswerText, Is.EqualTo("340"), "three taps on the keypad, three digits in the answer row");
                 Assert.That(view.CheckItButton.IsDisabled, Is.False, "a digit is in, so the turn can be finished");
