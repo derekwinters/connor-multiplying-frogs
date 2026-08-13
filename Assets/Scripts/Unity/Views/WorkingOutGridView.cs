@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Frogs.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -270,9 +269,9 @@ namespace Frogs.Unity.Views
         // What the player has typed, held by row *identity* rather than by
         // display index: growing the section shifts every row below it down by
         // one, and a digit must not move with it.
-        readonly List<RowContents> _carryRows = new List<RowContents>();
-        readonly List<RowContents> _additionRows = new List<RowContents>();
-        RowContents _answerRow;
+        readonly List<DigitRow> _carryRows = new List<DigitRow>();
+        readonly List<DigitRow> _additionRows = new List<DigitRow>();
+        DigitRow _answerRow;
         int _columnCount;
         int _nextStamp;
 
@@ -505,8 +504,8 @@ namespace Frogs.Unity.Views
         /// <summary>
         /// Points the grid at the turn it was opened on, and at the router
         /// `Check it` navigates through, then opens it. The caret starts in
-        /// the rightmost answer cell — "the first empty answer cell is the
-        /// focused one; typing fills the answer row right to left."
+        /// the **leftmost** answer cell — "typing fills the answer row left to
+        /// right, which is the direction the answer is read in" (#305).
         ///
         /// The router is optional for the same reason
         /// <c>RollAndCardDialogView.Initialize</c>'s is: a test that only
@@ -529,9 +528,9 @@ namespace Frogs.Unity.Views
 
             Refresh();
 
-            // The rightmost answer cell, which on a grid nobody has typed in
-            // yet is also the first empty one.
-            MoveCaretTo(GridRowKind.AnswerRow, 0, _columnCount - 1);
+            // The leftmost answer cell: the first box of the number, so the
+            // first digit typed is the first digit read.
+            MoveCaretTo(GridRowKind.AnswerRow, 0, _answerRow.FirstDigitColumn);
 
             _dialog.Open();
         }
@@ -1242,15 +1241,15 @@ namespace Frogs.Unity.Views
 
             for (var index = 0; index < WorkingOutGrid.CarryStripCount; index++)
             {
-                _carryRows.Add(new RowContents(columnCount));
+                _carryRows.Add(NewRow(columnCount));
             }
 
             for (var index = 0; index < WorkingOutGrid.GridAdditionRowsAtStart; index++)
             {
-                _additionRows.Add(new RowContents(columnCount));
+                _additionRows.Add(NewRow(columnCount));
             }
 
-            _answerRow = new RowContents(columnCount);
+            _answerRow = NewRow(columnCount);
         }
 
         void HandleCellTapped(WorkingOutGridCell cell)
@@ -1303,11 +1302,11 @@ namespace Frogs.Unity.Views
                 RebuildGrid();
             }
 
-            // Right to left, "which is the direction the digits are worked
-            // out in": the next digit goes in the cell to the left, until
-            // there is no cell to the left.
-            var nextColumn = Mathf.Max(_caretColumn - 1, OperatorColumn + 1);
-            MoveCaretTo(_caretRowKind, _caretRowOrdinal, nextColumn);
+            // "After a digit lands, the caret steps one cell to the right, in
+            // whatever row it is in, and stops at the last digit column."
+            // Which column that is is the row's own business — #305, and the
+            // reason it is Core's rather than this view's.
+            MoveCaretTo(_caretRowKind, _caretRowOrdinal, contents.NextColumnAfterTyping(_caretColumn));
         }
 
         // "Typing a single digit into the section's current bottom row appends
@@ -1331,7 +1330,7 @@ namespace Frogs.Unity.Views
                 return false;
             }
 
-            _additionRows.Add(new RowContents(_columnCount));
+            _additionRows.Add(NewRow(_columnCount));
             return true;
         }
 
@@ -1436,12 +1435,21 @@ namespace Frogs.Unity.Views
             }
         }
 
-        RowContents CaretContents()
+        // Every editable row is the same Core type, and every one of them
+        // starts its digit columns after the operator column. What a row holds
+        // and which box the next digit goes in are both Core's — see
+        // <see cref="DigitRow"/> on why they are not this view's.
+        static DigitRow NewRow(int columnCount)
+        {
+            return new DigitRow(columnCount, OperatorColumn + 1);
+        }
+
+        DigitRow CaretContents()
         {
             return ContentsFor(_caretRowKind, _caretRowOrdinal);
         }
 
-        RowContents ContentsFor(GridRowKind kind, int ordinal)
+        DigitRow ContentsFor(GridRowKind kind, int ordinal)
         {
             switch (kind)
             {
@@ -1585,119 +1593,6 @@ namespace Frogs.Unity.Views
             text.raycastTarget = false;
             text.rectTransform.SetParent(parent, worldPositionStays: false);
             return text;
-        }
-
-        /// <summary>
-        /// What one row of the grid holds, and in what order it was typed.
-        /// Kept per row *identity* — the second carry strip, the fourth
-        /// addition row — rather than per drawn row, so a digit stays where it
-        /// was put when the section grows or shrinks underneath it.
-        ///
-        /// It holds digits and nothing else: no correct value, no flag for
-        /// whether a digit is right, nothing that could be rendered as a mark.
-        /// </summary>
-        sealed class RowContents
-        {
-            readonly int?[] _digits;
-            readonly int[] _stamps;
-
-            internal RowContents(int columnCount)
-            {
-                _digits = new int?[columnCount];
-                _stamps = new int[columnCount];
-            }
-
-            internal bool HasDigit(int column)
-            {
-                return column >= 0 && column < _digits.Length && _digits[column].HasValue;
-            }
-
-            internal string TextAt(int column)
-            {
-                return HasDigit(column) ? _digits[column].Value.ToString() : string.Empty;
-            }
-
-            internal void Write(int column, int digit, int stamp)
-            {
-                if (column < 0 || column >= _digits.Length)
-                {
-                    return;
-                }
-
-                _digits[column] = digit;
-                _stamps[column] = stamp;
-            }
-
-            internal void Erase(int column)
-            {
-                if (column < 0 || column >= _digits.Length)
-                {
-                    return;
-                }
-
-                _digits[column] = null;
-                _stamps[column] = 0;
-            }
-
-            internal void EraseAll()
-            {
-                for (var column = 0; column < _digits.Length; column++)
-                {
-                    _digits[column] = null;
-                    _stamps[column] = 0;
-                }
-            }
-
-            internal bool IsEmpty()
-            {
-                for (var column = 0; column < _digits.Length; column++)
-                {
-                    if (_digits[column].HasValue)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            // The digit typed most recently anywhere in this row, which is
-            // what backspace takes away when the caret's own cell is already
-            // empty.
-            internal int LastEnteredColumn()
-            {
-                var best = -1;
-
-                for (var column = 0; column < _digits.Length; column++)
-                {
-                    if (!_digits[column].HasValue)
-                    {
-                        continue;
-                    }
-
-                    if (best < 0 || _stamps[column] > _stamps[best])
-                    {
-                        best = column;
-                    }
-                }
-
-                return best;
-            }
-
-            internal string ReadLeftToRight()
-            {
-                var builder = new StringBuilder();
-
-                for (var column = 0; column < _digits.Length; column++)
-                {
-                    if (_digits[column].HasValue)
-                    {
-                        builder.Append(_digits[column].Value);
-                    }
-                }
-
-                return builder.ToString();
-            }
         }
     }
 }

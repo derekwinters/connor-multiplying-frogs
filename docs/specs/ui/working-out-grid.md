@@ -359,9 +359,9 @@ past it.
 
 ## Behaviour
 
-- Entering from [roll and card](roll-and-card.md). The first empty answer cell
-  is the focused one; typing fills the answer row **right to left**, which is
-  the direction the digits are worked out in.
+- Entering from [roll and card](roll-and-card.md). The answer row's **leftmost**
+  digit column is the focused one; typing fills the answer row **left to
+  right**, which is the direction the answer is written and read in.
 - **Exactly one cell is focused, always, and it is the one the next digit lands
   in.** It is drawn filled with `GridFocusFill` — see
   [what focus looks like](#what-focus-looks-like) — and the fill follows the
@@ -404,11 +404,65 @@ past it.
   already empty — the digit most recently typed anywhere in the same block, and
   moves the caret to wherever it just took one from. It never reaches outside
   the block.
-- After a digit lands, the caret steps one cell to the left, in whatever row it
-  is in, and stops at the leftmost digit column. That is the answer row's
-  right-to-left fill applied everywhere, because the addition rows and the carry
-  strips are worked out in the same direction.
+- After a digit lands, the caret steps one cell to the **right**, in whatever
+  row it is in, and stops at the **last** digit column. There is **one
+  direction everywhere** — the answer row, the addition rows and both carry
+  strips fill the same way, so there is one rule to learn rather than one for
+  the answer and another for the scratch paper.
+- **The last digit column is where the caret stops, not where it wraps.**
+  Typing more digits than the grid has columns overwrites the final box. The
+  caret does not wrap to another row, leave the row it is in, or reach the
+  operator column.
 - Hardware back does nothing.
+
+### The fill direction this page used to carry
+
+Until [#305](https://github.com/derekwinters/connor-multiplying-frogs/issues/305)
+the two bullets above read the other way round, and the shell was built to
+them. The old wording is quoted here so the change is visible rather than
+silently overwritten. Neither sentence is true anywhere else on this page.
+
+> The first empty answer cell is the focused one; typing fills the answer row
+> **right to left**, which is the direction the digits are worked out in.
+
+> After a digit lands, the caret steps one cell to the left, in whatever row it
+> is in, and stops at the leftmost digit column.
+
+**This is a change to the contract, not a correction of drifted code.** The page
+and the shell agreed with each other and were wrong together in front of a
+player: reading the row back left to right while filling it right to left meant
+a player who typed `3`, `4`, `0` for 340 submitted **43**. The multiplication
+done correctly, and the frog left where it was. The only way to enter 340 was to
+tap each box before typing into it — the workaround Derek found on the tablet,
+and what his report was actually describing.
+
+**Why this direction and not a calculator's.** Two options were put to Derek:
+calculator-style entry for the answer row, where digits shift left as they are
+typed and the answer stays flush right; or this one, where the caret starts at
+the left, steps right, and a digit stays in the box it landed in. He picked the
+second:
+
+> my version. calculator would work if it was not boxes, but boxes implies
+> explicit entry to me.
+
+That reasoning is the answer to the obvious objection — that a card whose answer
+is shorter than the grid is wide, like `12 × 3` in three digit columns, ends up
+as `36_` with the 6 in the tens column. **A row of boxes is a row of slots, and
+a slot is something you point at.** Tapping a cell already moves the caret
+there, so a player who wants their 36 under the tens and units taps the middle
+box and types it there. Lining the answer up under the columns stays the
+**player's** job, which for a game about learning to multiply on paper is where
+it belongs. A calculator would have done it for them, silently, which is the
+thing that makes it wrong for a grid drawn as boxes.
+
+**Grading does not care about columns, and that stays true.** The answer row's
+digits are read left to right with empty boxes contributing nothing, so `36_`
+and `_36` both read `36` and both grade correct — see the
+[Invariants](#invariants) above and
+[ADR-0002](../../adr/0002-structured-working-out-grid.md), which is emphatic
+that only the answer row's *value* is checked. A future change that rejects or
+re-grades a correctly-typed but left-aligned answer would be a new rule about
+place value being marked, and it needs its own decision.
 
 ## Mockup
 
@@ -425,6 +479,19 @@ outline was the whole of it, in the drawings as in the shell. The cell is in the
 same place in each; what changed is that you can now see which one it is. A
 picture of this screen without a visible focused cell is a picture of a state
 the player never actually sees.
+
+**All three were already drawn filling left to right**, and nothing about them
+changed for
+[#305](https://github.com/derekwinters/connor-multiplying-frogs/issues/305).
+The two `331 × 41` drawings put `1` and `3` in the first two answer boxes with
+the focused cell immediately to their right and the rest empty, and the
+`68 × 5` drawing focuses the leftmost answer box on an empty row. Under the
+right-to-left rule those were pictures of states the shell could not reach —
+a caret to the *right* of the digits already typed is only reachable if the
+digits fill towards it. The drawings were right about the direction before the
+Behaviour section was, which is worth saying out loud: fill direction is not
+something a static picture *states*, but it turns out to be something a picture
+can quietly contradict.
 
 The first two are the agreed pictures of the screen a card deals, and they are a
 pair for the reason they always were: "the grid shrinks to fit the card" is a
