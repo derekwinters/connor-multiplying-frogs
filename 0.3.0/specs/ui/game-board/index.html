@@ -1122,6 +1122,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-bands-reach-the-edges-too" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands reach the edges too
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#keeping-the-frogs-visible" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2135,6 +2146,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-bands-reach-the-edges-too" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands reach the edges too
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#keeping-the-frogs-visible" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2338,6 +2360,11 @@ height, in this order and with no gaps:</p>
   clinging to the top.</li>
 <li><code>controls</code> — pinned to the bottom, <code>BoardControlsHeight</code> tall, full width.</li>
 </ul>
+<p>"Full width" and "the top" mean the screen's, not the reference canvas's, on a
+device that is not 16:10 — a band reaches the edges the way the water does. What
+the bands <em>contain</em> is measured in the reference canvas, which is what every
+number below is in. The whole of that rule, and the one control it moves, is
+<a href="#the-bands-reach-the-edges-too">the bands reach the edges too</a>.</p>
 <p>Across the pond, the nine positions occupy the same nine columns in every lane,
 and their total width is fixed by the position count rather than by the space
 available:</p>
@@ -2348,14 +2375,19 @@ available:</p>
   from each other, and from the End log.</li>
 <li><code>end-log</code> — pinned to the <strong>right</strong> edge of the safe area.</li>
 </ul>
-<p>Both logs are <code>SharedLogHeight</code> tall, which is the height of the <code>pond</code> band
-itself: they fill it, edge to edge with the two hairlines, whether two frogs are
-playing or four. Every lane's centre line therefore crosses both of them, and a
-frog on a log still sits on its own lane's line. A shorter screen loses height
-from <code>pond</code> and nothing else — and the logs lose it with the band, because they
-are the band's height rather than a number typed in beside it. The header and
-the controls do not shrink, because a smaller <code>Roll</code> button is the wrong thing
-to trade away.</p>
+<p>Both logs are <code>SharedLogHeight</code> tall, which is the height of the <code>pond</code> band on
+the reference canvas: they fill it, edge to edge with the two hairlines, whether
+two frogs are playing or four. Every lane's centre line therefore crosses both
+of them, and a frog on a log still sits on its own lane's line. A shorter screen
+loses height from <code>pond</code> and nothing else — and the logs lose it with the band,
+because they are the band's height rather than a number typed in beside it. The
+header and the controls do not shrink, because a smaller <code>Roll</code> button is the
+wrong thing to trade away.</p>
+<p>A <em>taller</em> screen is the other side of that, and it is not symmetric: the extra
+height is all <code>pond</code>, and it is all water. The logs and the lane stack stay
+their reference size, centred in the band, because they are the board rather
+than the backdrop — see
+<a href="#the-bands-reach-the-edges-too">the bands reach the edges too</a>.</p>
 <h2 id="why-the-lanes-run-across">Why the lanes run across<a class="headerlink" href="#why-the-lanes-run-across" title="Link to this section">&para;</a></h2>
 <p>The classroom board's lanes run bottom to top. This one's run left to right, and
 that is a deliberate rotation rather than an oversight.</p>
@@ -2702,9 +2734,16 @@ drawn in the mockups, and they are what the code carries until he has looked at
 the board on the tablet. They are honest placeholders in exactly the sense the
 <a href="../shared-components/#frog-colours">frog colours</a> are, and for the same reason.</p>
 <h3 id="the-water-is-the-whole-screen">The water is the whole screen<a class="headerlink" href="#the-water-is-the-whole-screen" title="Link to this section">&para;</a></h3>
-<p><code>PondWater</code> is not the pond band's fill. It is what this screen paints to all
-four edges of the device, on any aspect ratio — the header and controls bands
-are drawn on top of it, and so is everything else.</p>
+<p><code>PondWater</code> is what this screen paints to all four edges of the device, on any
+aspect ratio. It is the <code>pond</code> band's own fill <strong>and</strong> the paint behind
+everything else — the header and controls bands are drawn on top of it, and so
+is every lane, log and frog.</p>
+<p>Both, and written down as both, because it used to be only the second one: the
+<code>pond</code> band painted nothing at all and what read as the pond was the screen-wide
+paint showing through where the band was not. That is invisible while the two
+agree about where the band is, and it is why nobody noticed the band had the
+same bug the header and the controls had — see
+<a href="#the-bands-reach-the-edges-too">the bands reach the edges too</a>.</p>
 <p>That makes the board the one screen that does not paint the app's own
 background. Every other screen paints <code>#EDF1EF</code>, and so does the scene camera,
 which is what shows for the frame before any screen has painted at all. The
@@ -2712,6 +2751,32 @@ rule from
 <a href="../shared-components/#what-fills-a-screen-that-is-not-1610">the canvas every component is measured in</a>
 is unchanged and still holds here: nothing behind the canvas is ever visible,
 because this screen's own paint reaches the edges.</p>
+<h3 id="the-bands-reach-the-edges-too">The bands reach the edges too<a class="headerlink" href="#the-bands-reach-the-edges-too" title="Link to this section">&para;</a></h3>
+<p><strong>Invariant:</strong> every one of the three bands is as wide as the screen, <code>header</code>'s
+top edge is the top of the screen, and <code>controls</code>' bottom edge is the bottom of
+it — on every aspect ratio, exactly as the water is.</p>
+<p>A band is the top or the bottom <strong>of the screen</strong>, not a panel laid on the pond.
+A band that stopped at 1920 px on a wider device would show a strip of water past
+each of its ends, and two grey bars floating on a pond is a rendering fault
+rather than a design. That is what the tablet was doing until this was written
+down.</p>
+<p><strong>Invariant:</strong> what a band <em>contains</em> is still laid out in the reference canvas,
+centred. The lanes are the reference canvas's safe area wide and the two shared
+logs stand in the columns those lanes' tracks start and end in, on every screen,
+so every constant in the table below keeps meaning exactly what it says and
+position 0 is still on the Start log. The band grows; the board inside it does
+not.</p>
+<p><strong>A control anchored to a band's edge follows the screen's edge.</strong> The turn chip
+and the settings gear sit <code>SafeMargin</code> in from the real left and right edges of
+the screen, because <code>SafeMargin</code> is a margin from the screen and not from a
+rectangle nobody can see. <code>Roll</code> is centred and does not care either way.</p>
+<p><strong>Extra height goes to <code>pond</code> and nowhere else</strong> — the same answer
+<a href="#anchors">Anchors</a> already gives for a <em>shorter</em> screen, in the other
+direction. The two bands keep their heights, because a smaller <code>Roll</code> is the
+wrong thing to trade away, and what a taller screen shows more of is water: the
+logs and the lane stack keep their reference size, centred in the band.</p>
+<p>At exactly 1920 × 1200 all of this is pixel-identical to the mockups, which is
+why it is a rule stated on this page rather than a new picture to draw.</p>
 <h3 id="keeping-the-frogs-visible">Keeping the frogs visible<a class="headerlink" href="#keeping-the-frogs-visible" title="Link to this section">&para;</a></h3>
 <p>A blue pond behind a blue frog, and a green lily pad under a green frog, is the
 thing this change could have broken. The frog pieces are drawn <strong>on top of</strong>
