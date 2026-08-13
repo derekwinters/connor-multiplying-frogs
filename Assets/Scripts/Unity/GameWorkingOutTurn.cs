@@ -58,6 +58,12 @@ namespace Frogs.Unity
         public FrogColour Frog { get; }
 
         /// <inheritdoc />
+        public string FrogName
+        {
+            get { return _game.NameFor(Frog); }
+        }
+
+        /// <inheritdoc />
         public Pile Pile { get; }
 
         /// <inheritdoc />

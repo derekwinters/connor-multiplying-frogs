@@ -763,6 +763,16 @@ namespace Frogs.Unity.EditModeTests
 
             public FrogColour Frog { get; }
 
+            // A fake plays under its frog's default name unless a test sets
+            // one — a default name is a real name, not a placeholder.
+            string _frogName;
+
+            public string FrogName
+            {
+                get { return string.IsNullOrEmpty(_frogName) ? PlayerName.DefaultFor(Frog) : _frogName; }
+                set { _frogName = value; }
+            }
+
             public int Multiplicand => AnswerResultDialogViewTests.Multiplicand;
 
             public int Multiplier => AnswerResultDialogViewTests.Multiplier;

@@ -582,7 +582,7 @@ namespace Frogs.Unity.Views
             }
 
             var frog = _readout.Frog;
-            _whoseChip.SetFrog(FrogColours.For(frog), frog.ToString());
+            _whoseChip.SetFrog(FrogColours.For(frog), _readout.FrogName);
             _whoseChip.SetState(PlayerChipState.Active);
 
             var pile = _readout.Pile;

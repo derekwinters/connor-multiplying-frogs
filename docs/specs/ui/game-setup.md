@@ -305,6 +305,18 @@ carry. Do not build from it.
 - **Should the four colours be reorderable?** Proposed: no. Turn order is
   tap order, which is one gesture rather than two, and re-ordering is a drag
   interaction on a screen four children are all reaching at.
+- **What does `⇧` do?** **Open, and it blocks nothing else.** The keyboard
+  table above lists a shift key and the Behaviour section never says what
+  pressing it does — so the built keyboard draws it, disabled, and types the
+  glyph on each key cap, which is uppercase. That is the literal reading of
+  "typing appends a character" and it is the only part of this screen a guess
+  could have filled in. The mockups draw names as `Connor` and `Isabella`, so
+  mixed case is clearly wanted; what is not settled is *how* — a one-shot
+  shift that capitalises the next letter and then releases, a caps-lock style
+  toggle, or an automatic capital on the first letter of a name. They differ in
+  how many taps a child spends to get `Connor`, which makes it a taste call
+  rather than a mechanical one. Until it is answered the built screen can only
+  produce `CONNOR`.
 - **Are the letter keys in QWERTY order or alphabetical order?** The mockups
   draw QWERTY, because that is the arrangement on every keyboard a child has
   seen, including the one on the tablet this game runs on. The case for

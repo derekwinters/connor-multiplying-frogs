@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Frogs.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -109,7 +110,11 @@ namespace Frogs.Unity.Views
         const float CanvasHeight = 1200f;
 
         const string NoWinnerHeadline = "Game over";
-        const string WinnerHeadlineSuffix = " frog wins!";
+        // docs/specs/ui/shared-components.md#player-chip: nothing appends
+        // anything to a name. This suffix used to staple `frog` onto a
+        // colour, which read as `Connor frog wins!` the moment a name was
+        // typed.
+        const string WinnerHeadlineSuffix = " wins!";
         const string HomePrefix = "Home — ";
         const string OfSeparator = " of ";
         const string PlayAgainLabel = "Play again";
@@ -231,6 +236,7 @@ namespace Frogs.Unity.Views
         FrogColour? _winner;
         readonly List<StandingsRow> _standings = new List<StandingsRow>();
         readonly List<FrogColour> _turnOrder = new List<FrogColour>();
+        readonly List<RosterEntry> _roster = new List<RosterEntry>();
 
         bool _initialized;
         float _revealElapsed;
@@ -433,7 +439,7 @@ namespace Frogs.Unity.Views
                 throw new ArgumentNullException(nameof(endedGame));
             }
 
-            Show(endedGame.Winner, endedGame.Standings, endedGame.TurnOrder);
+            Show(endedGame.Winner, endedGame.Standings, endedGame.Roster);
         }
 
         /// <summary>
@@ -451,7 +457,31 @@ namespace Frogs.Unity.Views
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="standings"/> or <paramref name="turnOrder"/> is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="standings"/> has more than <see cref="MaxStandingsRows"/> rows.</exception>
+        public void Show(FrogColour? winner, IReadOnlyList<StandingsRow> standings, IReadOnlyList<RosterEntry> roster)
+        {
+            if (roster == null)
+            {
+                throw new ArgumentNullException(nameof(roster));
+            }
+
+            Show(winner, standings, roster.Select(entry => entry.Colour).ToArray(), roster);
+        }
+
+        /// <summary>
+        /// The same, for a caller that has only colours to hand — every frog
+        /// then plays under its default name, which is a real name and not a
+        /// gap.
+        /// </summary>
         public void Show(FrogColour? winner, IReadOnlyList<StandingsRow> standings, IReadOnlyList<FrogColour> turnOrder)
+        {
+            Show(winner, standings, turnOrder, null);
+        }
+
+        void Show(
+            FrogColour? winner,
+            IReadOnlyList<StandingsRow> standings,
+            IReadOnlyList<FrogColour> turnOrder,
+            IReadOnlyList<RosterEntry> roster)
         {
             EnsureInitialized();
 
@@ -487,10 +517,57 @@ namespace Frogs.Unity.Views
                 _turnOrder.Add(colour);
             }
 
+            // Names last as long as the game does, which includes
+            // `Play again` — docs/specs/ui/game-setup.md#behaviour. When the
+            // caller had only colours to hand, the standings still know each
+            // frog's name, and a frog missing from them plays under its
+            // default name, which is a real name and not a gap.
+            _roster.Clear();
+            foreach (var colour in turnOrder)
+            {
+                _roster.Add(roster != null
+                    ? RosterEntryFor(roster, colour)
+                    : new RosterEntry(colour, NameFromStandings(colour)));
+            }
+
             // Entering: the reveal starts over for the result now on screen.
             _revealElapsed = 0f;
 
             RefreshAll();
+        }
+
+        // The name the standings already carry for this frog. Nothing has to
+        // be looked up anywhere else: Core hands the name out with the row.
+        string NameFromStandings(FrogColour colour)
+        {
+            foreach (var row in _standings)
+            {
+                if (row.Colour == colour)
+                {
+                    return row.Name;
+                }
+            }
+
+            return PlayerName.DefaultFor(colour);
+        }
+
+        static RosterEntry RosterEntryFor(IReadOnlyList<RosterEntry> roster, FrogColour colour)
+        {
+            foreach (var entry in roster)
+            {
+                if (entry.Colour == colour)
+                {
+                    return entry;
+                }
+            }
+
+            return new RosterEntry(colour);
+        }
+
+        // The winner's own name, for the headline. Null when nobody won.
+        string WinnerName()
+        {
+            return _winner.HasValue ? NameFromStandings(_winner.Value) : null;
         }
 
         /// <summary>The frog row <paramref name="index"/> is about, in the order Core handed the standings over.</summary>
@@ -589,7 +666,7 @@ namespace Frogs.Unity.Views
             // Constructed exactly the way `Start` on game setup constructs
             // one — the same roster order in, a fresh seed from the Unity
             // layer — just without the tap-through.
-            StartedGame = new Frogs.Core.Game(_turnOrder.ToArray(), _seedFactory());
+            StartedGame = new Frogs.Core.Game(_roster.ToArray(), _seedFactory());
 
             _router?.NavigateToScreen(CoreScreen.GameBoard);
         }
@@ -614,16 +691,30 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// The `headline` region's line: `&lt;Colour&gt; frog wins!` when Core
-        /// reports a winner — on both routes that produce one — and
-        /// `Game over` when it does not, because "announcing a winner who did
-        /// not win is worse than announcing nobody".
+        /// The `headline` region's line: `&lt;Name&gt; wins!` when Core reports
+        /// a winner — on both routes that produce one — and `Game over` when
+        /// it does not, because "announcing a winner who did not win is worse
+        /// than announcing nobody".
+        /// </summary>
+        /// <param name="winnerName">
+        /// What the winning player is called — their colour's name unless
+        /// they typed one. Null when nobody won.
+        /// </param>
+        public static string FormatHeadline(string winnerName)
+        {
+            return string.IsNullOrEmpty(winnerName)
+                ? NoWinnerHeadline
+                : winnerName + WinnerHeadlineSuffix;
+        }
+
+        /// <summary>
+        /// The same headline for a frog on its default name. Kept for callers
+        /// that have only a colour to hand; the name-carrying overload is the
+        /// one this screen itself uses.
         /// </summary>
         public static string FormatHeadline(FrogColour? winner)
         {
-            return winner.HasValue
-                ? winner.Value.ToString() + WinnerHeadlineSuffix
-                : NoWinnerHeadline;
+            return FormatHeadline(winner.HasValue ? PlayerName.DefaultFor(winner.Value) : null);
         }
 
         /// <summary>
@@ -935,7 +1026,7 @@ namespace Frogs.Unity.Views
 
         void RefreshAll()
         {
-            _headlineText.text = FormatHeadline(_winner);
+            _headlineText.text = FormatHeadline(WinnerName());
 
             for (var index = 0; index < _rows.Count; index++)
             {
@@ -979,7 +1070,7 @@ namespace Frogs.Unity.Views
 
             row.Swatch.color = FrogColours.For(standings.Colour);
 
-            row.Name.text = standings.Colour.ToString();
+            row.Name.text = standings.Name;
             row.Name.fontStyle = weight;
 
             row.Progress.text = FormatProgress(standings);

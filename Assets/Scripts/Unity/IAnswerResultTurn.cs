@@ -25,6 +25,13 @@ namespace Frogs.Unity
         /// <summary>The frog whose answer this was — the chip, and the name in the consequence sentence.</summary>
         FrogColour Frog { get; }
 
+        /// <summary>
+        /// What this frog's player is called — their colour's name unless
+        /// they typed one on game setup. The chip draws the name and only the
+        /// name; nothing appends anything to it.
+        /// </summary>
+        string FrogName { get; }
+
         /// <summary>The card's first operand — the `331` in `331 × 41 = 13,571`.</summary>
         int Multiplicand { get; }
 
