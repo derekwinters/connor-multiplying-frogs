@@ -145,7 +145,6 @@ namespace Frogs.Unity.Views
         // for the frame before *any* screen has painted.
 
         RectTransform _rect;
-        RectTransform _contentRect;
         Image _background;
 
         RectTransform _headerRect;
@@ -242,17 +241,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred.</summary>
-        public RectTransform ContentRect
-        {
-            get
-            {
-                EnsureInitialized();
-                return _contentRect;
-            }
-        }
-
-        /// <summary>`header` — pinned to the top, <see cref="BoardHeaderHeight"/> tall, full width.</summary>
+        /// <summary>`header` — pinned to the top of the screen, <see cref="BoardHeaderHeight"/> tall, as wide as the screen.</summary>
         public RectTransform HeaderRect
         {
             get
@@ -312,7 +301,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>`pond` — everything between the two pinned bands.</summary>
+        /// <summary>`pond` — everything between the two pinned bands, and the water it paints there.</summary>
         public RectTransform PondRect
         {
             get
@@ -379,7 +368,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>`controls` — pinned to the bottom, <see cref="BoardControlsHeight"/> tall, full width.</summary>
+        /// <summary>`controls` — pinned to the bottom of the screen, <see cref="BoardControlsHeight"/> tall, as wide as the screen.</summary>
         public RectTransform ControlsRect
         {
             get
@@ -525,13 +514,17 @@ namespace Frogs.Unity.Views
             // The root fills the whole canvas, which on a device that is not
             // 16:10 is larger than the 1920 x 1200 reference — see
             // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
-            // Only the background hangs off it. Everything that is laid out in
-            // reference pixels hangs off `Content` instead, so the extra space
-            // a wider or taller device gives us is painted and nothing else.
+            //
+            // The background and the three bands hang off it, because all four
+            // are paint that reaches the screen's edges: the bands are the top
+            // and the bottom *of the screen*, not panels laid on the pond
+            // (#303). What is laid out in reference pixels is what the bands
+            // contain — the lanes and the two shared logs, which are placed by
+            // game-board.md's own arithmetic and so are measured from the
+            // pond's centre rather than from its edges.
             StretchToFill(_rect);
 
             BuildBackground();
-            BuildContent();
 
             BuildHeader();
             BuildPond();
@@ -552,32 +545,20 @@ namespace Frogs.Unity.Views
             StretchToFill(backgroundRect);
         }
 
-        void BuildContent()
-        {
-            // The reference canvas, centred — exactly the rect the root used
-            // to be, so every child below keeps the anchors, sizes and offsets
-            // it already had and nothing on the board moves by a pixel.
-            var contentGO = new GameObject("Content", typeof(RectTransform));
-            _contentRect = (RectTransform)contentGO.transform;
-            _contentRect.SetParent(_rect, worldPositionStays: false);
-            _contentRect.anchorMin = new Vector2(0.5f, 0.5f);
-            _contentRect.anchorMax = new Vector2(0.5f, 0.5f);
-            _contentRect.pivot = new Vector2(0.5f, 0.5f);
-            _contentRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
-            _contentRect.anchoredPosition = Vector2.zero;
-        }
-
         void BuildHeader()
         {
-            // header — pinned to the top, full width, not shrinking on a
-            // shorter screen.
+            // header — pinned to the top of the *screen*, as wide as the
+            // screen, not shrinking on a shorter one. The chip and the gear
+            // inside it are anchored to its own left and right edges, so they
+            // follow the real edge with it: SafeMargin is a margin from the
+            // screen, not from a virtual rectangle (#303).
             var headerGO = new GameObject("Header", typeof(RectTransform), typeof(Image));
             var headerImage = headerGO.GetComponent<Image>();
             headerImage.color = BoardColours.BandFill;
             headerImage.raycastTarget = false;
 
             _headerRect = headerImage.rectTransform;
-            _headerRect.SetParent(_contentRect, worldPositionStays: false);
+            _headerRect.SetParent(_rect, worldPositionStays: false);
             _headerRect.anchorMin = new Vector2(0f, 1f);
             _headerRect.anchorMax = new Vector2(1f, 1f);
             _headerRect.pivot = new Vector2(0.5f, 1f);
@@ -663,11 +644,23 @@ namespace Frogs.Unity.Views
 
         void BuildPond()
         {
-            // pond — everything between the other two bands. A shorter screen
-            // loses height from here and nothing else.
-            var pondGO = new GameObject("Pond", typeof(RectTransform));
-            _pondRect = (RectTransform)pondGO.transform;
-            _pondRect.SetParent(_contentRect, worldPositionStays: false);
+            // pond — everything between the other two bands, edge to edge with
+            // the screen. A shorter screen loses height from here and nothing
+            // else, and a taller one gives its extra height to here and
+            // nothing else.
+            //
+            // It paints its own water rather than letting the background show
+            // through, which is the half of #303 that was invisible: the band
+            // had the same anchoring fault as the other two and nobody could
+            // see it, because a bare RectTransform's gap and the water behind
+            // it are the same colour by definition.
+            var pondGO = new GameObject("Pond", typeof(RectTransform), typeof(Image));
+            var pondImage = pondGO.GetComponent<Image>();
+            pondImage.color = BoardColours.PondWater;
+            pondImage.raycastTarget = false;
+
+            _pondRect = pondImage.rectTransform;
+            _pondRect.SetParent(_rect, worldPositionStays: false);
             _pondRect.anchorMin = Vector2.zero;
             _pondRect.anchorMax = Vector2.one;
             _pondRect.offsetMin = new Vector2(0f, BoardControlsHeight);
@@ -685,19 +678,29 @@ namespace Frogs.Unity.Views
             // after it. The End log is pinned to the right of the safe area,
             // where every lane's track ends. Neither is placed by a number of
             // its own.
+            //
+            // Both are measured from the **centre** of the pond outwards, by
+            // the reference canvas's own half-width, rather than from the
+            // band's edges. The band reaches the screen's edges now (#303) and
+            // a lane does not: a log anchored to the band would slide out from
+            // under the lane whose position 0 and position 8 it is.
             _startLogOutline = BuildSharedLog(
                 "StartLog",
                 0f,
-                SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
+                -(CanvasWidth / 2f) + SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
                 out _startLogFill);
 
-            _endLogOutline = BuildSharedLog("EndLog", 1f, -SafeMargin, out _endLogFill);
+            _endLogOutline = BuildSharedLog("EndLog", 1f, (CanvasWidth / 2f) - SafeMargin, out _endLogFill);
         }
 
         // One shared log — LogWidth across, SharedLogHeight tall, vertically
         // centred on the pond and so on the lane stack the pond centres too.
         // Every lane's centre line crosses it, which is what lets a frog on a
         // log still sit on its own lane's line.
+        //
+        // `edge` is which of the log's own sides <paramref name="offsetX"/>
+        // places — its left (0) or its right (1) — and offsetX is measured
+        // from the pond's centre, in reference pixels.
         Image BuildSharedLog(string logName, float edge, float offsetX, out Image fill)
         {
             var logGO = new GameObject(logName, typeof(RectTransform), typeof(Image));
@@ -709,8 +712,8 @@ namespace Frogs.Unity.Views
 
             var logRect = outline.rectTransform;
             logRect.SetParent(_pondRect, worldPositionStays: false);
-            logRect.anchorMin = new Vector2(edge, 0.5f);
-            logRect.anchorMax = new Vector2(edge, 0.5f);
+            logRect.anchorMin = new Vector2(0.5f, 0.5f);
+            logRect.anchorMax = new Vector2(0.5f, 0.5f);
             logRect.pivot = new Vector2(edge, 0.5f);
             logRect.sizeDelta = new Vector2(LogWidth, SharedLogHeight);
             logRect.anchoredPosition = new Vector2(offsetX, 0f);
@@ -734,15 +737,16 @@ namespace Frogs.Unity.Views
 
         void BuildControls()
         {
-            // controls — pinned to the bottom, full width. A smaller `Roll`
-            // is the wrong thing to trade away, so this band does not shrink.
+            // controls — pinned to the bottom of the *screen*, as wide as the
+            // screen. A smaller `Roll` is the wrong thing to trade away, so
+            // this band does not shrink.
             var controlsGO = new GameObject("Controls", typeof(RectTransform), typeof(Image));
             var controlsImage = controlsGO.GetComponent<Image>();
             controlsImage.color = BoardColours.BandFill;
             controlsImage.raycastTarget = false;
 
             _controlsRect = controlsImage.rectTransform;
-            _controlsRect.SetParent(_contentRect, worldPositionStays: false);
+            _controlsRect.SetParent(_rect, worldPositionStays: false);
             _controlsRect.anchorMin = new Vector2(0f, 0f);
             _controlsRect.anchorMax = new Vector2(1f, 0f);
             _controlsRect.pivot = new Vector2(0.5f, 0f);
@@ -790,6 +794,11 @@ namespace Frogs.Unity.Views
             // One lane per frog in the game, in turn order — two, three, or
             // four. Every frog is visible at once, with no scrolling, paging
             // or zooming, and an absent frog gets no placeholder lane.
+            //
+            // A lane is the reference canvas's safe area wide and centred on
+            // the pond, on every screen. The band around it reaches the
+            // screen's edges; the nine positions on it are game-board.md's
+            // arithmetic and do not stretch (#303).
             var turnOrder = _game.TurnOrder;
             var laneWidth = CanvasWidth - (2f * SafeMargin);
             var groupTop = (turnOrder.Count * GameBoardLaneView.LaneHeight) / 2f;

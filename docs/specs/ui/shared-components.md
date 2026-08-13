@@ -91,6 +91,21 @@ appears there, and no element grows into it. An element that only exists on
 some devices is an element nobody can review against a mockup, and every mockup
 in this repo is drawn at exactly one size.
 
+**The one exception: a band that is background.** A full-width band whose job is
+to be the top or the bottom of the screen — the game board's `header`, `pond`
+and `controls`, and nothing else today — reaches the screen's edges by the same
+rule the background does, and a control anchored to such a band's left or right
+edge sits `SafeMargin` in from the screen's edge with it. Everything the band
+*contains* keeps this invariant untouched.
+
+The exception is narrow on purpose, and the test for it is what the element
+would look like if it did not grow: a band that stops short leaves a strip of
+background past each of its ends, which reads as a rendering fault. A button, a
+card or a dialog that stops short simply looks placed. Only the first kind grows
+— see
+[the bands reach the edges too](game-board.md#the-bands-reach-the-edges-too),
+which is where it was decided and why.
+
 **Invariant:** nothing behind the canvas is ever visible. Whatever a screen
 paints, it paints to all four edges, and the scene camera clears to the app's
 background rather than to the engine's default sky — so even a frame drawn
