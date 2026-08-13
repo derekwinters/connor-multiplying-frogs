@@ -723,6 +723,16 @@ namespace Frogs.Unity.EditModeTests
         sealed class StubReadout : IRollAndCardReadout
         {
             public FrogColour Frog { get; set; }
+
+            // A fake plays under its frog's default name unless a test sets
+            // one — a default name is a real name, not a placeholder.
+            string _frogName;
+
+            public string FrogName
+            {
+                get { return string.IsNullOrEmpty(_frogName) ? PlayerName.DefaultFor(Frog) : _frogName; }
+                set { _frogName = value; }
+            }
             public int Face { get; set; }
             public Pile Pile { get; set; }
             public int Multiplicand { get; set; }

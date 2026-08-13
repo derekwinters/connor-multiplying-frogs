@@ -27,6 +27,13 @@ namespace Frogs.Unity
         /// <summary>The frog taking this turn — the chip in the header.</summary>
         FrogColour Frog { get; }
 
+        /// <summary>
+        /// What this frog's player is called — their colour's name unless
+        /// they typed one on game setup. The chip draws the name and only the
+        /// name; nothing appends anything to it.
+        /// </summary>
+        string FrogName { get; }
+
         /// <summary>The pile the card came from, as Core reported it. Named in the header, never re-derived here.</summary>
         Pile Pile { get; }
 

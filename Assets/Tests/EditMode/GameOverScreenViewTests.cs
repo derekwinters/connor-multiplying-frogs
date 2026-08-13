@@ -39,7 +39,7 @@ namespace Frogs.Unity.EditModeTests
             {
                 view.Show(FrogColour.Blue, MockupStandings(), MockupRoster());
 
-                Assert.That(view.HeadlineText.text, Is.EqualTo("Blue frog wins!"));
+                Assert.That(view.HeadlineText.text, Is.EqualTo("Blue wins!"));
             }
             finally
             {
@@ -66,8 +66,8 @@ namespace Frogs.Unity.EditModeTests
                 new StandingsRow(FrogColour.Green, 2, 4, false)
             };
 
-            AssertHeadline(FrogColour.Pink, everybodyHome, "Pink frog wins!");
-            AssertHeadline(FrogColour.Pink, endedWithOneHome, "Pink frog wins!");
+            AssertHeadline(FrogColour.Pink, everybodyHome, "Pink wins!");
+            AssertHeadline(FrogColour.Pink, endedWithOneHome, "Pink wins!");
         }
 
         [Test]
@@ -607,7 +607,7 @@ namespace Frogs.Unity.EditModeTests
             {
                 view.Show(FrogColour.Blue, MockupStandings(), MockupRoster());
 
-                Assert.That(view.HeadlineText.text, Is.EqualTo("Blue frog wins!"));
+                Assert.That(view.HeadlineText.text, Is.EqualTo("Blue wins!"));
                 Assert.That(view.HeadlineText.fontSize, Is.EqualTo((int)GameOverScreenView.GameOverHeadlineSize));
                 Assert.That(view.HeadlineRect.anchoredPosition.y, Is.EqualTo(-GameOverScreenView.GameOverHeadlineTop));
 
@@ -675,7 +675,7 @@ namespace Frogs.Unity.EditModeTests
 
                 view.Show(game);
 
-                Assert.That(view.HeadlineText.text, Is.EqualTo("Green frog wins!"));
+                Assert.That(view.HeadlineText.text, Is.EqualTo("Green wins!"));
                 Assert.That(view.RowCount, Is.EqualTo(game.Standings.Count));
                 Assert.That(view.RowColour(0), Is.EqualTo(FrogColour.Green));
                 Assert.That(view.RowProgressText(0).text, Is.EqualTo("Home — 8 of 8"));

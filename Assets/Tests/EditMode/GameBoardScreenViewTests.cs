@@ -52,7 +52,7 @@ namespace Frogs.Unity.EditModeTests
             try
             {
                 // Blue is first in turn order, so Core reports Blue active.
-                Assert.That(view.TurnBannerText.text, Is.EqualTo("Blue frog's turn"));
+                Assert.That(view.TurnBannerText.text, Is.EqualTo("Blue's turn"));
                 Assert.That(view.TurnBannerChip.Label.text, Is.EqualTo("Blue"));
                 Assert.That(view.TurnBannerChip.State, Is.EqualTo(PlayerChipState.Active));
                 Assert.That(view.TurnBannerChip.Swatch.color, Is.EqualTo(FrogColours.For(FrogColour.Blue)));
@@ -62,7 +62,7 @@ namespace Frogs.Unity.EditModeTests
                 PassTheTurn(game);
                 view.Refresh();
 
-                Assert.That(view.TurnBannerText.text, Is.EqualTo("Green frog's turn"));
+                Assert.That(view.TurnBannerText.text, Is.EqualTo("Green's turn"));
                 Assert.That(view.TurnBannerChip.Label.text, Is.EqualTo("Green"));
                 Assert.That(view.TurnBannerChip.Swatch.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
             }

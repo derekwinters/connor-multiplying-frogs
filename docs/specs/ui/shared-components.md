@@ -331,6 +331,8 @@ what the chip shows.
 | Pad-count text size | `PlayerChipPadCountSize` | 24 px |
 | Corner radius | `PlayerChipRadius` | 20 px |
 | Ring drawn around the active chip | `PlayerChipActiveRing` | 6 px |
+| Horizontal padding inside the chip | `PlayerChipLabelPaddingX` | 20 px |
+| Room the name actually has | `PlayerChipLabelColumn` | 128 px |
 
 `PlayerChipLabelSize` was 40 px on this page; the committed mockups' shared
 stylesheet — repeated across all eleven files — draws the name at 32 px and the
@@ -340,6 +342,13 @@ mockups are what Connor approved when each screen's wireframe was signed off,
 so they win: `PlayerChipLabelSize` is corrected to 32 px, and
 `PlayerChipPadCountSize` — a value this table previously had no name for at
 all — is added at 24 px.
+
+`PlayerChipLabelPaddingX` and `PlayerChipLabelColumn` distil the next
+paragraph's own arithmetic into the names the code declares them under — the
+same move [game setup](game-setup.md#named-constants) made for
+`SeatBadgeInset`. The padding was already stated in prose here, and the column
+is what truncation is measured against, so it cannot stay a number that only
+exists inside a sentence.
 
 **The label column is 128 px, and it is tighter than it looks.**
 `PlayerChipWidth` 256 less 20 px padding either side, less

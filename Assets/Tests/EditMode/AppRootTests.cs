@@ -308,7 +308,7 @@ namespace Frogs.Unity.EditModeTests
                 // to be dismissed."
                 Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameOver));
                 Assert.That(root.Router.CurrentDialog, Is.Null);
-                Assert.That(root.GameOver.HeadlineText.text, Is.EqualTo("Green frog wins!"),
+                Assert.That(root.GameOver.HeadlineText.text, Is.EqualTo("Green wins!"),
                     "Green rolled first, so Green got home first");
                 Assert.That(root.GameOver.RowCount, Is.EqualTo(game.Standings.Count));
             }

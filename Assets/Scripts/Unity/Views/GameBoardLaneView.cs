@@ -336,13 +336,18 @@ namespace Frogs.Unity.Views
             EnsureInitialized();
         }
 
-        /// <summary>Sets which frog this lane belongs to, and paints it.</summary>
-        public void Initialize(FrogColour colour)
+        /// <summary>
+        /// Sets which frog this lane belongs to and what its player is
+        /// called, and paints it. The name comes in rather than being
+        /// derived from the colour, because a renamed frog's lane has to
+        /// say the typed name.
+        /// </summary>
+        public void Initialize(FrogColour colour, string name = null)
         {
             EnsureInitialized();
 
             _colour = colour;
-            _chip.SetFrog(FrogColours.For(colour), colour.ToString());
+            _chip.SetFrog(FrogColours.For(colour), name ?? PlayerName.DefaultFor(colour));
             _piece.color = FrogColours.For(colour);
         }
 

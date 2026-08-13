@@ -446,7 +446,7 @@ namespace Frogs.Unity.EditModeTests
                 // The board is back in play through #220's own seam, not
                 // through a second one invented here.
                 Assert.That(board.RollButton.IsDisabled, Is.False);
-                Assert.That(board.TurnBannerText.text, Is.EqualTo("Blue frog's turn"));
+                Assert.That(board.TurnBannerText.text, Is.EqualTo("Blue's turn"));
             }
             finally
             {
@@ -762,6 +762,16 @@ namespace Frogs.Unity.EditModeTests
             }
 
             public FrogColour Frog { get; }
+
+            // A fake plays under its frog's default name unless a test sets
+            // one — a default name is a real name, not a placeholder.
+            string _frogName;
+
+            public string FrogName
+            {
+                get { return string.IsNullOrEmpty(_frogName) ? PlayerName.DefaultFor(Frog) : _frogName; }
+                set { _frogName = value; }
+            }
 
             public int Multiplicand => AnswerResultDialogViewTests.Multiplicand;
 

@@ -30,6 +30,12 @@ namespace Frogs.Unity
         }
 
         /// <inheritdoc />
+        public string FrogName
+        {
+            get { return _game.NameFor(_game.ActiveFrog); }
+        }
+
+        /// <inheritdoc />
         public int Face
         {
             get { return RequireRoll().Face; }

@@ -9,9 +9,17 @@ namespace Frogs.Core
     /// </summary>
     public sealed class StandingsRow
     {
+        /// <summary>A row for a frog on its default name — its colour's.</summary>
         public StandingsRow(FrogColour colour, int place, int position, bool isHome)
+            : this(colour, PlayerName.DefaultFor(colour), place, position, isHome)
+        {
+        }
+
+        /// <summary>A row for a frog under the name its player is playing as.</summary>
+        public StandingsRow(FrogColour colour, string name, int place, int position, bool isHome)
         {
             Colour = colour;
+            Name = PlayerName.Resolve(name, colour);
             Place = place;
             Position = position;
             IsHome = isHome;
@@ -19,6 +27,13 @@ namespace Frogs.Core
 
         /// <summary>Which frog this row is about.</summary>
         public FrogColour Colour { get; }
+
+        /// <summary>
+        /// What this frog's player is called — the word game over's standings
+        /// row draws. Its colour's name by default, whatever was typed on
+        /// game setup otherwise, and never a colour with a word stapled to it.
+        /// </summary>
+        public string Name { get; }
 
         /// <summary>
         /// This frog's rank, 1-based. Frogs tied on <see cref="Position"/>

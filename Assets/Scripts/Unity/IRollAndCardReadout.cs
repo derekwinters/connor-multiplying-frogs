@@ -29,6 +29,13 @@ namespace Frogs.Unity
         /// <summary>The frog taking this turn — the chip in `whose`.</summary>
         FrogColour Frog { get; }
 
+        /// <summary>
+        /// What this frog's player is called — their colour's name unless
+        /// they typed one on game setup. The chip draws the name and only the
+        /// name; nothing appends anything to it.
+        /// </summary>
+        string FrogName { get; }
+
         /// <summary>The face that came up, <see cref="Roll.MinimumFace"/> to <see cref="Roll.MaximumFace"/>.</summary>
         int Face { get; }
 

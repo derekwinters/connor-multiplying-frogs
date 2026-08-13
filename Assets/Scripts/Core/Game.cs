@@ -42,6 +42,7 @@ namespace Frogs.Core
         /// </summary>
         public const int MaxFrogsPerGame = 4;
 
+        readonly RosterEntry[] _roster;
         readonly FrogColour[] _turnOrder;
         readonly IReadOnlyDictionary<FrogColour, Lane> _lanes;
         readonly Rng _rng;
@@ -71,28 +72,60 @@ namespace Frogs.Core
         /// frogs in the same game are never the same colour.
         /// </exception>
         public Game(IReadOnlyList<FrogColour> turnOrder, ulong seed)
+            : this(AsRoster(turnOrder), seed)
         {
-            if (turnOrder == null)
+        }
+
+        /// <summary>
+        /// A game for <paramref name="roster"/> — already-ordered, first frog
+        /// to last — running on <paramref name="seed"/>. This is the
+        /// constructor game setup uses once names have been typed; the
+        /// colour-only one above is the same thing with every frog on its
+        /// default name.
+        ///
+        /// docs/specs/ui/game-setup.md#behaviour: "Their names go with them,
+        /// and are what every later screen shows." Two entries may carry the
+        /// same name — "nothing prevents it, nothing numbers them, nothing
+        /// warns" — so only colours are checked for duplicates here.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="roster"/> is null, or holds a null entry.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="roster"/> has fewer than <see cref="MinFrogsPerGame"/>
+        /// or more than <see cref="MaxFrogsPerGame"/> frogs.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="roster"/> lists the same colour twice — two frogs
+        /// in the same game are never the same colour.
+        /// </exception>
+        public Game(IReadOnlyList<RosterEntry> roster, ulong seed)
+        {
+            if (roster == null)
             {
-                throw new ArgumentNullException(nameof(turnOrder));
+                throw new ArgumentNullException(nameof(roster));
             }
 
-            if (turnOrder.Count < MinFrogsPerGame || turnOrder.Count > MaxFrogsPerGame)
+            if (roster.Count < MinFrogsPerGame || roster.Count > MaxFrogsPerGame)
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(turnOrder),
-                    turnOrder.Count,
-                    $"a game is {MinFrogsPerGame} to {MaxFrogsPerGame} frogs; {turnOrder.Count} is neither.");
+                    nameof(roster),
+                    roster.Count,
+                    $"a game is {MinFrogsPerGame} to {MaxFrogsPerGame} frogs; {roster.Count} is neither.");
             }
 
-            if (turnOrder.Distinct().Count() != turnOrder.Count)
+            if (roster.Any(entry => entry == null))
+            {
+                throw new ArgumentNullException(nameof(roster), "a roster holds no null entries.");
+            }
+
+            if (roster.Select(entry => entry.Colour).Distinct().Count() != roster.Count)
             {
                 throw new ArgumentException(
                     "two frogs in the same game are never the same colour.",
-                    nameof(turnOrder));
+                    nameof(roster));
             }
 
-            _turnOrder = turnOrder.ToArray();
+            _roster = roster.ToArray();
+            _turnOrder = _roster.Select(entry => entry.Colour).ToArray();
 
             var lanes = new Dictionary<FrogColour, Lane>();
             foreach (var colour in _turnOrder)
@@ -107,10 +140,52 @@ namespace Frogs.Core
             _phase = TurnPhase.WaitingToRoll;
         }
 
+        // A colour-only line-up is a roster of frogs on their default names —
+        // docs/specs/ui/game-setup.md#behaviour: "A default name is a real
+        // name, not a placeholder." So there is one roster path, not two.
+        static RosterEntry[] AsRoster(IReadOnlyList<FrogColour> turnOrder)
+        {
+            if (turnOrder == null)
+            {
+                throw new ArgumentNullException(nameof(turnOrder));
+            }
+
+            return turnOrder.Select(colour => new RosterEntry(colour)).ToArray();
+        }
+
         /// <summary>The roster, first frog to last — the order turns are taken in.</summary>
         public IReadOnlyList<FrogColour> TurnOrder
         {
             get { return _turnOrder; }
+        }
+
+        /// <summary>
+        /// The roster with its names, first frog to last. What
+        /// <c>Play again</c> starts the next game from, so that names last as
+        /// long as the frogs do — docs/specs/ui/game-over.md.
+        /// </summary>
+        public IReadOnlyList<RosterEntry> Roster
+        {
+            get { return _roster; }
+        }
+
+        /// <summary>
+        /// What this frog's player is called — its colour name until somebody
+        /// changed it on game setup. Every screen that draws a frog reads it
+        /// from here, so nothing has to look a name up anywhere else.
+        /// </summary>
+        /// <exception cref="ArgumentException"><paramref name="colour"/> is not in this game's roster.</exception>
+        public string NameFor(FrogColour colour)
+        {
+            foreach (var entry in _roster)
+            {
+                if (entry.Colour == colour)
+                {
+                    return entry.Name;
+                }
+            }
+
+            throw new ArgumentException($"{colour} is not in this game's roster.", nameof(colour));
         }
 
         /// <summary>The frog whose turn it currently is.</summary>
@@ -275,7 +350,7 @@ namespace Frogs.Core
 
                     var place = tiedWithPrevious ? rows[index - 1].Place : index + 1;
 
-                    rows.Add(new StandingsRow(colour, place, lane.Position, lane.IsHome));
+                    rows.Add(new StandingsRow(colour, NameFor(colour), place, lane.Position, lane.IsHome));
                 }
 
                 return rows;

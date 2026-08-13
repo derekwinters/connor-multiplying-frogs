@@ -1,3 +1,4 @@
+using Frogs.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +28,28 @@ namespace Frogs.Unity.UI
         public const float PlayerChipPadCountSize = 24f;
         public const float PlayerChipRadius = 20f;
         public const float PlayerChipActiveRing = 6f;
+
+        /// <summary>
+        /// docs/specs/ui/shared-components.md#player-chip — the horizontal
+        /// padding the label column is derived through. Named here because
+        /// the page states it in prose ("less 20 px padding either side")
+        /// and the derivation below has to be reproducible.
+        /// </summary>
+        public const float PlayerChipLabelPaddingX = 20f;
+
+        /// <summary>
+        /// How much room the name actually has —
+        /// docs/specs/ui/shared-components.md#player-chip: "`PlayerChipWidth`
+        /// 256 less 20 px padding either side, less `PlayerSwatchDiameter`
+        /// 64, less `PlayerChipSwatchGap` 24, leaves 128 px."
+        ///
+        /// It is tighter than it looks: `Orange` renders at 132 px at
+        /// `PlayerChipLabelSize` 32 and overflows it — the game's own longest
+        /// default name, overflowing before anybody has typed anything. That
+        /// is why the chip truncates rather than refuses.
+        /// </summary>
+        public const float PlayerChipLabelColumn =
+            PlayerChipWidth - (PlayerChipLabelPaddingX * 2f) - PlayerSwatchDiameter - PlayerChipSwatchGap;
 
         const string HomeLabel = "Home!";
 
@@ -85,6 +108,7 @@ namespace Frogs.Unity.UI
         bool _initialized;
         PlayerChipState _state = PlayerChipState.Default;
         string _padCount = string.Empty;
+        string _name = string.Empty;
 
         /// <summary>The chip's own <see cref="RectTransform"/>, sized to <see cref="PlayerChipWidth"/> x <see cref="PlayerChipHeight"/>.</summary>
         public RectTransform RectTransform
@@ -151,15 +175,58 @@ namespace Frogs.Unity.UI
         }
 
         /// <summary>
-        /// Sets the frog's colour and its colour's name, in words —
+        /// Sets the frog's colour and the name its player is playing under —
         /// docs/specs/ui/shared-components.md#player-chip's first invariant:
-        /// colour and name always together, never colour alone.
+        /// colour and a word always together, never colour alone.
+        ///
+        /// The name is drawn as given, truncated with an ellipsis if it does
+        /// not fit: "the chip never refuses or alters a name it is given ...
+        /// A readout is not where a limit is enforced." <see cref="Name"/>
+        /// still reports the whole name.
         /// </summary>
-        public void SetFrog(Color color, string colourName)
+        public void SetFrog(Color color, string name)
         {
             EnsureInitialized();
             _swatch.color = color;
-            _label.text = colourName;
+            _name = name;
+            RefreshLabel();
+        }
+
+        /// <summary>
+        /// The whole name this chip was given, untruncated — what it is
+        /// drawing an abbreviation of when the column is too narrow.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                EnsureInitialized();
+                return _name;
+            }
+        }
+
+        void RefreshLabel()
+        {
+            _label.text = DisplayText.TruncateToWidth(_name, PlayerChipLabelColumn, MeasureLabel);
+        }
+
+        // How wide a string renders in this label's own font. The chip cannot
+        // reason about this from a character count — `Mohammed` is eight
+        // characters and wider than `Alexander` at nine — so Core asks the
+        // renderer, and this is the renderer answering.
+        float MeasureLabel(string text)
+        {
+            if (string.IsNullOrEmpty(text) || _label.font == null)
+            {
+                return 0f;
+            }
+
+            var settings = _label.GetGenerationSettings(Vector2.zero);
+            settings.horizontalOverflow = HorizontalWrapMode.Overflow;
+            settings.verticalOverflow = VerticalWrapMode.Overflow;
+            settings.generateOutOfBounds = true;
+
+            return _label.cachedTextGeneratorForLayout.GetPreferredWidth(text, settings) / _label.pixelsPerUnit;
         }
 
         /// <summary>

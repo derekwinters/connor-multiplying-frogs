@@ -123,7 +123,12 @@ namespace Frogs.Unity.Views
         // "Whose turn it is is stated in words in the header, not only shown
         // by a highlight." The wording is the frog's colour name, because
         // frogs have no other name.
-        const string TurnBannerFormat = "{0} frog's turn";
+        // docs/specs/ui/game-setup.md#behaviour and
+        // docs/specs/ui/shared-components.md#player-chip: nothing appends
+        // anything to a name. This format used to staple `frog` onto a
+        // colour, which read as `Connor frog's turn` the moment a name was
+        // typed.
+        const string TurnBannerFormat = "{0}'s turn";
         const string RollLabel = "Roll";
 
         // No imported font — matches Button.cs's, PlayerChip.cs's and
@@ -281,7 +286,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The turn banner — `Green frog's turn`, in words.</summary>
+        /// <summary>The turn banner — `Green's turn`, in words.</summary>
         public Text TurnBannerText
         {
             get
@@ -438,8 +443,10 @@ namespace Frogs.Unity.Views
 
             var active = _game.ActiveFrog;
 
-            _turnBannerText.text = string.Format(TurnBannerFormat, active);
-            _turnBannerChip.SetFrog(FrogColours.For(active), active.ToString());
+            var activeName = _game.NameFor(active);
+
+            _turnBannerText.text = string.Format(TurnBannerFormat, activeName);
+            _turnBannerChip.SetFrog(FrogColours.For(active), activeName);
             _turnBannerChip.SetState(PlayerChipState.Active);
 
             foreach (var lane in _lanes)
@@ -823,7 +830,7 @@ namespace Frogs.Unity.Views
                     groupTop - ((index + 0.5f) * GameBoardLaneView.LaneHeight));
 
                 var lane = laneGO.AddComponent<GameBoardLaneView>();
-                lane.Initialize(colour);
+                lane.Initialize(colour, _game.NameFor(colour));
 
                 _lanes.Add(lane);
                 _lanesByColour[colour] = lane;

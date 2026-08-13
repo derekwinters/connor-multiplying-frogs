@@ -550,7 +550,7 @@ namespace Frogs.Unity.Views
             }
 
             var frog = _turn.Frog;
-            _whoseChip.SetFrog(FrogColours.For(frog), frog.ToString());
+            _whoseChip.SetFrog(FrogColours.For(frog), _turn.FrogName);
             _whoseChip.SetState(PlayerChipState.Active);
 
             var card = _turn.Card;

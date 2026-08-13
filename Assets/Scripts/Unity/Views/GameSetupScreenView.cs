@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Frogs.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -42,7 +43,7 @@ namespace Frogs.Unity.Views
         public const float SafeMargin = 48f;
         public const float SetupHeaderSize = 72f;
         public const float SeatWidth = 360f;
-        public const float SeatHeight = 440f;
+        public const float SeatHeight = 480f;
         public const float SeatGap = 48f;
         public const float SeatRadius = 32f;
         public const float SeatSwatchDiameter = 200f;
@@ -51,16 +52,41 @@ namespace Frogs.Unity.Views
         public const float HintGap = 56f;
         public const float SetupHintSize = 36f;
         public const float SeatOrderBadge = 72f;
-
-        // docs/specs/ui/game-setup.md#named-constants — added by this issue's
-        // PR, distilling values already stated in the Invariants section
-        // (SeatContentGap, SeatBadgeInset) and already drawn in the
-        // committed mockup: docs/specs/ui/mockups/game-setup.html draws
-        // every seat column with `gap:32px` between the swatch and the
-        // content below it, and the turn-order badge at a fixed
-        // `left:24px; top:24px` inset from the seat's own corner.
-        public const float SeatContentGap = 32f;
+        public const float SeatContentGap = 16f;
         public const float SeatBadgeInset = 24f;
+
+        // docs/specs/ui/game-setup.md#named-constants — the rows #310's
+        // wireframe added when the seat gained a name row and a remove
+        // target of its own.
+        public const float SeatTopBand = 136f;
+        public const float SeatCornerTarget = 96f;
+        public const float SeatCornerInset = 16f;
+        public const float SeatNameRowWidth = 312f;
+        public const float SeatNameRowHeight = 96f;
+        public const float SeatNameRowRadius = 20f;
+        public const float SeatNameRowPaddingX = 16f;
+        public const float SeatRowTop = 300f;
+        public const float SeatRowEditingTop = 150f;
+
+        // docs/specs/ui/game-setup.md#the-keyboard — a keyboard this game
+        // draws, never Android's.
+        public const float NameKeyboardHeight = 480f;
+        public const float NameKeyboardWidth = 1664f;
+        public const float NameKeyWidth = 152f;
+        public const float NameKeyHeight = 108f;
+        public const float NameKeyGap = 16f;
+        public const float NameKeyRadius = 20f;
+        public const float NameKeyLabelSize = 52f;
+        public const float NameSpaceKeyWidth = 1160f;
+        public const float NameDoneKeyWidth = 488f;
+
+        /// <summary>
+        /// docs/specs/ui/game-setup.md#named-constants — the longest name a
+        /// player can type. Read off <see cref="Frogs.Core.PlayerName"/>'s
+        /// own constant rather than repeating the number, because the cap is
+        /// Core's rule and this screen only renders the refusal.
+        /// </summary>
+        public const int PlayerNameMaxLength = Frogs.Core.PlayerName.PlayerNameMaxLength;
 
         // docs/specs/ui/game-setup.md#named-constants — added by this
         // issue's PR, distilling the Invariants section's prose: "a game
@@ -83,6 +109,25 @@ namespace Frogs.Unity.Views
         const string StartLabel = "Start";
         const string HintDisabledText = "Pick two to four frogs";
         const string HintGoesFirstSuffix = " goes first";
+
+        // While a name is being typed the header carries the prompt, because
+        // the hint line's resting position is underneath the keyboard —
+        // docs/specs/ui/mockups/game-setup-name-edit-inline.html draws
+        // "Name the green frog". The word `frog` here is attached to a
+        // colour, not to a name; nothing appends anything to a name.
+        const string NamingHeaderFormat = "Name the {0} frog";
+
+        const string RemoveKeyLabel = "×";
+        const string BackspaceKeyLabel = "⌫";
+        const string SpaceKeyLabel = "space";
+        const string DoneKeyLabel = "Done";
+        const char SpaceCharacter = ' ';
+
+        // docs/specs/ui/game-setup.md#the-keyboard, rows 1-3. QWERTY, which
+        // is what the mockups draw; whether it should be alphabetical instead
+        // is a taste call left open for Connor and changes only which glyph
+        // sits on which key.
+        static readonly string[] LetterRows = { "QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM" };
 
         // No imported font — matches Button.cs's and TitleScreenView.cs's
         // own choice, for the same reason (no external assets).
@@ -123,8 +168,31 @@ namespace Frogs.Unity.Views
         static readonly Color EmptySwatchColor = new Color32(0xDD, 0xE4, 0xE1, 0xFF); // mockup's empty-seat swatch fill
         static readonly Color EmptyLabelColor = new Color32(0x8C, 0x97, 0x93, 0xFF); // mockup's "Tap to play" colour
         static readonly Color NoFillColor = new Color(1f, 1f, 1f, 0f); // "background:transparent" — fully transparent
+        static readonly Color AccentColor = new Color32(0x2E, 0x7D, 0x4F, 0xFF); // mockups' --accent
+        static readonly Color WarnColor = new Color32(0xB0, 0x3A, 0x2E, 0xFF); // mockups' --warn
+        static readonly Color RemoveFillColor = new Color32(0xFB, 0xF1, 0xF0, 0xFF); // mockups' .remove background
+        static readonly Color NameRowFillColor = new Color32(0xF4, 0xF7, 0xF5, 0xFF); // mockups' .namerow background
+        static readonly Color SpaceKeyLabelColor = new Color32(0x7A, 0x87, 0x83, 0xFF); // mockups' .k.space colour
+        static readonly Color DisabledKeyColor = new Color32(0xB9, 0xC0, 0xBD, 0xFF); // mockups' --faint, as a disabled key reads
 
         const float FullyOpaqueByte = 255f;
+
+        // Stroke widths the mockups draw but game-setup.md's constants table
+        // does not name — the same line SeatBadgeLabelSize and
+        // SeatEmptyBorderWidth above already draw: a rendering detail the
+        // spec leaves to presentation (ADR-0001), kept as a named private
+        // constant rather than a bare literal.
+        const float SeatNameRowBorderWidth = 3f;
+        const float SeatNameFieldBorderWidth = 5f;
+        const float SeatRemoveBorderWidth = 4f;
+        const float CaretWidth = 5f;
+        const float CaretHeight = 56f;
+        const float CaretGap = 4f;
+        const float NameKeyBorderWidth = 3f;
+        const float SeatRemoveLabelSize = 48f;
+        const float NameKeyGlyphLabelSize = 44f;
+        const float NameSpaceKeyLabelSize = 30f;
+        const float NameDoneKeyLabelSize = 44f;
 
         // No imported texture, sprite, or font — docs/specs/ui/shared-components.md
         // "no external assets". Same procedural rounded-rect technique as
@@ -135,6 +203,48 @@ namespace Frogs.Unity.Views
         static Sprite s_panelSprite;
         static Sprite s_swatchSprite;
         static Sprite s_badgeSprite;
+        static Sprite s_nameRowSprite;
+        static Sprite s_removeSprite;
+        static Sprite s_keySprite;
+
+        static Sprite NameRowSprite
+        {
+            get
+            {
+                if (s_nameRowSprite == null)
+                {
+                    s_nameRowSprite = CreateRoundedRectSprite(Mathf.RoundToInt(SeatNameRowRadius));
+                }
+
+                return s_nameRowSprite;
+            }
+        }
+
+        static Sprite RemoveSprite
+        {
+            get
+            {
+                if (s_removeSprite == null)
+                {
+                    s_removeSprite = CreateRoundedRectSprite(Mathf.RoundToInt(SeatCornerTarget / 2f));
+                }
+
+                return s_removeSprite;
+            }
+        }
+
+        static Sprite KeySprite
+        {
+            get
+            {
+                if (s_keySprite == null)
+                {
+                    s_keySprite = CreateRoundedRectSprite(Mathf.RoundToInt(NameKeyRadius));
+                }
+
+                return s_keySprite;
+            }
+        }
 
         static Sprite PanelSprite
         {
@@ -232,7 +342,16 @@ namespace Frogs.Unity.Views
         Button _backButton;
         Button _startButton;
 
-        readonly List<FrogColour> _chosenOrder = new List<FrogColour>();
+        RectTransform _keyboardRect;
+        GameObject _keyboardRoot;
+        readonly List<NameKeyboardKey> _nameKeys = new List<NameKeyboardKey>();
+
+        // Tap order, first tapped to last — the badge order, and the roster
+        // Start hands to Core. A frog that is removed loses its entry
+        // entirely, so re-seating it starts from its colour name again.
+        readonly List<RosterEntry> _chosen = new List<RosterEntry>();
+
+        PlayerNameEditor _editor;
 
         bool _initialized;
         ScreenRouter _router;
@@ -349,15 +468,81 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// Tap order, first tapped to last — the badge order <see cref="Start"/>
-        /// hands to Core. Empty on a clean slate.
+        /// Tap order, first tapped to last — the badge order `Start` hands to
+        /// Core. Empty on a clean slate.
         /// </summary>
         public IReadOnlyList<FrogColour> ChosenOrder
         {
             get
             {
                 EnsureInitialized();
-                return _chosenOrder;
+                return _chosen.Select(entry => entry.Colour).ToArray();
+            }
+        }
+
+        /// <summary>
+        /// The roster as it stands — every chosen frog with the name it will
+        /// take into the game, in badge order.
+        /// </summary>
+        public IReadOnlyList<RosterEntry> ChosenRoster
+        {
+            get
+            {
+                EnsureInitialized();
+                return _chosen.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Which seat's name is being typed, or null when the keyboard is
+        /// down. Only one seat is edited at a time.
+        /// </summary>
+        public FrogColour? EditingSeat
+        {
+            get
+            {
+                EnsureInitialized();
+                return _editor == null ? (FrogColour?)null : _editor.Colour;
+            }
+        }
+
+        /// <summary>What has been typed so far in the open naming session — empty when the keyboard is down.</summary>
+        public string TypedName
+        {
+            get
+            {
+                EnsureInitialized();
+                return _editor == null ? string.Empty : _editor.Text;
+            }
+        }
+
+        /// <summary>The `keyboard` region's root — active only while a name is being typed.</summary>
+        public GameObject KeyboardRoot
+        {
+            get
+            {
+                EnsureInitialized();
+                return _keyboardRoot;
+            }
+        }
+
+        /// <summary>The `keyboard` region's <see cref="RectTransform"/>, <see cref="NameKeyboardWidth"/> x <see cref="NameKeyboardHeight"/>.</summary>
+        public RectTransform KeyboardRect
+        {
+            get
+            {
+                EnsureInitialized();
+                return _keyboardRect;
+            }
+        }
+
+        /// <summary>Every key on the name keyboard, in layout order.</summary>
+        public IReadOnlyList<NameKeyboardKey> NameKeys
+        {
+            get
+            {
+                EnsureInitialized();
+                return _nameKeys;
             }
         }
 
@@ -412,7 +597,117 @@ namespace Frogs.Unity.Views
         {
             EnsureInitialized();
 
-            _chosenOrder.Clear();
+            _chosen.Clear();
+            _editor = null;
+            RefreshAll();
+        }
+
+        /// <summary>The key that types <paramref name="character"/>, or null if the keyboard has none.</summary>
+        public NameKeyboardKey NameKey(char character)
+        {
+            EnsureInitialized();
+
+            var wanted = char.ToUpperInvariant(character);
+
+            foreach (var key in _nameKeys)
+            {
+                if ((key.Kind == NameKeyKind.Letter || key.Kind == NameKeyKind.Space)
+                    && char.ToUpperInvariant(key.Character) == wanted)
+                {
+                    return key;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>The space bar.</summary>
+        public NameKeyboardKey SpaceKey
+        {
+            get { return KeyOfKind(NameKeyKind.Space); }
+        }
+
+        /// <summary>The backspace key.</summary>
+        public NameKeyboardKey BackspaceKey
+        {
+            get { return KeyOfKind(NameKeyKind.Backspace); }
+        }
+
+        /// <summary>`Done` — the only way out of the keyboard.</summary>
+        public NameKeyboardKey DoneKey
+        {
+            get { return KeyOfKind(NameKeyKind.Done); }
+        }
+
+        NameKeyboardKey KeyOfKind(NameKeyKind kind)
+        {
+            EnsureInitialized();
+
+            foreach (var key in _nameKeys)
+            {
+                if (key.Kind == kind)
+                {
+                    return key;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// What this seat's player is called, or the empty string while the
+        /// seat is empty — "a seat that is not playing has no name and cannot
+        /// be given one."
+        /// </summary>
+        public string NameFor(FrogColour colour)
+        {
+            EnsureInitialized();
+
+            var entry = EntryFor(colour);
+            return entry == null ? string.Empty : entry.Name;
+        }
+
+        /// <summary>
+        /// Empties the name being typed, without closing the keyboard — what
+        /// holding backspace down arrives at. A no-op when nothing is being
+        /// typed.
+        /// </summary>
+        public void ClearName()
+        {
+            EnsureInitialized();
+
+            if (_editor == null)
+            {
+                return;
+            }
+
+            _editor.Clear();
+            RefreshAll();
+        }
+
+        /// <summary>
+        /// `Done`: closes the keyboard, puts the seat row back at
+        /// <see cref="SeatRowTop"/>, and brings the hint and the controls
+        /// back. A blank name becomes the frog's colour name again.
+        /// </summary>
+        public void DoneNaming()
+        {
+            EnsureInitialized();
+
+            if (_editor == null)
+            {
+                return;
+            }
+
+            var committed = _editor.Commit();
+            var index = IndexOf(committed.Colour);
+
+            if (index >= 0)
+            {
+                _chosen[index] = committed;
+            }
+
+            _editor = null;
             RefreshAll();
         }
 
@@ -443,19 +738,62 @@ namespace Frogs.Unity.Views
         /// <summary>The turn-order badge's digit.</summary>
         public Text SeatBadgeText(FrogColour colour) => SeatFor(colour).BadgeText;
 
+        /// <summary>
+        /// The seat's name row — the edit target. Tapping it opens the
+        /// keyboard on this seat. Present only on a chosen seat.
+        /// </summary>
+        public RectTransform SeatNameRowRect(FrogColour colour) => SeatFor(colour).NameRowRect;
+
+        /// <summary>The name row's root — active only while the seat is chosen.</summary>
+        public GameObject SeatNameRowRoot(FrogColour colour) => SeatFor(colour).NameRowRoot;
+
+        /// <summary>The name row's tap target — the edit target, and nothing else.</summary>
+        public SeatTapTarget SeatNameRowTapTarget(FrogColour colour) => SeatFor(colour).NameRowTapTarget;
+
+        /// <summary>The remove target's root — active only while the seat is chosen and not being edited.</summary>
+        public GameObject SeatRemoveRoot(FrogColour colour) => SeatFor(colour).RemoveRoot;
+
+        /// <summary>The remove target's <see cref="RectTransform"/> — <see cref="SeatCornerTarget"/> at <see cref="SeatCornerInset"/> from the top-right corner.</summary>
+        public RectTransform SeatRemoveRect(FrogColour colour) => SeatFor(colour).RemoveRect;
+
+        /// <summary>The remove target's tap target — the only way a player leaves the game.</summary>
+        public SeatTapTarget SeatRemoveTapTarget(FrogColour colour) => SeatFor(colour).RemoveTapTarget;
+
+        /// <summary>The caret drawn in the name field while this seat is being edited.</summary>
+        public GameObject SeatCaret(FrogColour colour) => SeatFor(colour).Caret;
+
         /// <summary>Whether this seat currently holds a frog.</summary>
         public bool IsSeatChosen(FrogColour colour)
         {
             EnsureInitialized();
-            return _chosenOrder.Contains(colour);
+            return IndexOf(colour) >= 0;
         }
 
         /// <summary>This seat's turn-order badge (1-based), or null while the seat is empty.</summary>
         public int? SeatBadgeNumber(FrogColour colour)
         {
             EnsureInitialized();
-            var index = _chosenOrder.IndexOf(colour);
+            var index = IndexOf(colour);
             return index >= 0 ? index + 1 : (int?)null;
+        }
+
+        int IndexOf(FrogColour colour)
+        {
+            for (var index = 0; index < _chosen.Count; index++)
+            {
+                if (_chosen[index].Colour == colour)
+                {
+                    return index;
+                }
+            }
+
+            return -1;
+        }
+
+        RosterEntry EntryFor(FrogColour colour)
+        {
+            var index = IndexOf(colour);
+            return index >= 0 ? _chosen[index] : null;
         }
 
         Seat SeatFor(FrogColour colour)
@@ -506,6 +844,164 @@ namespace Frogs.Unity.Views
             BuildSeats();
             BuildHint();
             BuildControls();
+            BuildKeyboard();
+        }
+
+        // keyboard — pinned to the bottom safe area, centred,
+        // NameKeyboardHeight tall, laid out over hint and controls rather
+        // than beside them. docs/specs/ui/game-setup.md#the-keyboard.
+        void BuildKeyboard()
+        {
+            var keyboardGO = new GameObject("Keyboard", typeof(RectTransform));
+            _keyboardRoot = keyboardGO;
+            _keyboardRect = (RectTransform)keyboardGO.transform;
+            _keyboardRect.SetParent(_contentRect, worldPositionStays: false);
+            _keyboardRect.anchorMin = new Vector2(0.5f, 0f);
+            _keyboardRect.anchorMax = new Vector2(0.5f, 0f);
+            _keyboardRect.pivot = new Vector2(0.5f, 0f);
+            _keyboardRect.sizeDelta = new Vector2(NameKeyboardWidth, NameKeyboardHeight);
+            _keyboardRect.anchoredPosition = new Vector2(0f, SafeMargin);
+
+            var rowPitch = NameKeyHeight + NameKeyGap;
+
+            for (var rowIndex = 0; rowIndex < LetterRows.Length; rowIndex++)
+            {
+                var letters = LetterRows[rowIndex];
+                var isLastLetterRow = rowIndex == LetterRows.Length - 1;
+
+                // Row 3 carries backspace after its seven letters, and
+                // nothing before them — docs/specs/ui/game-setup.md#the-keyboard.
+                // There is no shift key: case is derived from position as the
+                // name is built (#319), so there is nothing for one to do.
+                var keyCount = isLastLetterRow ? letters.Length + 1 : letters.Length;
+                var rowWidth = (keyCount * NameKeyWidth) + ((keyCount - 1) * NameKeyGap);
+                var x = -(rowWidth / 2f) + (NameKeyWidth / 2f);
+                var y = (NameKeyboardHeight / 2f) - (NameKeyHeight / 2f) - (rowIndex * rowPitch);
+
+                foreach (var letter in letters)
+                {
+                    BuildKey(NameKeyKind.Letter, letter, letter.ToString(), NameKeyLabelSize, NameKeyWidth, new Vector2(x, y));
+                    x += NameKeyWidth + NameKeyGap;
+                }
+
+                if (isLastLetterRow)
+                {
+                    BuildKey(NameKeyKind.Backspace, default(char), BackspaceKeyLabel, NameKeyGlyphLabelSize, NameKeyWidth, new Vector2(x, y));
+                }
+            }
+
+            // Row 4: the space bar and `Done`, filling the block's width.
+            var bottomY = (NameKeyboardHeight / 2f) - (NameKeyHeight / 2f) - (LetterRows.Length * rowPitch);
+            var spaceX = -(NameKeyboardWidth / 2f) + (NameSpaceKeyWidth / 2f);
+            var doneX = (NameKeyboardWidth / 2f) - (NameDoneKeyWidth / 2f);
+
+            BuildKey(NameKeyKind.Space, SpaceCharacter, SpaceKeyLabel, NameSpaceKeyLabelSize, NameSpaceKeyWidth, new Vector2(spaceX, bottomY));
+            BuildKey(NameKeyKind.Done, default(char), DoneKeyLabel, NameDoneKeyLabelSize, NameDoneKeyWidth, new Vector2(doneX, bottomY));
+
+            _keyboardRoot.SetActive(false);
+        }
+
+        void BuildKey(NameKeyKind kind, char character, string label, float labelSize, float width, Vector2 position)
+        {
+            var keyGO = new GameObject("Key" + label, typeof(RectTransform));
+            var keyRect = (RectTransform)keyGO.transform;
+            keyRect.SetParent(_keyboardRect, worldPositionStays: false);
+            keyRect.anchorMin = new Vector2(0.5f, 0.5f);
+            keyRect.anchorMax = new Vector2(0.5f, 0.5f);
+            keyRect.pivot = new Vector2(0.5f, 0.5f);
+            keyRect.sizeDelta = new Vector2(width, NameKeyHeight);
+            keyRect.anchoredPosition = position;
+
+            // The key's hit area: the outline, covering the whole key, with
+            // the fill and the label refusing the raycast underneath it.
+            // Without it there is nothing raycastable under the key, the
+            // GraphicRaycaster never finds it, and the keyboard types
+            // nothing (#288).
+            var borderGO = new GameObject("Border", typeof(RectTransform), typeof(Image));
+            var border = borderGO.GetComponent<Image>();
+            border.sprite = KeySprite;
+            border.type = Image.Type.Sliced;
+            border.raycastTarget = true;
+            var borderRect = border.rectTransform;
+            borderRect.SetParent(keyRect, worldPositionStays: false);
+            StretchToFill(borderRect);
+
+            var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            var fill = fillGO.GetComponent<Image>();
+            fill.sprite = KeySprite;
+            fill.type = Image.Type.Sliced;
+            fill.raycastTarget = false;
+            var fillRect = fill.rectTransform;
+            fillRect.SetParent(borderRect, worldPositionStays: false);
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = new Vector2(NameKeyBorderWidth, NameKeyBorderWidth);
+            fillRect.offsetMax = new Vector2(-NameKeyBorderWidth, -NameKeyBorderWidth);
+
+            var textGO = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            var text = textGO.GetComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
+            text.fontSize = (int)labelSize;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.text = label;
+            text.fontStyle = kind == NameKeyKind.Space ? FontStyle.Normal : FontStyle.Bold;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.raycastTarget = false;
+            text.rectTransform.SetParent(borderRect, worldPositionStays: false);
+            StretchToFill(text.rectTransform);
+
+            var key = keyGO.AddComponent<NameKeyboardKey>();
+            key.Describe(kind, character, border, fill, text);
+            ApplyKeyColours(key);
+            key.Tapped += HandleKeyTapped;
+
+            _nameKeys.Add(key);
+        }
+
+        static void ApplyKeyColours(NameKeyboardKey key)
+        {
+            var isDone = key.Kind == NameKeyKind.Done;
+
+            key.Border.color = key.IsDisabled
+                ? DisabledKeyColor
+                : (isDone ? AccentColor : LineColor);
+            key.Fill.color = isDone && !key.IsDisabled ? AccentColor : PaperColor;
+            key.Label.color = key.IsDisabled
+                ? DisabledKeyColor
+                : (isDone ? PaperColor : (key.Kind == NameKeyKind.Space ? SpaceKeyLabelColor : InkColor));
+        }
+
+        void HandleKeyTapped(NameKeyboardKey key)
+        {
+            if (_editor == null)
+            {
+                return;
+            }
+
+            switch (key.Kind)
+            {
+                case NameKeyKind.Letter:
+                case NameKeyKind.Space:
+                    // A refusal at the cap is silently ignored: the key does
+                    // nothing, the name is unchanged, and nothing explains
+                    // itself.
+                    _editor.Append(key.Character);
+                    break;
+
+                case NameKeyKind.Backspace:
+                    _editor.Backspace();
+                    break;
+
+                case NameKeyKind.Done:
+                    DoneNaming();
+                    return;
+
+                default:
+                    return;
+            }
+
+            RefreshAll();
         }
 
         void BuildBackground()
@@ -631,6 +1127,31 @@ namespace Frogs.Unity.Views
             swatchRect.pivot = new Vector2(0.5f, 0.5f);
             swatchRect.sizeDelta = new Vector2(SeatSwatchDiameter, SeatSwatchDiameter);
 
+            // The name band. On a chosen seat it is drawn as a field — a
+            // bordered box — because it is the one part of a seat a player
+            // can change and it has to look like it. On an empty seat only
+            // the text inside it shows, reading `Tap to play`.
+            var nameRowGO = new GameObject("NameRow", typeof(RectTransform), typeof(Image));
+            var nameRowBorder = nameRowGO.GetComponent<Image>();
+            nameRowBorder.sprite = NameRowSprite;
+            nameRowBorder.type = Image.Type.Sliced;
+            nameRowBorder.raycastTarget = true;
+            var nameRowRect = nameRowBorder.rectTransform;
+            nameRowRect.SetParent(seatRect, worldPositionStays: false);
+            nameRowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            nameRowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            nameRowRect.pivot = new Vector2(0.5f, 0.5f);
+            nameRowRect.sizeDelta = new Vector2(SeatNameRowWidth, SeatNameRowHeight);
+
+            var nameRowFillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            var nameRowFill = nameRowFillGO.GetComponent<Image>();
+            nameRowFill.sprite = NameRowSprite;
+            nameRowFill.type = Image.Type.Sliced;
+            nameRowFill.raycastTarget = false;
+            var nameRowFillRect = nameRowFill.rectTransform;
+            nameRowFillRect.SetParent(nameRowRect, worldPositionStays: false);
+            StretchToFill(nameRowFillRect);
+
             var labelGO = new GameObject("Label", typeof(RectTransform), typeof(Text));
             var label = labelGO.GetComponent<Text>();
             label.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
@@ -639,12 +1160,78 @@ namespace Frogs.Unity.Views
             label.horizontalOverflow = HorizontalWrapMode.Overflow;
             label.verticalOverflow = VerticalWrapMode.Overflow;
             label.raycastTarget = false;
+            // The label and the caret hang off the seat rather than off the
+            // name row, because an empty seat hides the row but still shows a
+            // word in the same place — `Tap to play`.
             var labelRect = label.rectTransform;
             labelRect.SetParent(seatRect, worldPositionStays: false);
             labelRect.anchorMin = new Vector2(0.5f, 0.5f);
             labelRect.anchorMax = new Vector2(0.5f, 0.5f);
             labelRect.pivot = new Vector2(0.5f, 0.5f);
-            labelRect.sizeDelta = Vector2.zero;
+            labelRect.sizeDelta = new Vector2(SeatNameRowWidth - (SeatNameRowPaddingX * 2f), SeatNameRowHeight);
+
+            // The caret, drawn only on the seat being edited.
+            var caretGO = new GameObject("Caret", typeof(RectTransform), typeof(Image));
+            var caret = caretGO.GetComponent<Image>();
+            caret.color = InkColor;
+            caret.raycastTarget = false;
+            var caretRect = caret.rectTransform;
+            caretRect.SetParent(seatRect, worldPositionStays: false);
+            caretRect.anchorMin = new Vector2(0.5f, 0.5f);
+            caretRect.anchorMax = new Vector2(0.5f, 0.5f);
+            caretRect.pivot = new Vector2(0.5f, 0.5f);
+            caretRect.sizeDelta = new Vector2(CaretWidth, CaretHeight);
+            caretGO.SetActive(false);
+
+            var nameRowTapTarget = nameRowGO.AddComponent<SeatTapTarget>();
+            nameRowTapTarget.Clicked += () => HandleNameRowTapped(colour);
+
+            // The remove target — SeatCornerTarget at SeatCornerInset from
+            // the seat's top-right corner, and the only way a player leaves
+            // the game.
+            var removeGO = new GameObject("Remove", typeof(RectTransform), typeof(Image));
+            var removeBorder = removeGO.GetComponent<Image>();
+            removeBorder.sprite = RemoveSprite;
+            removeBorder.type = Image.Type.Sliced;
+            removeBorder.color = WarnColor;
+            removeBorder.raycastTarget = true;
+            var removeRect = removeBorder.rectTransform;
+            removeRect.SetParent(seatRect, worldPositionStays: false);
+            removeRect.anchorMin = new Vector2(1f, 1f);
+            removeRect.anchorMax = new Vector2(1f, 1f);
+            removeRect.pivot = new Vector2(1f, 1f);
+            removeRect.sizeDelta = new Vector2(SeatCornerTarget, SeatCornerTarget);
+            removeRect.anchoredPosition = new Vector2(-SeatCornerInset, -SeatCornerInset);
+
+            var removeFillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            var removeFill = removeFillGO.GetComponent<Image>();
+            removeFill.sprite = RemoveSprite;
+            removeFill.type = Image.Type.Sliced;
+            removeFill.color = RemoveFillColor;
+            removeFill.raycastTarget = false;
+            var removeFillRect = removeFill.rectTransform;
+            removeFillRect.SetParent(removeRect, worldPositionStays: false);
+            removeFillRect.anchorMin = Vector2.zero;
+            removeFillRect.anchorMax = Vector2.one;
+            removeFillRect.offsetMin = new Vector2(SeatRemoveBorderWidth, SeatRemoveBorderWidth);
+            removeFillRect.offsetMax = new Vector2(-SeatRemoveBorderWidth, -SeatRemoveBorderWidth);
+
+            var removeLabelGO = new GameObject("Glyph", typeof(RectTransform), typeof(Text));
+            var removeLabel = removeLabelGO.GetComponent<Text>();
+            removeLabel.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
+            removeLabel.fontSize = (int)SeatRemoveLabelSize;
+            removeLabel.alignment = TextAnchor.MiddleCenter;
+            removeLabel.color = WarnColor;
+            removeLabel.fontStyle = FontStyle.Bold;
+            removeLabel.text = RemoveKeyLabel;
+            removeLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+            removeLabel.verticalOverflow = VerticalWrapMode.Overflow;
+            removeLabel.raycastTarget = false;
+            removeLabel.rectTransform.SetParent(removeRect, worldPositionStays: false);
+            StretchToFill(removeLabel.rectTransform);
+
+            var removeTapTarget = removeGO.AddComponent<SeatTapTarget>();
+            removeTapTarget.Clicked += () => HandleRemoveTapped(colour);
 
             var badgeGO = new GameObject("Badge", typeof(RectTransform), typeof(Image));
             var badgeImage = badgeGO.GetComponent<Image>();
@@ -686,7 +1273,16 @@ namespace Frogs.Unity.Views
                 Label = label,
                 BadgeRoot = badgeGO,
                 BadgeRect = badgeRect,
-                BadgeText = badgeText
+                BadgeText = badgeText,
+                NameRowRoot = nameRowGO,
+                NameRowRect = nameRowRect,
+                NameRowBorder = nameRowBorder,
+                NameRowFill = nameRowFill,
+                NameRowTapTarget = nameRowTapTarget,
+                Caret = caretGO,
+                RemoveRoot = removeGO,
+                RemoveRect = removeRect,
+                RemoveTapTarget = removeTapTarget
             };
 
             PositionSeatContent(seat);
@@ -696,19 +1292,23 @@ namespace Frogs.Unity.Views
             return seat;
         }
 
-        // The swatch and the label below it, centred as a block within the
-        // seat, SeatContentGap apart — docs/specs/ui/mockups/game-setup.html:
-        // every seat column draws `gap:32px` between the swatch and the
-        // content below it.
-        void PositionSeatContent(Seat seat)
+        // The swatch sits SeatTopBand below the seat's top edge — that band
+        // is the space the two corner targets live in — and the name band
+        // sits SeatContentGap below the swatch. Both mockups draw exactly
+        // this: `.seat{padding-top:136px; gap:16px}`.
+        static void PositionSeatContent(Seat seat)
         {
-            var labelHeight = SeatLabelSize;
-            var stackHeight = SeatSwatchDiameter + SeatContentGap + labelHeight;
-            var swatchCenterY = (stackHeight / 2f) - (SeatSwatchDiameter / 2f);
-            var labelCenterY = swatchCenterY - (SeatSwatchDiameter / 2f) - SeatContentGap - (labelHeight / 2f);
+            var seatTop = SeatHeight / 2f;
+            var swatchCenterY = seatTop - SeatTopBand - (SeatSwatchDiameter / 2f);
+            var nameRowCenterY = swatchCenterY
+                - (SeatSwatchDiameter / 2f)
+                - SeatContentGap
+                - (SeatNameRowHeight / 2f);
 
             seat.Swatch.rectTransform.anchoredPosition = new Vector2(0f, swatchCenterY);
-            seat.Label.rectTransform.anchoredPosition = new Vector2(0f, labelCenterY);
+            seat.NameRowRect.anchoredPosition = new Vector2(0f, nameRowCenterY);
+            seat.Label.rectTransform.anchoredPosition = new Vector2(0f, nameRowCenterY);
+            seat.Caret.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, nameRowCenterY);
         }
 
         void BuildHint()
@@ -769,26 +1369,21 @@ namespace Frogs.Unity.Views
             return button;
         }
 
-        // seats centred both ways in the space between header and controls
-        // — docs/specs/ui/game-setup.md's Anchors section. Unlike
-        // title-screen.md, game-setup.md names no absolute pixel offset for
-        // this: the header and controls zones are derived from the
-        // constants that describe them (SafeMargin/SetupHeaderSize for the
-        // header, SafeMargin/ButtonHeight for controls), and the seats+hint
-        // block is centred in whatever is left.
+        // The seat row's top edge is a named number now, not a centring
+        // calculation — docs/specs/ui/game-setup.md#named-constants gives
+        // SeatRowTop 300 at rest and SeatRowEditingTop 150 while a name is
+        // being typed. It has to be named, because "the distance they move"
+        // is the whole reason the game draws its own keyboard rather than
+        // Android's: a system keyboard's height is not a number a spec can
+        // carry.
         static float ComputeSeatsCenterY()
         {
-            var topReserved = SafeMargin + SetupHeaderSize;
-            var bottomReserved = SafeMargin + Button.ButtonHeight;
-            var hintBlockHeight = HintGap + SetupHintSize;
+            return SeatsCenterYFor(SeatRowTop);
+        }
 
-            var availableMiddle = CanvasHeight - topReserved - bottomReserved;
-            var blockHeight = SeatHeight + hintBlockHeight;
-
-            var topOfMiddleZone = (CanvasHeight / 2f) - topReserved;
-            var topOfBlock = topOfMiddleZone - ((availableMiddle - blockHeight) / 2f);
-
-            return topOfBlock - (SeatHeight / 2f);
+        static float SeatsCenterYFor(float rowTop)
+        {
+            return (CanvasHeight / 2f) - rowTop - (SeatHeight / 2f);
         }
 
         // hint sits HintGap beneath seats, centred —
@@ -800,38 +1395,81 @@ namespace Frogs.Unity.Views
 
         void HandleSeatTapped(FrogColour colour)
         {
-            // Empty: adds this frog; it takes the next free turn-order
-            // number. Chosen: removes this frog; the badges after it
-            // renumber — computed fresh on every refresh below, never
-            // cached, so removal renumbers immediately rather than at
-            // Start. docs/specs/ui/game-setup.md's Elements section.
-            if (_chosenOrder.Contains(colour))
+            // **A chosen seat's body is inert, and that is the change.** It
+            // used to be the remove target. Adding an edit target inside a
+            // 360 x 480 destructive target means a child aiming at the name
+            // and missing loses the player, with no confirm to catch it.
+            // An empty seat's body still seats the frog, unchanged.
+            if (IsSeatChosen(colour))
             {
-                _chosenOrder.Remove(colour);
-            }
-            else
-            {
-                _chosenOrder.Add(colour);
+                return;
             }
 
+            _chosen.Add(new RosterEntry(colour));
+            RefreshAll();
+        }
+
+        void HandleNameRowTapped(FrogColour colour)
+        {
+            // "A seat that is not playing has no name and cannot be given
+            // one. Naming a frog that is not in the game is a state with no
+            // meaning."
+            var entry = EntryFor(colour);
+
+            if (entry == null)
+            {
+                return;
+            }
+
+            // Only one seat is being edited at a time, so opening this one
+            // commits whatever the last one had typed.
+            DoneNaming();
+
+            _editor = new PlayerNameEditor(entry);
+            RefreshAll();
+        }
+
+        void HandleRemoveTapped(FrogColour colour)
+        {
+            var index = IndexOf(colour);
+
+            if (index < 0)
+            {
+                return;
+            }
+
+            if (_editor != null && _editor.Colour == colour)
+            {
+                _editor = null;
+            }
+
+            // The badges after it renumber — computed fresh on every refresh
+            // below, never cached, so removal renumbers immediately rather
+            // than at Start.
+            _chosen.RemoveAt(index);
             RefreshAll();
         }
 
         void RefreshAll()
         {
+            var editing = EditingSeat;
+
             foreach (var colour in SeatOrder)
             {
                 var seat = _seats[colour];
-                var index = _chosenOrder.IndexOf(colour);
-                ApplySeatState(seat, index >= 0, index + 1);
+                var index = IndexOf(colour);
+                ApplySeatState(seat, index, editing.HasValue && editing.Value == colour);
             }
 
-            RefreshControls();
+            RefreshKeyboard(editing);
+            RefreshControls(editing);
         }
 
-        void ApplySeatState(Seat seat, bool isChosen, int badgeNumber)
+        void ApplySeatState(Seat seat, int index, bool isEditing)
         {
-            seat.Outline.color = isChosen ? InkColor : FaintColor;
+            var isChosen = index >= 0;
+
+            seat.Outline.color = isEditing ? AccentColor : (isChosen ? InkColor : FaintColor);
 
             var ringWidth = isChosen ? SeatChosenRing : SeatEmptyBorderWidth;
             seat.Fill.rectTransform.offsetMin = new Vector2(ringWidth, ringWidth);
@@ -840,29 +1478,82 @@ namespace Frogs.Unity.Views
 
             seat.Swatch.color = isChosen ? FrogColours.For(seat.Colour) : EmptySwatchColor;
 
-            seat.Label.text = isChosen ? seat.Colour.ToString() : EmptySeatLabel;
+            // An empty seat has no name row and no remove target, but its
+            // body still seats the frog and it still shows a word in the name
+            // band's place.
+            seat.NameRowRoot.SetActive(isChosen);
+            seat.NameRowBorder.color = isEditing ? AccentColor : FaintColor;
+            seat.NameRowFill.color = isEditing ? PaperColor : NameRowFillColor;
+
+            var borderWidth = isEditing ? SeatNameFieldBorderWidth : SeatNameRowBorderWidth;
+            seat.NameRowFill.rectTransform.offsetMin = new Vector2(borderWidth, borderWidth);
+            seat.NameRowFill.rectTransform.offsetMax = new Vector2(-borderWidth, -borderWidth);
+
+            seat.Label.text = isEditing
+                ? _editor.Text
+                : (isChosen ? _chosen[index].Name : EmptySeatLabel);
             seat.Label.color = isChosen ? InkColor : EmptyLabelColor;
             seat.Label.fontStyle = isChosen ? FontStyle.Bold : FontStyle.Normal;
+
+            seat.Caret.SetActive(isEditing);
+            if (isEditing)
+            {
+                // Just to the right of the text, the way the mockup draws it.
+                var caretRect = (RectTransform)seat.Caret.transform;
+                caretRect.anchoredPosition = new Vector2(
+                    (seat.Label.preferredWidth / 2f) + CaretGap,
+                    seat.NameRowRect.anchoredPosition.y);
+            }
+
+            // The remove target is not drawn on the seat being edited —
+            // "Done first, then remove if that is what you meant."
+            seat.RemoveRoot.SetActive(isChosen && !isEditing);
 
             seat.BadgeRoot.SetActive(isChosen);
             if (isChosen)
             {
-                seat.BadgeText.text = badgeNumber.ToString();
+                seat.BadgeText.text = (index + 1).ToString();
             }
         }
 
-        void RefreshControls()
+        void RefreshKeyboard(FrogColour? editing)
+        {
+            var isTyping = editing.HasValue;
+
+            _keyboardRoot.SetActive(isTyping);
+
+            // While a name is being typed the seat row moves up to clear the
+            // keyboard. Nothing else moves and nothing resizes.
+            _seatsRect.anchoredPosition = new Vector2(
+                0f,
+                SeatsCenterYFor(isTyping ? SeatRowEditingTop : SeatRowTop));
+
+            _headerText.text = isTyping
+                ? string.Format(NamingHeaderFormat, editing.Value.ToString().ToLowerInvariant())
+                : HeaderLabel;
+        }
+
+        void RefreshControls(FrogColour? editing)
         {
             // Start disabled below GameSetupMinFrogs, enabled from
             // GameSetupMinFrogs up to GameSetupMaxFrogs (all four seats
             // chosen) — there are exactly four seats, so the seat count is
             // the maximum; no separate ceiling check is needed.
-            var startEnabled = _chosenOrder.Count >= GameSetupMinFrogs;
+            var startEnabled = _chosen.Count >= GameSetupMinFrogs;
             _startButton.SetDisabled(!startEnabled);
 
+            // The hint names whoever goes first by their name, so
+            // `Connor goes first` rather than `Green goes first` once Green
+            // has been renamed.
             _hintText.text = startEnabled
-                ? _chosenOrder[0].ToString() + HintGoesFirstSuffix
+                ? _chosen[0].Name + HintGoesFirstSuffix
                 : HintDisabledText;
+
+            // hint and the controls are laid out under the keyboard rather
+            // than beside it, so both are hidden while it is up.
+            var isTyping = editing.HasValue;
+            _hintRect.gameObject.SetActive(!isTyping);
+            _controlsRect.gameObject.SetActive(!isTyping);
         }
 
         void HandleBackClicked()
@@ -872,17 +1563,19 @@ namespace Frogs.Unity.Views
 
         void HandleStartClicked()
         {
-            // Button never invokes Clicked while disabled, so `_chosenOrder`
+            // Button never invokes Clicked while disabled, so `_chosen`
             // is always between GameSetupMinFrogs and GameSetupMaxFrogs
             // here, already unique (a seat can only ever appear once in tap
             // order) — exactly what Frogs.Core.Game's constructor itself
             // re-validates. This screen adds no game rules of its own;
             // docs/specs/ui/game-setup.md#behaviour: "`Start` begins the
             // game with the chosen frogs in badge order."
-            var turnOrder = _chosenOrder.ToArray();
+            // Their names go with them, and are what every later screen
+            // shows — docs/specs/ui/game-setup.md#behaviour.
+            var roster = _chosen.ToArray();
             var seed = _seedFactory();
 
-            StartedGame = new Frogs.Core.Game(turnOrder, seed);
+            StartedGame = new Frogs.Core.Game(roster, seed);
 
             _router?.NavigateToScreen(CoreScreen.GameBoard);
         }
@@ -923,6 +1616,15 @@ namespace Frogs.Unity.Views
             public GameObject BadgeRoot;
             public RectTransform BadgeRect;
             public Text BadgeText;
+            public GameObject NameRowRoot;
+            public RectTransform NameRowRect;
+            public Image NameRowBorder;
+            public Image NameRowFill;
+            public SeatTapTarget NameRowTapTarget;
+            public GameObject Caret;
+            public GameObject RemoveRoot;
+            public RectTransform RemoveRect;
+            public SeatTapTarget RemoveTapTarget;
         }
 
         /// <summary>

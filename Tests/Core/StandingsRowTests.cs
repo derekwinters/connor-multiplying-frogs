@@ -27,9 +27,11 @@ namespace Frogs.Core.Tests
         }
 
         // Structural, not behavioural: game-over.md's standings row needs
-        // exactly these four facts and nothing more.
+        // exactly these five facts and nothing more. It was four until names
+        // became editable (#311) — the row now carries the word it draws,
+        // because a row that knew only the colour could not draw `Connor`.
         [Test]
-        public void StandingsRow_ExposesNoPublicMembersBeyondTheFourFacts()
+        public void StandingsRow_ExposesNoPublicMembersBeyondTheFiveFacts()
         {
             var propertyNames = typeof(StandingsRow)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -41,6 +43,7 @@ namespace Frogs.Core.Tests
             {
                 "Colour",
                 "IsHome",
+                "Name",
                 "Place",
                 "Position"
             }));

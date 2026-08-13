@@ -481,7 +481,7 @@ namespace Frogs.Unity.Views
                 ? string.Format(RightConsequenceFormat, movement)
                 : string.Format(WrongConsequenceFormat, equation, movement);
 
-            _chip.SetFrog(FrogColours.For(frog), frog.ToString());
+            _chip.SetFrog(FrogColours.For(frog), _turn.FrogName);
             _chip.SetPadCount(string.Format(
                 ChipMoveFormat,
                 resolution.PositionBefore,
