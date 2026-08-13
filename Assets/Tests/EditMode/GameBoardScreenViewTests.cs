@@ -1006,11 +1006,31 @@ namespace Frogs.Unity.EditModeTests
             return (corners[0].y + corners[2].y) / 2f;
         }
 
+        // The board under a canvas that is exactly the reference size — the
+        // shape every mockup is drawn at, and the shape the target tablet is.
+        //
+        // It is stated rather than implied because the board's three bands are
+        // measured against the canvas rather than against a reference
+        // rectangle inside it (#303): a test that wants the mockup's numbers
+        // has to say which canvas it is holding. Everything below is therefore
+        // the same picture the mockup is, asserted at the one size the mockup
+        // exists at — what happens on a screen that is not 16:10 is
+        // GameBoardBandsToTheEdgeTests'.
         static GameBoardScreenView CreateView(Game game)
         {
-            var host = new GameObject(nameof(GameBoardScreenViewTests), typeof(RectTransform));
-            var view = host.AddComponent<GameBoardScreenView>();
+            var canvas = new GameObject(nameof(GameBoardScreenViewTests), typeof(RectTransform));
+            var canvasRect = (RectTransform)canvas.transform;
+            canvasRect.anchorMin = new Vector2(0.5f, 0.5f);
+            canvasRect.anchorMax = new Vector2(0.5f, 0.5f);
+            canvasRect.pivot = new Vector2(0.5f, 0.5f);
+            canvasRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            canvasRect.anchoredPosition = Vector2.zero;
+
+            var view = new GameObject(nameof(GameBoardScreenView), typeof(RectTransform))
+                .AddComponent<GameBoardScreenView>();
+            view.transform.SetParent(canvasRect, worldPositionStays: false);
             view.Initialize(game);
+
             return view;
         }
 
@@ -1044,10 +1064,16 @@ namespace Frogs.Unity.EditModeTests
 
         static void Destroy(GameBoardScreenView view)
         {
-            if (view != null)
+            if (view == null)
             {
-                UnityEngine.Object.DestroyImmediate(view.gameObject);
+                return;
             }
+
+            // The canvas CreateView built, if the view is still under it —
+            // destroying only the view would leave one host per test behind.
+            var canvas = view.transform.parent;
+
+            UnityEngine.Object.DestroyImmediate(canvas != null ? canvas.gameObject : view.gameObject);
         }
     }
 }

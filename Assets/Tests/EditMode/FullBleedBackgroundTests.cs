@@ -27,6 +27,12 @@ namespace Frogs.Unity.EditModeTests
     ///   fix cannot pass by stretching the layout instead. Every constant on
     ///   every spec page means what it meant before.
     ///
+    /// The game board's three full-width bands are the one exception to the
+    /// second half, and issue #303 is where that was decided: a band that
+    /// reads as the top or the bottom of the screen reaches the screen's
+    /// edges, and what it *contains* is what stays in reference pixels. The
+    /// board's case below asserts both halves of that.
+    ///
     /// The canvas used here is bigger in *both* directions than the reference,
     /// which is not a shape any real device has — it is the shape that makes a
     /// background that only stretched one way fail here rather than on
@@ -49,8 +55,22 @@ namespace Frogs.Unity.EditModeTests
 
         const ulong AnySeed = 20260812UL;
 
+        /// <summary>
+        /// The board is the one screen whose full-width **bands** reach the
+        /// edges as well as its background — issue #303, and
+        /// docs/specs/ui/game-board.md's "The bands reach the edges too". The
+        /// bands are the top and the bottom of the screen rather than panels
+        /// on the pond, so they are measured against the canvas exactly as the
+        /// water behind them is.
+        ///
+        /// What that does *not* license is stretching the layout: everything
+        /// the bands contain that the spec places by geometry is still in
+        /// reference pixels. Both halves are asserted here, and the split is
+        /// pinned down in full by
+        /// <see cref="GameBoardBandsToTheEdgeTests"/>.
+        /// </summary>
         [Test]
-        public void GameBoard_PaintsItsBackgroundToEveryEdge_AndLeavesTheBoardAtReferenceSize()
+        public void GameBoard_PaintsItsBackgroundToEveryEdge_AndLeavesItsContentsAtReferenceSize()
         {
             var canvas = OversizedCanvas();
 
@@ -62,7 +82,6 @@ namespace Frogs.Unity.EditModeTests
                 view.Initialize(new Game(new[] { FrogColour.Green, FrogColour.Blue }, AnySeed));
 
                 AssertCoversTheWholeCanvas(view.BackgroundImage.rectTransform, canvas, "the board's background");
-                AssertIsTheReferenceCanvasCentred(view.ContentRect, canvas, "the board's content");
 
                 // The board is the one screen that paints something other than
                 // the shared app background: its own water — issue #291,
@@ -79,25 +98,42 @@ namespace Frogs.Unity.EditModeTests
                     "the fixture, not the assertion — if these two are ever the same value "
                     + "the test above proves nothing");
 
-                // The layout itself is untouched: the header and the controls
-                // band are full width *of the reference canvas*, not of the
-                // device. If either of these reads 2400 the fix stretched the
-                // board instead of the background, and every constant on
-                // docs/specs/ui/game-board.md has quietly stopped meaning what
-                // it says.
+                // The three bands are the screen's own top, middle and bottom,
+                // so each is as wide as the screen. A band that reads 1920 here
+                // is a band with a strip of water past each of its ends, which
+                // is the bug #303 was reported for.
                 Assert.That(
                     view.HeaderRect.rect.width,
-                    Is.EqualTo(ReferenceWidth).Within(Tolerance),
-                    "the header is still the reference canvas wide, not the device wide");
+                    Is.EqualTo(OversizedCanvasWidth).Within(Tolerance),
+                    "the header is the device wide, so it is the top of the screen rather than a "
+                    + "panel floating on the pond");
                 Assert.That(
                     view.ControlsRect.rect.width,
-                    Is.EqualTo(ReferenceWidth).Within(Tolerance),
-                    "the controls band is still the reference canvas wide, not the device wide");
+                    Is.EqualTo(OversizedCanvasWidth).Within(Tolerance),
+                    "the controls band is the device wide");
                 Assert.That(
                     view.PondRect.rect.width,
-                    Is.EqualTo(ReferenceWidth).Within(Tolerance),
-                    "the pond is still the reference canvas wide, so every lane is where "
-                    + "docs/specs/ui/game-board.md puts it");
+                    Is.EqualTo(OversizedCanvasWidth).Within(Tolerance),
+                    "the pond band paints its own water to the device's edges rather than "
+                    + "relying on the background showing through");
+
+                // And the layout inside them is untouched. If a lane reads
+                // 2400 the fix stretched the board instead of its bands, and
+                // every constant on docs/specs/ui/game-board.md has quietly
+                // stopped meaning what it says.
+                foreach (var lane in view.Lanes)
+                {
+                    Assert.That(
+                        lane.RectTransform.rect.width,
+                        Is.EqualTo(ReferenceWidth - (2f * GameBoardScreenView.SafeMargin)).Within(Tolerance),
+                        "a lane is still the reference canvas's safe area wide, not the device's");
+                }
+
+                Assert.That(
+                    view.StartLogOutline.rectTransform.rect.height,
+                    Is.EqualTo(GameBoardScreenView.SharedLogHeight).Within(Tolerance),
+                    "the logs are still the reference pond's height — the extra height a taller "
+                    + "device gives us is water, not log");
             }
             finally
             {
