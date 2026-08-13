@@ -98,13 +98,19 @@ that says it is a button that passes the device to the right person.
 
 | Situation | Sentence |
 | --- | --- |
-| Right | `Right! <Colour> hops forward one lily pad.` |
-| Wrong, above the Start log | `<Colour> hops back one lily pad.` |
-| Wrong, on the Start log | `<Colour> stays on the Start log.` |
+| Right | `Right! <Name> hops forward one lily pad.` |
+| Wrong, above the Start log | `<Name> hops back one lily pad.` |
+| Wrong, on the Start log | `<Name> stays on the Start log.` |
 
 Three, not two. The third is the floor rule, and writing it as its own sentence
 is how the layout proves it was thought about rather than left as an
 off-by-one.
+
+`<Name>` is the frog's name, with nothing appended: `Green` for a frog still on
+its default, `Connor` for one renamed on [game setup](game-setup.md). These
+sentences already read the bare colour name rather than `Green frog`, so only
+the placeholder's name changed here — see
+[#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310).
 
 ## Behaviour
 
