@@ -1151,6 +1151,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-focus-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What focus looks like
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-many-columns-and-rows" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2098,6 +2109,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-focus-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What focus looks like
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-many-columns-and-rows" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2479,6 +2501,11 @@ the screen is built to.</p>
 <td>6 rows</td>
 </tr>
 <tr>
+<td>Fill of the cell the caret is in</td>
+<td><code>GridFocusFill</code></td>
+<td><code>#8CB89E</code></td>
+</tr>
+<tr>
 <td>Keypad, down from the panel's top edge</td>
 <td><code>KeypadTop</code></td>
 <td>216 px</td>
@@ -2542,12 +2569,16 @@ and stops at is exactly the kind of number that otherwise ends up as an unnamed
 gets changed. They are the two rows on this table <code>Core</code> owns
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>),
 and the shell references them rather than keeping a copy.</p>
-<p><strong>Every value above is a number a drawing already fixed</strong>, except two:
+<p><strong>Every value above is a number a drawing already fixed</strong>, except three:
+<code>GridFocusFill</code>, which is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/304">#304</a>'s
+and is arrived at against a bar rather than read off a picture — see
+<a href="#what-focus-looks-like">what focus looks like</a>;
 <code>GridAdditionRowHeight</code>, which is Derek's answer to
 <a href="#open-questions">open question 3</a>, and <code>GridSmallDigitSize</code>, which is what a
 digit has to shrink to in order to sit inside a 56 px-tall box. No committed
 drawing shows a digit in one — no mockup fills a carry box, and the grown
-drawing's rows are empty — so it is the one number here read off a proportion
+drawing's rows are empty — so it is read off a proportion
 instead of a picture: the same share of its box's height that <code>GridDigitSize</code>
 (56 px) is of <code>GridCellSize</code> (104 px), which lands on the 28 px the drawings
 already use for their smallest glyph.</p>
@@ -2562,6 +2593,55 @@ Growing the section therefore costs <code>GridAdditionRowHeight</code> + <code>G
 64 px per row instead of the 112 px it would cost at full size, and the first
 grown row <em>shrinks</em> the grid rather than stretching it — see
 <a href="#mockup">Mockup</a> for the whole sum.</p>
+<p><strong><code>GridFocusFill</code> is the one colour on that table</strong>, and it is there because it
+is the one colour that carries a rule rather than a picture's paint. The rest of
+this screen's palette is the mockups' — ink, line, faint, paper, accent — copied
+into the shell and named nowhere. This one has to clear a bar, and a bar needs
+somewhere to be written down.</p>
+<h3 id="what-focus-looks-like">What focus looks like<a class="headerlink" href="#what-focus-looks-like" title="Link to this section">&para;</a></h3>
+<p><strong>The cell the caret is in is filled with <code>GridFocusFill</code></strong>, and keeps the
+accent outline it already had. Nothing else about it changes: not
+<code>GridCellSize</code>, not <code>GridCarryBoxSize</code>, not <code>GridCellBorderWidth</code> or
+<code>GridAnswerBorderWidth</code>. A filled box among empty boxes reads from across a
+room; a box that is bigger or thicker than its neighbours is a different layout,
+and layout is what the mockups are for.</p>
+<p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/304">#304</a>
+this page said nothing at all about focus, and the shell filled the blank with
+the quietest option available: the 3 px outline swapped from <code>#6C7873</code> grey to
+<code>#2E7D4F</code> accent green, and nothing else. That is two mid-tone colours on a
+hairline, and on the tablet Derek could not see it — knowing it was there. A
+player who cannot tell which box the next digit lands in taps a box before every
+digit, which is what he did.</p>
+<p>The fill is the accent green the outline already uses, laid over paper at 55 %,
+taken to where it clears the bar the project already sets for two colours being
+<strong>clearly separable</strong> — a luminance contrast of at least <strong>1.9 : 1</strong> <em>and</em> a CIE
+L*a*b* distance (ΔE*ab) of at least <strong>30</strong>, both measures, for the reasons
+<a href="../game-board/#keeping-the-frogs-visible"><code>game-board.md</code></a> gives.</p>
+<p>It has to clear that bar twice over, because a focused cell lands on two
+different fills depending on where the caret is: the ordinary cell fill, and the
+answer row's own tint. As <em>contrast : 1 / ΔE</em>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Paper, <code>#FFFFFF</code> — every cell but the answer row's</th>
+<th>The answer row's tint, <code>#F3F8F5</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GridFocusFill</code></td>
+<td>2.22 / 36.2</td>
+<td>2.07 / 32.5</td>
+</tr>
+</tbody>
+</table>
+<p>Both clear it, the answer row being the tighter of the two, which is the pair
+the treatment was always going to be decided by. Two more ratios worth recording
+because they are what a darker tint would cost: a digit on the focused fill is
+<strong>7.11 : 1</strong> (<code>#1E2422</code> ink, against a 4.5 : 1 text bar), and the accent outline
+against the fill inside it is <strong>2.27 : 1 / 30.4</strong>, so the box still reads as a
+box rather than as a blob.</p>
 <h3 id="how-many-columns-and-rows">How many columns and rows<a class="headerlink" href="#how-many-columns-and-rows" title="Link to this section">&para;</a></h3>
 <p>The card decides the columns. The card and the player between them decide the
 rows.</p>
@@ -2676,8 +2756,11 @@ past it.</p>
   work, and pre-printing it would pick one — which is the thing ADR-0002 says
   not to do.</li>
 <li><strong>A grown row is indistinguishable from a dealt one.</strong> Same cells, same
-    size, same border, no tint, no badge, nothing that says "you added this".
+    size, same border, no badge, nothing that says "you added this".
     The section is scratch paper and scratch paper does not annotate itself.
+    The one fill a cell in the section can carry is <code>GridFocusFill</code>, and that is
+    not a mark on the row: it is on whichever single cell the caret is in, dealt
+    or grown, and it is gone the moment the caret leaves.
     The smaller <code>GridAdditionRowHeight</code> a grown section takes applies to <em>every</em>
     row in it, the two dealt ones included — a section where the first two rows
     were taller than the four below them would be exactly the "you added this"
@@ -2697,6 +2780,15 @@ past it.</p>
 <li>Entering from <a href="../roll-and-card/">roll and card</a>. The first empty answer cell
   is the focused one; typing fills the answer row <strong>right to left</strong>, which is
   the direction the digits are worked out in.</li>
+<li><strong>Exactly one cell is focused, always, and it is the one the next digit lands
+  in.</strong> It is drawn filled with <code>GridFocusFill</code> — see
+  <a href="#what-focus-looks-like">what focus looks like</a> — and the fill follows the
+  caret everywhere it goes: through typing, backspace, <code>clear</code>, a tap on another
+  cell, and a section that grows or shrinks underneath it. It is drawn on carry
+  boxes and addition cells exactly as it is in the answer row, because the caret
+  goes there too. When the caret leaves a cell, the cell goes back to the fill
+  it had — the tint is where the next digit goes, never a record of where one
+  has been.</li>
 <li>Tapping any cell moves the caret there, so the grid can be filled in any
   order — a player who fills the addition rows first, then the answer, is not
   fighting the caret.</li>
@@ -2743,6 +2835,13 @@ past it.</p>
 <li><strong>The easy pile, as dealt:</strong> <a href="../mockups/working-out-grid-68x5.html"><code>mockups/working-out-grid-68x5.html</code></a></li>
 <li><strong>The widest card, grown to the cap:</strong> <a href="../mockups/working-out-grid-331x41-grown.html"><code>mockups/working-out-grid-331x41-grown.html</code></a></li>
 </ul>
+<p><strong>All three draw the focused cell</strong>, filled with <code>GridFocusFill</code>. They always
+drew one — an answer cell with the accent outline — and until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/304">#304</a> that
+outline was the whole of it, in the drawings as in the shell. The cell is in the
+same place in each; what changed is that you can now see which one it is. A
+picture of this screen without a visible focused cell is a picture of a state
+the player never actually sees.</p>
 <p>The first two are the agreed pictures of the screen a card deals, and they are a
 pair for the reason they always were: "the grid shrinks to fit the card" is a
 claim best checked by looking at the biggest and the smallest next to each
