@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.3.0...v0.4.0) (2026-08-13)
+
+
+### Features
+
+* **setup:** let a player set their name, defaulting to the frog's colour ([#318](https://github.com/derekwinters/connor-multiplying-frogs/issues/318)) ([a0b871e](https://github.com/derekwinters/connor-multiplying-frogs/commit/a0b871e1d7ef44714f8810c8ed00d264bc11e07b))
+
+
+### Bug Fixes
+
+* **game-board:** the top and bottom bars reach the screen's edges ([#313](https://github.com/derekwinters/connor-multiplying-frogs/issues/313)) ([1ac85d3](https://github.com/derekwinters/connor-multiplying-frogs/commit/1ac85d3f40fe8f9c4ca00a25ab4940128c1be34e))
+* **working-out-grid:** typing an answer enters it in reading order ([#317](https://github.com/derekwinters/connor-multiplying-frogs/issues/317)) ([05cf39e](https://github.com/derekwinters/connor-multiplying-frogs/commit/05cf39e9c7b07d60c7abe407a55ce87632b98cb0))
+* **working-out-grid:** you can see which box the next digit goes in ([#316](https://github.com/derekwinters/connor-multiplying-frogs/issues/316)) ([99f1700](https://github.com/derekwinters/connor-multiplying-frogs/commit/99f1700a10f737118d60bd61fe20270ac93a9c28))
+
 ## [0.3.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.2.1...v0.3.0) (2026-08-12)
 
 
