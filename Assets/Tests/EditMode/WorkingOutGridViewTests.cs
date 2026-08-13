@@ -425,6 +425,55 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
+        public void TheCaretStepsRightInEveryRowKind_NotOnlyInTheAnswerRow()
+        {
+            // "One rule everywhere": the scratch paper fills the same way the
+            // answer does, so there is one direction to learn rather than one
+            // for the answer row and another for everything above it. Each
+            // block below is tapped into once and then typed straight through.
+            var view = CreateView(Turn(Pile.Hard));
+
+            try
+            {
+                var blocks = new[]
+                {
+                    // The top carry strip, the second carry strip, and an
+                    // addition row that is not the section's bottom — so the
+                    // section does not grow underneath the assertion.
+                    RowIndexOf(view, GridRowKind.CarryStrip, 0),
+                    RowIndexOf(view, GridRowKind.CarryStrip, 1),
+                    RowIndexOf(view, GridRowKind.AdditionRow, 0),
+                };
+
+                foreach (var row in blocks)
+                {
+                    Tap(view.Cells[row][FirstDigitColumn]);
+
+                    Type(view, 4);
+                    Type(view, 5);
+                    Type(view, 6);
+
+                    Assert.That(view.Cells[row][FirstDigitColumn].Content, Is.EqualTo("4"));
+                    Assert.That(view.Cells[row][FirstDigitColumn + 1].Content, Is.EqualTo("5"));
+                    Assert.That(view.Cells[row][FirstDigitColumn + 2].Content, Is.EqualTo("6"));
+                    Assert.That(
+                        view.CaretCell,
+                        Is.EqualTo(view.Cells[row][FirstDigitColumn + 3]),
+                        "and the caret is on the next box to the right, still in this row");
+                }
+
+                Assert.That(
+                    view.AdditionRowCount,
+                    Is.EqualTo(WorkingOutGrid.GridAdditionRowsAtStart),
+                    "nothing here was typed into the section's bottom row, so nothing grew");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
         public void AShortAnswerTypedFromATappedCell_StaysInTheColumnsItWasTappedInto()
         {
             // The consequence of boxes-as-slots that Derek chose deliberately:

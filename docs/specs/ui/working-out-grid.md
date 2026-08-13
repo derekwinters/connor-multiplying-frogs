@@ -418,9 +418,10 @@ past it.
 ### The fill direction this page used to carry
 
 Until [#305](https://github.com/derekwinters/connor-multiplying-frogs/issues/305)
-the two bullets above read the other way round, and the shell was built to
-them. The old wording is quoted here so the change is visible rather than
-silently overwritten. Neither sentence is true anywhere else on this page.
+two of the bullets above — the first one, and the one about where the caret
+steps — read the other way round, and the shell was built to them. The old
+wording is quoted here so the change is visible rather than silently
+overwritten. Neither sentence is true anywhere else on this page.
 
 > The first empty answer cell is the focused one; typing fills the answer row
 > **right to left**, which is the direction the digits are worked out in.
