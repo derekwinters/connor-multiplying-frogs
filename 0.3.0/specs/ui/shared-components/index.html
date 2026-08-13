@@ -3243,6 +3243,16 @@ what the chip shows.</p>
 <td><code>PlayerChipActiveRing</code></td>
 <td>6 px</td>
 </tr>
+<tr>
+<td>Horizontal padding inside the chip</td>
+<td><code>PlayerChipLabelPaddingX</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td>Room the name actually has</td>
+<td><code>PlayerChipLabelColumn</code></td>
+<td>128 px</td>
+</tr>
 </tbody>
 </table>
 <p><code>PlayerChipLabelSize</code> was 40 px on this page; the committed mockups' shared
@@ -3253,6 +3263,12 @@ mockups are what Connor approved when each screen's wireframe was signed off,
 so they win: <code>PlayerChipLabelSize</code> is corrected to 32 px, and
 <code>PlayerChipPadCountSize</code> — a value this table previously had no name for at
 all — is added at 24 px.</p>
+<p><code>PlayerChipLabelPaddingX</code> and <code>PlayerChipLabelColumn</code> distil the next
+paragraph's own arithmetic into the names the code declares them under — the
+same move <a href="../game-setup/#named-constants">game setup</a> made for
+<code>SeatBadgeInset</code>. The padding was already stated in prose here, and the column
+is what truncation is measured against, so it cannot stay a number that only
+exists inside a sentence.</p>
 <p><strong>The label column is 128 px, and it is tighter than it looks.</strong>
 <code>PlayerChipWidth</code> 256 less 20 px padding either side, less
 <code>PlayerSwatchDiameter</code> 64, less <code>PlayerChipSwatchGap</code> 24, leaves 128 px for the
