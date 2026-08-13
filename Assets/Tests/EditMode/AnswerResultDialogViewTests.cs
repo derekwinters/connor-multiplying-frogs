@@ -446,7 +446,7 @@ namespace Frogs.Unity.EditModeTests
                 // The board is back in play through #220's own seam, not
                 // through a second one invented here.
                 Assert.That(board.RollButton.IsDisabled, Is.False);
-                Assert.That(board.TurnBannerText.text, Is.EqualTo("Blue frog's turn"));
+                Assert.That(board.TurnBannerText.text, Is.EqualTo("Blue's turn"));
             }
             finally
             {

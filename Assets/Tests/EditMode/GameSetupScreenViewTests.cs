@@ -104,8 +104,11 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        // Removal moved off the seat's body and onto its own corner target in
+        // #311 — see GameSetupNamingTests for the separation itself. What
+        // this test still owns is the renumbering.
         [Test]
-        public void TappingAChosenSeat_RemovesIt_AndRenumbersLaterBadgesDownImmediately()
+        public void RemovingAChosenSeat_RenumbersLaterBadgesDownImmediately()
         {
             var view = CreateView();
 
@@ -115,7 +118,7 @@ namespace Frogs.Unity.EditModeTests
                 Tap(view, FrogColour.Blue); // badge 2
                 Tap(view, FrogColour.Orange); // badge 3
 
-                Tap(view, FrogColour.Blue); // remove — no confirm, just the tap
+                TapRemove(view, FrogColour.Blue); // remove — no confirm, just the tap
 
                 Assert.That(view.IsSeatChosen(FrogColour.Blue), Is.False);
                 Assert.That(view.SeatBadgeNumber(FrogColour.Blue), Is.Null);
@@ -168,7 +171,7 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(view.HintText.text, Is.EqualTo("Pink goes first"));
 
-                Tap(view, FrogColour.Pink); // remove Pink; Blue now holds badge 1
+                TapRemove(view, FrogColour.Pink); // remove Pink; Blue now holds badge 1
                 Assert.That(view.HintText.text, Is.EqualTo("Pick two to four frogs"), "only one frog left — Start is disabled again");
 
                 Tap(view, FrogColour.Orange);
@@ -355,13 +358,13 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(view.SeatsRect.sizeDelta.x, Is.EqualTo(rowWidth));
                 Assert.That(view.SeatsRect.anchoredPosition.x, Is.EqualTo(0f), "the row is centred as a whole");
 
-                // The swatch and the label below it are SeatContentGap
-                // apart — docs/specs/ui/mockups/game-setup.html.
+                // The swatch and the name band below it are SeatContentGap
+                // apart — docs/specs/ui/mockups/game-setup-names-set.html.
                 var swatchRect = view.SeatSwatch(FrogColour.Green).rectTransform;
-                var labelRect = view.SeatLabel(FrogColour.Green).rectTransform;
+                var nameBand = view.SeatNameRowRect(FrogColour.Green);
                 var swatchBottom = swatchRect.anchoredPosition.y - (GameSetupScreenView.SeatSwatchDiameter / 2f);
-                var labelTop = labelRect.anchoredPosition.y + (GameSetupScreenView.SeatLabelSize / 2f);
-                Assert.That(swatchBottom - labelTop, Is.EqualTo(GameSetupScreenView.SeatContentGap).Within(0.001f));
+                var nameBandTop = nameBand.anchoredPosition.y + (GameSetupScreenView.SeatNameRowHeight / 2f);
+                Assert.That(swatchBottom - nameBandTop, Is.EqualTo(GameSetupScreenView.SeatContentGap).Within(0.001f));
 
                 // hint sits HintGap beneath seats.
                 var seatsBottom = view.SeatsRect.anchoredPosition.y - (GameSetupScreenView.SeatHeight / 2f);
@@ -424,7 +427,16 @@ namespace Frogs.Unity.EditModeTests
 
         static void Tap(GameSetupScreenView view, FrogColour colour)
         {
-            var target = view.SeatTapTargetFor(colour);
+            TapTarget(view.SeatTapTargetFor(colour));
+        }
+
+        static void TapRemove(GameSetupScreenView view, FrogColour colour)
+        {
+            TapTarget(view.SeatRemoveTapTarget(colour));
+        }
+
+        static void TapTarget(GameSetupScreenView.SeatTapTarget target)
+        {
             var eventData = EventDataAt(target.RectTransform, inside: true);
 
             target.OnPointerDown(eventData);

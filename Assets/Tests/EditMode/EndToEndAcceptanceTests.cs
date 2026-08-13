@@ -128,7 +128,7 @@ namespace Frogs.Unity.EditModeTests
 
                 view.Show(game);
 
-                Assert.That(view.HeadlineText.text, Is.EqualTo("Green frog wins!"));
+                Assert.That(view.HeadlineText.text, Is.EqualTo("Green wins!"));
                 Assert.That(view.RowCount, Is.EqualTo(game.Standings.Count));
                 Assert.That(view.RowColour(0), Is.EqualTo(FrogColour.Green), "the first finisher leads the standings");
                 Assert.That(view.RowColour(1), Is.EqualTo(FrogColour.Blue));
