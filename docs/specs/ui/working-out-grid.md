@@ -171,12 +171,16 @@ gets changed. They are the two rows on this table `Core` owns
 ([`WorkingOutGrid`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs)),
 and the shell references them rather than keeping a copy.
 
-**Every value above is a number a drawing already fixed**, except two:
+**Every value above is a number a drawing already fixed**, except three:
+`GridFocusFill`, which is
+[#304](https://github.com/derekwinters/connor-multiplying-frogs/issues/304)'s
+and is arrived at against a bar rather than read off a picture — see
+[what focus looks like](#what-focus-looks-like);
 `GridAdditionRowHeight`, which is Derek's answer to
 [open question 3](#open-questions), and `GridSmallDigitSize`, which is what a
 digit has to shrink to in order to sit inside a 56 px-tall box. No committed
 drawing shows a digit in one — no mockup fills a carry box, and the grown
-drawing's rows are empty — so it is the one number here read off a proportion
+drawing's rows are empty — so it is read off a proportion
 instead of a picture: the same share of its box's height that `GridDigitSize`
 (56 px) is of `GridCellSize` (104 px), which lands on the 28 px the drawings
 already use for their smallest glyph.
