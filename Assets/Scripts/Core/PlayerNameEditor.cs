@@ -15,6 +15,9 @@ namespace Frogs.Core
     /// </summary>
     public sealed class PlayerNameEditor
     {
+        // What separates one word from the next, for the capitalisation rule.
+        const char WordSeparator = ' ';
+
         readonly FrogColour _colour;
         readonly StringBuilder _text;
 
@@ -54,6 +57,15 @@ namespace Frogs.Core
         /// Appends one character, unless the name is already
         /// <see cref="PlayerName.PlayerNameMaxLength"/> long — in which case
         /// the keystroke is refused and nothing changes.
+        ///
+        /// The character's case is **derived from where it lands**, not taken
+        /// from the caller: a capital at the start of the name and after a
+        /// space, lowercase everywhere else. So `C O N N O R` is `Connor` and
+        /// `M A R Y` space `J A N E` is `Mary Jane`, and the field reads that
+        /// way while it is being typed rather than being corrected at the
+        /// end. docs/specs/ui/game-setup.md#behaviour, settling #319 — the
+        /// keyboard has no shift key, so this is the only thing that decides
+        /// case.
         /// </summary>
         /// <returns>
         /// Whether the character landed. False is the refusal the keyboard
@@ -67,8 +79,16 @@ namespace Frogs.Core
                 return false;
             }
 
-            _text.Append(character);
+            _text.Append(StartsAWord() ? char.ToUpperInvariant(character) : char.ToLowerInvariant(character));
             return true;
+        }
+
+        // Read off the text as it stands rather than remembered, which is
+        // what makes backspacing and retyping re-derive the case instead of
+        // carrying a stale flag.
+        bool StartsAWord()
+        {
+            return _text.Length == 0 || _text[_text.Length - 1] == WordSeparator;
         }
 
         /// <summary>Deletes the last character. A no-op on an empty name.</summary>

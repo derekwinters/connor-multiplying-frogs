@@ -226,6 +226,101 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        // #319: the keyboard has no shift key, because case is derived from
+        // position as the name is built. Row 3 is eight keys — seven letters
+        // and backspace — centred in the block.
+        [Test]
+        public void TheKeyboard_HasNoShiftKey_AndRowThreeIsEightKeysCentred()
+        {
+            var view = CreateView();
+
+            try
+            {
+                TapSeatBody(view, FrogColour.Green);
+                TapTarget(view.SeatNameRowTapTarget(FrogColour.Green));
+
+                Assert.That(view.NameKeys.Select(key => key.Label.text), Does.Not.Contain("⇧"));
+
+                var rowThree = view.NameKeys
+                    .Where(key => "ZXCVBNM".Contains(key.Character.ToString())
+                        || key.Kind == NameKeyKind.Backspace)
+                    .ToArray();
+
+                Assert.That(rowThree.Length, Is.EqualTo(8));
+
+                // 8 x 152 + 7 x 16 = 1328, centred in NameKeyboardWidth 1664,
+                // which is an offset of 168 either side.
+                var rowWidth = (8 * GameSetupScreenView.NameKeyWidth) + (7 * GameSetupScreenView.NameKeyGap);
+                Assert.That(rowWidth, Is.EqualTo(1328f));
+
+                var leftEdge = rowThree.Min(key => key.RectTransform.anchoredPosition.x)
+                    - (GameSetupScreenView.NameKeyWidth / 2f);
+
+                Assert.That(leftEdge, Is.EqualTo(-(GameSetupScreenView.NameKeyboardWidth / 2f) + 168f).Within(0.001f));
+
+                // Every key on that row shares one y — it is one row.
+                Assert.That(rowThree.Select(key => key.RectTransform.anchoredPosition.y).Distinct().Count(), Is.EqualTo(1));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        // The key caps stay uppercase, exactly as the mockups draw them —
+        // only what gets appended to the name is case-derived.
+        [Test]
+        public void TheKeyCapsStayUppercase_EvenThoughTypingProducesMixedCase()
+        {
+            var view = CreateView();
+
+            try
+            {
+                TapSeatBody(view, FrogColour.Green);
+                TapTarget(view.SeatNameRowTapTarget(FrogColour.Green));
+
+                foreach (var key in view.NameKeys.Where(key => key.Kind == NameKeyKind.Letter))
+                {
+                    Assert.That(key.Label.text, Is.EqualTo(key.Label.text.ToUpperInvariant()));
+                }
+
+                view.ClearName();
+                TapKeys(view, "CONNOR");
+
+                Assert.That(view.TypedName, Is.EqualTo("Connor"));
+                Assert.That(view.SeatLabel(FrogColour.Green).text, Is.EqualTo("Connor"),
+                    "the field reads Connor while it is being typed, not CONNOR corrected at the end");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void TheSpaceBar_StartsANewCapitalisedWord()
+        {
+            var view = CreateView();
+
+            try
+            {
+                TapSeatBody(view, FrogColour.Green);
+                TapTarget(view.SeatNameRowTapTarget(FrogColour.Green));
+
+                view.ClearName();
+                TapKeys(view, "MARY");
+                TapKey(view.SpaceKey);
+                TapKeys(view, "JANE");
+                view.DoneNaming();
+
+                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("Mary Jane"));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
         // #288's lesson: without a raycast target of its own there is nothing
         // raycastable under the key, the GraphicRaycaster never finds it, and
         // the keyboard types nothing.
@@ -272,8 +367,8 @@ namespace Frogs.Unity.EditModeTests
                 TapKeys(view, "DAD");
                 view.DoneNaming();
 
-                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("DAD"));
-                Assert.That(view.SeatLabel(FrogColour.Green).text, Is.EqualTo("DAD"));
+                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("Dad"));
+                Assert.That(view.SeatLabel(FrogColour.Green).text, Is.EqualTo("Dad"));
                 Assert.That(view.EditingSeat, Is.Null);
             }
             finally
@@ -297,7 +392,7 @@ namespace Frogs.Unity.EditModeTests
                 TapKey(view.BackspaceKey);
                 view.DoneNaming();
 
-                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("DA"));
+                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("Da"));
             }
             finally
             {
@@ -350,7 +445,7 @@ namespace Frogs.Unity.EditModeTests
                 view.ClearName();
                 TapKeys(view, "ZZ");
                 view.DoneNaming();
-                Assert.That(view.NameFor(FrogColour.Orange), Is.EqualTo("ZZ"));
+                Assert.That(view.NameFor(FrogColour.Orange), Is.EqualTo("Zz"));
 
                 TapTarget(view.SeatNameRowTapTarget(FrogColour.Orange));
                 view.ClearName();
@@ -496,7 +591,7 @@ namespace Frogs.Unity.EditModeTests
                 TapKeys(view, "CONNOR");
                 view.DoneNaming();
 
-                Assert.That(view.HintText.text, Is.EqualTo("CONNOR goes first"),
+                Assert.That(view.HintText.text, Is.EqualTo("Connor goes first"),
                     "not `Green goes first` once Green has been renamed");
             }
             finally
@@ -528,7 +623,7 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(game, Is.Not.Null);
                 Assert.That(game.TurnOrder, Is.EqualTo(new[] { FrogColour.Orange, FrogColour.Green }));
-                Assert.That(game.NameFor(FrogColour.Orange), Is.EqualTo("CONNOR"));
+                Assert.That(game.NameFor(FrogColour.Orange), Is.EqualTo("Connor"));
                 Assert.That(game.NameFor(FrogColour.Green), Is.EqualTo("Green"));
             }
             finally
@@ -604,8 +699,8 @@ namespace Frogs.Unity.EditModeTests
                     view.DoneNaming();
                 }
 
-                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("SAM"));
-                Assert.That(view.NameFor(FrogColour.Blue), Is.EqualTo("SAM"));
+                Assert.That(view.NameFor(FrogColour.Green), Is.EqualTo("Sam"));
+                Assert.That(view.NameFor(FrogColour.Blue), Is.EqualTo("Sam"));
                 Assert.That(view.StartButton.IsDisabled, Is.False);
             }
             finally

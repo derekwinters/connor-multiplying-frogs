@@ -119,7 +119,6 @@ namespace Frogs.Unity.Views
 
         const string RemoveKeyLabel = "×";
         const string BackspaceKeyLabel = "⌫";
-        const string ShiftKeyLabel = "⇧";
         const string SpaceKeyLabel = "space";
         const string DoneKeyLabel = "Done";
         const char SpaceCharacter = ' ';
@@ -634,12 +633,6 @@ namespace Frogs.Unity.Views
             get { return KeyOfKind(NameKeyKind.Backspace); }
         }
 
-        /// <summary>The shift key — drawn, and disabled; see this type's own note.</summary>
-        public NameKeyboardKey ShiftKey
-        {
-            get { return KeyOfKind(NameKeyKind.Shift); }
-        }
-
         /// <summary>`Done` — the only way out of the keyboard.</summary>
         public NameKeyboardKey DoneKey
         {
@@ -876,18 +869,14 @@ namespace Frogs.Unity.Views
                 var letters = LetterRows[rowIndex];
                 var isLastLetterRow = rowIndex == LetterRows.Length - 1;
 
-                // Row 3 carries shift and backspace either side of its seven
-                // letters — docs/specs/ui/game-setup.md#the-keyboard.
-                var keyCount = isLastLetterRow ? letters.Length + 2 : letters.Length;
+                // Row 3 carries backspace after its seven letters, and
+                // nothing before them — docs/specs/ui/game-setup.md#the-keyboard.
+                // There is no shift key: case is derived from position as the
+                // name is built (#319), so there is nothing for one to do.
+                var keyCount = isLastLetterRow ? letters.Length + 1 : letters.Length;
                 var rowWidth = (keyCount * NameKeyWidth) + ((keyCount - 1) * NameKeyGap);
                 var x = -(rowWidth / 2f) + (NameKeyWidth / 2f);
                 var y = (NameKeyboardHeight / 2f) - (NameKeyHeight / 2f) - (rowIndex * rowPitch);
-
-                if (isLastLetterRow)
-                {
-                    BuildKey(NameKeyKind.Shift, default(char), ShiftKeyLabel, NameKeyGlyphLabelSize, NameKeyWidth, new Vector2(x, y));
-                    x += NameKeyWidth + NameKeyGap;
-                }
 
                 foreach (var letter in letters)
                 {
@@ -908,12 +897,6 @@ namespace Frogs.Unity.Views
 
             BuildKey(NameKeyKind.Space, SpaceCharacter, SpaceKeyLabel, NameSpaceKeyLabelSize, NameSpaceKeyWidth, new Vector2(spaceX, bottomY));
             BuildKey(NameKeyKind.Done, default(char), DoneKeyLabel, NameDoneKeyLabelSize, NameDoneKeyWidth, new Vector2(doneX, bottomY));
-
-            // The shift key is drawn because the agreed mockup draws it, and
-            // disabled because what it does is not settled — see this type's
-            // note at the top of the naming section.
-            ShiftKey.SetDisabled(true);
-            ApplyKeyColours(ShiftKey);
 
             _keyboardRoot.SetActive(false);
         }

@@ -214,13 +214,21 @@ sized to the same tap-target family as everything else in the game.
 | --- | --- |
 | 1 | `Q W E R T Y U I O P` |
 | 2 | `A S D F G H J K L` |
-| 3 | `⇧ Z X C V B N M ⌫` |
+| 3 | `Z X C V B N M ⌫` |
 | 4 | space, `Done` |
 
 `Done` is the primary [button](shared-components.md#button) kind and the only
 way out of the keyboard. There is no cancel: a name is edited in place and
 every keystroke has already happened, so there is nothing a cancel would undo
 that backspace does not.
+
+Row 3 is eight keys — seven letters and backspace — which is
+8 × `NameKeyWidth` + 7 × `NameKeyGap` = 1328 px, centred in the 1664 px
+`NameKeyboardWidth` block at an offset of 168 px either side.
+
+**There is no shift key**, and the key caps are drawn in uppercase anyway, the
+way key caps always are. Case is not something the player chooses — see the
+capitalisation rule under Behaviour.
 
 **Why not the system keyboard.** It is free and familiar, and it would have
 been the smaller change. It also has a height nobody knows at design time,
@@ -245,6 +253,23 @@ build, which is 26 keys of the same key.
   children to dismiss confirms.
 - Tapping a chosen seat's name row opens the keyboard on that seat and puts the
   caret at the end of the name. Only one seat is being edited at a time.
+- **The first letter of each word is a capital and every other letter is
+  lowercase**, derived from where the character lands rather than chosen. The
+  first character of the name is a capital, so is any character immediately
+  after a space, and nothing else is. Typing `C O N N O R` gives `Connor`;
+  `M A R Y` space `J A N E` gives `Mary Jane`. It is applied as the name is
+  built, so the field reads `Connor` while it is being typed rather than
+  `CONNOR` corrected on `Done`, and backspacing re-derives it from position —
+  deleting back to empty and typing again still capitalises. Default colour
+  names already obey it.
+
+    This is why there is no shift key, and it is the answer to
+    [#319](https://github.com/derekwinters/connor-multiplying-frogs/issues/319).
+    The cost is stated rather than hidden: `JJ` and `McKenzie` cannot be typed.
+    A shift key that a six-year-old has to find before the `M` of `McKenzie`
+    buys those two names and taxes every other name in the game, and the
+    players this is for are children typing their own first names.
+
 - Typing appends a character. **At `PlayerNameMaxLength` the next keystroke is
   refused** — the key does nothing, the name is unchanged, and nothing explains
   itself, which is how a
@@ -305,18 +330,14 @@ carry. Do not build from it.
 - **Should the four colours be reorderable?** Proposed: no. Turn order is
   tap order, which is one gesture rather than two, and re-ordering is a drag
   interaction on a screen four children are all reaching at.
-- **What does `⇧` do?** **Open, and it blocks nothing else.** The keyboard
-  table above lists a shift key and the Behaviour section never says what
-  pressing it does — so the built keyboard draws it, disabled, and types the
-  glyph on each key cap, which is uppercase. That is the literal reading of
-  "typing appends a character" and it is the only part of this screen a guess
-  could have filled in. The mockups draw names as `Connor` and `Isabella`, so
-  mixed case is clearly wanted; what is not settled is *how* — a one-shot
-  shift that capitalises the next letter and then releases, a caps-lock style
-  toggle, or an automatic capital on the first letter of a name. They differ in
-  how many taps a child spends to get `Connor`, which makes it a taste call
-  rather than a mechanical one. Until it is answered the built screen can only
-  produce `CONNOR`.
+- **What does `⇧` do?** **Answered: nothing — there is no shift key.** The
+  keyboard table used to list one and the Behaviour section never said what it
+  did, which was a genuine omission rather than a deferral;
+  [#319](https://github.com/derekwinters/connor-multiplying-frogs/issues/319)
+  exists because of it. Settled by making case automatic — first letter of each
+  word capital, everything else lowercase — and taking the key off the
+  keyboard, so row 3 lost a key and re-centred. The rule and its cost are under
+  Behaviour above.
 - **Are the letter keys in QWERTY order or alphabetical order?** The mockups
   draw QWERTY, because that is the arrangement on every keyboard a child has
   seen, including the one on the tablet this game runs on. The case for
