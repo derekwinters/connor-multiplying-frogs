@@ -150,6 +150,7 @@ the screen is built to.
 | Card readout label | `GridCardReadoutLabelSize` | 40 px |
 | Addition rows a card is dealt | `GridAdditionRowsAtStart` | 2 rows |
 | Most addition rows the section can hold | `GridAdditionRowsMax` | 6 rows |
+| Fill of the cell the caret is in | `GridFocusFill` | `#8CB89E` |
 | Keypad, down from the panel's top edge | `KeypadTop` | 216 px |
 | Keypad key, square | `KeypadKeySize` | 140 px |
 | Gap between keys | `KeypadKeyGap` | 16 px |
@@ -191,6 +192,50 @@ Growing the section therefore costs `GridAdditionRowHeight` + `GridCellGap` =
 64 px per row instead of the 112 px it would cost at full size, and the first
 grown row *shrinks* the grid rather than stretching it — see
 [Mockup](#mockup) for the whole sum.
+
+**`GridFocusFill` is the one colour on that table**, and it is there because it
+is the one colour that carries a rule rather than a picture's paint. The rest of
+this screen's palette is the mockups' — ink, line, faint, paper, accent — copied
+into the shell and named nowhere. This one has to clear a bar, and a bar needs
+somewhere to be written down.
+
+### What focus looks like
+
+**The cell the caret is in is filled with `GridFocusFill`**, and keeps the
+accent outline it already had. Nothing else about it changes: not
+`GridCellSize`, not `GridCarryBoxSize`, not `GridCellBorderWidth` or
+`GridAnswerBorderWidth`. A filled box among empty boxes reads from across a
+room; a box that is bigger or thicker than its neighbours is a different layout,
+and layout is what the mockups are for.
+
+Until [#304](https://github.com/derekwinters/connor-multiplying-frogs/issues/304)
+this page said nothing at all about focus, and the shell filled the blank with
+the quietest option available: the 3 px outline swapped from `#6C7873` grey to
+`#2E7D4F` accent green, and nothing else. That is two mid-tone colours on a
+hairline, and on the tablet Derek could not see it — knowing it was there. A
+player who cannot tell which box the next digit lands in taps a box before every
+digit, which is what he did.
+
+The fill is the accent green the outline already uses, laid over paper at 55 %,
+taken to where it clears the bar the project already sets for two colours being
+**clearly separable** — a luminance contrast of at least **1.9 : 1** *and* a CIE
+L\*a\*b\* distance (ΔE\*ab) of at least **30**, both measures, for the reasons
+[`game-board.md`](game-board.md#keeping-the-frogs-visible) gives.
+
+It has to clear that bar twice over, because a focused cell lands on two
+different fills depending on where the caret is: the ordinary cell fill, and the
+answer row's own tint. As *contrast : 1 / ΔE*:
+
+| | Paper, `#FFFFFF` — every cell but the answer row's | The answer row's tint, `#F3F8F5` |
+| --- | --- | --- |
+| `GridFocusFill` | 2.22 / 36.2 | 2.07 / 32.5 |
+
+Both clear it, the answer row being the tighter of the two, which is the pair
+the treatment was always going to be decided by. Two more ratios worth recording
+because they are what a darker tint would cost: a digit on the focused fill is
+**7.11 : 1** (`#1E2422` ink, against a 4.5 : 1 text bar), and the accent outline
+against the fill inside it is **2.27 : 1 / 30.4**, so the box still reads as a
+box rather than as a blob.
 
 ### How many columns and rows
 
@@ -289,8 +334,11 @@ past it.
   work, and pre-printing it would pick one — which is the thing ADR-0002 says
   not to do.
   - **A grown row is indistinguishable from a dealt one.** Same cells, same
-    size, same border, no tint, no badge, nothing that says "you added this".
+    size, same border, no badge, nothing that says "you added this".
     The section is scratch paper and scratch paper does not annotate itself.
+    The one fill a cell in the section can carry is `GridFocusFill`, and that is
+    not a mark on the row: it is on whichever single cell the caret is in, dealt
+    or grown, and it is gone the moment the caret leaves.
     The smaller `GridAdditionRowHeight` a grown section takes applies to *every*
     row in it, the two dealt ones included — a section where the first two rows
     were taller than the four below them would be exactly the "you added this"
@@ -310,6 +358,15 @@ past it.
 - Entering from [roll and card](roll-and-card.md). The first empty answer cell
   is the focused one; typing fills the answer row **right to left**, which is
   the direction the digits are worked out in.
+- **Exactly one cell is focused, always, and it is the one the next digit lands
+  in.** It is drawn filled with `GridFocusFill` — see
+  [what focus looks like](#what-focus-looks-like) — and the fill follows the
+  caret everywhere it goes: through typing, backspace, `clear`, a tap on another
+  cell, and a section that grows or shrinks underneath it. It is drawn on carry
+  boxes and addition cells exactly as it is in the answer row, because the caret
+  goes there too. When the caret leaves a cell, the cell goes back to the fill
+  it had — the tint is where the next digit goes, never a record of where one
+  has been.
 - Tapping any cell moves the caret there, so the grid can be filled in any
   order — a player who fills the addition rows first, then the answer, is not
   fighting the caret.
@@ -356,6 +413,14 @@ Three, all at 1920 × 1200.
 - **The widest card, as dealt:** [`mockups/working-out-grid-331x41.html`](mockups/working-out-grid-331x41.html)
 - **The easy pile, as dealt:** [`mockups/working-out-grid-68x5.html`](mockups/working-out-grid-68x5.html)
 - **The widest card, grown to the cap:** [`mockups/working-out-grid-331x41-grown.html`](mockups/working-out-grid-331x41-grown.html)
+
+**All three draw the focused cell**, filled with `GridFocusFill`. They always
+drew one — an answer cell with the accent outline — and until
+[#304](https://github.com/derekwinters/connor-multiplying-frogs/issues/304) that
+outline was the whole of it, in the drawings as in the shell. The cell is in the
+same place in each; what changed is that you can now see which one it is. A
+picture of this screen without a visible focused cell is a picture of a state
+the player never actually sees.
 
 The first two are the agreed pictures of the screen a card deals, and they are a
 pair for the reason they always were: "the grid shrinks to fit the card" is a
