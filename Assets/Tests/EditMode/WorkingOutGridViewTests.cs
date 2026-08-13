@@ -618,6 +618,14 @@ namespace Frogs.Unity.EditModeTests
                 // A grown row is indistinguishable from a dealt one: same
                 // cells, same size, same colours, no badge.
                 GrowSectionBy(view, 1);
+
+                // With the caret parked outside the section, because #304's
+                // focus tint is drawn wherever the caret is and growing a row
+                // leaves the caret in it. A tinted cell is "the next digit goes
+                // here", not "you added this row" — the marking this bullet
+                // rules out is one the row keeps after the caret has left.
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 1));
+
                 var rows = Enumerable.Range(0, view.AdditionRowCount)
                     .Select(ordinal => view.Cells[RowIndexOf(view, GridRowKind.AdditionRow, ordinal)])
                     .ToArray();
@@ -1032,7 +1040,15 @@ namespace Frogs.Unity.EditModeTests
 
                 // Only the caret's own cell differs, and it differs because it
                 // is the caret's, not because of what is in it.
-                var differences = before.Zip(after, (first, second) => first == second).Count(same => !same);
+                //
+                // The threshold is **cells**, not colour slots, which is what
+                // this always meant: #304 gives the focused cell a tinted fill
+                // as well as its accent outline, so the two cells the caret
+                // left and arrived at each legitimately differ in two of their
+                // three colours. Counting cells says the invariant — *only*
+                // those two ever differ — without being a number that has to
+                // be edited every time the focused cell's treatment changes.
+                var differences = ChangedCells(before, after);
                 Assert.That(differences, Is.LessThanOrEqualTo(2), "nothing is marked; only the caret moves");
 
                 var forbidden = new[] { "Correct", "Wrong", "Grade", "Verdict", "Score", "Marked", "Valid", "Product" };
@@ -1065,6 +1081,177 @@ namespace Frogs.Unity.EditModeTests
                             || name.IndexOf("Countdown", StringComparison.OrdinalIgnoreCase) >= 0
                             || name.IndexOf("Deadline", StringComparison.OrdinalIgnoreCase) >= 0),
                     Is.Empty);
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Which box the next digit goes in (#304).
+        //
+        // The grid always marked the focused cell — by swapping a 3 px
+        // outline between two mid-tone greys, which Derek could not see on the
+        // tablet. These three assert the treatment
+        // docs/specs/ui/working-out-grid.md now names: the focused cell is
+        // **filled** with `GridFocusFill`, at the sizes and outline widths it
+        // already had.
+        //
+        // `GridFocusFill` is written out as a literal below rather than read
+        // from the view, the same way GameBoardColoursTests.cs writes out the
+        // board's palette: a test that asserts a constant equals itself passes
+        // whatever the constant is changed to.
+        // ---------------------------------------------------------------
+
+        [Test]
+        public void TheFocusedCell_IsFilledWithTheFocusTint_SoItDiffersByMoreThanItsBorderColour()
+        {
+            var view = CreateView(Turn(Pile.Hard));
+
+            try
+            {
+                var focused = view.CaretCell;
+
+                Assert.That(focused, Is.Not.Null, "the grid opens with a caret");
+                Assert.That(
+                    focused.Fill.color,
+                    Is.EqualTo(FocusFill),
+                    "the focused cell is filled with working-out-grid.md's `GridFocusFill`");
+
+                // The point of the issue: the difference survives being told
+                // to ignore the outline. Every other editable cell in the grid
+                // is filled with something clearly separable from it.
+                foreach (var other in EditableCells(view).Where(cell => cell != focused))
+                {
+                    Assert.That(
+                        other.Fill.color,
+                        Is.Not.EqualTo(FocusFill),
+                        "only the focused cell carries the tint");
+
+                    Assert.That(
+                        ContrastRatio(focused.Fill.color, other.Fill.color),
+                        Is.GreaterThanOrEqualTo(MinimumContrastRatio),
+                        "the focused fill against an unfocused one");
+                    Assert.That(
+                        ColourDistance(focused.Fill.color, other.Fill.color),
+                        Is.GreaterThanOrEqualTo(MinimumColourDistance),
+                        "the focused fill against an unfocused one");
+                }
+
+                // A digit typed into the focused cell still reads.
+                Assert.That(
+                    ContrastRatio(focused.Label.color, focused.Fill.color),
+                    Is.GreaterThanOrEqualTo(MinimumTextContrastRatio),
+                    "the digit against the tint it sits on");
+
+                // "Build the treatment without changing any cell's size or any
+                // outline width": the focused cell is the same box as the one
+                // beside it, filled differently.
+                var neighbour = CellAt(view, GridRowKind.AnswerRow, 0, HardColumnCount - 2);
+
+                Assert.That(focused.RectTransform.rect.size, Is.EqualTo(neighbour.RectTransform.rect.size));
+                Assert.That(focused.Border.rectTransform.rect.size, Is.EqualTo(neighbour.Border.rectTransform.rect.size));
+                Assert.That(
+                    BorderWidthOf(focused),
+                    Is.EqualTo(BorderWidthOf(neighbour)).Within(0.001f),
+                    "focus does not thicken the outline — that would be structure, and structure needs a wireframe");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void ExactlyOneCell_CarriesTheFocusTint_AndItFollowsTheCaretEverywhereItGoes()
+        {
+            var view = CreateView(Turn(Pile.Hard));
+
+            try
+            {
+                AssertOnlyTheCaretIsTinted(view, "as the grid opens");
+
+                Type(view, 7);
+                AssertOnlyTheCaretIsTinted(view, "after a digit");
+
+                Backspace(view);
+                AssertOnlyTheCaretIsTinted(view, "after backspace");
+
+                Type(view, 4);
+                Clear(view);
+                AssertOnlyTheCaretIsTinted(view, "after clear");
+
+                Tap(CellAt(view, GridRowKind.CarryStrip, 0, 2));
+                AssertOnlyTheCaretIsTinted(view, "after tapping a cell");
+
+                Tap(CellAt(view, GridRowKind.AdditionRow, view.AdditionRowCount - 1, 1));
+                Type(view, 1);
+                Assert.That(view.AdditionRowCount, Is.EqualTo(WorkingOutGrid.GridAdditionRowsAtStart + 1));
+                AssertOnlyTheCaretIsTinted(view, "after the section grew");
+
+                GrowSectionBy(view, 3);
+                Assert.That(view.AdditionRowCount, Is.EqualTo(WorkingOutGrid.GridAdditionRowsMax));
+                AssertOnlyTheCaretIsTinted(view, "at the cap");
+
+                // And back down: backspacing a grown row's last digit takes the
+                // row away underneath the caret.
+                Tap(CellAt(view, GridRowKind.AdditionRow, view.AdditionRowCount - 1, 1));
+                Type(view, 1);
+                Assert.That(view.AdditionRowCount, Is.EqualTo(WorkingOutGrid.GridAdditionRowsMax), "the cap holds");
+
+                Backspace(view);
+                Assert.That(view.AdditionRowCount, Is.EqualTo(WorkingOutGrid.GridAdditionRowsMax - 1));
+                AssertOnlyTheCaretIsTinted(view, "after the section shrank");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void TheFocusTint_IsDrawnOnCarryBoxesAndAdditionCells_NotOnlyInTheAnswerRow()
+        {
+            var view = CreateView(Turn(Pile.Hard));
+
+            try
+            {
+                // Every kind of cell the caret can reach: both carry strips,
+                // the addition section, and the answer row.
+                var reachable = new[]
+                {
+                    CellAt(view, GridRowKind.CarryStrip, 0, 1),
+                    CellAt(view, GridRowKind.CarryStrip, 1, HardColumnCount - 1),
+                    CellAt(view, GridRowKind.AdditionRow, 0, 2),
+                    CellAt(view, GridRowKind.AdditionRow, 1, HardColumnCount - 1),
+                    CellAt(view, GridRowKind.AnswerRow, 0, 1)
+                };
+
+                foreach (var cell in reachable)
+                {
+                    Tap(cell);
+
+                    Assert.That(view.CaretCell, Is.SameAs(cell), "tapping moves the caret here");
+                    Assert.That(
+                        cell.Fill.color,
+                        Is.EqualTo(FocusFill),
+                        cell.RowKind + " cell " + cell.Column + " is tinted while the caret is in it");
+
+                    // And it is separable from the unfocused cells of its own
+                    // kind — a carry box beside a carry box, not just against
+                    // the answer row.
+                    foreach (var sibling in EditableCells(view)
+                        .Where(other => other.RowKind == cell.RowKind && other != cell))
+                    {
+                        Assert.That(
+                            ContrastRatio(cell.Fill.color, sibling.Fill.color),
+                            Is.GreaterThanOrEqualTo(MinimumContrastRatio));
+                        Assert.That(
+                            ColourDistance(cell.Fill.color, sibling.Fill.color),
+                            Is.GreaterThanOrEqualTo(MinimumColourDistance));
+                    }
+                }
             }
             finally
             {
@@ -1582,6 +1769,137 @@ namespace Frogs.Unity.EditModeTests
                 .Where(cell => cell.Border != null)
                 .SelectMany(cell => new[] { cell.Border.color, cell.Fill.color, cell.Label.color })
                 .ToArray();
+        }
+
+        // ---------------------------------------------------------------
+        // The focused cell (#304).
+        // ---------------------------------------------------------------
+
+        // docs/specs/ui/working-out-grid.md § Named constants — `GridFocusFill`,
+        // the page's own value, copied here by hand rather than read from the
+        // view so the code cannot be repainted without the spec page moving too.
+        static readonly Color FocusFill = new Color32(0x8C, 0xB8, 0x9E, 0xFF);
+
+        // The bar the project already uses for "clearly separable" —
+        // docs/specs/ui/game-board.md#keeping-the-frogs-visible. Two measures,
+        // because either alone can be fooled: a luminance contrast ratio, and a
+        // CIE L*a*b* distance.
+        const float MinimumContrastRatio = 1.9f;
+        const float MinimumColourDistance = 30f;
+
+        // A digit on the tint it sits on is text, and text has a higher bar.
+        const float MinimumTextContrastRatio = 4.5f;
+
+        static IEnumerable<WorkingOutGridCell> EditableCells(WorkingOutGridView view)
+        {
+            return view.Cells.SelectMany(row => row).Where(cell => cell.IsEditable && cell.Border != null);
+        }
+
+        static float BorderWidthOf(WorkingOutGridCell cell)
+        {
+            // What BuildBox draws an outline with: the fill is inset from the
+            // border box by the outline's width on every side.
+            return cell.Fill.rectTransform.offsetMin.x;
+        }
+
+        static void AssertOnlyTheCaretIsTinted(WorkingOutGridView view, string when)
+        {
+            var tinted = EditableCells(view).Where(cell => cell.Fill.color == FocusFill).ToArray();
+
+            Assert.That(tinted.Length, Is.EqualTo(1), "exactly one cell is focused " + when);
+            Assert.That(tinted[0], Is.SameAs(view.CaretCell), "the tinted cell is the caret's " + when);
+        }
+
+        // How many cells' colours changed between two CellColours readings —
+        // three slots per cell, in the order CellColours emits them.
+        static int ChangedCells(Color[] before, Color[] after)
+        {
+            Assert.That(after.Length, Is.EqualTo(before.Length), "the same cells are drawn either side");
+
+            const int SlotsPerCell = 3;
+            var changed = 0;
+
+            for (var cell = 0; cell * SlotsPerCell < before.Length; cell++)
+            {
+                for (var slot = 0; slot < SlotsPerCell; slot++)
+                {
+                    var index = (cell * SlotsPerCell) + slot;
+
+                    if (before[index] != after[index])
+                    {
+                        changed++;
+                        break;
+                    }
+                }
+            }
+
+            return changed;
+        }
+
+        static float ContrastRatio(Color a, Color b)
+        {
+            var first = RelativeLuminance(a);
+            var second = RelativeLuminance(b);
+
+            return (Mathf.Max(first, second) + 0.05f) / (Mathf.Min(first, second) + 0.05f);
+        }
+
+        static float RelativeLuminance(Color colour)
+        {
+            return (0.2126f * ToLinear(colour.r))
+                + (0.7152f * ToLinear(colour.g))
+                + (0.0722f * ToLinear(colour.b));
+        }
+
+        static float ToLinear(float channel)
+        {
+            return channel <= 0.04045f
+                ? channel / 12.92f
+                : Mathf.Pow((channel + 0.055f) / 1.055f, 2.4f);
+        }
+
+        // Straight-line distance in CIE L*a*b* (ΔE*ab), the same arithmetic
+        // GameBoardColoursTests.cs measures the pond with.
+        static float ColourDistance(Color a, Color b)
+        {
+            var first = ToLab(a);
+            var second = ToLab(b);
+
+            var dl = first.x - second.x;
+            var da = first.y - second.y;
+            var db = first.z - second.z;
+
+            return Mathf.Sqrt((dl * dl) + (da * da) + (db * db));
+        }
+
+        static Vector3 ToLab(Color colour)
+        {
+            var r = ToLinear(colour.r);
+            var g = ToLinear(colour.g);
+            var b = ToLinear(colour.b);
+
+            // sRGB to CIE XYZ, D65.
+            var x = ((0.4124564f * r) + (0.3575761f * g) + (0.1804375f * b)) / 0.95047f;
+            var y = (0.2126729f * r) + (0.7151522f * g) + (0.0721750f * b);
+            var z = ((0.0193339f * r) + (0.1191920f * g) + (0.9503041f * b)) / 1.08883f;
+
+            var fx = LabF(x);
+            var fy = LabF(y);
+            var fz = LabF(z);
+
+            return new Vector3(
+                (116f * fy) - 16f,
+                500f * (fx - fy),
+                200f * (fy - fz));
+        }
+
+        static float LabF(float t)
+        {
+            const float Epsilon = 216f / 24389f;
+
+            return t > Epsilon
+                ? Mathf.Pow(t, 1f / 3f)
+                : ((841f / 108f) * t) + (4f / 29f);
         }
 
         // Grows the addition section by typing one digit into whatever its

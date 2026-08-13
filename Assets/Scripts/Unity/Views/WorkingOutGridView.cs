@@ -154,12 +154,39 @@ namespace Frogs.Unity.Views
         // Button.cs, PlayerChip.cs, DialogPanel.cs and RollAndCardDialogView.cs
         // each draw for their own colours: not a geometry constant on any spec
         // page's table, so not declared as a named spec constant.
+        //
+        // GridFocusFill below is the exception, and it is public for the same
+        // reason the sizes are: it is on working-out-grid.md's own table.
         static readonly Color InkColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockups' --ink
         static readonly Color LineColor = new Color32(0x6C, 0x78, 0x73, 0xFF); // mockups' --line
         static readonly Color FaintColor = new Color32(0xB9, 0xC0, 0xBD, 0xFF); // mockups' --faint
         static readonly Color AccentColor = new Color32(0x2E, 0x7D, 0x4F, 0xFF); // mockups' --accent
         static readonly Color PaperColor = Color.white; // mockups' --paper / #fff
         static readonly Color AnswerTintColor = new Color32(0xF3, 0xF8, 0xF5, 0xFF); // mockups' answer-row fill
+
+        /// <summary>
+        /// The fill of the cell the caret is in —
+        /// docs/specs/ui/working-out-grid.md's `GridFocusFill`, and the whole
+        /// of what makes the focused cell visible.
+        ///
+        /// Until #304 focus was the accent outline and nothing else: `#6C7873`
+        /// grey becoming `#2E7D4F` green on a 3 px line, which is two mid-tone
+        /// colours on a hairline and is not visible at the distance a child
+        /// holds a tablet. The outline stays; this is what carries the signal.
+        ///
+        /// It is the accent green over paper at 55 %, which is where it clears
+        /// the project's separability bar — 1.9 : 1 contrast *and* ΔE*ab 30 —
+        /// against **both** fills a focused cell can land on, the ordinary
+        /// <see cref="PaperColor"/> and the answer row's own
+        /// <see cref="AnswerTintColor"/>. The ratios are recorded on the spec
+        /// page; the bar itself is game-board.md's.
+        ///
+        /// Nothing about the cell's geometry changes with it. A focused cell
+        /// that were bigger or more heavily outlined than its neighbours would
+        /// be a change to the layout the mockups draw, and layout is gated on a
+        /// wireframe (docs/engineering/ui-design-process.md).
+        /// </summary>
+        public static readonly Color GridFocusFill = new Color32(0x8C, 0xB8, 0x9E, 0xFF);
 
         static Sprite s_cellSprite;
         static Sprite s_carryBoxSprite;
@@ -940,10 +967,7 @@ namespace Frogs.Unity.Views
                         LineColor,
                         out fill);
 
-                    if (row.Kind == GridRowKind.AnswerRow)
-                    {
-                        fill.color = AnswerTintColor;
-                    }
+                    fill.color = UnfocusedFillFor(row.Kind);
 
                     label = BuildText("Digit", border.rectTransform, DigitSizeFor(row.Kind), InkColor, TextAnchor.MiddleCenter);
                     StretchToFill(label.rectTransform);
@@ -1477,6 +1501,15 @@ namespace Frogs.Unity.Views
                     cell.Border.color = focused
                         ? AccentColor
                         : cell.Kind == GridCellKind.CarryBox ? FaintColor : LineColor;
+
+                    if (cell.Fill != null)
+                    {
+                        // The whole of #304: the focused cell is *filled*, not
+                        // just outlined. When the caret leaves, the cell goes
+                        // back to the fill it was built with — the tint says
+                        // where the next digit goes, never where one has been.
+                        cell.Fill.color = focused ? GridFocusFill : UnfocusedFillFor(cell.RowKind);
+                    }
                 }
             }
 
@@ -1484,6 +1517,14 @@ namespace Frogs.Unity.Views
             {
                 _checkItButton.SetDisabled(AnswerText.Length == 0);
             }
+        }
+
+        // What a cell is filled with when the caret is somewhere else: the
+        // answer row is tinted, everything else is paper. The one place that
+        // knows this, so BuildCell and RefreshCells cannot drift apart.
+        static Color UnfocusedFillFor(GridRowKind rowKind)
+        {
+            return rowKind == GridRowKind.AnswerRow ? AnswerTintColor : PaperColor;
         }
 
         static string PileNameFor(Pile pile)
