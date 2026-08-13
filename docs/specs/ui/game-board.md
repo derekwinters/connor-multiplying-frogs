@@ -67,6 +67,12 @@ height, in this order and with no gaps:
   clinging to the top.
 - `controls` — pinned to the bottom, `BoardControlsHeight` tall, full width.
 
+"Full width" and "the top" mean the screen's, not the reference canvas's, on a
+device that is not 16:10 — a band reaches the edges the way the water does. What
+the bands *contain* is measured in the reference canvas, which is what every
+number below is in. The whole of that rule, and the one control it moves, is
+[the bands reach the edges too](#the-bands-reach-the-edges-too).
+
 Across the pond, the nine positions occupy the same nine columns in every lane,
 and their total width is fixed by the position count rather than by the space
 available:
@@ -77,14 +83,20 @@ available:
   from each other, and from the End log.
 - `end-log` — pinned to the **right** edge of the safe area.
 
-Both logs are `SharedLogHeight` tall, which is the height of the `pond` band
-itself: they fill it, edge to edge with the two hairlines, whether two frogs are
-playing or four. Every lane's centre line therefore crosses both of them, and a
-frog on a log still sits on its own lane's line. A shorter screen loses height
-from `pond` and nothing else — and the logs lose it with the band, because they
-are the band's height rather than a number typed in beside it. The header and
-the controls do not shrink, because a smaller `Roll` button is the wrong thing
-to trade away.
+Both logs are `SharedLogHeight` tall, which is the height of the `pond` band on
+the reference canvas: they fill it, edge to edge with the two hairlines, whether
+two frogs are playing or four. Every lane's centre line therefore crosses both
+of them, and a frog on a log still sits on its own lane's line. A shorter screen
+loses height from `pond` and nothing else — and the logs lose it with the band,
+because they are the band's height rather than a number typed in beside it. The
+header and the controls do not shrink, because a smaller `Roll` button is the
+wrong thing to trade away.
+
+A *taller* screen is the other side of that, and it is not symmetric: the extra
+height is all `pond`, and it is all water. The logs and the lane stack stay
+their reference size, centred in the band, because they are the board rather
+than the backdrop — see
+[the bands reach the edges too](#the-bands-reach-the-edges-too).
 
 ## Why the lanes run across
 
@@ -249,9 +261,17 @@ the board on the tablet. They are honest placeholders in exactly the sense the
 
 ### The water is the whole screen
 
-`PondWater` is not the pond band's fill. It is what this screen paints to all
-four edges of the device, on any aspect ratio — the header and controls bands
-are drawn on top of it, and so is everything else.
+`PondWater` is what this screen paints to all four edges of the device, on any
+aspect ratio. It is the `pond` band's own fill **and** the paint behind
+everything else — the header and controls bands are drawn on top of it, and so
+is every lane, log and frog.
+
+Both, and written down as both, because it used to be only the second one: the
+`pond` band painted nothing at all and what read as the pond was the screen-wide
+paint showing through where the band was not. That is invisible while the two
+agree about where the band is, and it is why nobody noticed the band had the
+same bug the header and the controls had — see
+[the bands reach the edges too](#the-bands-reach-the-edges-too).
 
 That makes the board the one screen that does not paint the app's own
 background. Every other screen paints `#EDF1EF`, and so does the scene camera,
@@ -260,6 +280,39 @@ rule from
 [the canvas every component is measured in](shared-components.md#what-fills-a-screen-that-is-not-1610)
 is unchanged and still holds here: nothing behind the canvas is ever visible,
 because this screen's own paint reaches the edges.
+
+### The bands reach the edges too
+
+**Invariant:** every one of the three bands is as wide as the screen, `header`'s
+top edge is the top of the screen, and `controls`' bottom edge is the bottom of
+it — on every aspect ratio, exactly as the water is.
+
+A band is the top or the bottom **of the screen**, not a panel laid on the pond.
+A band that stopped at 1920 px on a wider device would show a strip of water past
+each of its ends, and two grey bars floating on a pond is a rendering fault
+rather than a design. That is what the tablet was doing until this was written
+down.
+
+**Invariant:** what a band *contains* is still laid out in the reference canvas,
+centred. The lanes are the reference canvas's safe area wide and the two shared
+logs stand in the columns those lanes' tracks start and end in, on every screen,
+so every constant in the table below keeps meaning exactly what it says and
+position 0 is still on the Start log. The band grows; the board inside it does
+not.
+
+**A control anchored to a band's edge follows the screen's edge.** The turn chip
+and the settings gear sit `SafeMargin` in from the real left and right edges of
+the screen, because `SafeMargin` is a margin from the screen and not from a
+rectangle nobody can see. `Roll` is centred and does not care either way.
+
+**Extra height goes to `pond` and nowhere else** — the same answer
+[Anchors](#anchors) already gives for a *shorter* screen, in the other
+direction. The two bands keep their heights, because a smaller `Roll` is the
+wrong thing to trade away, and what a taller screen shows more of is water: the
+logs and the lane stack keep their reference size, centred in the band.
+
+At exactly 1920 × 1200 all of this is pixel-identical to the mockups, which is
+why it is a rule stated on this page rather than a new picture to draw.
 
 ### Keeping the frogs visible
 
