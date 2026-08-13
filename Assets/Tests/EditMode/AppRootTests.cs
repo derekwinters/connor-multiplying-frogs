@@ -487,13 +487,14 @@ namespace Frogs.Unity.EditModeTests
 
         static void TypeAnswer(WorkingOutGridView view, int answer)
         {
-            // The caret starts on the rightmost answer cell and walks left, so
-            // an answer is typed units first — the way it is written.
+            // The caret starts on the leftmost answer cell and walks right
+            // (#305), so an answer is typed the way it is written and read:
+            // most significant digit first, no tapping between digits.
             var digits = answer.ToString();
 
-            for (var index = digits.Length - 1; index >= 0; index--)
+            foreach (var character in digits)
             {
-                var digit = digits[index] - '0';
+                var digit = character - '0';
                 Tap(view.Keys.Single(key => key.Kind == KeypadKeyKind.Digit && key.Digit == digit));
             }
 
