@@ -1855,6 +1855,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-the-pipeline-replaced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the pipeline replaced
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the pipeline replaced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-there-is-no-sweep-any-more" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why there is no sweep any more
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2032,6 +2060,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-the-pipeline-replaced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the pipeline replaced
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the pipeline replaced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-there-is-no-sweep-any-more" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why there is no sweep any more
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2191,6 +2247,50 @@ a grace window, to survive <code>skip-docs</code> being added while the check wa
 relies on the <code>labeled</code> trigger instead — adding the label starts a fresh run. Same outcome, fewer
 moving parts, and <code>test_docs_gate_triggers.py</code> still guards the trigger because that is the half
 that cannot be centralised.</p>
+<h2 id="what-the-pipeline-replaced">What the pipeline replaced<a class="headerlink" href="#what-the-pipeline-replaced" title="Link to this section">&para;</a></h2>
+<p>The whole issue lifecycle now runs from ai-sdlc. What used to live here, and where it went:</p>
+<table>
+<thead>
+<tr>
+<th>Was here</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gatekeeper-comment.yml</code> + <code>pipeline-gatekeeper</code></td>
+<td><code>gatekeeper-comment.yml</code>, a caller</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>gatekeeper-close.yml</code>, a caller — frogs had no equivalent</td>
+</tr>
+<tr>
+<td><code>dashboard.yml</code> + <code>pipeline-dashboard</code></td>
+<td><code>dashboard.yml</code>, a caller</td>
+</tr>
+<tr>
+<td><code>gatekeeper-sweep.yml</code> + <code>pipeline-reconcile</code></td>
+<td><strong>nothing, deliberately</strong></td>
+</tr>
+<tr>
+<td><code>pipeline-analysis</code>, <code>pipeline-dev</code>, <code>triage-issue</code>, <code>ci-watch</code>, <code>milestone-ops</code>, <code>issue-blockers</code>, <code>release-flow</code></td>
+<td>ai-sdlc skills, installed with <code>gh skill</code></td>
+</tr>
+<tr>
+<td><code>pipeline-tests.yml</code></td>
+<td>gone with the code it tested</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-there-is-no-sweep-any-more">Why there is no sweep any more<a class="headerlink" href="#why-there-is-no-sweep-any-more" title="Link to this section">&para;</a></h3>
+<p>The sweep existed because frogs <strong>stored</strong> blockedness as pipeline state, and stored state goes
+stale. ai-sdlc derives blockedness at selection time from the live dependency graph instead. State
+computed when it is used cannot drift, so there is nothing to reconcile — the sweep was not dropped,
+its cause was.</p>
+<p>Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
+anything left is <strong>reported on the dashboard rather than silently repaired</strong>. That is the whole
+bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.</p>
 <h2 id="upgrading-and-checking-for-drift">Upgrading, and checking for drift<a class="headerlink" href="#upgrading-and-checking-for-drift" title="Link to this section">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>plan<span class="w">   </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># read-only: what would change</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>apply<span class="w">  </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># writes, on a branch</span>
