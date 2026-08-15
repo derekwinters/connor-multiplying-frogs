@@ -1,0 +1,65 @@
+# What this repository is, for ai-sdlc.
+#
+# Everything else about the pipeline — the skills, the workflows, the specs —
+# is identical in every repository that adopts it. This file is the only place
+# Multiplying Frogs differs from the others.
+#
+# See https://derekwinters.github.io/ai-sdlc/spec/configuration/ for the schema.
+
+# Capabilities arrive one at a time, as each replaces the local tooling doing
+# that job today. This list is what is *live*, not what is intended — `adopt`
+# installs everything a declared capability owns on the next run, so declaring
+# `pipeline` before the old gatekeeper is gone would mean two handlers on one
+# event, racing, both writing.
+#
+# The remaining order, each with its issue:
+#   labels      #342   consistency #343
+#   pipeline    #344 and #346, once the colliding workflows are retired
+#   release     with #342, once release-please is reconciled
+#
+# `substrate` is implied and is not listed.
+capabilities:
+  - hygiene
+
+# Both markers are present — ProjectSettings/ProjectVersion.txt and mkdocs.yml —
+# and detection would find both. Stated explicitly anyway: a repository that has
+# said what it is does not get second-guessed by a marker file appearing or
+# disappearing.
+profiles:
+  - unity
+  - mkdocs
+
+# Who may drive the pipeline with commands. Connor decides plenty about the
+# game, but the pipeline's approvals are Derek's.
+owners:
+  - derekwinters
+
+# The existing dashboard issue, reused rather than replaced. Opening a second
+# one would leave two boards disagreeing.
+dashboard_issue: 163
+
+# v0.5, v0.6, v0.10 — ordered as versions rather than as strings, so v0.10
+# follows v0.9 instead of preceding v0.2. Non-version milestones
+# ("Direct Involvement Needed", "ai-sdlc adoption") are deliberately outside
+# the ordering and are never the focus milestone.
+milestone_ordering: semver
+
+commands:
+  # The Core suite: no editor, no licence, about two seconds.
+  test: dotnet test Tests/Core/Frogs.Core.Tests.csproj
+  # Core has not gained a Unity dependency — rule 2 in CLAUDE.md, enforced.
+  verify: python3 .github/scripts/check_core_isolation.py
+
+# Deliberately absent:
+#
+# `labels:` — frogs' pipeline-state labels already match the canonical
+#   vocabulary exactly (ai-triage, pending-approval, needs-clarification,
+#   ready-for-work, in-progress, parked), so there is nothing to map. Checked
+#   against .github/labels.yml rather than assumed.
+#
+# `bot:` — the default `github-actions` identity, with the watermark read from
+#   `github-actions[bot]`. Revisit under #339, which asks whether `claude[bot]`
+#   should drive commands.
+#
+# `commands.spec_validator` — frogs' docs are prose specs, not AREA-NNN
+#   requirement tables, so there is no validator to name.

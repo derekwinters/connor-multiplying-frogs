@@ -1,0 +1,25 @@
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.2 hash=6ae3fa4bc47cae9e
+# Managed by `adopt`. Local edits are preserved but stop this file
+# being updated — `adopt verify` will report it.
+name: closing-keyword
+
+# A caller. The logic is in ai-sdlc; this exists because a trigger
+# cannot be centralised — it must be declared in the repository it
+# fires for.
+#
+# Pinned to a commit rather than a tag: a tag can move, and this runs
+# with this repository's token. Upgrade with `adopt apply <version>`,
+# which rewrites both the SHA and the comment.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  closing-keyword:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-closing-keyword.yml@b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3 # v0.4.2
+    with:
+      ref: b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3
