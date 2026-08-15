@@ -2617,11 +2617,45 @@ three places:</p>
 <li><strong>The manifest</strong>, where the record's <code>name</code> is the directory.</li>
 </ul>
 <h2 id="labels">Labels<a class="headerlink" href="#labels" title="Link to this section">&para;</a></h2>
-<p>Labels are the pipeline's state machine. The list below is mirrored by
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.yml"><code>.github/labels.yml</code></a>,
-which is the machine-readable source of truth; the <code>labels-sync</code> workflow
-applies that file to the repo whenever it changes. <strong>Edit <code>labels.yml</code> and this
-page together</strong> — never the GitHub label UI, whose edits the next sync undoes.</p>
+<p>Labels are the pipeline's state machine. The list below is mirrored by <strong>two</strong>
+machine-readable manifests, and the <code>labels-sync</code> workflow applies their union
+whenever either changes:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Holds</th>
+<th>Who edits it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.core.yml"><code>.github/labels.core.yml</code></a></td>
+<td>the shared pipeline vocabulary</td>
+<td><strong>nobody here</strong> — <code>adopt</code> installs it, pinned</td>
+</tr>
+<tr>
+<td><a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.repo.yml"><code>.github/labels.repo.yml</code></a></td>
+<td>frogs' own <code>area:*</code>, <code>type:*</code>, <code>dashboard</code></td>
+<td>us</td>
+</tr>
+</tbody>
+</table>
+<p>The core manifest is identical in every repository that has adopted
+<a href="../../engineering/ai-sdlc/">ai-sdlc</a> — the shared code reads those names, so a
+repository that redefines one has a pipeline that does not work while appearing
+adopted. To change a core label, change it in ai-sdlc and move the pin. A label
+defined in both files is a hard error rather than a silent precedence rule.</p>
+<p><strong>Edit <code>labels.repo.yml</code> and this page together</strong> — never the GitHub label UI,
+whose edits the next sync undoes.</p>
+<blockquote>
+<p><strong>How the spec is changing (#342).</strong> This page used to describe a single
+<code>.github/labels.yml</code> maintained here and applied by our own
+<code>sync_labels.py</code>. The taxonomy is now split — shared vocabulary installed and
+pinned, local labels ours — and applied by ai-sdlc's sync. The colours of the
+nine shared labels changed to the shared values as part of that, and
+<code>no-closing-keyword</code> was added. Nothing was renamed or deleted.</p>
+</blockquote>
 <h3 id="area-what-part-of-the-game"><code>area:*</code> — what part of the game<a class="headerlink" href="#area-what-part-of-the-game" title="Link to this section">&para;</a></h3>
 <p>Exactly one per issue.</p>
 <table>
@@ -2803,19 +2837,18 @@ failure mode a queue can have.</p>
   was closed rather than what it is, so they collide with nothing above.</li>
 </ul>
 <h2 id="applying-the-taxonomy">Applying the taxonomy<a class="headerlink" href="#applying-the-taxonomy" title="Link to this section">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Preview: validates labels.yml (distinct names, distinct colours, every label</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># described) without touching the repo.</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>python<span class="w"> </span>.github/scripts/sync_labels.py<span class="w"> </span>--dry-run
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Apply, if you have a token with `issues: write`.</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nv">GITHUB_TOKEN</span><span class="o">=</span>...<span class="w"> </span><span class="nv">GITHUB_REPOSITORY</span><span class="o">=</span>derekwinters/connor-multiplying-frogs<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span>python<span class="w"> </span>.github/scripts/sync_labels.py
-</code></pre></div>
+<p>Run the <strong>labels-sync</strong> workflow from the Actions tab, or push a change to
+either manifest on <code>main</code> — it fires on both paths.</p>
+<p>The sync is idempotent: running it twice changes nothing the second time, which
+is what makes it safe on every push rather than something to run carefully. It
+creates and updates by name, and deletes <strong>only</strong> what the <code>delete:</code> list names.
+A label absent from both manifests is left alone, so there is no way to lose a
+label by forgetting to mention it.</p>
 <h2 id="issues">Issues<a class="headerlink" href="#issues" title="Link to this section">&para;</a></h2>
 <h3 id="every-issue-names-the-spec-pages-it-touches">Every issue names the spec pages it touches<a class="headerlink" href="#every-issue-names-the-spec-pages-it-touches" title="Link to this section">&para;</a></h3>
 <p>Every issue body ends with a line naming the pages in <code>/docs</code> it affects:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>**Spec pages touched:** docs/specs/reference/index.md, docs/specs/ui/game-board.md
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>**Spec pages touched:** none — repo config.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>**Spec pages touched:** docs/specs/reference/index.md, docs/specs/ui/game-board.md
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>**Spec pages touched:** none — repo config.
 </code></pre></div>
 <p><code>none</code> is a legitimate answer and has to be written out; a missing line is not
 the same as <code>none</code>, because a missing line usually means nobody checked.</p>
