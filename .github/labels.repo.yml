@@ -1,0 +1,71 @@
+# Multiplying Frogs' own labels.
+#
+# The shared vocabulary — the pipeline states, the CI escape hatches, and
+# `type:epic` — lives in `labels.core.yml`, which `adopt` installs and keeps
+# up to date. Nothing here may repeat a name from that file: a label defined
+# in both is a hard error, because otherwise the effective taxonomy would
+# depend on which file was read first.
+#
+# The applied taxonomy is the union of the two. Both are documented for humans
+# in docs/intro/conventions.md — keep the three in step.
+
+labels:
+  # ---------------------------------------------------------------- area:*
+  # Which part of the game an issue touches. Exactly one per issue.
+  - name: "area:gameplay"
+    color: "1D76DB"
+    description: "Frog behaviour, multiplying rules, scoring, and game feel"
+  - name: "area:art"
+    color: "B392F0"
+    description: "Sprites, animation, palettes, and visual assets"
+  - name: "area:audio"
+    color: "8E44AD"
+    description: "Music, sound effects, and audio mixing"
+  - name: "area:ui"
+    color: "5319E7"
+    description: "Menus, HUD, layout, and on-screen controls"
+  - name: "area:story"
+    color: "D93F0B"
+    description: "Narrative, level themes, and world-building"
+  - name: "area:build"
+    color: "546E7A"
+    description: "Unity project config, CI, packaging, and releases"
+  - name: "area:ai"
+    color: "006B75"
+    description: "Claude skills, agents, and the issue pipeline itself"
+
+  # ---------------------------------------------------------------- type:*
+  # What kind of work the issue is. Exactly one per issue.
+  # `type:epic` is not here — the gatekeeper reads it, so it is core.
+  - name: "type:task"
+    color: "C2E0C6"
+    description: "A single self-contained unit of buildable work"
+  - name: "type:question"
+    color: "CC317C"
+    description: "A decision to make before work can be specified"
+  - name: "type:bug"
+    color: "D73A4A"
+    description: "Something built already behaves incorrectly"
+  - name: "type:wireframe"
+    color: "F9D0C4"
+    description: "A UI layout to agree on before any UI code is written"
+
+  # ----------------------------------------------------------------- other
+  - name: "dashboard"
+    color: "FEF2C0"
+    description: "The single live pipeline dashboard issue"
+
+# GitHub's stock labels. Decision (issue #1): delete the six that duplicate the
+# type:* taxonomy. `duplicate`, `invalid` and `wontfix` are deliberately absent
+# from this list — they are useful as close reasons and collide with nothing.
+#
+# There is no `keep:` section any more. The old manifest had one, but the
+# shared sync does not read it and never needed to: a label absent from both
+# manifests is left alone, which is exactly what `keep:` was asking for.
+delete:
+  - "bug"
+  - "documentation"
+  - "enhancement"
+  - "good first issue"
+  - "help wanted"
+  - "question"

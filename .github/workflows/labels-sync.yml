@@ -1,36 +1,29 @@
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.3 hash=1442529a7095066f
+# Managed by `adopt`. Local edits are preserved but stop this file
+# being updated — `adopt verify` will report it.
 name: labels-sync
 
-# The label taxonomy is the pipeline's state machine, so it lives in git
-# (.github/labels.yml) and is applied from there rather than clicked into the
-# GitHub UI. Runs on every change to the taxonomy, and on demand.
+# A caller. The logic is in ai-sdlc; this exists because a trigger
+# cannot be centralised — it must be declared in the repository it
+# fires for.
+#
+# Pinned to a commit rather than a tag: a tag can move, and this runs
+# with this repository's token. Upgrade with `adopt apply <version>`,
+# which rewrites both the SHA and the comment.
 
 on:
   push:
     branches: [main]
     paths:
-      - .github/labels.yml
-      - .github/scripts/sync_labels.py
-      - .github/workflows/labels-sync.yml
+      - .github/labels.core.yml
+      - .github/labels.repo.yml
   workflow_dispatch:
 
 permissions:
   contents: read
-  issues: write
-
-concurrency:
-  group: labels-sync
-  cancel-in-progress: false
 
 jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Install PyYAML
-        run: python3 -m pip install --quiet pyyaml
-
-      - name: Apply the label taxonomy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/sync_labels.py
+  labels-sync:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-labels-sync.yml@b8c1690e1cdcb09e60531871172270df5e460a24 # v0.4.3
+    with:
+      ref: b8c1690e1cdcb09e60531871172270df5e460a24
