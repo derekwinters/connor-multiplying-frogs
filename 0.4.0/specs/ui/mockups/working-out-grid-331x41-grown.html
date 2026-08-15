@@ -1,0 +1,188 @@
+<!doctype html>
+<!--
+  Multiplying Frogs — Working-out grid — 331 × 41, addition section grown to the cap
+  Device: kids' Android tablet, held landscape.
+  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+
+  Shapes, sizes and positions only. The colours are placeholders so the frogs
+  can be told apart in a picture; the palette is an area:art decision.
+  Numbers here are the numbers in the spec page's constants table.
+
+  THIS DRAWING USED TO BE THE QUESTION. IT IS NOW THE ANSWER.
+
+  It is the same screen as working-out-grid-331x41.html with the addition
+  section drawn at its cap of six rows instead of the two it starts with. At
+  full-size addition rows it did not fit — 1180 px of grid in 908 px of panel,
+  with the answer row below the bottom edge of the tablet — and that overflow
+  was drawn deliberately, as the input to open question 3.
+
+  Derek settled that question: smaller cells for the addition rows only. The
+  section takes GridAdditionRowHeight (56 px) once it holds more rows than the
+  card dealt it, and every other row keeps the size it has at two rows. Six
+  grown rows now make an 892 px grid in the 908 px available, and the grid
+  re-centres in that space as it grows, per the page's Anchors rule.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multiplying Frogs — Working-out grid — 331 × 41 grown to the cap</title>
+<style>
+  :root{
+    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
+    /* the cell the caret is in — working-out-grid.md's `GridFocusFill` */
+    --focus:#8CB89E;
+    --green:#3F8E4F; --blue:#2C6DAF; --orange:#D2762B; --pink:#C24C86;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+         background:var(--bg);color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .abs{position:absolute}
+  .row{display:flex;align-items:center}
+  .col{display:flex;flex-direction:column}
+  .mid{display:flex;align-items:center;justify-content:center}
+  .band{position:absolute;left:0;right:0}
+  .note{font-size:26px;color:#7A8783}
+  .hatch{background:repeating-linear-gradient(45deg,#DCE3E0 0 14px,#E8EDEB 14px 28px)}
+  .panel{background:var(--paper);border:3px solid var(--line);border-radius:32px}
+  .btn{height:112px;min-width:320px;padding:0 48px;border-radius:24px;display:flex;align-items:center;
+       justify-content:center;font-size:44px;font-weight:700}
+  .btn.p{background:var(--accent);color:#fff}
+  .btn.s{border:4px solid var(--line);color:var(--ink)}
+  .btn.d{border:4px solid var(--warn);color:var(--warn)}
+  .btn.off{background:#C9D2CE;color:#8C9793}
+  .chip{width:256px;height:96px;border-radius:20px;border:3px solid var(--faint);display:flex;
+        align-items:center;gap:24px;padding:0 20px;font-size:32px;background:#fff;flex:none}
+  .chip.act{border:6px solid var(--ink);font-weight:700}
+  .chip b{display:block;font-size:32px;font-weight:700;line-height:1.1}
+  .chip s{display:block;font-size:24px;color:#6C7873;text-decoration:none;line-height:1.2}
+  .sw{width:64px;height:64px;border-radius:50%;flex:none}
+  .pad{width:112px;height:112px;border-radius:50%;background:#CFE0D2;border:3px solid #9FB8A5;flex:none;position:relative}
+  .log{width:176px;height:120px;border-radius:24px;background:#E0D4C3;border:3px solid #B9A78E;flex:none;
+       display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A7A63}
+  .frog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;
+        border:4px solid rgba(0,0,0,.35)}
+  .scrim{position:absolute;inset:0;background:rgba(20,26,24,.66)}
+  .cell{width:104px;height:104px;border:3px solid var(--line);border-radius:10px;background:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:56px}
+  .cell.fix{border:none;background:transparent;font-weight:700}
+  /* A grown section's row: GridAdditionRowHeight tall, with GridSmallDigitSize
+     digits in it. Same width, same border, same colours — only the height and
+     the digit shrink, and they shrink for every row in the section, the two
+     the card dealt included. */
+  .cell.sm{height:56px;font-size:28px}
+  .carry{width:104px;height:56px;display:flex;align-items:center;justify-content:center}
+  .carry i{display:block;width:56px;height:52px;border:3px dashed var(--faint);border-radius:8px}
+  .key{width:140px;height:140px;border:3px solid var(--line);border-radius:20px;background:#fff;
+       display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:700}
+  .dice{width:240px;height:240px;border-radius:40px;background:#fff;border:4px solid var(--line);
+        display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:34px}
+  .pip{width:40px;height:40px;border-radius:50%;background:var(--ink);align-self:center;justify-self:center}
+  .card{width:560px;height:420px;border-radius:24px;background:#fff;border:4px solid var(--line);
+        display:flex;align-items:center;justify-content:center}
+  .gear{width:96px;height:96px;border-radius:50%;border:4px solid var(--line);display:flex;align-items:center;
+        justify-content:center;font-size:44px}
+  /* Measurement annotations. Not part of the screen — they are the drawing
+     talking about itself, and none of them is an element to be built. */
+  .limit{position:absolute;left:0;right:0;height:0;border-top:4px dashed var(--accent)}
+  .limit span{position:absolute;right:0;top:-38px;font-size:24px;font-weight:700;color:var(--accent)}
+  .tag{font-size:24px;color:var(--accent);font-weight:700}
+  .brace{position:absolute;border:4px solid var(--accent);border-right:none;border-radius:20px 0 0 20px}
+</style>
+</head>
+<body>
+<div class="frame">
+    <div class="abs" style="inset:0;background:#E2E8E5"></div>
+    <div class="scrim"></div>
+
+    <div class="abs panel" style="left:48px;top:48px;width:1824px;height:1104px">
+      <div class="abs row" style="left:56px;top:44px;gap:32px">
+        <div class="chip act"><span class="sw" style="background:var(--green)"></span><span>Green</span></div>
+        <div style="font-size:44px;color:#6C7873">Work it out</div>
+        <div class="row" style="height:96px;padding:0 32px;border-radius:20px;border:3px solid var(--faint);font-size:40px;font-weight:700">331 × 41 · hard pile</div>
+      </div>
+
+      <!-- grid: the committed left, 370, unchanged. The top is 148 rather than
+           the as-dealt drawing's 216, because a 892 px grid centres higher in
+           the 908 px between the header band and DialogPadding than a 732 px
+           one does — the grid moves, the keypad does not. -->
+      <div class="abs col" style="left:370px;top:148px;gap:8px">
+        <div class="row" style="gap:8px"><div class="carry"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">3</div><div class="cell fix">3</div><div class="cell fix">1</div></div>
+        <div class="row" style="gap:8px"><div class="cell fix">×</div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">4</div><div class="cell fix">1</div></div>
+        <div style="height:6px;background:var(--ink);width:664px"></div>
+
+        <!-- addition section: the two rows every card starts with … -->
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <!-- … and the four a player can grow it by, to the cap of six. A grown
+             row is an ordinary row: same cells, same size as the rest of the
+             section, no marking. The `+` stays on the bottom row of the
+             section, where the committed two-row drawing puts it. -->
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+        <div class="row" style="gap:8px"><div class="cell fix sm">+</div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div><div class="cell sm"></div></div>
+
+        <div style="height:6px;background:var(--ink);width:664px"></div>
+        <div class="row" style="gap:8px"><div class="carry"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div>
+        <div class="row" style="gap:8px">
+          <div class="cell fix" style="font-size:28px;color:#6C7873">=</div>
+          <div class="cell" style="height:128px;border-width:6px;background:#F3F8F5">1</div>
+          <div class="cell" style="height:128px;border-width:6px;background:#F3F8F5">3</div>
+          <div class="cell" style="height:128px;border-width:6px;background:var(--focus);border-color:var(--accent)"></div>
+          <div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div>
+          <div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div>
+        </div>
+      </div>
+
+      <!-- Left margin: which rows are the addition section, and where it
+           starts and stops. Annotation, not an element. -->
+      <div class="abs brace" style="left:300px;top:450px;width:44px;height:376px"></div>
+      <div class="abs col" style="left:64px;top:452px;width:224px;gap:10px">
+        <div style="font-size:26px;font-weight:700;color:var(--accent)">addition section</div>
+        <div style="font-size:24px;color:#6C7873;line-height:1.3">rows 1–2 are what<br>every card starts with</div>
+      </div>
+      <div class="abs" style="left:64px;top:600px;width:224px;font-size:24px;color:#6C7873;line-height:1.3">
+        rows 3–6 are grown by the player, one at a time, and stop here. The
+        whole section is 56 px a row from the third onward, dealt rows
+        included
+      </div>
+
+      <!-- Right of the grid: what the drawing measures. -->
+      <div class="abs col" style="left:1060px;top:216px;width:240px;gap:18px">
+        <div style="font-size:28px;font-weight:700;color:var(--accent)">This fits.</div>
+        <div style="font-size:24px;color:#6C7873;line-height:1.35">
+          There are 908 px between the header band and
+          <code>DialogPadding</code>. The rows that never change size come to
+          460 px, and the gaps to 96 px.
+        </div>
+        <div style="font-size:24px;color:#6C7873;line-height:1.35">
+          Six rows at <code>GridAdditionRowHeight</code>: 336 px. The grid is
+          892 px tall and ends 1040 px into the panel — 16 px to spare.
+        </div>
+        <div style="font-size:24px;color:#6C7873;line-height:1.35">
+          At full-size rows it was 1180 px, 272 px too tall, with the second
+          rule line, the second carry strip and the answer row all below the
+          bottom of the tablet. That drawing was the question; this one is
+          Derek's answer to it.
+        </div>
+        <div style="font-size:24px;color:#6C7873;line-height:1.35">
+          The problem, both rule lines, both carry strips and the answer row
+          are the size they are on the as-dealt drawing. Only the scratch
+          paper shrank.
+        </div>
+      </div>
+    </div>
+
+    <!-- The last usable pixel inside the dialog: DialogMaxHeight less
+         DialogPadding, 1096 px down the canvas. The grid's bottom edge is
+         8 px above it. -->
+    <div class="abs limit" style="left:48px;right:48px;top:1096px">
+      <span>DialogPadding — the last usable pixel inside the dialog</span>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!doctype html>
+<!--
+  Multiplying Frogs — Game setup at rest, with names set
+  Device: kids' Android tablet, held landscape.
+  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+
+  The ordinary state: nobody is typing, the keyboard is gone, the seat row is
+  back at its resting top of 300, and Back and Start are visible again. This is
+  what the screen looks like for almost all of the time it is on screen, which
+  is why it gets a picture of its own rather than being left to the imagination
+  between the two editing mockups.
+
+  This is the at-rest drawing for the screen once names exist. It supersedes
+  game-setup.html, which draws the same screen before names and before the seat
+  grew from 440 to 480.
+
+  Drawn in candidate B's dressing — the name row edits, the corner badge
+  removes — because that is the candidate Derek picked.
+
+  Three things are being shown at once:
+
+    Green  — a short typed name, the ordinary case.
+    Blue   — a long typed name. "Isabella" is 211 px at SeatLabelSize 48,
+             against the 274 px a name row has inside its padding.
+    Orange — never renamed, so it still carries its bare colour name. A default
+             name is a real name, not a placeholder, and it is drawn identically.
+
+  ON THE CAP: PlayerNameMaxLength is 10 characters, and the name row is where
+  that number comes from — ten characters of ordinary mixed-case text is about
+  270 px at SeatLabelSize 48, which is what the row holds. A character count
+  cannot promise a width, though: "Mohammed" is eight characters and 314 px,
+  wider than "Alexander" at nine. So the count is the cap the keyboard enforces,
+  and any surface that still cannot fit the string it is given truncates with an
+  ellipsis. On this row that is rare. On the board's player chip, whose label
+  column is 128 px, it is the normal case — see shared-components.md.
+
+  The hint reads "Connor goes first", not "Green goes first". A name that only
+  the seat knows about is a name nobody plays with.
+
+  Shapes, sizes and positions only. The colours are placeholders so the frogs
+  can be told apart in a picture; the palette is an area:art decision.
+  Numbers here are the numbers in the spec page's constants table.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multiplying Frogs — Game setup with names set</title>
+<style>
+  :root{
+    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
+    --green:#3F8E4F; --blue:#2C6DAF; --orange:#D2762B; --pink:#C24C86;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+         background:var(--bg);color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .abs{position:absolute}
+  .row{display:flex;align-items:center}
+  .col{display:flex;flex-direction:column}
+  .mid{display:flex;align-items:center;justify-content:center}
+  .btn{height:112px;min-width:320px;padding:0 48px;border-radius:24px;display:flex;align-items:center;
+       justify-content:center;font-size:44px;font-weight:700}
+  .btn.p{background:var(--accent);color:#fff}
+  .btn.s{border:4px solid var(--line);color:var(--ink)}
+
+  /* A seat. SeatWidth 360 x SeatHeight 480, SeatRadius 32. */
+  .seat{width:360px;height:480px;border-radius:32px;position:relative;
+        padding-top:136px;align-items:center;gap:16px}
+  .seat.chosen{background:#fff;border:8px solid var(--ink)}
+  .seat.empty{background:transparent;border:6px dashed var(--faint)}
+  .sw{width:200px;height:200px;border-radius:50%;flex:none}
+  .badge{position:absolute;left:24px;top:24px;width:72px;height:72px;border-radius:50%;
+         background:var(--ink);color:#fff;font-size:38px;font-weight:700}
+  .remove{position:absolute;right:16px;top:16px;width:96px;height:96px;border-radius:50%;
+          border:4px solid var(--warn);color:var(--warn);font-size:48px;font-weight:700;background:#FBF1F0}
+  .namerow{width:312px;height:96px;border-radius:20px;background:#F4F7F5;border:3px solid var(--faint);
+           display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;
+           padding:0 16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;
+           line-height:90px;text-align:center}
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div class="abs" style="left:0;right:0;top:64px;text-align:center;font-size:72px;font-weight:700">Who is playing?</div>
+
+  <!-- The seat row at its resting top of 300. -->
+  <div class="abs row" style="left:168px;top:300px;gap:48px">
+
+    <!-- Green, renamed. -->
+    <div class="col seat chosen">
+      <div class="badge mid">1</div>
+      <div class="remove mid">&times;</div>
+      <div class="sw" style="background:var(--green)"></div>
+      <div class="namerow">Connor</div>
+    </div>
+
+    <!-- Blue, renamed to a long name: 8 characters, 211 px of the 274 the row
+         holds inside its padding. Comfortable, and about as long as a name
+         normally gets. -->
+    <div class="col seat chosen">
+      <div class="badge mid">2</div>
+      <div class="remove mid">&times;</div>
+      <div class="sw" style="background:var(--blue)"></div>
+      <div class="namerow">Isabella</div>
+    </div>
+
+    <!-- Orange, never renamed. Its default name is its bare colour name — no
+         "frog" appended, here or anywhere else. -->
+    <div class="col seat chosen">
+      <div class="badge mid">3</div>
+      <div class="remove mid">&times;</div>
+      <div class="sw" style="background:var(--orange)"></div>
+      <div class="namerow">Orange</div>
+    </div>
+
+    <!-- Pink, empty. No name row and no remove badge; its body still seats the
+         frog, unchanged from today. -->
+    <div class="col seat empty">
+      <div class="sw" style="background:#DDE4E1"></div>
+      <div style="height:96px;display:flex;align-items:center;font-size:44px;color:#8C9793">Tap to play</div>
+    </div>
+  </div>
+
+  <!-- HintGap 56 below the seat row, which now ends at 780. -->
+  <div class="abs" style="left:0;right:0;top:836px;text-align:center;font-size:36px;color:#6C7873">Connor goes first</div>
+  <div class="abs btn s" style="left:48px;bottom:48px">Back</div>
+  <div class="abs btn p" style="right:48px;bottom:48px">Start</div>
+</div>
+</body>
+</html>

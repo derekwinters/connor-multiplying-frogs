@@ -1,0 +1,5846 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The design contract and engineering handbook for Multiplying Frogs — a game Derek is building with his son Connor.">
+      
+      
+        <meta name="author" content="Derek Winters">
+      
+      
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.4.0/engineering/issue-pipeline/">
+      
+      
+        <link rel="prev" href="../agent-workflow/">
+      
+      
+        <link rel="next" href="../ui-design-process/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Issue pipeline - Multiplying Frogs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#issue-pipeline" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Multiplying Frogs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Issue pipeline
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Introduction
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../specs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Specs
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adr/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Engineering
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tools/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tools
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Multiplying Frogs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../intro/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Introduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../specs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/product-scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product scope
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules of play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/future-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future ideas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference material
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../specs/ui/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/shared-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/mockups/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mockups
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../adr/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 Rules sacred, presentation ours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0002-structured-working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 The working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0003-network-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 The network boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0004 Core owns the save format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tech stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue pipeline
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        States
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="States">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-normal-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The normal path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-each-command-is-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where each command is refused
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unknown commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-bad-actor-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bad-actor gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idempotency-the-watermark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotency: the 👀 watermark
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Idempotency: the 👀 watermark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The snapshot
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The snapshot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-dependency-is-an-edge-not-a-number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A dependency is an edge, not a number
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A partial payload is tolerated; an unreadable edge is not approved over
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#replaying-the-comments-the-webhook-lost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replaying the comments the webhook lost
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Replaying the comments the webhook lost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-is-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay is cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-writes-its-labels-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay writes its labels back
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-render-last-override-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One render, last override wins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-replay-raises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a replay raises
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-approval-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The approval gates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The approval gates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gate-1-approve-requires-a-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gate 1: /approve requires a milestone
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gate-2-milestone-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gate 2: milestone order
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Gate 2: milestone order">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#milestone-order-comes-from-the-title" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone order comes from the title
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#soft-depends-on-uses-the-same-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soft Depends on: uses the same rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refuse-never-auto-bump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refuse, never auto-bump
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#it-runs-on-milestone-too" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        It runs on /milestone too
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auto-revisit-when-a-blocker-clears" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-revisit when a blocker clears
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auto-revisit when a blocker clears">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-counts-as-a-blocker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as a blocker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What counts as a blocker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-blocker-resolves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a blocker resolves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-typewireframe-carve-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The type:wireframe carve-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-blocker-set-wakes-an-issue-at-most-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A blocker set wakes an issue at most once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-never-touches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it never touches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#focus-and-cap-live-on-the-dashboard-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /focus and /cap live on the dashboard issue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="/focus and /cap live on the dashboard issue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-markers-and-why-re-rendering-beats-hand-editing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why markers, and why re-rendering beats hand-editing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fetching-live-milestones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetching live milestones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fetching live milestones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-gotcha-milestone-takes-a-number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gotcha: milestone takes a number
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schedule
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reactive-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reactive triage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reactive triage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#both-entry-points-fire-and-each-issue-fires-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both entry points fire, and each issue fires once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-outcome-is-classified-truthfully" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The outcome is classified truthfully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The endpoint is the Anthropic API, so anthropic-version is required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#an-error-status-is-an-answer-not-a-failure-to-reach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An error status is an answer, not a failure to reach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#and-the-classification-is-printed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        And the classification is printed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-payload-is-not-a-place-to-put-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The payload is not a place to put instructions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-each-stage-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What each stage does
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What each stage does">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analysis-find-what-needs-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analysis — find what needs triage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analysis — find what needs triage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-scheduled-round-is-the-backstop-not-the-main-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The scheduled round is the backstop, not the main path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-one-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Triage — one issue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Triage — one issue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-four-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The four routes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-ordering-comment-first-then-the-label" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Write ordering: comment first, then the label
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Write ordering: comment first, then the label">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-write-is-code-not-an-instruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The write is code, not an instruction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-hand-back-footer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hand-back footer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#re-fire-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-fire repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Re-fire repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-io-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The I/O layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The I/O layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-either-entry-point-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running either entry point by hand
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#applying-an-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Applying an action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recording-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recording dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-the-ready-queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development — the ready queue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serial-delegated-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serial delegated delivery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Serial delegated delivery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cap-bounds-the-round-not-the-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cap bounds the round, not the concurrency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-branch-one-pr-one-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One branch, one PR, one issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-builder-never-merges-and-never-closes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The builder never merges and never closes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip-docs-is-applied-immediately-or-not-at-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skip-docs is applied immediately, or not at all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-owner-invoked-alternative-milestone-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The owner-invoked alternative: milestone-orchestration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-failing-issue-is-dropped-and-the-round-continues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A failing issue is dropped, and the round continues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reconciliation-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reconciliation — drift
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reconciliation — drift">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-sweep-never-closes-an-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The sweep never closes an issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-two-of-the-auto-fixes-are-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why two of the auto-fixes are cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#done-ness-is-read-from-commit-bodies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Done-ness is read from commit bodies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dashboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-the-pie-and-the-ready-queue-are-focus-scoped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Only the pie and the ready queue are focus-scoped
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intake-carries-two-piles-and-flags-which-is-which" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intake carries two piles, and flags which is which
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unblocker-stars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unblocker stars
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parked-is-listed-never-queued" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parked is listed, never queued
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-model-renders-the-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No model renders the board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-renders-write-surface-is-one-issue-body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The render's write surface is one issue body
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The focus pie always adds up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-reconciles-flags-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How reconcile's flags surface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skills-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills inventory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skills-here-are-local-and-deliberately-not-synced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills here are local, and deliberately not synced
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Skills here are local, and deliberately not synced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vendored-skills-do-not-outrank-this-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vendored skills do not outrank this repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-not-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-manifest-is-a-record-not-a-subscription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The manifest is a record, not a subscription
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-a-sync-is-ever-wanted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If a sync is ever wanted
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-design-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI design process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unity-serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity serialization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai-sdlc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ai-sdlc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../tools/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        States
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="States">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-normal-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The normal path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-each-command-is-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where each command is refused
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unknown commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-bad-actor-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bad-actor gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idempotency-the-watermark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idempotency: the 👀 watermark
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Idempotency: the 👀 watermark">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The snapshot
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The snapshot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-dependency-is-an-edge-not-a-number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A dependency is an edge, not a number
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A partial payload is tolerated; an unreadable edge is not approved over
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#replaying-the-comments-the-webhook-lost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replaying the comments the webhook lost
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Replaying the comments the webhook lost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-is-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay is cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-replay-writes-its-labels-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the replay writes its labels back
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-render-last-override-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One render, last override wins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-replay-raises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a replay raises
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-approval-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The approval gates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The approval gates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gate-1-approve-requires-a-milestone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gate 1: /approve requires a milestone
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gate-2-milestone-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gate 2: milestone order
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Gate 2: milestone order">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#milestone-order-comes-from-the-title" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milestone order comes from the title
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#soft-depends-on-uses-the-same-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Soft Depends on: uses the same rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refuse-never-auto-bump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refuse, never auto-bump
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#it-runs-on-milestone-too" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        It runs on /milestone too
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auto-revisit-when-a-blocker-clears" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-revisit when a blocker clears
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Auto-revisit when a blocker clears">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-counts-as-a-blocker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as a blocker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What counts as a blocker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-a-blocker-resolves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When a blocker resolves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-typewireframe-carve-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The type:wireframe carve-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-blocker-set-wakes-an-issue-at-most-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A blocker set wakes an issue at most once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-never-touches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it never touches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#focus-and-cap-live-on-the-dashboard-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /focus and /cap live on the dashboard issue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="/focus and /cap live on the dashboard issue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-markers-and-why-re-rendering-beats-hand-editing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why markers, and why re-rendering beats hand-editing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fetching-live-milestones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetching live milestones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fetching live milestones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-gotcha-milestone-takes-a-number" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gotcha: milestone takes a number
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schedule
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reactive-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reactive triage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reactive triage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#both-entry-points-fire-and-each-issue-fires-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both entry points fire, and each issue fires once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-outcome-is-classified-truthfully" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The outcome is classified truthfully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The endpoint is the Anthropic API, so anthropic-version is required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#an-error-status-is-an-answer-not-a-failure-to-reach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An error status is an answer, not a failure to reach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#and-the-classification-is-printed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        And the classification is printed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-payload-is-not-a-place-to-put-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The payload is not a place to put instructions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-each-stage-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What each stage does
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What each stage does">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analysis-find-what-needs-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analysis — find what needs triage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analysis — find what needs triage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-scheduled-round-is-the-backstop-not-the-main-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The scheduled round is the backstop, not the main path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-one-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Triage — one issue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Triage — one issue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-four-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The four routes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-ordering-comment-first-then-the-label" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Write ordering: comment first, then the label
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Write ordering: comment first, then the label">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-write-is-code-not-an-instruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The write is code, not an instruction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-hand-back-footer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hand-back footer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#re-fire-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Re-fire repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Re-fire repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#one-recognizer-shared_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One recognizer, shared
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-io-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The I/O layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The I/O layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-either-entry-point-by-hand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running either entry point by hand
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#applying-an-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Applying an action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recording-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recording dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-the-ready-queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development — the ready queue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serial-delegated-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serial delegated delivery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Serial delegated delivery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cap-bounds-the-round-not-the-concurrency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cap bounds the round, not the concurrency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-branch-one-pr-one-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One branch, one PR, one issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-builder-never-merges-and-never-closes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The builder never merges and never closes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip-docs-is-applied-immediately-or-not-at-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skip-docs is applied immediately, or not at all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-owner-invoked-alternative-milestone-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The owner-invoked alternative: milestone-orchestration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-failing-issue-is-dropped-and-the-round-continues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A failing issue is dropped, and the round continues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reconciliation-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reconciliation — drift
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reconciliation — drift">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-sweep-never-closes-an-issue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The sweep never closes an issue
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-two-of-the-auto-fixes-are-cron-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why two of the auto-fixes are cron-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#done-ness-is-read-from-commit-bodies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Done-ness is read from commit bodies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dashboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-the-pie-and-the-ready-queue-are-focus-scoped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Only the pie and the ready queue are focus-scoped
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intake-carries-two-piles-and-flags-which-is-which" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intake carries two piles, and flags which is which
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unblocker-stars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unblocker stars
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parked-is-listed-never-queued" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parked is listed, never queued
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-model-renders-the-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No model renders the board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-renders-write-surface-is-one-issue-body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The render's write surface is one issue body
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-focus-pie-always-adds-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The focus pie always adds up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-reconciles-flags-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How reconcile's flags surface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skills-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills inventory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skills-here-are-local-and-deliberately-not-synced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills here are local, and deliberately not synced
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Skills here are local, and deliberately not synced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vendored-skills-do-not-outrank-this-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vendored skills do not outrank this repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-not-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not sync
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-manifest-is-a-record-not-a-subscription" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The manifest is a record, not a subscription
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-a-sync-is-ever-wanted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If a sync is ever wanted
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/engineering/issue-pipeline.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="issue-pipeline">Issue pipeline<a class="headerlink" href="#issue-pipeline" title="Link to this section">&para;</a></h1>
+<p>The AI issue-management pipeline: how an idea becomes a triaged issue, an
+approved issue, a queued issue, and a merged PR — mostly without anyone typing
+anything except <code>/approve</code>.</p>
+<p>Everything in the <code>pipeline-*</code> skills implements what this page describes. When
+the two disagree, this page is the specification and the code is the bug.</p>
+<h2 id="the-model">The model<a class="headerlink" href="#the-model" title="Link to this section">&para;</a></h2>
+<p>Four ideas, and the rest follows from them.</p>
+<p><strong>1. Labels are the state machine.</strong> An issue's pipeline state is a label, not a
+field in a database somewhere, not a line in its body. GitHub is the store. That
+means the state is visible in the issues list, filterable, editable by hand in an
+emergency, and impossible to lose by dropping a file.</p>
+<p><strong>2. Comments are the owner's control surface.</strong> Derek drives the pipeline by
+commenting <code>/approve</code>, <code>/park</code>, <code>/focus v0.1</code> on issues. No dashboard app, no
+CLI, no separate tool to log into. The place where the conversation about an
+issue already happens is the place where the decision about it is made.</p>
+<p><strong>3. A gatekeeper translates one into the other.</strong> A deterministic script — not
+a model — reads comments, parses commands, and applies label changes. This is
+the whole safety story: the component that can change state is a parser with a
+fixed vocabulary, so the worst a confused language model can do is <em>suggest</em>
+something, never <em>do</em> it.</p>
+<p><strong>4. Only the owner's commands are honoured.</strong> A command in a comment from
+anyone else is ignored. See <a href="#the-bad-actor-gate">the bad-actor gate</a>.</p>
+<h2 id="states">States<a class="headerlink" href="#states" title="Link to this section">&para;</a></h2>
+<p>Exactly one state label per open issue.</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+<th>Set by</th>
+<th>Leaves when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(none)</em></td>
+<td>brand new, not yet admitted</td>
+<td>issue creation</td>
+<td><code>/admit</code></td>
+</tr>
+<tr>
+<td><code>ai-triage</code></td>
+<td>queued for automated triage</td>
+<td><code>/admit</code>, <code>/propose</code>, <code>/revise</code>, <code>/unpark</code></td>
+<td>triage finishes</td>
+</tr>
+<tr>
+<td><code>pending-approval</code></td>
+<td>triaged; waiting on a human</td>
+<td>triage</td>
+<td><code>/approve</code>, <code>/park</code></td>
+</tr>
+<tr>
+<td><code>needs-clarification</code></td>
+<td>triage could not proceed without an answer</td>
+<td>triage</td>
+<td><code>/revise &lt;answer&gt;</code>, <code>/park</code>, or the blocker sweep</td>
+</tr>
+<tr>
+<td><code>ready-for-work</code></td>
+<td>approved and eligible for the builder</td>
+<td><code>/approve</code></td>
+<td>the builder picks it up</td>
+</tr>
+<tr>
+<td><code>in-progress</code></td>
+<td>an agent is building it right now</td>
+<td>the builder</td>
+<td>its PR merges, or it fails</td>
+</tr>
+<tr>
+<td><code>parked</code></td>
+<td>deliberately set aside</td>
+<td><code>/park</code></td>
+<td><code>/unpark</code></td>
+</tr>
+</tbody>
+</table>
+<p>Plus <code>dashboard</code>, which is not a state — it marks the one live dashboard issue,
+which the pipeline never triages or works.</p>
+<p><strong>There is no <code>/retriage</code>.</strong> This table named one twice, and it has never
+existed: <code>parse_commands.COMMANDS</code> has no such entry, so typing it earns the
+unknown-command reaction rather than a re-triage. The way back to <code>ai-triage</code>
+from a question is <code>/revise &lt;your answer&gt;</code> — the one command that returns an
+issue to triage <em>with a note attached</em>, which is exactly what an answer is. The
+verb reads oddly on that route and the hand-back footer says so in plainer
+words; see <a href="#the-hand-back-footer">the footer</a>.</p>
+<p><strong>Invariant:</strong> <code>ready-for-work</code> ⇒ the issue has a milestone. Enforced at the
+<code>/approve</code> gate and re-checked by the reconciler. See
+<a href="../../intro/conventions/#the-invariant-ready-for-work-has-a-milestone">Conventions</a>.</p>
+<p><strong>Invariant:</strong> an issue has at most one state label. The gatekeeper <em>replaces</em>
+rather than adds; the reconciler flags any issue carrying two.</p>
+<h3 id="the-normal-path">The normal path<a class="headerlink" href="#the-normal-path" title="Link to this section">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>(new) → ai-triage → pending-approval → ready-for-work → in-progress → closed
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                            ↓                ↑
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                   needs-clarification ──────┘
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                            ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                         parked → (unpark) → ai-triage
+</code></pre></div>
+<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Link to this section">&para;</a></h2>
+<p>Every command is a line in an issue comment beginning with <code>/</code>. A comment may
+contain several; they apply in order. Text around them is ignored, so you can
+explain yourself in the same comment.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/admit</code></td>
+<td>bring an issue into the pipeline — it becomes <code>ai-triage</code>.</td>
+</tr>
+<tr>
+<td><code>/propose</code></td>
+<td>ask triage to produce a plan for it.</td>
+</tr>
+<tr>
+<td><code>/approve</code></td>
+<td>the plan is right → <code>ready-for-work</code>. Subject to both approval gates.</td>
+</tr>
+<tr>
+<td><code>/revise &lt;notes&gt;</code></td>
+<td>the plan is not right → back to <code>ai-triage</code>, with the notes.</td>
+</tr>
+<tr>
+<td><code>/redo</code></td>
+<td>the built work is not right → queue it again.</td>
+</tr>
+<tr>
+<td><code>/park</code></td>
+<td>set aside deliberately.</td>
+</tr>
+<tr>
+<td><code>/unpark</code></td>
+<td>bring it back.</td>
+</tr>
+<tr>
+<td><code>/milestone &lt;title&gt;</code></td>
+<td>set the issue's milestone, by title.</td>
+</tr>
+<tr>
+<td><code>/focus &lt;title&gt;</code></td>
+<td>set the pipeline's focus milestone. <strong>Dashboard issue only.</strong></td>
+</tr>
+<tr>
+<td><code>/cap &lt;n&gt;</code></td>
+<td>set how many issues one build round takes on. <strong>Dashboard issue only.</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Deliberately absent: anything that closes an issue, edits a body, or merges a
+PR. Those have perfectly good GitHub buttons, and a command vocabulary that can
+do irreversible things is a vocabulary that will eventually do one by accident.</p>
+<h3 id="where-each-command-is-refused">Where each command is refused<a class="headerlink" href="#where-each-command-is-refused" title="Link to this section">&para;</a></h3>
+<p>The parser refuses rather than guessing, and every refusal carries a reason
+code so the ack can say which rule applied:</p>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>not-owner</code></td>
+<td>the comment is from anyone but the owner — dropped <strong>silently</strong></td>
+</tr>
+<tr>
+<td><code>already-applied</code></td>
+<td>the comment already carries the 👀 watermark</td>
+</tr>
+<tr>
+<td><code>unknown-command</code></td>
+<td><code>/aprove</code> — never guessed at; the reply names the closest match</td>
+</tr>
+<tr>
+<td><code>not-dashboard</code></td>
+<td><code>/focus</code> or <code>/cap</code> on an ordinary issue</td>
+</tr>
+<tr>
+<td><code>cap-invalid</code></td>
+<td><code>/cap lots</code>, <code>/cap 0</code>, <code>/cap -1</code></td>
+</tr>
+<tr>
+<td><code>epic-excluded</code></td>
+<td><code>/admit</code>, <code>/propose</code>, <code>/approve</code>, <code>/revise</code>, <code>/redo</code> on a <code>type:epic</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Epics are containers</strong>, so the five commands that would put one in the
+builder's path are refused on them — their children are the work. <code>/park</code> and
+<code>/milestone</code> still apply to a whole epic, because both are reasonable things to
+want.</p>
+<p>Two parsing rules worth knowing:</p>
+<ul>
+<li><strong>A command must start its line</strong> — its <em>line</em>, not the comment. "see
+  /approve for details" is a mention; a sentence of explanation above
+  <code>/approve</code> is not, and applies normally. The workflow briefly filtered on
+  <code>startsWith(body, '/')</code>, which dropped exactly that case with no run, no
+  reaction and no acknowledgement — a silence indistinguishable from the
+  pipeline being broken.</li>
+<li><strong>A command inside a code fence is ignored</strong>, or writing up this table in a
+  comment would execute it.</li>
+</ul>
+<h3 id="unknown-commands">Unknown commands<a class="headerlink" href="#unknown-commands" title="Link to this section">&para;</a></h3>
+<p>A line starting with <code>/</code> that isn't in the table gets a 😕 reaction and a reply
+naming the closest match. It is never guessed at — <code>/aprove</code> does not approve.</p>
+<h2 id="the-bad-actor-gate">The bad-actor gate<a class="headerlink" href="#the-bad-actor-gate" title="Link to this section">&para;</a></h2>
+<p><strong>Commands are honoured only from the repository owner.</strong> Everything else is
+read, recognised, and dropped.</p>
+<p>The pipeline can label, comment, fire scheduled routines, and queue work for an
+agent that writes code. That is not authority to hand to whoever can type in a
+comment box on a public repo.</p>
+<p>Two details that matter:</p>
+<ul>
+<li><strong>Ignored means silent.</strong> No reply, no reaction, no label change. Replying
+  would let a stranger make the bot post — a smaller hole than acting on the
+  command, but the same shape. The drop is recorded in the workflow log, which
+  is where you look if you expected something to happen and it didn't.</li>
+<li><strong>Author association is not enough.</strong> The check is against the configured
+  owner login, not "is a collaborator" or "has write access". Access can be
+  granted for a reason that has nothing to do with driving the pipeline.</li>
+</ul>
+<h2 id="idempotency-the-watermark">Idempotency: the 👀 watermark<a class="headerlink" href="#idempotency-the-watermark" title="Link to this section">&para;</a></h2>
+<p>Two things process comments — the <code>issue_comment</code> workflow and the periodic
+sweep — and neither can assume the other didn't get there first. Webhooks are
+also redelivered.</p>
+<p>So before acting on a comment, the gatekeeper adds a <strong>👀 reaction from its own
+account</strong>, and it skips any comment that already has one.</p>
+<ul>
+<li>The watermark is <strong>on the comment</strong>, so it survives everything: workflow
+  re-runs, sweeps, redelivered webhooks, and the queue being rebuilt.</li>
+<li>It is added <strong>before</strong> the actions are applied, not after. A crash mid-apply
+  leaves a claimed-but-unfinished comment, which is a stuck command someone can
+  see; the alternative — reacting afterwards — risks applying twice, which is a
+  state change nobody asked for. Prefer visible-and-stuck to silent-and-doubled.</li>
+<li>It is a <strong>claim</strong>, so the outcome gets its own reaction: 🚀 applied, 😕
+  refused or not understood.</li>
+<li>A <strong>refused</strong> comment is watermarked too. It was considered, and without the
+  mark the sweep reconsiders it every run and re-posts the same refusal. A
+  stranger's comment is <em>not</em> watermarked — reacting to it would itself be
+  letting them make the bot act.</li>
+</ul>
+<p>To make the gatekeeper reconsider a comment, remove its 👀.</p>
+<p><strong>Only the gatekeeper's own 👀 counts.</strong> A human reacting out of interest must
+not silence a command, so the watermark check matches on the reacting account.
+And if the reactions cannot be read at all, the comment is treated as <em>already
+claimed</em> — re-applying a command is worse than skipping one, and the sweep picks
+it up next time.</p>
+<h3 id="the-snapshot">The snapshot<a class="headerlink" href="#the-snapshot" title="Link to this section">&para;</a></h3>
+<p><code>fetch_comment_event.py</code> turns the raw webhook payload into what the parser and
+the gates read: the issue's number, labels, body, milestone, blockers
+(text ∪ native), its soft <code>Depends on:</code> dependencies, whether it is the
+dashboard, and the comment itself. All the payload-shape guesswork lives there
+so the parser never has to know what GitHub's JSON looks like.</p>
+<h4 id="a-dependency-is-an-edge-not-a-number">A dependency is an edge, not a number<a class="headerlink" href="#a-dependency-is-an-edge-not-a-number" title="Link to this section">&para;</a></h4>
+<p><code>blockers</code> and <code>soft_dependencies</code> are lists of <strong>edges</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;open&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;milestone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v0.1&quot;</span><span class="p">}</span>
+</code></pre></div>
+<p>Not <code>[20]</code>. The <a href="#gate-2-milestone-order">milestone-order gate</a> is a comparison
+between two milestones, so it needs the blocker's own milestone and its own
+state — a list of issue numbers is not something it can answer with. The
+snapshot reads each edge's issue to fill them in, one request per edge, rather
+than trusting the dependency endpoint's payload to carry a <code>milestone</code> field:
+a shape that quietly omitted it would read as unscheduled and refuse every
+approval, and that is not a thing to guess at.</p>
+<p>An issue that is both a blocker and a <code>Depends on:</code> is one edge, the hard one.
+It is already the stronger of the two, and listing it twice only names it twice
+in the refusal.</p>
+<h4 id="a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over">A partial payload is tolerated; an unreadable edge is not approved over<a class="headerlink" href="#a-partial-payload-is-tolerated-an-unreadable-edge-is-not-approved-over" title="Link to this section">&para;</a></h4>
+<p>The builder returns nothing at all for a comment on a pull request or from a
+bot — defence in depth, since the workflow filters those too, but a snapshot the
+parser <em>could</em> act on is one it eventually will.</p>
+<p>It also tolerates a partial payload rather than throwing. A failed <strong>dependency
+lookup</strong> does not lose the event: the command is probably <code>/park</code>, which does
+not care, and the <code>Blocked by #N</code> lines in the body are still read.</p>
+<p>An edge whose <strong>issue</strong> cannot be read is a different case, and it is kept
+rather than dropped — as open, with no milestone, which is exactly the shape the
+order gate refuses on. Approving over a dependency nobody can see is the
+expensive direction: the issue goes ready, the builder skips it every night
+because the blocker is still open, and nothing says why. A refusal costs one
+comment.</p>
+<h2 id="replaying-the-comments-the-webhook-lost">Replaying the comments the webhook lost<a class="headerlink" href="#replaying-the-comments-the-webhook-lost" title="Link to this section">&para;</a></h2>
+<p><code>gatekeeper-comment</code> fires on <code>issue_comment: created</code>. When that delivery is
+dropped — a webhook that never arrives, a workflow that fails to start, a run
+cancelled mid-flight — the command is simply gone. Derek types <code>/approve</code>,
+nothing happens, and <strong>nothing anywhere reports that nothing happened.</strong></p>
+<p>So the sweep re-reads recent comments and feeds anything unclaimed back through
+the ordinary path. This is the second pass the 👀 watermark was designed for.</p>
+<p>Four properties, and every one of them is load-bearing:</p>
+<ul>
+<li><strong>It reuses <code>run_comment_event.run</code>, the same function the live workflow
+  calls.</strong> Not a second implementation of parse → gate → apply. The owner
+  re-check, the gates, the acknowledgement wording and above all the watermark
+  rule are <em>inherited</em> rather than re-derived — and a second copy that got the
+  watermark's failure direction backwards would re-apply every command in the
+  window on every sweep, six times a day, forever.</li>
+<li><strong>It is cron-path only.</strong> See below.</li>
+<li><strong>The window is bounded</strong> — seven days, <code>REPLAY_WINDOW_DAYS</code> in
+  <code>run_sweep.py</code>, gathered by one repo-wide <code>since</code>-filtered call rather than
+  one request per open issue. Seven days is far more than the six-hourly cron
+  needs for a single dropped webhook; the width is there for a multi-day
+  Actions outage, and costs nothing because re-reading a claimed comment is a
+  no-op. It is bounded rather than unlimited because an unbounded scan of the
+  whole comment history is both slow and a far larger surface for a watermark
+  bug to act on.</li>
+<li><strong>A replayed command updates the sweep's own snapshot</strong> before reconcile
+  reads it, and the board is re-rendered <strong>once</strong>, at the end of the sweep.</li>
+</ul>
+<h3 id="why-the-replay-is-cron-only">Why the replay is cron-only<a class="headerlink" href="#why-the-replay-is-cron-only" title="Link to this section">&para;</a></h3>
+<p><code>gatekeeper-sweep</code> has two triggers, and on the event path one of them is
+<code>issues: [labeled]</code>. An applied command <em>changes a label</em>. So an event-path
+replay would wake this workflow up to re-apply the very comment
+<code>gatekeeper-comment</code> is applying at that moment — and nothing serialises the
+two, because they are in different concurrency groups.</p>
+<p>The six-hourly cron has no such relationship to the comment workflow, which is
+why the replay lives there, alongside reconcile's two cron-only fixes.</p>
+<h3 id="why-the-replay-writes-its-labels-back">Why the replay writes its labels back<a class="headerlink" href="#why-the-replay-writes-its-labels-back" title="Link to this section">&para;</a></h3>
+<p>Reconcile runs after the replay, and derives its fixes from the labels on the
+sweep's in-memory snapshot. If the replay moved an issue from <code>in-progress</code> to
+<code>parked</code> and reconcile then read the pre-replay list, it would see an
+<code>in-progress</code> issue with no open PR, call it a stall, and requeue it to
+<code>ready-for-work</code> — <strong>silently undoing the command it was replayed to honour</strong>,
+and reporting a successful auto-fix while doing it.</p>
+<p>So <code>run_comment_event.Result</code> carries the label set the command left behind,
+and the replay writes it onto the snapshot issue. A refused command reports no
+labels at all, rather than "the labels unchanged", so the snapshot is left
+exactly as it was instead of being overwritten with a guess.</p>
+<h3 id="one-render-last-override-wins">One render, last override wins<a class="headerlink" href="#one-render-last-override-wins" title="Link to this section">&para;</a></h3>
+<p><code>run_comment_event.run</code> re-renders the dashboard itself, which is right for one
+webhook and wrong for a sweep: six replayed commands would publish six boards,
+five of them describing a half-finished sweep. The replay hands it a collector
+instead, and the sweep renders once at the end.</p>
+<p>If two replayed comments both set a <code>/focus</code>, <strong>the later one wins</strong> — the
+candidates are fetched oldest-first for exactly that reason. Refusing both as
+ambiguous was the alternative; last-wins is what would have happened had the
+webhooks arrived normally, and matching the undropped case is the less
+surprising rule.</p>
+<h3 id="when-a-replay-raises">When a replay raises<a class="headerlink" href="#when-a-replay-raises" title="Link to this section">&para;</a></h3>
+<p>One malformed comment does not take the sweep down with it. The failure is
+counted, named in the workflow log, and the sweep carries on — reconcile is the
+backstop for the entire board, and losing it because a single comment blew up
+trades a missed command for a missed sweep, which is the more expensive of the
+two.</p>
+<h2 id="the-approval-gates">The approval gates<a class="headerlink" href="#the-approval-gates" title="Link to this section">&para;</a></h2>
+<p>Both gates <strong>refuse and explain</strong>. Neither ever fixes the problem itself.</p>
+<p>That posture is deliberate. Auto-correcting at an approval gate means the
+pipeline quietly decides something Derek was in the middle of deciding, and the
+first he hears of it is a build he didn't expect. A refusal costs one comment
+and ten seconds; a wrong auto-fix costs a milestone's worth of misordered work.</p>
+<h3 id="gate-1-approve-requires-a-milestone">Gate 1: <code>/approve</code> requires a milestone<a class="headerlink" href="#gate-1-approve-requires-a-milestone" title="Link to this section">&para;</a></h3>
+<p><strong>Invariant:</strong> an issue cannot become <code>ready-for-work</code> without a milestone.</p>
+<p>Without one it is approved work no builder will ever select, because selection
+runs against the focus milestone. It leaves the queue silently, which is the
+worst way for work to disappear.</p>
+<p>The gatekeeper <strong>refuses</strong> with an <code>approve-no-milestone</code> skip and a hand-back
+asking <em>which milestone?</em>. It never picks one — not when only one is open, and
+not when the issue's siblings all sit in the same milestone.</p>
+<p>It reads <strong>only the issue's milestone field</strong>. Triage sets that field, and
+scraping a <code>/milestone v0.1</code> out of the comment history would make the gate
+depend on what was said rather than what is true; the two disagree the moment
+anything is edited. An inline <code>/milestone</code> in the same comment does not feed
+this gate either — that command fires independently, and if it succeeds the
+next <code>/approve</code> sees the field it set.</p>
+<p><code>/milestone</code> is deliberately <strong>not</strong> subject to this gate. It is the command
+that fixes a missing milestone, so gating it on having one would make the fix
+impossible.</p>
+<h3 id="gate-2-milestone-order">Gate 2: milestone order<a class="headerlink" href="#gate-2-milestone-order" title="Link to this section">&para;</a></h3>
+<p><strong>Invariant:</strong> for every open blocker edge A → B, <code>order(A) ≥ order(B)</code>, and B
+must be scheduled.</p>
+<p>Without it, an issue can sit in <code>v0.0.1</code> blocked by one in <code>v0.1</code>. The builder
+correctly skips the dependent — but the blocker is not in the focus milestone to
+be built either, so <strong>the work silently stalls while the milestone reads
+"ready"</strong>. Nothing notices, because from every angle each issue looks fine on
+its own.</p>
+<p>Two refusals:</p>
+<table>
+<thead>
+<tr>
+<th>Skip</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blocker-unscheduled</code></td>
+<td>the blocker has no milestone, or one with no version order</td>
+</tr>
+<tr>
+<td><code>blocker-inversion</code></td>
+<td>the blocker is in a <em>later</em> milestone</td>
+</tr>
+</tbody>
+</table>
+<p>Both name the offending issues, so the ack says which ones rather than that
+something is wrong.</p>
+<h4 id="milestone-order-comes-from-the-title">Milestone order comes from the title<a class="headerlink" href="#milestone-order-comes-from-the-title" title="Link to this section">&para;</a></h4>
+<p><code>vMAJOR.MINOR[.PATCH]</code> is ordered; anything else is <strong>unordered</strong>. That
+deliberately includes <code>Direct Involvement Needed</code> — it never ships, so a blocker
+parked there is one nothing will ever build, which is exactly the
+<code>blocker-unscheduled</code> case.</p>
+<p>Closed blockers are ignored: a resolved dependency constrains nothing.</p>
+<h4 id="soft-depends-on-uses-the-same-rule">Soft <code>Depends on:</code> uses the same rule<a class="headerlink" href="#soft-depends-on-uses-the-same-rule" title="Link to this section">&para;</a></h4>
+<p>It does not stop the builder selecting the issue, but the ordering problem is
+identical — the thing it depends on is not scheduled — and a refusal is cheap
+while a stalled milestone is not.</p>
+<h4 id="refuse-never-auto-bump">Refuse, never auto-bump<a class="headerlink" href="#refuse-never-auto-bump" title="Link to this section">&para;</a></h4>
+<p>A refusal leaves the issue <strong>completely untouched</strong>. Moving the blocker earlier
+and moving the subject later are both valid fixes, and which one is right is a
+planning decision about scope. The reply says so, and says that nothing was
+changed.</p>
+<h4 id="it-runs-on-milestone-too">It runs on <code>/milestone</code> too<a class="headerlink" href="#it-runs-on-milestone-too" title="Link to this section">&para;</a></h4>
+<p>Setting a milestone is the other way to create an inversion. Gating only
+<code>/approve</code> would let <code>/milestone v0.0.1</code> quietly produce one, to be discovered
+at the next approval — or not at all, if the issue was already approved.</p>
+<h2 id="auto-revisit-when-a-blocker-clears">Auto-revisit when a blocker clears<a class="headerlink" href="#auto-revisit-when-a-blocker-clears" title="Link to this section">&para;</a></h2>
+<p>An issue parked in <code>needs-clarification</code> <strong>because it was blocked</strong> has nothing
+to wake it. Analysis only acts on <code>ai-triage</code>, and the gatekeeper otherwise only
+acts on comments — so without this the issue waits for a human to remember it,
+which is the same as waiting forever.</p>
+<p>This is a <strong>state-derived transition, not a command</strong>. The sweep computes it.</p>
+<h3 id="what-counts-as-a-blocker">What counts as a blocker<a class="headerlink" href="#what-counts-as-a-blocker" title="Link to this section">&para;</a></h3>
+<p>Structured text lines (<code>Blocked by #42</code>) <strong>unioned</strong> with native GitHub
+relationships. Union rather than either-or: an issue can have one recorded
+natively and another still in prose, and waking it when only half have cleared
+is worse than not waking it at all.</p>
+<p>An unstructured mention — "this is similar to #42" — is not a dependency, and
+is deliberately not matched.</p>
+<h4 id="one-recognizer-shared">One recognizer, shared<a class="headerlink" href="#one-recognizer-shared" title="Link to this section">&para;</a></h4>
+<p>Recognizing that line has exactly one implementation: <code>text_blockers</code> in
+<code>.claude/skills/issue-blockers/blocker_refs.py</code>, and the union has exactly two —
+<code>blockers_of</code> for a snapshot that already carries its native edges, and
+<code>union_blockers</code> for the one caller that fetches them live. Every reader in the
+pipeline imports them: the sweep, the queue selector, the reconciler, the
+dashboard, the comment-event snapshot, and <code>audit</code>.</p>
+<p><code>issue-blockers</code> owns them because it is the skill that documents the format —
+the same "the side that writes the format owns the recognizer" rule that put
+<code>has_analysis_signature</code> in <code>triage-issue</code>.</p>
+<p>The soft <code>Depends on: #42</code> line lives there too, as <code>text_depends_on</code>. It was a
+single-reader pattern sitting in <code>select_queue.py</code> right up until the approval
+gates became its second reader, and a second copy would have let the queue and
+the gate disagree about what the same body said.</p>
+<p>The pattern used to be written out in each reader, and the drift is silent in
+the worst way: the queue selector reads a line as a blocker and refuses to
+build the issue, the sweep does not and so never wakes it, and the dashboard
+shows it as ready the whole time. Nothing errors. The issue just stops moving,
+and no log anywhere says why.</p>
+<h3 id="when-a-blocker-resolves">When a blocker resolves<a class="headerlink" href="#when-a-blocker-resolves" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Blocker state</th>
+<th>Resolved?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>closed, or merged</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>open, <code>ready-for-work</code> or <code>in-progress</code></td>
+<td>yes — it is scheduled and will be built</td>
+</tr>
+<tr>
+<td>open, anything else</td>
+<td>no</td>
+</tr>
+<tr>
+<td>not in the snapshot</td>
+<td><strong>no</strong> — not knowing is not knowing it is done</td>
+</tr>
+</tbody>
+</table>
+<p>An issue with several blockers is revisited <strong>once every one</strong> resolves.</p>
+<h3 id="the-typewireframe-carve-out">The <code>type:wireframe</code> carve-out<a class="headerlink" href="#the-typewireframe-carve-out" title="Link to this section">&para;</a></h3>
+<p><strong>A <code>type:wireframe</code> blocker resolves only when it is closed.</strong> Being scheduled
+is not enough.</p>
+<p>Closing a wireframe issue is what "agreed" means, and a wireframe marked
+<code>ready-for-work</code> is still a picture nobody has said yes to. Without the
+carve-out the sweep wakes the dependent on every run and triage sets it aside
+again on every run — forever, and noisily.</p>
+<h3 id="a-blocker-set-wakes-an-issue-at-most-once">A blocker set wakes an issue at most once<a class="headerlink" href="#a-blocker-set-wakes-an-issue-at-most-once" title="Link to this section">&para;</a></h3>
+<p>A closed blocker stays resolved forever, so without a guard, an issue that
+lands back on <code>needs-clarification</code> for <em>any other reason</em> — an open design
+question triage raised, say, unrelated to the blocker that used to hold it —
+reads as "blocker cleared, wake it up" again on the very next sweep. And the
+sweep runs on every <code>labeled</code> event, including the one the revisit itself just
+made, so this is not a rare recurrence: it is a tight loop, once per sweep,
+forever, each pass posting another "back in the triage queue" comment and
+firing triage again.</p>
+<p>The sweep reads the issue's own comment history and skips a blocker set it has
+already posted a revisit for — only a triage-authored comment counts, so a
+human typing similar words by hand can't suppress a real wake-up. A <em>new</em>
+blocker resolving later still fires normally; only a repeat of an already-
+actioned set is skipped.</p>
+<h3 id="what-it-never-touches">What it never touches<a class="headerlink" href="#what-it-never-touches" title="Link to this section">&para;</a></h3>
+<ul>
+<li><strong><code>parked</code> issues.</strong> Parking is a decision the owner made; only the owner
+  un-makes it.</li>
+<li><strong>Anything not in <code>needs-clarification</code></strong> — an issue already
+  <code>pending-approval</code> or <code>ready-for-work</code> is not waiting on a blocker.</li>
+</ul>
+<p>A revisit adds <code>ai-triage</code>, removes <code>needs-clarification</code>, and posts a short
+comment naming the cleared blockers — so the transition is visible in the
+thread rather than being a label that changed itself overnight.</p>
+<h2 id="focus-and-cap-live-on-the-dashboard-issue"><code>/focus</code> and <code>/cap</code> live on the dashboard issue<a class="headerlink" href="#focus-and-cap-live-on-the-dashboard-issue" title="Link to this section">&para;</a></h2>
+<p>Both are stored as HTML-comment markers in the body of the dashboard issue:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cm">&lt;!-- pipeline-focus: v0.0.1 --&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cm">&lt;!-- pipeline-cap: 3 --&gt;</span>
+</code></pre></div>
+<p>Each setting resolves <strong>override → marker → default</strong>: an explicit <code>/focus</code> or
+<code>/cap</code> on this run wins, otherwise the marker currently in the body, otherwise
+the default (3 for <code>cap</code>; <code>focus</code> has no default and must come from one of the
+first two).</p>
+<p>A <code>/focus</code> naming <strong>no live milestone is rejected, not stored.</strong> A typo'd
+<code>v0.0.10</code> would otherwise render a board whose every section is empty — which
+looks exactly like a finished milestone, and is the most misleading output the
+renderer could produce. The refusal names the milestones that do exist.</p>
+<p>A malformed <code>cap</code> marker falls back to 3 rather than failing the render: a
+board that does not render is worse than one with a default cap, and the next
+<code>/cap</code> fixes it.</p>
+<p>The dashboard issue is the one carrying the <code>dashboard</code> label. There is exactly
+one — <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/163"><strong>issue #163</strong></a>
+— and the reconciler flags it if there are ever two or none.</p>
+<p>Nothing hard-codes that number. Every script finds the board by its label, so
+recreating it is a matter of moving the label rather than editing code; the
+number here is for people, not for programs.</p>
+<h3 id="why-markers-and-why-re-rendering-beats-hand-editing">Why markers, and why re-rendering beats hand-editing<a class="headerlink" href="#why-markers-and-why-re-rendering-beats-hand-editing" title="Link to this section">&para;</a></h3>
+<p>The dashboard body is <strong>regenerated wholesale</strong> on every render — every section
+is derived from live GitHub state. That is what makes it trustworthy: nothing on
+it can be stale, because nothing on it is remembered.</p>
+<p>Configuration can't work that way, so the renderer parses the markers out of the
+current body, and writes them back verbatim into the new one. The markers are
+the only part of the body that survives a render.</p>
+<p>Which gives the rule: <strong>edit the markers, never the rendered sections.</strong> A hand
+edit to a rendered section disappears at the next render, and — worse — looks
+like it worked until it does.</p>
+<p><code>/focus</code> and <code>/cap</code> therefore persist <strong>by re-rendering with an override</strong>, not
+by editing the body. The gatekeeper passes the new value to the renderer, which
+writes it into the marker as part of the regenerated body. Hand-editing the
+marker directly would work exactly once — until the next render, which reads
+the marker it is about to overwrite and would find the old value if the write
+had raced. Going through the renderer means there is only ever one writer of
+that body.</p>
+<p>Markers rather than a config file in the repo because focus and cap are
+<em>operational</em> state that changes between merges. A PR to change which milestone
+is in focus is friction in exactly the wrong place.</p>
+<h2 id="fetching-live-milestones">Fetching live milestones<a class="headerlink" href="#fetching-live-milestones" title="Link to this section">&para;</a></h2>
+<p>Never hard-code a milestone list. Read it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">GET /repos/{owner}/{repo}/milestones?state=open&amp;per_page=100</span>
+</code></pre></div>
+<h3 id="the-gotcha-milestone-takes-a-number">The gotcha: <code>milestone</code> takes a number<a class="headerlink" href="#the-gotcha-milestone-takes-a-number" title="Link to this section">&para;</a></h3>
+<p>When setting a milestone on an issue, the field takes the milestone's <strong>number</strong>,
+not its title:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">PATCH /repos/{owner}/{repo}/issues/{issue_number}</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">{&quot;milestone&quot;: 2}          ✅</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">{&quot;milestone&quot;: &quot;v0.1&quot;}     ❌ 422, or silently wrong</span>
+</code></pre></div>
+<p>So anything accepting a title — <code>/milestone v0.1</code>, a triage decision — resolves
+title → number against the live list first, and refuses if the title doesn't
+match exactly one open milestone. Titles are compared literally: <code>v0.1</code> and
+<code>V0.1</code> are different milestones, and the fix is to type the real one rather than
+to normalise and hope.</p>
+<h2 id="schedule">Schedule<a class="headerlink" href="#schedule" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Runs</th>
+<th>When</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gatekeeper-comment</code> workflow</td>
+<td>on <code>issue_comment</code> created</td>
+<td>parse and apply commands, immediately</td>
+</tr>
+<tr>
+<td><code>gatekeeper-sweep</code> workflow</td>
+<td>issue/PR events, and a six-hourly cron</td>
+<td>auto-revisit cleared blockers, apply reconcile's fixes; on the cron, also replay missed comments</td>
+</tr>
+<tr>
+<td><code>pipeline-analysis</code> routine</td>
+<td>nightly, 02:00 UTC</td>
+<td>triage everything untriaged</td>
+</tr>
+<tr>
+<td>reactive triage</td>
+<td>fired on demand by the gatekeeper</td>
+<td>triage one issue, now</td>
+</tr>
+<tr>
+<td><code>pipeline-dev</code> routine</td>
+<td>nightly, 03:00 UTC</td>
+<td>build and work the ready queue</td>
+</tr>
+<tr>
+<td><code>pipeline-reconcile</code> routine</td>
+<td>nightly, 01:00 UTC</td>
+<td>detect and fix drift</td>
+</tr>
+<tr>
+<td><code>dashboard</code> workflow</td>
+<td>hourly, and after each pipeline run</td>
+<td>re-render the dashboard</td>
+</tr>
+</tbody>
+</table>
+<p>Reconcile runs before analysis, which runs before development: fix the state,
+then triage against fixed state, then work against a triaged queue. A nightly
+order that ran them the other way would spend each night acting on yesterday's
+mistakes.</p>
+<h3 id="reactive-triage">Reactive triage<a class="headerlink" href="#reactive-triage" title="Link to this section">&para;</a></h3>
+<p>Waiting until 02:00 to triage an issue filed at 09:00 is a bad experience when
+the person who filed it is sitting right there. So the moment <code>ai-triage</code> is
+<strong>newly</strong> added, the gatekeeper job — already running — makes an <strong>outbound
+POST</strong> to a poke-only Routine.</p>
+<p>Outbound specifically, because a workflow triggered by the token's own label
+change would never run: GitHub suppresses workflow runs from events initiated by
+<code>GITHUB_TOKEN</code>. An outbound request is not an event, so the guard does not
+apply.</p>
+<p>Configured by <code>AI_TRIAGE_URL</code> and <code>AI_TRIAGE_SECRET</code> (#83). <strong>Absent, it is a
+clean no-op</strong> — the nightly run still picks the issue up, so a missing secret
+costs latency rather than correctness, and never fails the command that caused
+it. A network error is swallowed for the same reason: the label move has
+already succeeded by then.</p>
+<h4 id="both-entry-points-fire-and-each-issue-fires-once">Both entry points fire, and each issue fires once<a class="headerlink" href="#both-entry-points-fire-and-each-issue-fires-once" title="Link to this section">&para;</a></h4>
+<p><code>run_comment_event.py</code> fires after its label write; <code>run_sweep.py</code> fires from
+both of its paths, because a cleared blocker and a requeue each land an issue in
+<code>ai-triage</code> without anyone typing a command.</p>
+<p>The sweep fires <strong>at most once per issue per pass</strong>. A revisit does not update
+the in-memory issue that reconcile then reads, so the same issue can look newly
+triageable twice in one sweep — and two fires are two triage sessions racing on
+one issue, each posting its own plan for Derek to choose between.</p>
+<p><code>fire_from_env</code> is the single place the environment variables are read, so both
+entry points poke the same Routine the same way.</p>
+<div class="admonition warning">
+<p class="admonition-title">This was described here for weeks before it was true</p>
+<p><code>fires_triage</code> and <code>fire_routine.fire</code> were both written, both unit-tested
+— and called from nowhere. The workflow passed the two secrets to a step
+that never read them, so <strong>reactive triage never fired once</strong>, on any
+issue, and everything waited for the scheduled round.</p>
+<p>Nothing surfaced it. Tests passed, because each half was correct in
+isolation; the log was green, because nothing had failed; and the fallback
+it was designed around — the nightly round — did the work quietly, which is
+exactly what it is there for. A feature whose absence looks identical to
+its fallback needs a test that the call site exists, and both entry points
+now have one.</p>
+</div>
+<h4 id="the-outcome-is-classified-truthfully">The outcome is classified truthfully<a class="headerlink" href="#the-outcome-is-classified-truthfully" title="Link to this section">&para;</a></h4>
+<p>Success requires a <strong>real fire</strong> — a response carrying a session URL. A bare
+<code>200</code> means the endpoint answered, not that the Routine ran, and reporting that
+as fired would hide a misconfigured Routine behind a green log line for weeks.
+Everything else logs the status and a bounded snippet of the body, and a <code>401</code>
+says the secret is wrong rather than just failing.</p>
+<p>The API names that field <strong><code>claude_code_session_url</code></strong>. The older <code>session_url</code>
+and <code>url</code> are still accepted, but looking for only those made the success path
+unreachable and annotated every healthy fire as an error
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/240">#240</a>) —
+which is the same failure as a green line nobody believes, pointing the other
+way. An annotation that fires on every good run is one people stop reading.</p>
+<h4 id="the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required">The endpoint is the Anthropic API, so <code>anthropic-version</code> is required<a class="headerlink" href="#the-endpoint-is-the-anthropic-api-so-anthropic-version-is-required" title="Link to this section">&para;</a></h4>
+<p><code>AI_TRIAGE_URL</code> points at an Anthropic API endpoint, and that API requires an
+<code>anthropic-version</code> header on <strong>every</strong> request. Without it the fire is refused
+at header validation with a <code>400</code>, before the token or the payload is examined —
+which is why a missing version reads as a malformed request rather than an auth
+failure, and why a <code>400</code> here never meant the secret was wrong.</p>
+<p>That cost real time in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/238">#238</a>:
+because the URL is a secret, nobody could see it was an <code>api.anthropic.com</code>
+endpoint, so nobody thought to ask what headers that API demands. If the fire
+ever starts failing at header validation again, the endpoint's own message names
+the header — which is the whole reason the two fixes above exist.</p>
+<h4 id="an-error-status-is-an-answer-not-a-failure-to-reach">An error status is an answer, not a failure to reach<a class="headerlink" href="#an-error-status-is-an-answer-not-a-failure-to-reach" title="Link to this section">&para;</a></h4>
+<p><code>urlopen</code> raises on any 4xx or 5xx rather than returning it, so an error status
+has to be caught and turned back into a <code>(status, body)</code> pair. Skipping that
+step costs three things at once, and
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/236">#236</a> cost
+all three: the response body is discarded, which for a <code>400</code> is the only thing
+that names the field the endpoint rejected; the classification above becomes
+unreachable on every error path, so the "your secret is wrong" message can never
+print; and every HTTP error reports as <em>"could not reach the Routine"</em>, which
+sends you looking at networking while the endpoint is up and answering.</p>
+<p>Only a genuine transport failure — a refused connection, a timeout, DNS — is
+reported as unreachable.</p>
+<h4 id="and-the-classification-is-printed">And the classification is printed<a class="headerlink" href="#and-the-classification-is-printed" title="Link to this section">&para;</a></h4>
+<p>Classifying an outcome nobody prints buys nothing. Every fire writes two lines
+to the job log: one <strong>before</strong> the request saying it is about to go out, and one
+after saying what came back.</p>
+<p>Before, specifically. A line printed only afterwards is a line nobody sees when
+the request hangs until the job times out — and the log then stops at the label
+move, which reads as <em>the fire was never attempted</em> rather than <em>the fire was
+attempted and went nowhere</em>.</p>
+<p>A failed fire is a GitHub Actions <code>::error::</code> annotation. <code>not-configured</code> is a
+<code>::notice::</code>, because a secret nobody has set yet is a choice not yet made
+rather than a fault, and annotating it as an error trains everyone to ignore the
+annotation that matters.</p>
+<p><strong>Neither line contains the endpoint or the secret.</strong> <code>AI_TRIAGE_URL</code> is itself
+a secret, and GitHub masks only exact matches — a host fragment reassembled into
+a log line is a leak nothing would catch.</p>
+<p>This was <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/231">#231</a>:
+the classification above was implemented and then discarded at every call site,
+so a Routine that never ran produced a log identical to one that worked. The
+page described the intended behaviour and the code did not deliver it; the code
+is what changed.</p>
+<p>A failed fire still never fails the command. The label move has already landed
+by then, and the nightly round will pick the issue up — the cost is latency, not
+correctness.</p>
+<h4 id="the-payload-is-not-a-place-to-put-instructions">The payload is not a place to put instructions<a class="headerlink" href="#the-payload-is-not-a-place-to-put-instructions" title="Link to this section">&para;</a></h4>
+<p>The POST body's freeform text names <strong>only the repository and the issue
+number</strong>, and the helper refuses a non-integer issue number rather than
+formatting it into the string.</p>
+<p><strong>The Routine's prompt must parse only the integer and follow nothing else in
+the payload.</strong> If a Routine treats that text as instructions, anything that can
+influence the text can instruct an agent with write access. Boring text is half
+the defence; the Routine ignoring it is the other half, and its prompt says so.</p>
+<h2 id="what-each-stage-does">What each stage does<a class="headerlink" href="#what-each-stage-does" title="Link to this section">&para;</a></h2>
+<h3 id="analysis-find-what-needs-triage">Analysis — find what needs triage<a class="headerlink" href="#analysis-find-what-needs-triage" title="Link to this section">&para;</a></h3>
+<p><code>select_triage.py</code> lists candidate issues. An issue is eligible when it is
+<strong>open</strong> and carries <strong><code>ai-triage</code></strong>, and is none of the following:</p>
+<table>
+<thead>
+<tr>
+<th>Excluded</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type:epic</code></td>
+<td>An epic is a container. Its children are the work, and they carry their own labels.</td>
+</tr>
+<tr>
+<td><code>dashboard</code></td>
+<td>The pipeline's own furniture, not something the pipeline works on.</td>
+</tr>
+<tr>
+<td><code>parked</code></td>
+<td>A decision the owner made with <code>/park</code>. Triage does not get to overrule it — only <code>/unpark</code> does.</td>
+</tr>
+</tbody>
+</table>
+<p>Carrying <code>ai-triage</code> is the whole entry condition, so an issue with no state
+label at all is not a candidate: it has not been <code>/admit</code>ted, and admitting is
+the owner's call. That is the same rule the command table above describes, and
+picking up unadmitted issues would make <code>/admit</code> mean nothing.</p>
+<p>Each eligible issue comes back with its <strong>number</strong>, its <strong>current milestone</strong>,
+and the <strong>latest owner note</strong> — the most recent <code>/revise</code>, <code>/redo</code>, or
+<code>/propose</code> comment, with its text. Only the latest, because an issue revised
+twice should be triaged against the current feedback rather than a
+conversation; and only the owner's, for the same reason the parser has a
+bad-actor gate. Carrying the note here means the triage run does not have to
+re-read the thread to find out why it is running again.</p>
+<p>Results are sorted by issue number, oldest first.</p>
+<p>The dispatcher (<code>pipeline-analysis</code>) is a thin loop over that list. It makes no
+decisions itself — the decisions are in <code>triage-issue</code>, one issue at a time,
+which keeps a bad triage contained to one issue instead of one batch.</p>
+<p><strong>The dispatcher writes nothing at all</strong> — no labels, no comments, not even a
+summary of the round. Every write belongs to the single-issue skill. A round
+that made its own writes would be a second thing that can be wrong, wrong at
+batch scale across the whole queue, in a way no individual triage run could
+produce. It also keeps <code>triage-issue</code> genuinely standalone, which is what lets
+reactive triage invoke it with no dispatcher present.</p>
+<p><strong>Concurrency is set by the orchestration layer, not the script.</strong>
+<code>select_triage.py</code> reports what needs triage and has no opinion on how fast to
+work through it: the right number depends on rate limits and runner capacity,
+which change without the eligibility rules changing. A limit baked into the
+discovery script is one nobody can adjust for a busy night without editing a
+file with tests pinned to it.</p>
+<p>A triage that fails is one issue's problem — it keeps <code>ai-triage</code> and the next
+round picks it up. The round does not abort for it.</p>
+<h4 id="the-scheduled-round-is-the-backstop-not-the-main-path">The scheduled round is the backstop, not the main path<a class="headerlink" href="#the-scheduled-round-is-the-backstop-not-the-main-path" title="Link to this section">&para;</a></h4>
+<p>Reactive triage is how an issue normally gets triaged: the gatekeeper fires it
+the moment <code>ai-triage</code> appears, and the issue is analyzed within minutes.</p>
+<p>The 02:00 round exists for what reactive triage missed — a failed POST, secrets
+that were never configured, a label changed by hand instead of by a command, an
+issue carried back by the blocker sweep. On a healthy night it finds nothing.
+<strong>An empty round is the system working</strong>, not a wasted run.</p>
+<h3 id="triage-one-issue">Triage — one issue<a class="headerlink" href="#triage-one-issue" title="Link to this section">&para;</a></h3>
+<p><code>triage-issue</code> reads an issue and produces:</p>
+<ul>
+<li>an <strong><code>area:*</code> and <code>type:*</code> label</strong>;</li>
+<li>the <strong>milestone</strong>, set as a field by matching the live milestone descriptions;</li>
+<li>a <strong>build checklist</strong> — the acceptance criteria, as checkboxes;</li>
+<li>a <strong>spec-pages line</strong> naming what in <code>/docs</code> it touches;</li>
+<li><strong>dependencies</strong>, recorded natively (below);</li>
+<li>a state: <code>pending-approval</code>, or <code>needs-clarification</code> with the specific
+  question that blocks it.</li>
+</ul>
+<p>It writes one comment containing its reasoning, so an <code>/approve</code> is a human
+agreeing with something they can read rather than rubber-stamping a label. That
+comment <strong>opens with the plain-English lead</strong> — the same two or three skimmable
+sentences a PR body opens with, and for the same reason: a wrong plan has to be
+catchable on a skim.</p>
+<p><strong>It never sets <code>ready-for-work</code>, and it never invents a mechanic.</strong> Every route
+ends with the issue waiting on a human. The label that means "build this" is
+only ever applied by <code>/approve</code>.</p>
+<h4 id="the-four-routes">The four routes<a class="headerlink" href="#the-four-routes" title="Link to this section">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>When</th>
+<th>Ends at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bug</td>
+<td>behaviour contradicts what <code>/docs</code> says</td>
+<td><code>pending-approval</code> + <code>type:bug</code></td>
+</tr>
+<tr>
+<td>Spec-covered feature</td>
+<td><code>/docs</code> already says how this behaves</td>
+<td><code>pending-approval</code></td>
+</tr>
+<tr>
+<td>Needs a design call</td>
+<td><code>/docs</code> doesn't say, or UI with no wireframe</td>
+<td><code>needs-clarification</code></td>
+</tr>
+<tr>
+<td><code>/propose</code> authorized</td>
+<td>Derek asked for a design</td>
+<td><code>pending-approval</code>, marked PROPOSAL</td>
+</tr>
+</tbody>
+</table>
+<p>Two of these are worth spelling out.</p>
+<p><strong>A bug whose root cause is a missing rule</strong> gets an invariant, not just a
+patch. When the code does what someone intended and the real fault is that
+nobody wrote the rule down, the plan proposes the missing invariant in plain
+English and the checklist gains an item that tests it. Patching the code alone
+guarantees the same class of bug reappears elsewhere. If the rule is a genuinely
+new choice about how the game plays, it is a design call instead — and when it
+is unclear which, it is a design call.</p>
+<p><strong>The design-call route writes no plan at all</strong> — no checklist, no milestone,
+just one concrete question and <code>needs-clarification</code>. A plan attached to an
+undecided question is an answer smuggled in as paperwork, and half of it
+survives into the build because it was already written down.</p>
+<h4 id="write-ordering-comment-first-then-the-label">Write ordering: comment first, then the label<a class="headerlink" href="#write-ordering-comment-first-then-the-label" title="Link to this section">&para;</a></h4>
+<p>The analysis comment is posted <strong>before</strong> the state label is set, always.</p>
+<p>This is what makes the bad state structurally impossible rather than merely
+unlikely. A run that dies between the two writes leaves either a plan still
+sitting on <code>ai-triage</code> — untriaged, which the next round simply redoes — or
+<code>pending-approval</code> with nothing to approve, which is silent: the pipeline
+believes the issue is handled and it waits on a human who has nothing to read.</p>
+<p><code>ai-triage</code> is removed in the same write that adds the new state, so a hand-back
+rests in exactly one state. An issue carrying both gets triaged again by the
+next analysis round while it sits waiting for Derek.</p>
+<h5 id="the-write-is-code-not-an-instruction">The write is code, not an instruction<a class="headerlink" href="#the-write-is-code-not-an-instruction" title="Link to this section">&para;</a></h5>
+<p><code>hand_back.py</code> performs both writes. This used to be prose in the skill file —
+"remove <code>ai-triage</code> in the same write that adds the new state" — carried out by
+a model at the end of a long analysis, and it was skipped in practice: sixteen
+issues sat on <code>ai-triage</code> with finished plans on them, waiting for an approval
+queue they had never reached.</p>
+<p>Nothing failed when it was skipped, which is the whole problem. The comment was
+posted, so the run looked successful from outside; only the label was missing,
+and no exit code, artifact, or test reports a missing label.</p>
+<p>So it is one call that does both writes or neither:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">hand_back</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;pending-approval&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>It <strong>refuses before it writes</strong> in two cases, so a rejected hand-back leaves the
+issue exactly as it was rather than half-written:</p>
+<ul>
+<li>a state triage may not set — <code>ready-for-work</code> is Derek's, via <code>/approve</code>;</li>
+<li>an analysis the recognizer would not match, which is the state
+  <code>triage_repair</code> cannot repair and the reconciler requeues forever.</li>
+</ul>
+<p>This follows the same principle as the gatekeeper: <em>the component that can
+change state is a parser with a fixed vocabulary, not a model.</em> Triage was the
+one stage where a model applied its own label, and it was the one stage that
+silently stopped doing it.</p>
+<h5 id="the-hand-back-footer">The hand-back footer<a class="headerlink" href="#the-hand-back-footer" title="Link to this section">&para;</a></h5>
+<p>The comment ends with the commands that make sense <strong>on the route it took</strong> —
+not the whole vocabulary:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Offers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pending-approval</code></td>
+<td><code>/approve</code>, <code>/revise &lt;notes&gt;</code>, <code>/park</code></td>
+</tr>
+<tr>
+<td><code>needs-clarification</code></td>
+<td><code>/revise &lt;answer&gt;</code>, <code>/park</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>/approve</code> is deliberately absent from the second: there is no plan on that
+route, so approving would approve nothing, and an offered command that means
+something other than it appears to is worse than no footer.</p>
+<p>The glosses come from <code>render_dashboard.COMMANDS</code> rather than a second copy —
+one description of what each command does. The single exception is <code>/revise</code> on
+the clarification route, where the canonical gloss ("the plan is not right") is
+false, because triage wrote no plan. That override is the visible edge of a real
+gap in the vocabulary: there is no verb for <em>here is the answer, look again</em>,
+and <code>/revise</code> is doing that job because it is the only route back to <code>ai-triage</code>
+that carries a note.</p>
+<h4 id="re-fire-repair">Re-fire repair<a class="headerlink" href="#re-fire-repair" title="Link to this section">&para;</a></h4>
+<p>Triage runs twice more often than you would think: a sweep catches a comment
+late, a Routine is poked twice, a run crashes after posting its analysis but
+before moving the label. <code>triage_repair.py</code> decides what happens, as a pure
+function rather than a judgement made afresh each time.</p>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An analysis comment is already there</td>
+<td><strong>repair</strong> — apply the missing label move, post nothing</td>
+</tr>
+<tr>
+<td>No analysis comment</td>
+<td>a normal triage run</td>
+</tr>
+<tr>
+<td>Analysis present, label already correct</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td>The owner left <code>/revise</code>, <code>/redo</code>, or <code>/propose</code></td>
+<td>re-analyze anyway</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Repair, not repeat.</strong> Triage is not deterministic: the same issue analyzed
+twice yields two different reasonable plans, and stacking the second on the
+first leaves Derek deciding which one an <code>/approve</code> refers to.</p>
+<p>The exception is the owner's note. <code>/revise</code> objects <em>to the plan</em> — repairing
+the label would apply the state the rejected plan asked for and silently discard
+the objection. The note travels with the issue from <code>select_triage.py</code>, so the
+rewrite answers the actual complaint.</p>
+<h5 id="one-recognizer-shared_1">One recognizer, shared<a class="headerlink" href="#one-recognizer-shared_1" title="Link to this section">&para;</a></h5>
+<p>"Does this comment look like triage wrote it" has exactly one implementation:
+<code>has_analysis_signature</code> in <code>triage_repair.py</code>. It matches a <code>## Build
+checklist</code> heading anchored at the start of a line, or the
+<code>❓ Needs from Derek/Connor:</code> marker allowing Markdown emphasis around the text.
+Prose mentioning either phrase does not match, and only comments authored by the
+bot count — a human pasting a checklist is not a triage run.</p>
+<p><code>reconcile.py</code> imports it rather than carrying a second copy. Two copies drift,
+and this particular drift is self-sustaining: reconcile finds no analysis and
+returns the issue to <code>ai-triage</code>, triage finds the analysis it wrote and repairs
+the label instead, reconcile returns it again. Neither side is wrong on its own
+terms, so nothing surfaces as an error — the issue just cycles. The side that
+writes the format owns the recognizer.</p>
+<p><strong>The author test is shared for the same reason, and it was the one that broke.</strong>
+<code>is_triage_author</code> lives beside the recognizer and is imported the same way. Both
+modules previously kept their own <code>TRIAGE_AUTHOR = "github-actions[bot]"</code>, while
+every real triage comment was posted by the Claude App as <code>claude[bot]</code> — so the
+author filter ran <em>before</em> the recognizer and rejected every analysis on the
+board. Two copies, both stale in the same direction, so nothing looked
+inconsistent.</p>
+<p>Triage has two surfaces and both are accepted: <code>claude[bot]</code> when it runs as the
+App, <code>github-actions[bot]</code> when it runs from a workflow holding <code>GITHUB_TOKEN</code>.
+A human's comment still never counts, which is the point of having the gate at
+all — Derek pasting a checklist is not a triage run.</p>
+<h3 id="the-io-layer">The I/O layer<a class="headerlink" href="#the-io-layer" title="Link to this section">&para;</a></h3>
+<p>Everything with a decision in it is pure and tested without a network. Three
+thin modules wire those pieces to GitHub:</p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_github_api.py</code></td>
+<td>REST helpers, and the shared dashboard re-render</td>
+</tr>
+<tr>
+<td><code>run_comment_event.py</code></td>
+<td>one <code>issue_comment</code> event, end to end</td>
+</tr>
+<tr>
+<td><code>run_sweep.py</code></td>
+<td>the board-wide replay + revisit + reconcile pass</td>
+</tr>
+</tbody>
+</table>
+<p><code>run_comment_event.py</code> is: snapshot → parse → gate → apply → write labels, ack,
+and reaction → <strong>re-render the dashboard once, after every label write.</strong>
+Rendering in between would publish a board describing a half-applied command.
+<code>run_sweep.py</code> re-renders once at the end for the same reason, and takes
+<code>--events-only</code> to drop the comment replay and reconcile's two cron-only fixes
+on the <strong>event path</strong>. That flag names the trigger, not a clock: both paths run
+the same script, and the cron is six-hourly.</p>
+<p><strong>Authentication is <code>GITHUB_TOKEN</code>, never a PAT.</strong> The workflow token is scoped
+to this repository and expires with the job; a personal access token would
+carry everything its owner can do into a job nobody is watching.</p>
+<p><strong>The owner check is repeated in the script.</strong> The workflows already filter on
+the comment author, so this is redundant — deliberately. A script that is safe
+only because its caller filtered is one edited <code>if:</code> away from letting a
+stranger drive the pipeline, and the workflow trigger is exactly the kind of
+line that gets edited for an unrelated reason.</p>
+<h4 id="running-either-entry-point-by-hand">Running either entry point by hand<a class="headerlink" href="#running-either-entry-point-by-hand" title="Link to this section">&para;</a></h4>
+<p>Both read JSON on <strong>stdin</strong>, which is what makes replaying a missed event or
+rehearsing a sweep possible without waiting for a trigger:</p>
+<table>
+<thead>
+<tr>
+<th>Entry point</th>
+<th>Expects on stdin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_comment_event.py</code></td>
+<td>an <code>issue_comment</code> webhook payload</td>
+</tr>
+<tr>
+<td><code>run_sweep.py</code></td>
+<td>a state snapshot — issues, pulls, merged commits, recent comments, focus</td>
+</tr>
+</tbody>
+</table>
+<p><code>run_sweep.py --events-only</code> simulates the <strong>event path</strong> by dropping the
+comment replay and reconcile's two cron-only fixes. Running it <em>without</em> that
+flag outside the nightly window will requeue whatever the builder currently has
+in flight, which is the one way to do real damage with these scripts by hand.</p>
+<p>The rehearsal snapshot's <code>recent_comments</code> are raw <code>/issues/comments</code> items,
+exactly as GitHub returns them — the replay hands them to the same
+<code>fetch_comment_event.build</code> the live path uses, so it must be given the same
+shape rather than a second one. <code>PIPELINE_OWNER</code> names the account whose
+comments count; without it the replay does nothing at all, because an empty
+owner would match an empty author.</p>
+<h3 id="applying-an-action">Applying an action<a class="headerlink" href="#applying-an-action" title="Link to this section">&para;</a></h3>
+<p><code>apply_actions.py</code> computes the resulting label set, the acknowledgement, and
+whether to watermark. Three rules worth knowing:</p>
+<ul>
+<li><strong>A state change replaces, never adds.</strong> Exactly one of the state labels is
+  on an open issue at a time. Everything else — <code>area:*</code>, <code>type:*</code>,
+  <code>skip-docs</code> — is untouched, because a state change that dropped them would
+  throw away the whole triage decision.</li>
+<li><strong>The ack says what happens next</strong>, not which label changed. "the nightly
+  builder can pick it up next" is the consequence; the label is a means.</li>
+<li><strong>A refusal's ack says nothing was changed</strong> — not the labels, not the
+  milestone — because "your command was refused" and "your command was partly
+  applied" need very different responses.</li>
+</ul>
+<p>Reactive triage fires <strong>only when <code>ai-triage</code> is newly present</strong>. An idempotent
+re-add — a replay, or a second <code>/admit</code> on an already-admitted issue — must not
+fire it again, or one stuck comment becomes a triage run every sweep.</p>
+<h3 id="recording-dependencies">Recording dependencies<a class="headerlink" href="#recording-dependencies" title="Link to this section">&para;</a></h3>
+<p>Dependencies are <strong>native GitHub relationships</strong>, never prose:</p>
+<ul>
+<li><em>This is part of that</em> → a <strong>sub-issue</strong> of the parent epic.</li>
+<li><em>This can't start until that's done</em> → a <strong>blocked-by</strong> relationship.</li>
+</ul>
+<p>The builder computes its ready queue from that graph. A dependency written as a
+sentence is a dependency it walks straight into. This is also why <code>/block</code> and
+<code>/unblock</code> exist as commands: recording one has to be as cheap as mentioning it.</p>
+<p><strong><code>Depends on:</code> is not a blocker.</strong> It is soft ordering — "this will go better
+afterwards" — and it deliberately has no native form. Converting one into a hard
+blocked-by turns a preference into a gate the builder refuses to pass, which is
+how a queue deadlocks on work that could have been done at any time.</p>
+<p>The <code>issue-blockers</code> skill is the write side, and its <code>audit</code> subcommand finds
+<code>Blocked by #N</code> lines that were never recorded natively. One trap it exists
+around: the dependencies <strong>write</strong> API takes the internal <code>issue_id</code>, not the
+issue number — and a wrong id does not fail, it links to whatever issue happens
+to have it.</p>
+<h3 id="development-the-ready-queue">Development — the ready queue<a class="headerlink" href="#development-the-ready-queue" title="Link to this section">&para;</a></h3>
+<p><code>select_queue.py</code> returns the issues to work, in the order to work them:</p>
+<p><strong>Eligibility</strong> — all of:</p>
+<ul>
+<li><code>ready-for-work</code>;</li>
+<li>in the focus milestone (no milestone is not the focus milestone);</li>
+<li>every hard blocker closed or merged;</li>
+<li>not <code>parked</code>;</li>
+<li>not a <code>type:epic</code> (epics are containers; their children are the work);</li>
+<li>has no open PR <strong>closing</strong> it.</li>
+</ul>
+<p>Two of those are narrower than they look.</p>
+<p><strong>Hard blockers are native edges unioned with <code>Blocked by #N</code> lines</strong>, merged by
+one helper — <code>blockers_of</code> in <code>.claude/skills/issue-blockers/blocker_refs.py</code>,
+the same one the sweep and the dashboard use. An issue can have one dependency
+recorded natively and another still
+written in prose, and reading either source alone releases work that is still
+half-blocked. A blocker the caller knows nothing about counts as unresolved:
+not knowing whether the thing you depend on is finished is precisely the case
+where starting is expensive.</p>
+<p><strong>An open PR only suppresses an issue if it <em>closes</em> it</strong> — a closing keyword,
+not a bare <code>#47</code>. PRs reference issues constantly for context, and treating a
+mention as "already being worked" would silently starve an issue that nobody is
+actually working. This is the same keyword rule reconcile uses to decide
+done-ness.</p>
+<p><strong>Ordering</strong> — a stable topological sort. At each step the lowest-numbered
+issue whose in-queue dependencies are already placed, so dependencies come
+first and ties break oldest-first with nothing starving. Soft <code>Depends on:</code>
+lines order here even though they never gate: a blocker closed this evening
+still says which of two ready issues was meant to come first.</p>
+<p>The sort places <strong>one issue per step</strong>, re-checking after each. Placing the
+whole ready set at once would scatter a dependent away from the thing it
+depends on — with a cap of 2, <code>#11, #12</code> rather than <code>#11, #10</code> — and a cap is
+far more useful when it cuts a coherent chain than an arbitrary slice.</p>
+<p>A cycle is a triage mistake, and reconcile flags it. The builder must not hang
+or drop issues on one, so it falls back to number order for the tangled set.</p>
+<h3 id="serial-delegated-delivery">Serial delegated delivery<a class="headerlink" href="#serial-delegated-delivery" title="Link to this section">&para;</a></h3>
+<p>Issues are worked <strong>one at a time</strong>, each delegated to its own agent session.</p>
+<p>Serial because parallel agents on one repository fight: two branches touching
+<code>ProjectSettings.asset</code>, two release-please runs, two PRs renumbering the same
+things. Nothing raises that above one at a time.</p>
+<p>Delegated — a fresh session per issue — because context from the previous issue
+is a liability. The agent that just spent an hour on the audio system will find
+a way to make the next issue about audio.</p>
+<p>Each delegation is: mark <code>in-progress</code> <strong>first</strong>, so a crashed run leaves a
+visibly stuck issue rather than an invisible one; hand the issue to the
+development agent (<a href="../agent-workflow/">Agent workflow</a>); let it open its own PR.
+The pipeline does not write code.</p>
+<h4 id="cap-bounds-the-round-not-the-concurrency"><code>cap</code> bounds the round, not the concurrency<a class="headerlink" href="#cap-bounds-the-round-not-the-concurrency" title="Link to this section">&para;</a></h4>
+<p>The two are separate knobs and it is worth keeping them apart.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Means</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Concurrency</td>
+<td>issues worked at once</td>
+<td>always <strong>1</strong></td>
+</tr>
+<tr>
+<td><code>cap</code></td>
+<td>issues the round takes on at all</td>
+<td><strong>3</strong> by default</td>
+</tr>
+</tbody>
+</table>
+<p><code>select_queue.py</code> returns at most <code>cap</code> issues; the builder then works through
+them one after another. A night that picks up three issues and delivers them
+serially is entirely compatible with "parallel agents fight" — nothing is
+running in parallel.</p>
+<p>The cap is small on purpose. Three issues that land beat six that half-land,
+and it is the only thing standing between a quiet night and thirty open PRs.
+The cap applies <strong>after</strong> ordering, never before: capping first would take the
+three lowest-numbered issues and could admit a dependent without the thing it
+depends on.</p>
+<h4 id="one-branch-one-pr-one-issue">One branch, one PR, one issue<a class="headerlink" href="#one-branch-one-pr-one-issue" title="Link to this section">&para;</a></h4>
+<p>Never a combined PR, even for two small issues touching the same file.</p>
+<p>A combined PR cannot be partly rejected, carries an ambiguous closing keyword,
+and — the one that bites quietly — has to pick a single Conventional Commit
+type. release-please derives the version from that type, so a PR bundling a
+<code>feat:</code> with a <code>fix:</code> ships the wrong version number whichever label it takes.</p>
+<h4 id="the-builder-never-merges-and-never-closes">The builder never merges and never closes<a class="headerlink" href="#the-builder-never-merges-and-never-closes" title="Link to this section">&para;</a></h4>
+<p>Not a green PR, not a one-line fix, not its own work.</p>
+<p>The pipeline's job is to get work to the point where Derek can look at it. A
+pipeline that also merged would make the review step optional in practice, and
+an agent that can approve its own output has no gate on it at all. Closing is
+the same rule from the other end: <code>Closes #N</code> in the PR body closes the issue
+when Derek merges, and closing it directly would mark work done that nobody
+accepted.</p>
+<h4 id="skip-docs-is-applied-immediately-or-not-at-all"><code>skip-docs</code> is applied immediately, or not at all<a class="headerlink" href="#skip-docs-is-applied-immediately-or-not-at-all" title="Link to this section">&para;</a></h4>
+<p>A PR touching no files under <code>docs/</code> gets <code>skip-docs</code> <strong>the moment it opens</strong> —
+before anything else in the round.</p>
+<p>The reconciliation gate fails a code-only PR, and the label is the sanctioned
+escape hatch. Applying it late means the round's first visible output is a red
+X on a PR that was never wrong, which teaches everyone to skim past red. It
+still needs a written justification in <code>## Deviations and Decisions</code>, because
+the gate cannot distinguish "no docs needed" from "forgot the docs" — that is
+the whole reason a human has to say which it was.</p>
+<h4 id="the-owner-invoked-alternative-milestone-orchestration">The owner-invoked alternative: <code>milestone-orchestration</code><a class="headerlink" href="#the-owner-invoked-alternative-milestone-orchestration" title="Link to this section">&para;</a></h4>
+<p>When Derek hands over several issues at once and wants them <em>delivered</em>, the
+<code>milestone-orchestration</code> skill runs the same dev agent with one difference:
+the gate between issues is <strong>merged</strong>, not <strong>PR opened</strong>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Nightly builder</th>
+<th><code>milestone-orchestration</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gate between issues</td>
+<td>PR opened</td>
+<td><strong>PR merged</strong></td>
+</tr>
+<tr>
+<td>Invoked by</td>
+<td>the 03:00 schedule</td>
+<td>Derek, explicitly</td>
+</tr>
+<tr>
+<td>A failing issue</td>
+<td>dropped, round continues</td>
+<td><strong>halts the run</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Merging between issues is what makes a multi-issue run conflict-free by
+construction: every branch is cut from a <code>main</code> that already contains all
+previously delivered work, so two issues in one run cannot produce conflicting
+diffs. The nightly builder does not need this, because its PRs sit unmerged
+until Derek reviews them and he resolves any overlap by choosing what to merge.</p>
+<p>A failure <strong>halts</strong> rather than skipping, because the next issue would be built
+on a <code>main</code> that is missing work the handoff assumed was there. Whether that
+matters is unknowable without reading both issues, so the run stops and says
+which issue failed.</p>
+<p><strong>It is owner-invoked only, never scheduled.</strong> Everything else in the pipeline
+stops at "PR opened" so a human sees the work before it becomes the game. This
+skill merges, and it exists because Derek sometimes applies that judgement up
+front to a set he chose. Wiring it to a trigger would convert a decision about
+six specific issues into a standing grant to merge anything.</p>
+<h4 id="a-failing-issue-is-dropped-and-the-round-continues">A failing issue is dropped, and the round continues<a class="headerlink" href="#a-failing-issue-is-dropped-and-the-round-continues" title="Link to this section">&para;</a></h4>
+<p>If an issue cannot be completed — tests won't pass, the plan was wrong, a
+checklist box cannot be ticked — the branch is deleted and <strong>no PR is opened</strong>.
+No draft, no partial. A PR that does not close its issue still costs a review,
+and a partial implementation hides an untickable checklist box that is really a
+triage problem.</p>
+<p>The issue keeps <code>in-progress</code>, deliberately. Reconcile finds an open
+<code>in-progress</code> issue with no open PR and nothing on <code>main</code> and returns it to
+<code>ready-for-work</code>, so the failure self-heals by the next round and stays visible
+on the dashboard until it does.</p>
+<p>One failure never aborts the round — the other issues are unrelated.</p>
+<h3 id="reconciliation-drift">Reconciliation — drift<a class="headerlink" href="#reconciliation-drift" title="Link to this section">&para;</a></h3>
+<p>Reality drifts: a PR merges without its closing keyword, someone hand-edits a
+label, a run crashes between two API calls. <code>reconcile.py</code> compares what the
+labels claim against what GitHub shows, and sorts each finding into
+<strong>auto-fixable</strong> or <strong>flag-only</strong>.</p>
+<p><strong>Auto-fixed</strong> — mechanical, single correct answer, no judgement:</p>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Condition</th>
+<th>Action</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strip_labels</code></td>
+<td>closed issue still carrying a pipeline-state label</td>
+<td>remove it</td>
+<td>every pass</td>
+</tr>
+<tr>
+<td><code>requeue</code></td>
+<td>open, <code>in-progress</code>, no open PR, not on <code>main</code></td>
+<td>→ <code>ready-for-work</code></td>
+<td><strong>cron only</strong></td>
+</tr>
+<tr>
+<td><code>requeue_triage</code></td>
+<td>a state label with no triage-authored analysis</td>
+<td>→ <code>ai-triage</code></td>
+<td><strong>cron only</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Flagged, never touched</strong> — anything needing judgement:</p>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flag_merged_but_open</code></td>
+<td>the work is on <code>main</code> but the issue is still open</td>
+</tr>
+<tr>
+<td><code>flag_orphaned_analysis</code></td>
+<td>an analysis comment with no state label</td>
+</tr>
+<tr>
+<td><code>flag_orphaned_ready</code></td>
+<td><code>ready-for-work</code> with no milestone</td>
+</tr>
+<tr>
+<td><code>flag_prose_dependency</code></td>
+<td><code>Blocked by #N</code> in the body with no native edge</td>
+</tr>
+<tr>
+<td><code>flag_cycle</code></td>
+<td>a dependency cycle</td>
+</tr>
+<tr>
+<td><code>flag_dashboard_count</code></td>
+<td>two dashboard issues, or none</td>
+</tr>
+</tbody>
+</table>
+<p>The split is the design. A reconciler that guesses is a reconciler you have to
+audit, and one you have to audit is one you turn off — at which point it is
+worse than absent, because the dashboard still says it ran.</p>
+<h4 id="the-sweep-never-closes-an-issue">The sweep never closes an issue<a class="headerlink" href="#the-sweep-never-closes-an-issue" title="Link to this section">&para;</a></h4>
+<p>Not even when the work is demonstrably merged and the issue is demonstrably
+still open. That is <code>flag_merged_but_open</code>, and it stays a flag.</p>
+<p><code>Closes #N</code> in a PR body is what closes an issue, when Derek merges it. A sweep
+that also closed issues would be deciding that work is finished and accepted on
+evidence that it merely <em>landed</em> — and the two are not the same claim. Getting
+it wrong closes something nobody agreed was done, silently, at 01:00.</p>
+<h4 id="why-two-of-the-auto-fixes-are-cron-only">Why two of the auto-fixes are cron-only<a class="headerlink" href="#why-two-of-the-auto-fixes-are-cron-only" title="Link to this section">&para;</a></h4>
+<p><code>requeue</code> and <code>requeue_triage</code> are correct nightly and wrong on the event path,
+because <strong>the drift they detect is indistinguishable from work in flight.</strong></p>
+<ul>
+<li>An issue the builder picked up seconds ago has <code>in-progress</code> and no PR yet.
+  That is exactly <code>requeue</code>'s condition, and firing it would yank the issue out
+  from under a running agent.</li>
+<li>Triage posts its analysis comment <em>before</em> setting the state label. Between
+  those two writes an issue legitimately has neither; moments later it has both.
+  Mid-write, <code>requeue_triage</code>'s condition holds.</li>
+</ul>
+<p>By 01:00 the transient has resolved: an issue still looking stalled hours later
+genuinely is. So they are <strong>omitted entirely</strong> on the event path rather than
+softened with a time threshold — a threshold is a guess about how long an agent
+takes, and it would be wrong in both directions.</p>
+<p><code>strip_labels</code> has no such problem and runs on every pass. It acts only on an
+already-closed issue, and a closed issue is not transiently anything.</p>
+<h4 id="done-ness-is-read-from-commit-bodies">Done-ness is read from commit bodies<a class="headerlink" href="#done-ness-is-read-from-commit-bodies" title="Link to this section">&para;</a></h4>
+<p>Whether work landed is decided by a <strong>closing keyword in a merged commit's
+body</strong> — never the subject line, never a bare <code>#N</code> or <code>Refs #N</code>.</p>
+<p>The subject line is excluded because a squash merge appends <code>(#148)</code> to it, and
+that is a <em>PR</em> number. Bare references are excluded because PRs and commits
+mention issues constantly for context; treating a mention as completion would
+mark work done because somebody linked to it.</p>
+<p><strong><code>flag_merged_but_open</code> is checked before the stall rule</strong>, so an issue already
+on <code>main</code> never reads as a stall. Without that ordering it would be requeued,
+rebuilt, and requeued again every night — a loop that produces a duplicate PR
+each time.</p>
+<h3 id="dashboard">Dashboard<a class="headerlink" href="#dashboard" title="Link to this section">&para;</a></h3>
+<p><code>render_dashboard.py</code> rewrites the dashboard issue from live state. The
+sections, in order:</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Shows</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🎯 Focus</td>
+<td>the four-slice pie for the focus milestone</td>
+<td>focus</td>
+</tr>
+<tr>
+<td>🔨 Ready queue</td>
+<td><code>ready-for-work</code>, headed by the build cap</td>
+<td>focus</td>
+</tr>
+<tr>
+<td>📥 Intake</td>
+<td><code>ai-triage</code> — waiting to be analyzed, plus unadmitted work</td>
+<td>board-wide</td>
+</tr>
+<tr>
+<td>✋ Waiting for you</td>
+<td><code>pending-approval</code> — waiting on Derek</td>
+<td>board-wide</td>
+</tr>
+<tr>
+<td>❓ Needs clarification</td>
+<td>blocked on a question</td>
+<td>board-wide</td>
+</tr>
+<tr>
+<td>⏸️ Parked</td>
+<td>set aside, listed so it can be found</td>
+<td>board-wide</td>
+</tr>
+<tr>
+<td>⚠️ Reconcile</td>
+<td>the sweep's flag findings</td>
+<td>board-wide</td>
+</tr>
+<tr>
+<td>📅 Other milestones</td>
+<td>progress elsewhere; finished milestones omitted</td>
+<td>every other</td>
+</tr>
+<tr>
+<td>🎮 Commands</td>
+<td>the command reference</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Every issue table carries a <strong>Milestone</strong> column, so the milestone is visible
+at every stage rather than only where an issue is being scheduled, and a
+<strong>Blocked by</strong> column linking each hard blocker.</p>
+<h4 id="only-the-pie-and-the-ready-queue-are-focus-scoped">Only the pie and the ready queue are focus-scoped<a class="headerlink" href="#only-the-pie-and-the-ready-queue-are-focus-scoped" title="Link to this section">&para;</a></h4>
+<p>Those two answer <em>what is being built now</em>, and the builder builds the focus
+milestone. Listing an out-of-focus <code>ready-for-work</code> issue in the queue would
+put work in front of Derek that nothing is going to pick up.</p>
+<p>Every other section answers a different question — <em>what does somebody have to
+look at</em> — and an issue does not stop needing to be looked at by sitting
+outside the milestone currently being built. Scoping those to focus hides the
+work that most needs surfacing:</p>
+<ul>
+<li><strong>Intake is the worst case.</strong> <code>ai-triage</code> means the issue has <em>not</em> been
+  triaged, and triage is what decides its milestone — so an issue waiting for
+  triage usually has no milestone at all. A focus-scoped Intake is
+  structurally near-empty: the section reads "Nothing waiting for triage"
+  precisely because the untriaged pile is growing out of sight.</li>
+<li><strong><code>Direct Involvement Needed</code> can never be the focus.</strong> It carries no
+  version and never ships, so a focus-scoped "Waiting for you" hides every
+  issue in the one milestone that exists to say <em>Derek has to do this by
+  hand</em> — which is most of them.</li>
+<li><strong>A question is not answered by being scheduled late</strong>, and answering it
+  early is often what lets the issue be scheduled at all.</li>
+<li><strong>Parked work is listed so it can be found.</strong> An out-of-focus parked issue
+  is the one most in need of that.</li>
+</ul>
+<p>The <strong>Milestone</strong> column is what keeps a board-wide table readable: a row
+reading <code>—</code> is an issue nobody has scheduled, which is the point of showing
+it. If every table were focus-scoped, that column would be a constant.</p>
+<h4 id="intake-carries-two-piles-and-flags-which-is-which">Intake carries two piles, and flags which is which<a class="headerlink" href="#intake-carries-two-piles-and-flags-which-is-which" title="Link to this section">&para;</a></h4>
+<p>An issue with <strong>no pipeline-state label at all</strong> has not been <code>/admit</code>ted, and
+the nightly analysis run will never pick it up — <a href="#analysis--find-what-needs-triage">its entry condition is
+<code>ai-triage</code> and nothing else</a>. Left off the
+board entirely, such an issue is invisible until somebody happens to scroll
+the issue list, which on this repo meant seven of twenty-one open issues.</p>
+<p>So Intake lists both, and marks the difference:</p>
+<table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Means</th>
+<th>Who moves it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>plain</td>
+<td><code>ai-triage</code> — the pipeline has it</td>
+<td>tonight's analysis run</td>
+</tr>
+<tr>
+<td><code>🚪 not admitted</code></td>
+<td>no state label — nothing has it</td>
+<td>Derek, with <code>/admit</code></td>
+</tr>
+</tbody>
+</table>
+<p>The flag is not decoration. The two piles are waiting on different things, and
+an Intake row that did not say which pile it was in would make the section
+mean two contradictory things — "handled" and "stalled on you" — at a glance,
+which is the only way this section gets read.</p>
+<p><strong>Two issues are never listed as unadmitted</strong>: the <code>dashboard</code> issue, which is
+the pipeline's own furniture, and any <code>type:epic</code>, which is a container whose
+children carry the work. The epic case is exactly what
+<a href="#where-each-command-is-refused"><code>epic-excluded</code> refuses</a>, and listing an
+issue beside a command that gets refused is worse than not listing it.</p>
+<p>Unadmitted issues stay in the pie's <strong>Unplanned</strong> slice, and only inside the
+focus milestone — the pie's job is to add up, and widening Intake does not
+move an issue between slices.</p>
+<h4 id="unblocker-stars">Unblocker stars<a class="headerlink" href="#unblocker-stars" title="Link to this section">&para;</a></h4>
+<p>An issue is starred <code>⭐ unblocks #A, #B</code> when it appears in another open
+issue's hard-blocker set <strong>and is not itself blocked</strong>, and it sorts to the top
+of its table. Blocked rows carry <code>⛔ blocked</code> naming what they wait on.</p>
+<p>Both halves of that condition matter. Appearing in someone's blocker set is
+what makes an issue leverage — approving it frees work that is otherwise stuck.
+Not being blocked itself is what makes it <em>actionable</em>. Starring a blocked
+issue would point Derek at something nobody can start, which is worse than no
+star: it costs a click to find out the suggestion was useless, and a
+recommendation that is often useless stops being read.</p>
+<p>A closed blocker is never starred — it has already done its unblocking.</p>
+<h4 id="parked-is-listed-never-queued">Parked is listed, never queued<a class="headerlink" href="#parked-is-listed-never-queued" title="Link to this section">&para;</a></h4>
+<p>The Parked section is read-only, and <code>parked</code> issues are excluded from every
+other queue and count on the board — including when an issue somehow carries
+both <code>parked</code> and <code>ready-for-work</code>.</p>
+<p><strong>The pie's Unplanned slice is the one deliberate exception</strong>, because the pie
+has to add up. Excluding parked work there would make the slices sum to less
+than the milestone's issue count, and a total that does not reconcile is a
+board you stop trusting.</p>
+<p>Wholly regenerated every time, apart from the config markers. Nothing on it is
+remembered, so nothing on it can be stale.</p>
+<p>Rendering is <strong>deterministic and byte-stable</strong>: the same state produces the
+same bytes. Without that, every hourly run would PATCH the issue and the
+dashboard would generate a stream of meaningless edits.</p>
+<h4 id="no-model-renders-the-board">No model renders the board<a class="headerlink" href="#no-model-renders-the-board" title="Link to this section">&para;</a></h4>
+<p>Production rendering is <code>dashboard.yml</code> running <code>render_dashboard.py</code>. Nothing
+about the body is generated prose — every line comes out of a pure function of
+the state.</p>
+<p>The board is what Derek reads to decide what to approve next. A model-written
+summary can be subtly, fluently wrong in a way that reads perfectly; a table
+computed from labels either matches GitHub or has a bug someone can find.</p>
+<h4 id="the-renders-write-surface-is-one-issue-body">The render's write surface is one issue body<a class="headerlink" href="#the-renders-write-surface-is-one-issue-body" title="Link to this section">&para;</a></h4>
+<p>The renderer reads the whole board and can modify <strong>exactly one thing</strong>: the
+dashboard issue's body, via a single <code>PATCH</code>, authenticated with <code>GITHUB_TOKEN</code>
+rather than a PAT. No labels, no comments, no milestones, no other issues. Run
+without <code>--write</code> it does not write at all — previewing is the default, because
+it is the common case and the safe option should not need a flag.</p>
+<p>That narrow surface is what makes an incorrect render cheap. A wrong board is
+replaced by the next render; if the renderer also applied labels, a bug in the
+star logic would be a bug that reorganises the pipeline.</p>
+<h4 id="the-focus-pie-always-adds-up">The focus pie always adds up<a class="headerlink" href="#the-focus-pie-always-adds-up" title="Link to this section">&para;</a></h4>
+<p>The focus milestone is summarised as four slices:</p>
+<table>
+<thead>
+<tr>
+<th>Slice</th>
+<th>What is in it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unplanned</strong></td>
+<td><code>parked</code>, or carrying no pipeline-state label at all</td>
+</tr>
+<tr>
+<td><strong>In Planning</strong></td>
+<td><code>ai-triage</code>, <code>pending-approval</code>, <code>needs-clarification</code></td>
+</tr>
+<tr>
+<td><strong>Ready</strong></td>
+<td><code>ready-for-work</code>, <code>in-progress</code></td>
+</tr>
+<tr>
+<td><strong>Done</strong></td>
+<td>closed, whatever its labels say</td>
+</tr>
+</tbody>
+</table>
+<p>Every issue in the milestone falls into <strong>exactly one</strong>, and the four counts
+sum to the milestone's issue total. That is the property worth protecting: it
+means an issue cannot quietly disappear from the board by ending up with an odd
+combination of labels. The slices are assigned by ordered checks rather than
+independent predicates, so there is no gap to fall through and no overlap to be
+counted twice.</p>
+<p>Parked and never-triaged share the Unplanned slice because they mean the same
+thing for planning — not being worked, and not waiting on anybody — even though
+they got there for different reasons. This is the <strong>one</strong> place a <code>parked</code>
+issue is counted; every active-work queue excludes it, because the board's
+Parked section is a listing, not a re-admission.</p>
+<h4 id="how-reconciles-flags-surface">How reconcile's flags surface<a class="headerlink" href="#how-reconciles-flags-surface" title="Link to this section">&para;</a></h4>
+<p>The sweep's flag findings render into the board's <strong>⚠️ Reconcile</strong> section, and
+that is the only place they appear. They are regenerated with everything else,
+so a flag vanishes the moment its condition stops holding — and one still
+sitting there after several days is one nobody has dealt with.</p>
+<p>This is why a flag does not post a comment. A flag describes the board's state
+<em>right now</em>; a comment would outlive the state it described and turn into a
+false report of a problem that was fixed weeks ago. The dashboard can be wholly
+regenerated. A comment thread cannot.</p>
+<h2 id="skills-inventory">Skills inventory<a class="headerlink" href="#skills-inventory" title="Link to this section">&para;</a></h2>
+<p>The skills the pipeline itself runs. <code>.claude/skills/</code> holds more than these —
+see <a href="#skills-here-are-local-and-deliberately-not-synced">Skills here are local</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Owns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pipeline-gatekeeper</code></td>
+<td>comment parsing, the gates, label application, acks, reactive fire</td>
+</tr>
+<tr>
+<td><code>pipeline-analysis</code></td>
+<td>finding what needs triage and dispatching it</td>
+</tr>
+<tr>
+<td><code>triage-issue</code></td>
+<td>triaging one issue, and repairing a re-fire</td>
+</tr>
+<tr>
+<td><code>pipeline-dev</code></td>
+<td>the ready queue and serial delegated delivery</td>
+</tr>
+<tr>
+<td><code>pipeline-reconcile</code></td>
+<td>drift detection, auto-fix, and flagging</td>
+</tr>
+<tr>
+<td><code>pipeline-dashboard</code></td>
+<td>rendering the live dashboard issue</td>
+</tr>
+<tr>
+<td><code>milestone-orchestration</code></td>
+<td>driving a milestone end to end across the above</td>
+</tr>
+</tbody>
+</table>
+<p>The scripts inside them are ordinary Python with ordinary unit tests, run by the
+<code>pipeline-tests</code> workflow (<a href="../ci-cd/#pipeline-workflows">CI/CD</a>). The pipeline is
+code, and a broken gatekeeper is a broken queue.</p>
+<h2 id="skills-here-are-local-and-deliberately-not-synced">Skills here are local, and deliberately not synced<a class="headerlink" href="#skills-here-are-local-and-deliberately-not-synced" title="Link to this section">&para;</a></h2>
+<p><strong><code>.claude/skills/</code> is the source of truth in this repository.</strong> Nothing here
+subscribes to an upstream. Two kinds of skill live in the directory, and the
+difference decides what a future reconciliation is allowed to do.</p>
+<p><strong>Ported skills</strong> — the pipeline skills, <code>release-flow</code>, <code>dw-run-tests</code>,
+<code>ci-watch</code>, <code>scaffold-core</code>, <code>core-unity-split</code>, <code>issue-blockers</code>,
+<code>milestone-ops</code> — were hand-ported from <code>derekwinters/lucas-doggiehood</code> and then
+diverged to fit this game: different release config, different milestones, a
+different label taxonomy.</p>
+<p><strong>Vendored skills</strong> are verbatim third-party copies pinned to an upstream
+commit, with no local divergence. Today that is the 25 skills from
+<a href="https://github.com/mattpocock/skills"><code>mattpocock/skills</code></a> (MIT, license kept
+at <code>.claude/skills/LICENSE.mattpocock-skills</code>) — <code>grilling</code>, <code>wayfinder</code>,
+<code>tdd</code>, <code>to-spec</code>, <code>to-tickets</code>, <code>code-review</code> and the rest. They are vendored
+rather than installed with <code>/plugin install</code>, because a plugin is per-user
+machine state: it would be present for whoever ran the command and absent for
+everyone else who clones the repo, and it would not be pinned to a reviewed
+commit.</p>
+<p>Re-vendoring one is a clean diff while <code>diverged</code> stays <code>false</code> in the manifest.
+It is still a manual, reviewed act — see <a href="#why-not-sync">Why not sync</a>, which
+applies to both kinds for different reasons.</p>
+<h3 id="vendored-skills-do-not-outrank-this-repo">Vendored skills do not outrank this repo<a class="headerlink" href="#vendored-skills-do-not-outrank-this-repo" title="Link to this section">&para;</a></h3>
+<p>Where one of our skill names would be confused with a vendored one, ours carries a
+<code>dw-</code> prefix — <code>dw-run-tests</code>, not <code>run-tests</code>. The prefix marks a collision, not
+ownership, so most of our skills do not have one, and it comes off again when the
+skill it collided with is removed. See
+<a href="../../intro/conventions/#skill-names">Skill names</a>.</p>
+<p>Several vendored skills cover ground <code>/docs</code> already specifies, and where they
+disagree, this repo wins:</p>
+<table>
+<thead>
+<tr>
+<th>Vendored skill</th>
+<th>Defers to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tdd</code></td>
+<td>CLAUDE.md rule 1 and <a href="../testing/">testing</a></td>
+</tr>
+<tr>
+<td><code>code-review</code>, <code>implement</code></td>
+<td>the <a href="../agent-workflow/">agent workflow</a></td>
+</tr>
+<tr>
+<td><code>resolving-merge-conflicts</code></td>
+<td>CLAUDE.md rule 7 — this repo rebases</td>
+</tr>
+<tr>
+<td><code>to-tickets</code>, <code>to-spec</code></td>
+<td>the label and milestone <a href="../../intro/conventions/">conventions</a></td>
+</tr>
+</tbody>
+</table>
+<p>A vendored <code>triage</code> skill used to sit in that table, and it was the dangerous
+one: it knew nothing about our label taxonomy, the milestone rules, or the
+hand-back-to-Derek step, so an agent reaching for it instead of this repo's
+<code>triage-issue</code> dropped all three silently. It has been <strong>removed</strong> rather than
+deconflicted, because a prefix only protects you if you read it, and the two
+skills wrote different label vocabularies onto the same issues.</p>
+<p>Deleting a vendored skill is the stronger fix and the one to prefer when its
+whole subject is already specified here. Renaming ours was never going to stop a
+tired reader picking the wrong one.</p>
+<p>Its siblings still mention it — <code>ask-matt</code> recommends <code>/triage</code>, and
+<code>setup-matt-pocock-skills</code> offers to configure its labels. Those files are left
+<strong>verbatim</strong>, because editing a vendored copy to patch a reference sets
+<code>diverged</code> and turns every future re-vendor into a manual fixup. The references
+are harmless: <code>setup-matt-pocock-skills</code> already asks whether <code>triage</code> is
+installed and skips its whole label section when it is not, and a session asked
+to triage now resolves to <code>triage-issue</code>, which is the skill you wanted.</p>
+<p>The prefix cannot help where the clash is between two names the repo does not
+both own. Two vendored names — <code>grilling</code> and <code>code-review</code> — also exist as a
+personal or built-in skill, and which one a session resolves is harness
+precedence, not something the repo controls. Check the description you got before
+relying on either. Renaming the vendored copy is not the fix: it would break the
+<code>/code-review</code>-style cross-references inside its siblings.</p>
+<p>There is <strong>no <code>skills-update</code> workflow</strong>, no scheduled sync, and nothing here
+reads an upstream skills repository at runtime. No <code>AI_SKILLS_READ_TOKEN</code> secret
+is needed, and one should not be added.</p>
+<h3 id="why-not-sync">Why not sync<a class="headerlink" href="#why-not-sync" title="Link to this section">&para;</a></h3>
+<p>For <strong>ported</strong> skills: a sync would eventually revert local work. That is not a
+hypothetical: it is why the upstream project disabled its own sync. Once a skill
+has diverged — which it does the first time it mentions
+<code>.github/release-please/config.json</code> or <code>type:wireframe</code> — an upstream copy is
+not an update, it is a regression wearing an update's clothes. And it arrives on
+a schedule, so it lands when nobody is looking at it.</p>
+<p>For <strong>vendored</strong> skills the risk is the other way round. There is no divergence
+to lose; what a sync would do is pull unreviewed third-party instructions
+straight into the agent's context on a timer. A skill file is not a library —
+it is a standing instruction to an agent working on this repo, and an upstream
+edit could contradict CLAUDE.md, reach for a tool this project has ruled out, or
+just quietly change what <code>/grilling</code> does mid-session. That is a change someone
+should read before it takes effect, which is exactly what a pinned commit and a
+reviewed bump give you.</p>
+<h3 id="the-manifest-is-a-record-not-a-subscription">The manifest is a record, not a subscription<a class="headerlink" href="#the-manifest-is-a-record-not-a-subscription" title="Link to this section">&para;</a></h3>
+<p><code>.claude/.skills-manifest.json</code> says where each skill came from and whether it
+has diverged, so a future reconciliation knows what was copied from where. It
+carries <code>"sync": "disabled"</code> and the reason, so nobody wires a workflow to it by
+assuming that a manifest implies a sync.</p>
+<p>Each ported skill carries <code>ported_from</code>; each vendored skill carries
+<code>vendored_from</code> and its <code>source_path</code> in the upstream tree. The
+<code>vendored_upstreams</code> list holds the part that makes a re-vendor reproducible —
+repository, licence, and the exact <code>pinned_commit</code> the current copies came from.
+Bumping a vendored skill means moving that pin in the same commit as the files,
+so the record and the copies cannot drift apart.</p>
+<p>Nothing reads it. It is documentation that happens to be JSON.</p>
+<h3 id="if-a-sync-is-ever-wanted">If a sync is ever wanted<a class="headerlink" href="#if-a-sync-is-ever-wanted" title="Link to this section">&para;</a></h3>
+<p>In this order, and not any other:</p>
+<ol>
+<li><strong>Reconcile the divergence first.</strong> Diff every local skill against upstream
+   and decide, per difference, which side is right. A sync installed before
+   this step is a sync that silently makes those decisions by overwriting.</li>
+<li>Restore a <code>skills-update</code> workflow and its read token.</li>
+<li>Subscribe only the skills that genuinely have no local divergence, and record
+   in the manifest which those are.</li>
+</ol>
+<p>Steps 2 and 3 are an afternoon. Step 1 is the one that gets skipped, and it is
+the one that matters.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by Derek and Connor.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs" target="_blank" rel="noopener" title="This project on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

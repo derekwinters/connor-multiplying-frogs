@@ -1,0 +1,3085 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The design contract and engineering handbook for Multiplying Frogs — a game Derek is building with his son Connor.">
+      
+      
+        <meta name="author" content="Derek Winters">
+      
+      
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.4.0/specs/ui/game-board/">
+      
+      
+        <link rel="prev" href="../game-setup/">
+      
+      
+        <link rel="next" href="../roll-and-card/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Game board - Multiplying Frogs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#game-board" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Multiplying Frogs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Game board
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Introduction
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Specs
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../adr/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../engineering/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Engineering
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../tools/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tools
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Multiplying Frogs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../intro/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Introduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../intro/vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../intro/how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../intro/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../product-scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product scope
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules of play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../future-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future ideas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference material
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shared-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-the-lanes-run-across" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the lanes run across
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#colours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Colours
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Colours">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#placeholder-or-settled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholder, or settled?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-water-is-the-whole-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water is the whole screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bands-reach-the-edges-too" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands reach the edges too
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keeping-the-frogs-visible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keeping the frogs visible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bands-are-unchanged-deliberately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands are unchanged, deliberately
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mockups/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mockups
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../adr/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 Rules sacred, presentation ours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0002-structured-working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 The working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0003-network-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 The network boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0004 Core owns the save format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../engineering/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tech stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/agent-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/issue-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/ui-design-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI design process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/unity-serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity serialization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../engineering/ai-sdlc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ai-sdlc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../tools/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-the-lanes-run-across" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the lanes run across
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#colours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Colours
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Colours">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#placeholder-or-settled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholder, or settled?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-water-is-the-whole-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water is the whole screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bands-reach-the-edges-too" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands reach the edges too
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keeping-the-frogs-visible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keeping the frogs visible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bands-are-unchanged-deliberately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The bands are unchanged, deliberately
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/game-board.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="game-board">Game board<a class="headerlink" href="#game-board" title="Link to this section">&para;</a></h1>
+<p>The pond. Every frog's lane, whose turn it is, and the button that starts a
+turn. This is the screen the game lives on — everything else is something that
+opens on top of it.</p>
+<h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
+<p><strong>Invariant:</strong> every frog in the game is visible at once, on its own lane,
+without scrolling. Four lanes is the maximum and the layout is designed for
+four; it never pages, pans, or zooms.
+<strong>Invariant:</strong> frogs never share a lane and never interact. A player's entire
+state is how far up their own lane they are — see
+<a href="../../reference/#frogs-are-independent">the reference material</a>.
+<strong>Invariant:</strong> the Start log and the End log are <strong>one drawing over separate
+positions</strong>. There is one of each on the board however many frogs are playing,
+and every frog's position 0 and position 8 are on them. Two frogs on the Start
+log are not sharing a space: each is on position 0 <em>of its own lane</em>, drawn on
+its own lane's centre line, and neither can be moved, blocked, or read off by
+the other. The shared log is the only thing on this screen a player could
+mistake for frogs sharing something, which is why it is written down here.
+<strong>Invariant:</strong> the board never moves on its own. A frog moves only as the direct
+result of the answer the player just gave.
+<strong>Invariant:</strong> whose turn it is is stated in words in the header, not only shown
+by a highlight.
+<strong>Invariant:</strong> <code>Roll</code> is the only way to start a turn, and it is disabled the
+moment it is pressed until the turn resolves. A double-tap cannot roll twice.
+<strong>Invariant:</strong> nothing on this screen is destructive. Ending the game lives
+behind the settings button and a confirm — see
+<a href="../settings-dialog/">settings dialog</a>.</p>
+<h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>header</code></td>
+<td>Whose turn it is, and the settings button</td>
+</tr>
+<tr>
+<td><code>pond</code></td>
+<td>The lanes — one per frog in the game — and the two logs they share</td>
+</tr>
+<tr>
+<td><code>controls</code></td>
+<td>The <code>Roll</code> button</td>
+</tr>
+</tbody>
+</table>
+<p>The pond, in turn, is:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start-log</code></td>
+<td><strong>One</strong> log down the left of the pond, spanning the whole pond band. It is position 0 of every lane</td>
+</tr>
+<tr>
+<td><code>lane</code> × 2–4</td>
+<td>One per frog in the game, stacked</td>
+</tr>
+<tr>
+<td><code>end-log</code></td>
+<td><strong>One</strong> log down the right of the pond, spanning the whole pond band. It is position 8 of every lane</td>
+</tr>
+</tbody>
+</table>
+<p>A lane, in turn, is:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chip</code></td>
+<td>Which frog this lane belongs to, and how far it has got</td>
+</tr>
+<tr>
+<td><code>track</code></td>
+<td>Seven lily pads — this lane's positions 1–7</td>
+</tr>
+<tr>
+<td><code>piece</code></td>
+<td>The frog itself, sitting on its current position — one of its own lily pads, or the shared log at either end</td>
+</tr>
+</tbody>
+</table>
+<p>The logs are parts of the <strong>pond</strong>, not parts of a lane. That is the whole of
+this layout change: a four-frog game draws two logs, not eight.</p>
+<h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
+<p>The three regions are horizontal bands that together fill the full 1200 px
+height, in this order and with no gaps:</p>
+<ul>
+<li><code>header</code> — pinned to the top, <code>BoardHeaderHeight</code> tall, full width.</li>
+<li><code>pond</code> — everything between the other two bands. Lanes are stacked and
+  <strong>vertically centred</strong> within it, so a two-frog game is centred rather than
+  clinging to the top.</li>
+<li><code>controls</code> — pinned to the bottom, <code>BoardControlsHeight</code> tall, full width.</li>
+</ul>
+<p>"Full width" and "the top" mean the screen's, not the reference canvas's, on a
+device that is not 16:10 — a band reaches the edges the way the water does. What
+the bands <em>contain</em> is measured in the reference canvas, which is what every
+number below is in. The whole of that rule, and the one control it moves, is
+<a href="#the-bands-reach-the-edges-too">the bands reach the edges too</a>.</p>
+<p>Across the pond, the nine positions occupy the same nine columns in every lane,
+and their total width is fixed by the position count rather than by the space
+available:</p>
+<ul>
+<li><code>chip</code> — pinned to the <strong>left</strong> safe margin, <code>LaneGutterWidth</code> wide.</li>
+<li><code>start-log</code> — <code>LaneGutterGap</code> to the right of the chips.</li>
+<li><code>track</code> — this lane's seven lily pads, <code>LanePositionGap</code> from the Start log,
+  from each other, and from the End log.</li>
+<li><code>end-log</code> — pinned to the <strong>right</strong> edge of the safe area.</li>
+</ul>
+<p>Both logs are <code>SharedLogHeight</code> tall, which is the height of the <code>pond</code> band on
+the reference canvas: they fill it, edge to edge with the two hairlines, whether
+two frogs are playing or four. Every lane's centre line therefore crosses both
+of them, and a frog on a log still sits on its own lane's line. A shorter screen
+loses height from <code>pond</code> and nothing else — and the logs lose it with the band,
+because they are the band's height rather than a number typed in beside it. The
+header and the controls do not shrink, because a smaller <code>Roll</code> button is the
+wrong thing to trade away.</p>
+<p>A <em>taller</em> screen is the other side of that, and it is not symmetric: the extra
+height is all <code>pond</code>, and it is all water. The logs and the lane stack stay
+their reference size, centred in the band, because they are the board rather
+than the backdrop — see
+<a href="#the-bands-reach-the-edges-too">the bands reach the edges too</a>.</p>
+<h2 id="why-the-lanes-run-across">Why the lanes run across<a class="headerlink" href="#why-the-lanes-run-across" title="Link to this section">&para;</a></h2>
+<p>The classroom board's lanes run bottom to top. This one's run left to right, and
+that is a deliberate rotation rather than an oversight.</p>
+<p>Both were drawn and compared:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Lanes across</strong> (built)</th>
+<th><strong>Lanes up</strong> (rejected)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lane runs</td>
+<td>Left to right</td>
+<td>Bottom to top</td>
+</tr>
+<tr>
+<td>Lily pad diameter</td>
+<td><strong>112 px</strong></td>
+<td><strong>64 px</strong></td>
+</tr>
+<tr>
+<td>Frog piece</td>
+<td>88 px</td>
+<td>52 px</td>
+</tr>
+<tr>
+<td>Looks like the cardboard board</td>
+<td>No — it is rotated</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Reads as progress</td>
+<td>Yes — left to right, like a race</td>
+<td>Less so on a wide screen</td>
+</tr>
+<tr>
+<td>Space used</td>
+<td>Fills a 16:10 screen</td>
+<td>Four tall columns with wide margins</td>
+</tr>
+</tbody>
+</table>
+<p>The deciding number is the pad size. Nine positions have to fit along the lane;
+laid out across a 1920-wide screen that gives a 112 px lily pad, and stood up
+against a 1200-tall one it gives 64 px. The lily pad is the thing a child looks
+at to see how they are doing, and standing the board up costs nearly half of it.</p>
+<p>Under <a href="../../../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a> the board's
+orientation is presentation, not a rule, so it is ours to change. <strong>Derek chose
+lanes-across</strong> after seeing both drawn.</p>
+<h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Safe margin</td>
+<td><code>SafeMargin</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Header band height</td>
+<td><code>BoardHeaderHeight</code></td>
+<td>128 px</td>
+</tr>
+<tr>
+<td>Controls band height</td>
+<td><code>BoardControlsHeight</code></td>
+<td>176 px</td>
+</tr>
+<tr>
+<td>Hairline under <code>header</code>, over <code>controls</code></td>
+<td><code>BoardBandOutline</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Turn banner text size</td>
+<td><code>TurnBannerSize</code></td>
+<td>52 px</td>
+</tr>
+<tr>
+<td>Gap between the banner's chip and its words</td>
+<td><code>TurnBannerGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>Settings button, square</td>
+<td><code>SettingsButtonSize</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td>Settings gear glyph size</td>
+<td><code>SettingsGlyphSize</code></td>
+<td>44 px</td>
+</tr>
+<tr>
+<td>Settings button outline</td>
+<td><code>SettingsButtonOutline</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td><code>Roll</code> button width</td>
+<td><code>RollButtonWidth</code></td>
+<td>480 px</td>
+</tr>
+<tr>
+<td><code>Roll</code> button height</td>
+<td><code>RollButtonHeight</code></td>
+<td>144 px</td>
+</tr>
+<tr>
+<td><code>Roll</code> label size</td>
+<td><code>RollButtonLabelSize</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Frog hop duration</td>
+<td><code>FrogHopDuration</code></td>
+<td>0.4 s</td>
+</tr>
+<tr>
+<td>Lanes in play</td>
+<td><code>LaneCount</code></td>
+<td>2–4 — one per frog in the game</td>
+</tr>
+<tr>
+<td>Positions in a lane</td>
+<td><code>LanePositionCount</code></td>
+<td>9</td>
+</tr>
+<tr>
+<td>Correct answers needed to win</td>
+<td><code>LaneWinningPosition</code></td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<p><code>LanePositionCount</code> is 9 because a lane is the Start log, seven lily pads, and
+the End log, and <strong>the End log is the winning space</strong> — a frog has to land on
+it. Confirmed by Derek in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/185">issue #185</a>;
+recorded in
+<a href="../../reference/#the-end-log-is-the-winning-space">the reference material</a>.
+That is what the <code>of 8</code> in every chip's pad count refers to. Drawing the two
+logs once for the whole pond does not change that count: a lane is still nine
+positions, and two of them are now drawn on something the lane shares.</p>
+<p><code>LaneCount</code> is the only quantity on this page that is not fixed at design time.
+It sizes the lane stack — <code>LaneCount × LaneHeight</code>, centred in the pond — and
+nothing else. In particular it does <strong>not</strong> size the logs: they fill the pond
+band whatever it is.</p>
+<p>The lane:</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lane band height</td>
+<td><code>LaneHeight</code></td>
+<td>184 px</td>
+</tr>
+<tr>
+<td>Lily pad diameter</td>
+<td><code>LilyPadDiameter</code></td>
+<td>112 px</td>
+</tr>
+<tr>
+<td>Frog piece diameter</td>
+<td><code>FrogPieceDiameter</code></td>
+<td>88 px</td>
+</tr>
+<tr>
+<td>Frog piece outline</td>
+<td><code>FrogPieceOutline</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td>Lily pad and log outline</td>
+<td><code>TrackOutline</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Gap between positions</td>
+<td><code>LanePositionGap</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Chip gutter width</td>
+<td><code>LaneGutterWidth</code></td>
+<td>256 px</td>
+</tr>
+<tr>
+<td>Gap between chip and track</td>
+<td><code>LaneGutterGap</code></td>
+<td>48 px</td>
+</tr>
+</tbody>
+</table>
+<p>The two shared logs. They belong to the pond, so they are their own table:</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Log width</td>
+<td><code>LogWidth</code></td>
+<td>176 px</td>
+</tr>
+<tr>
+<td>Log height</td>
+<td><code>SharedLogHeight</code></td>
+<td>896 px — <code>1200 − BoardHeaderHeight − BoardControlsHeight</code></td>
+</tr>
+<tr>
+<td>Log corner radius</td>
+<td><code>LogRadius</code></td>
+<td>24 px</td>
+</tr>
+</tbody>
+</table>
+<p><code>LogHeight</code> (120 px) is <strong>gone</strong>, not renamed to something with the same
+meaning. It was the height of a log sized to sit inside one 184 px lane, and
+there is no such thing on this board any more.</p>
+<p><code>SharedLogHeight</code> is <strong>one number, not an expression</strong>: the log spans the full
+pond, so it is 896 px at two frogs, at three, and at four. That is Derek's
+answer, on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/296">issue #296</a>,
+to the question this page used to leave open — "log spans full lane space
+regardless of player count" — and it is the option the mockup did <em>not</em>
+originally draw. A two-frog game gets a full-height log with open water above
+and below its two lanes, and the board's ends do not change size when a player
+joins or leaves.</p>
+<p>It is written as the band's own arithmetic rather than as the bare 896 because
+the log <strong>is</strong> the band: if <code>BoardHeaderHeight</code> or <code>BoardControlsHeight</code> ever
+moves, the logs move with it and nobody has to remember them.</p>
+<p>That horizontal arithmetic is exact and worth keeping exact, and sharing the
+logs does not disturb it, because a shared log stands in the same column its
+per-lane predecessor did: two logs at 176, seven pads at 112 and eight gaps at
+48 is 1520 px across the pond; plus a 256 px chip gutter, a 48 px gap and two
+48 px margins, that is 1920 px on the nose. If a constant here changes, one of
+the others has to move with it.</p>
+<p>Vertically, the pond band is <code>1200 − BoardHeaderHeight − BoardControlsHeight</code> =
+896 px, which is <code>SharedLogHeight</code> — the logs fill it exactly. Four lanes at
+184 px is 736 px, centred with 80 px of water above and below, so at four frogs
+the logs stand 80 px proud of the lane stack at each end; at two frogs, 264 px.</p>
+<p>Every outline is drawn <strong>inside</strong> the element's own bounds, so <code>TrackOutline</code>,
+<code>FrogPieceOutline</code>, <code>SettingsButtonOutline</code> and <code>BoardBandOutline</code> cost the
+layout nothing and the 1920 px sum above is unaffected by any of them.</p>
+<p><code>LogRadius</code> is the log's own corner and <code>SettingsGlyphSize</code> the gear's own
+glyph. Both happen to equal a constant on
+<a href="../shared-components/">shared components</a> today — <code>ButtonRadius</code> is also 24 px
+and <code>ButtonLabelSize</code> also 44 px — and neither is that constant. The Button's
+corner and label are the Button's to restyle; the pond's logs and its gear are
+not, and they must not move when it does.</p>
+<h2 id="colours">Colours<a class="headerlink" href="#colours" title="Link to this section">&para;</a></h2>
+<p>The board is a pond. <strong>Blue water, brown logs, green lily pads</strong> — Derek's
+decision, in his words, on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/291">issue #291</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The water — the pond, and the whole screen behind it</td>
+<td><code>PondWater</code></td>
+<td><code>#9FD8F2</code></td>
+</tr>
+<tr>
+<td>Lily pad</td>
+<td><code>LilyPadGreen</code></td>
+<td><code>#CCEAAF</code></td>
+</tr>
+<tr>
+<td>Lily pad rim</td>
+<td><code>LilyPadEdge</code></td>
+<td><code>#7FAE5E</code></td>
+</tr>
+<tr>
+<td>Log</td>
+<td><code>LogBrown</code></td>
+<td><code>#E2C79C</code></td>
+</tr>
+<tr>
+<td>Log rim</td>
+<td><code>LogEdge</code></td>
+<td><code>#A97F4F</code></td>
+</tr>
+<tr>
+<td>Header and controls bands</td>
+<td><code>BandFill</code></td>
+<td><code>#E2E8E5</code></td>
+</tr>
+<tr>
+<td>Band hairline</td>
+<td><code>BandEdge</code></td>
+<td><code>#B9C0BD</code></td>
+</tr>
+<tr>
+<td>The board's words</td>
+<td><code>BoardInk</code></td>
+<td><code>#1E2422</code></td>
+</tr>
+<tr>
+<td>Frog piece outline</td>
+<td><code>PieceEdge</code></td>
+<td>black at 35%</td>
+</tr>
+</tbody>
+</table>
+<p>The four frog colours are not here. They are one table for the whole game, on
+<a href="../shared-components/#frog-colours">shared components</a>, because a frog is the
+same frog on every screen.</p>
+<p><code>TrackOutline</code> (3 px), <code>BoardBandOutline</code> (3 px) and <code>FrogPieceOutline</code> (4 px)
+in the tables above are <strong>widths</strong>; the <code>…Edge</code> rows here are the colours drawn
+at those widths.</p>
+<h3 id="placeholder-or-settled">Placeholder, or settled?<a class="headerlink" href="#placeholder-or-settled" title="Link to this section">&para;</a></h3>
+<p><strong>Settled:</strong> the water is blue, the logs are brown, the lily pads are green.
+That is a decision, not a proposal, and nothing should quietly walk it back.</p>
+<p><strong>Not settled:</strong> which blue, which brown, which green. The exact hues are a
+taste call and they are Connor's — see
+<a href="#open-questions">the open questions</a>. The values in the table are the proposal
+drawn in the mockups, and they are what the code carries until he has looked at
+the board on the tablet. They are honest placeholders in exactly the sense the
+<a href="../shared-components/#frog-colours">frog colours</a> are, and for the same reason.</p>
+<h3 id="the-water-is-the-whole-screen">The water is the whole screen<a class="headerlink" href="#the-water-is-the-whole-screen" title="Link to this section">&para;</a></h3>
+<p><code>PondWater</code> is what this screen paints to all four edges of the device, on any
+aspect ratio. It is the <code>pond</code> band's own fill <strong>and</strong> the paint behind
+everything else — the header and controls bands are drawn on top of it, and so
+is every lane, log and frog.</p>
+<p>Both, and written down as both, because it used to be only the second one: the
+<code>pond</code> band painted nothing at all and what read as the pond was the screen-wide
+paint showing through where the band was not. That is invisible while the two
+agree about where the band is, and it is why nobody noticed the band had the
+same bug the header and the controls had — see
+<a href="#the-bands-reach-the-edges-too">the bands reach the edges too</a>.</p>
+<p>That makes the board the one screen that does not paint the app's own
+background. Every other screen paints <code>#EDF1EF</code>, and so does the scene camera,
+which is what shows for the frame before any screen has painted at all. The
+rule from
+<a href="../shared-components/#what-fills-a-screen-that-is-not-1610">the canvas every component is measured in</a>
+is unchanged and still holds here: nothing behind the canvas is ever visible,
+because this screen's own paint reaches the edges.</p>
+<h3 id="the-bands-reach-the-edges-too">The bands reach the edges too<a class="headerlink" href="#the-bands-reach-the-edges-too" title="Link to this section">&para;</a></h3>
+<p><strong>Invariant:</strong> every one of the three bands is as wide as the screen, <code>header</code>'s
+top edge is the top of the screen, and <code>controls</code>' bottom edge is the bottom of
+it — on every aspect ratio, exactly as the water is.</p>
+<p>A band is the top or the bottom <strong>of the screen</strong>, not a panel laid on the pond.
+A band that stopped at 1920 px on a wider device would show a strip of water past
+each of its ends, and two grey bars floating on a pond is a rendering fault
+rather than a design. That is what the tablet was doing until this was written
+down.</p>
+<p><strong>Invariant:</strong> what a band <em>contains</em> is still laid out in the reference canvas,
+centred. The lanes are the reference canvas's safe area wide and the two shared
+logs stand in the columns those lanes' tracks start and end in, on every screen,
+so every constant in the table below keeps meaning exactly what it says and
+position 0 is still on the Start log. The band grows; the board inside it does
+not.</p>
+<p><strong>A control anchored to a band's edge follows the screen's edge.</strong> The turn chip
+and the settings gear sit <code>SafeMargin</code> in from the real left and right edges of
+the screen, because <code>SafeMargin</code> is a margin from the screen and not from a
+rectangle nobody can see. <code>Roll</code> is centred and does not care either way.</p>
+<p><strong>Extra height goes to <code>pond</code> and nowhere else</strong> — the same answer
+<a href="#anchors">Anchors</a> already gives for a <em>shorter</em> screen, in the other
+direction. The two bands keep their heights, because a smaller <code>Roll</code> is the
+wrong thing to trade away, and what a taller screen shows more of is water: the
+logs and the lane stack keep their reference size, centred in the band.</p>
+<p>At exactly 1920 × 1200 all of this is pixel-identical to the mockups, which is
+why it is a rule stated on this page rather than a new picture to draw.</p>
+<h3 id="keeping-the-frogs-visible">Keeping the frogs visible<a class="headerlink" href="#keeping-the-frogs-visible" title="Link to this section">&para;</a></h3>
+<p>A blue pond behind a blue frog, and a green lily pad under a green frog, is the
+thing this change could have broken. The frog pieces are drawn <strong>on top of</strong>
+these fills, and two of the four are <code>FrogGreen</code> and <code>FrogBlue</code>.</p>
+<p>So the fills are chosen against a bar, and the bar is part of the spec:</p>
+<blockquote>
+<p><strong>Every frog colour stays clearly separable from every surface it can sit
+on</strong> — the water, a lily pad, and a log. Separable means a luminance contrast
+of at least <strong>1.9 : 1</strong> <em>and</em> a CIE L*a*b* distance (ΔE*ab) of at least
+<strong>30</strong>.</p>
+</blockquote>
+<p>Two measures, because either alone can be fooled. Contrast catches two colours
+of different hue and identical brightness, which is all a colour-blind player —
+or anyone holding the tablet in sunlight — has left. ΔE catches two colours a
+contrast ratio calls fine and nobody could name apart. The 4 px <code>PieceEdge</code>
+outline is separation on top of this, never instead of it.</p>
+<p>What the table's values measure, as <em>contrast : 1 / ΔE</em>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>The water</th>
+<th>A lily pad</th>
+<th>A log</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FrogGreen</code></td>
+<td>2.61 / 60.4</td>
+<td>3.07 / <strong>40.8</strong></td>
+<td>2.48 / 50.7</td>
+</tr>
+<tr>
+<td><code>FrogBlue</code></td>
+<td>3.47 / 46.8</td>
+<td>4.08 / 83.0</td>
+<td>3.29 / 75.5</td>
+</tr>
+<tr>
+<td><code>FrogOrange</code></td>
+<td>2.13 / 87.9</td>
+<td>2.51 / 65.8</td>
+<td><strong>2.02</strong> / 46.0</td>
+</tr>
+<tr>
+<td><code>FrogPink</code></td>
+<td>2.91 / 73.8</td>
+<td>3.42 / 89.5</td>
+<td>2.76 / 67.6</td>
+</tr>
+</tbody>
+</table>
+<p>Every pair clears the bar. The two tightest are the two the change was always
+going to squeeze: the green frog on a green lily pad (ΔE 40.8, on a bar of 30)
+and the orange frog on a brown log (contrast 2.02 : 1, on a bar of 1.9). If a
+future repaint cannot clear the bar, <strong>the surface moves, not the frog</strong> — the
+frog colours are an <code>area:art</code> decision that this page does not own.</p>
+<p>One number in that palette is deliberately low and is not about frogs: the log
+and the water are almost the same brightness (1.05 : 1) and a long way apart in
+hue (ΔE 46.3). What makes a log read as a log floating on water is its
+<code>LogEdge</code> rim, which is 2.33 : 1 against the water. That is what <code>TrackOutline</code>
+is for.</p>
+<h3 id="the-bands-are-unchanged-deliberately">The bands are unchanged, deliberately<a class="headerlink" href="#the-bands-are-unchanged-deliberately" title="Link to this section">&para;</a></h3>
+<p><code>BandFill</code> and <code>BandEdge</code> are the pale grey-green they have always been. They
+were chosen to sit against a pale board and they now sit against blue water,
+where they are a soft frame rather than a crisp one — ΔE 23 from the water.</p>
+<p>They were left alone on purpose rather than overlooked: Derek's words were
+about the pond, and repainting the chrome on the way past would have made the
+change harder to judge. Whether they now read as a frame or as leftovers is
+<a href="#open-questions">the second open question</a>, and it is a look-at-it call.</p>
+<h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
+<ul>
+<li>
+<p><strong>Turn banner</strong> — <code>Green's turn</code>, left of the header, with that frog's
+  <a href="../shared-components/#player-chip">player chip</a> in its active state. The
+  wording is the frog's <strong>name and nothing else</strong> — <code>Green's turn</code> for a frog
+  still on its default, <code>Connor's turn</code> for one that has been renamed on
+  <a href="../game-setup/">game setup</a>.</p>
+<p>It used to read <code>Green frog's turn</code>, and the reason given was that frogs
+have no other name. They do now, so the justification went with the word:
+<code>Connor frog's turn</code> is not a sentence anybody would write. Rather than
+compose the banner one way for a default name and another way for a typed
+one — a rule with an edge case in it, living in a format string — nothing
+appends anything to a name, ever. The cost is that an un-renamed frog's
+banner loses a word, which is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/310">#310</a>
+question 4, settled by Derek.
+- <strong>Settings button</strong> — top right, <code>SettingsButtonSize</code> square, a gear. Opens
+  the <a href="../settings-dialog/">settings dialog</a>. Available on any turn, at any
+  time, including while it is not your turn — it is the way out of a game and
+  hiding it would be worse.
+- <strong><code>Roll</code></strong> — primary <a href="../shared-components/#button">button</a>, oversized. Opens
+  <a href="../roll-and-card/">roll and card</a>. Disabled from the moment it is pressed
+  until the turn resolves.
+- <strong>Lane × 2–4</strong> — one per frog, in turn order, top to bottom (A) or left to
+  right (B).
+- <strong>Lily pad × 7 per lane</strong> — the spaces, and the only part of the track a lane
+  has to itself. The pad a frog is on is drawn no differently from the others;
+  the frog on it is the marker.
+- <strong>Start log × 1, End log × 1</strong> — one of each for the whole board, however many
+  frogs are playing, each filling the pond band top to bottom. They are the ends
+  of every lane at once. The Start log is a real position a frog occupies, and a
+  wrong answer there leaves the frog where it is; see
+  <a href="../../reference/#the-start-log-is-a-floor-not-a-special-space">the Start log is a floor</a>.
+  Two to four frogs sit on the Start log at the beginning of every game and
+  gather on the End log as they finish — that is a shared drawing, not a shared
+  position, per the invariant above.
+- <strong>Frog piece</strong> — one per lane, on its current position, in the frog's colour.
+  On a shared log it sits on its own lane's centre line, which is what keeps
+  "frogs never interact" true in the picture as well as in the state.
+- <strong>Pad count</strong> — on the chip: <code>3 of 8</code>, so progress is readable in words as
+  well as by looking.</p>
+</li>
+</ul>
+<h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
+<ul>
+<li>Entering from <a href="../game-setup/">game setup</a>: every frog on its Start log, frog 1
+  active, <code>Roll</code> enabled.</li>
+<li><code>Roll</code> → <a href="../roll-and-card/">roll and card</a> →
+  <a href="../working-out-grid/">working-out grid</a> →
+  <a href="../answer-result/">answer result</a> → back here with the frog moved and the turn
+  passed to the next frog in order.</li>
+<li><strong>The move is animated on this screen, after the result dialog closes</strong>, over
+  <code>FrogHopDuration</code> (0.4 s), one pad's distance. It is the only motion on the
+  board, which is what makes it worth watching.</li>
+<li>A frog that reaches the End log stays there and its chip switches to the
+  <code>Home</code> state. <strong>Play continues</strong> — the other frogs keep taking turns. That is
+  Derek's provisional call recorded in
+  <a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">the reference material</a>,
+  not something the classroom board says.</li>
+<li>A frog that is home is skipped in turn order.</li>
+<li><strong>When the last frog gets home, the game ends itself.</strong> The hop finishes, and
+  <a href="../game-over/">game over</a> follows with no input from anybody — see
+  <a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">how a game ends</a>.
+  A finished game never sits on this screen waiting to be dismissed.</li>
+<li>Hardware back opens the <a href="../settings-dialog/">settings dialog</a>. It does not
+  quit, and it never quits without the confirm.</li>
+</ul>
+<h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
+<p><a href="../mockups/game-board.html"><code>mockups/game-board.html</code></a> — and, until Connor has
+picked the water, <a href="../mockups/game-board-paler-water.html"><code>mockups/game-board-paler-water.html</code></a>
+beside it.</p>
+<p>The two files differ in <strong>one value</strong>: <code>PondWater</code>. <code>game-board.html</code> draws the
+proposal in the table above, <code>#9FD8F2</code>; the second draws <code>#B5E3F7</code>, the same
+blue with more light in it. Everything else on the two canvases is identical to
+the pixel. Open both on the tablet, one after the other, and say which is the
+pond — comparing two pictures is a much easier conversation than critiquing
+one, and the losing file is deleted when the answer arrives, the way
+<code>title-screen-resume-primary.html</code> was.</p>
+<p>Drawn in the state that exercises every case at once: four frogs, one home on
+the End log, one still on its Start log, two mid-lane, Green to roll — and
+<strong>exactly two logs on the whole screen</strong>, which is the thing to look at.</p>
+<p>Every one of the four frogs is drawn on something it has to be legible
+against — Green and Pink on lily pads, Orange on the Start log, Blue home on
+the End log — so <a href="#keeping-the-frogs-visible">the contrast question</a> is
+visible in the picture rather than only asserted in a table.</p>
+<p>It draws the three questions #289 left open as Derek answered them on #296: the
+logs fill the pond band top to bottom rather than stopping at the lanes in play,
+each frog sits on its own lane's centre line, and the corner and outline are the
+<code>LogRadius</code> and <code>TrackOutline</code> they always were. Only the first of the three
+moved — the mockup originally drew a 736 px log spanning the four lanes, and was
+redrawn to 896 px when the answer arrived.</p>
+<p>The rejected lanes-up variant is not committed. It was drawn, compared, and
+decided against; keeping a mockup of a layout nobody is building is how a
+<code>mockups/</code> folder stops being trustworthy.</p>
+<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong>Which blue is the water?</strong> Blue is settled; this blue is not. Two are drawn
+  — <code>#9FD8F2</code> in <code>game-board.html</code> and the paler <code>#B5E3F7</code> beside it — and
+  Connor picks, on the tablet, at 1:1. Both clear
+  <a href="#keeping-the-frogs-visible">the separability bar</a>, so either can be taken as
+  it stands; a third blue of his own choosing has to be measured against that
+  bar before it lands. The same is true of <code>LogBrown</code> and <code>LilyPadGreen</code>, which
+  are drawn once each rather than twice — say if either is wrong and it gets
+  the same treatment.</li>
+<li><strong>Do the header and controls bands change?</strong> They are <code>BandFill</code>, the pale
+  grey-green chosen to sit against a pale board, and this change
+  <a href="#the-bands-are-unchanged-deliberately">deliberately left them alone</a>. Against
+  blue water they either read as a clean frame or as leftovers from the old
+  look, and that is a thing to see rather than to argue about. If they should
+  change, this is where it gets decided.</li>
+<li><strong>Do the unused lanes show?</strong> The classroom board always has eight lanes,
+  whoever is playing. The mockups draw only the lanes in play, because empty
+  lanes on a screen this size cost the ones in play their height. Presentation,
+  so ours — but say if it looks wrong.</li>
+<li><strong>Does the board show what the last player rolled?</strong> Currently no: the die
+  appears in <a href="../roll-and-card/">roll and card</a> and is gone. A persistent
+  "last roll" readout is an element and would need adding here.
+The three questions #289 left open about the shared logs are <strong>settled</strong>, by
+Derek on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/296">issue #296</a>,
+and are recorded above rather than here: the log spans the full pond whatever
+the player count, a frog on a log sits on its own lane's centre line, and the
+log keeps <code>LogRadius</code> and <code>TrackOutline</code> as they are.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by Derek and Connor.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs" target="_blank" rel="noopener" title="This project on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

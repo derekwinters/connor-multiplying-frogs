@@ -1,0 +1,175 @@
+<!doctype html>
+<!--
+  Multiplying Frogs — Game setup, editing a player name — CANDIDATE A (pencil)
+  Device: kids' Android tablet, held landscape.
+  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+
+  This is one of two drawings of the same feature. Every number in them is the
+  same. They differ on ONE thing: which part of a chosen seat means "edit the
+  name", and which part means "throw this player out of the game".
+
+    A (this file) — the corner target is a PENCIL and means edit. The rest of
+                    the seat still means remove, exactly as it does today.
+    B (game-setup-name-edit-inline.html) — the corner target is a CROSS and
+                    means remove. The name row means edit, and the seat's body
+                    means nothing at all.
+
+  A keeps today's behaviour ("tapping a chosen seat removes it") untouched and
+  adds a small target inside it. The cost is drawn here honestly: the biggest
+  target on the screen still removes a player with no confirm, and the edit
+  target sits inside it. The dashed ring around the pencil is SeatEditClearance
+  — a dead zone that is neither edit nor remove, so a near miss costs nothing.
+
+  The green frog is mid-edit. The keyboard is drawn, not implied: it is a
+  keyboard this game paints, sized to the same tap targets as everything else,
+  the way the working-out grid paints its own digit keypad.
+
+  NOTE ON SeatHeight: the seat is 480 here, not the 440 it is today. A seat that
+  has to carry a 96 px name row and a 96 px corner target as well as a 200 px
+  swatch does not fit in 440 without the corner target overlapping the frog. The
+  frog is the thing children look at, so the seat grew rather than the swatch
+  shrinking. See the spec page.
+
+  Shapes, sizes and positions only. The colours are placeholders so the frogs
+  can be told apart in a picture; the palette is an area:art decision.
+  Numbers here are the numbers in the spec page's constants table.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multiplying Frogs — Name edit, candidate A (pencil)</title>
+<style>
+  :root{
+    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
+    --green:#3F8E4F; --blue:#2C6DAF; --orange:#D2762B; --pink:#C24C86;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+         background:var(--bg);color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .abs{position:absolute}
+  .row{display:flex;align-items:center}
+  .col{display:flex;flex-direction:column}
+  .mid{display:flex;align-items:center;justify-content:center}
+
+  /* A seat. SeatWidth 360 x SeatHeight 480, SeatRadius 32.
+     SeatTopBand 136 is the space above the swatch that the two corner targets
+     live in; SeatContentGap 16 sits between the swatch and the name band. */
+  .seat{width:360px;height:480px;border-radius:32px;position:relative;
+        padding-top:136px;align-items:center;gap:16px}
+  .seat.chosen{background:#fff;border:8px solid var(--ink)}
+  .seat.editing{background:#fff;border:8px solid var(--accent)}
+  .seat.empty{background:transparent;border:6px dashed var(--faint)}
+  .sw{width:200px;height:200px;border-radius:50%;flex:none}
+  /* The name band. In candidate A a chosen seat's name is a plain label — it is
+     not a target, so it is not drawn as a field. */
+  .name{height:96px;display:flex;align-items:center;font-size:48px;font-weight:700}
+  /* Turn-order badge: SeatOrderBadge 72, SeatBadgeInset 24, top-left. */
+  .badge{position:absolute;left:24px;top:24px;width:72px;height:72px;border-radius:50%;
+         background:var(--ink);color:#fff;font-size:38px;font-weight:700}
+  /* CANDIDATE A's edit target: SeatCornerTarget 96 (= MinTouchTarget), inset
+     SeatCornerInset 16 from the seat's top-right corner. */
+  .pencil{position:absolute;right:16px;top:16px;width:96px;height:96px;border-radius:24px;
+          border:4px solid var(--accent);color:var(--accent);font-size:46px;background:#F2F8F4}
+  /* SeatEditClearance 16: the dead ring around the pencil. Neither edit nor
+     remove — a tap that lands here does nothing rather than costing a player. */
+  .clearance{position:absolute;right:0;top:0;width:128px;height:128px;border-radius:32px;
+             border:3px dashed var(--faint)}
+
+  /* The name field, while this seat is being edited. */
+  .field{width:312px;height:96px;border-radius:20px;background:#fff;border:5px solid var(--accent);
+         display:flex;align-items:center;justify-content:center;gap:4px;font-size:48px;font-weight:700;
+         padding:0 16px}
+  .caret{display:block;width:5px;height:56px;background:var(--ink)}
+
+  /* The keyboard this game draws. NameKeyWidth 152 x NameKeyHeight 108,
+     NameKeyGap 16, NameKeyRadius 20. */
+  .kbd{position:absolute;left:128px;top:672px;width:1664px}
+  .krow{display:flex;gap:16px;margin-bottom:16px}
+  .krow:last-child{margin-bottom:0}
+  .k{width:152px;height:108px;border:3px solid var(--line);border-radius:20px;background:#fff;
+     display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:700;flex:none}
+  .k.space{width:1160px;font-size:30px;font-weight:400;color:#7A8783}
+  .k.done{width:488px;background:var(--accent);color:#fff;border-color:var(--accent);font-size:44px}
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- While a name is being edited the header carries the prompt, because the
+       hint line's resting position is underneath the keyboard. -->
+  <div class="abs" style="left:0;right:0;top:40px;text-align:center;font-size:72px;font-weight:700">Name the green frog</div>
+
+  <!-- SeatRowEditingTop 150: the seat row moves up from its resting 300 to make
+       room for the keyboard. Four seats at 360 with three 48 gaps = 1584,
+       centred in 1920 with 168 either side, exactly as at rest. -->
+  <div class="abs row" style="left:168px;top:150px;gap:48px">
+
+    <!-- Green: being edited. Name typed so far is "Connor". No pencil while the
+         seat is already open for editing. -->
+    <div class="col seat editing">
+      <div class="badge mid">1</div>
+      <div class="sw" style="background:var(--green)"></div>
+      <div class="field">Connor<i class="caret"></i></div>
+    </div>
+
+    <!-- Blue: chosen, already renamed. Tapping the pencil edits; tapping
+         anywhere else in the seat removes the player. -->
+    <div class="col seat chosen">
+      <div class="badge mid">2</div>
+      <div class="clearance"></div>
+      <div class="pencil mid">&#9998;</div>
+      <div class="sw" style="background:var(--blue)"></div>
+      <div class="name">Dad</div>
+    </div>
+
+    <!-- Orange: chosen, never renamed, so it still carries its colour name. -->
+    <div class="col seat chosen">
+      <div class="badge mid">3</div>
+      <div class="clearance"></div>
+      <div class="pencil mid">&#9998;</div>
+      <div class="sw" style="background:var(--orange)"></div>
+      <div class="name">Orange</div>
+    </div>
+
+    <!-- Pink: empty. An empty seat has no name and no pencil — naming a frog
+         that is not playing is a state with no meaning. Its whole body still
+         means "seat this frog", unchanged from today. -->
+    <div class="col seat empty">
+      <div class="sw" style="background:#DDE4E1"></div>
+      <div class="name" style="font-size:44px;color:#8C9793;font-weight:400">Tap to play</div>
+    </div>
+  </div>
+
+  <!-- NameKeyboardHeight 480: four rows of 108 with three 16 gaps. Its bottom
+       edge sits SafeMargin 48 off the bottom of the canvas. Back and Start are
+       not drawn while typing — the keyboard is over them, and Done is the way
+       out. -->
+  <div class="kbd">
+    <div class="krow">
+      <div class="k">Q</div><div class="k">W</div><div class="k">E</div><div class="k">R</div><div class="k">T</div>
+      <div class="k">Y</div><div class="k">U</div><div class="k">I</div><div class="k">O</div><div class="k">P</div>
+    </div>
+    <div class="krow" style="margin-left:84px">
+      <div class="k">A</div><div class="k">S</div><div class="k">D</div><div class="k">F</div><div class="k">G</div>
+      <div class="k">H</div><div class="k">J</div><div class="k">K</div><div class="k">L</div>
+    </div>
+    <!-- Row 3 is eight keys: seven letters and backspace. There is no shift
+         key — case is automatic (first letter of each word a capital), so
+         8 x 152 + 7 x 16 = 1328, centred in 1664 at an offset of 168. -->
+    <div class="krow" style="margin-left:168px">
+      <div class="k">Z</div><div class="k">X</div><div class="k">C</div><div class="k">V</div><div class="k">B</div>
+      <div class="k">N</div><div class="k">M</div>
+      <div class="k" style="font-size:44px">&#9003;</div>
+    </div>
+    <div class="krow">
+      <div class="k space">space</div>
+      <div class="k done">Done</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
