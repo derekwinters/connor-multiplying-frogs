@@ -3211,7 +3211,13 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.</p>
 <td><code>docs-test</code></td>
 <td>PR, push to <code>main</code></td>
 <td>yes</td>
-<td>the docs site builds, and the docs match the change</td>
+<td>the docs site builds, and the CI scripts' own tests pass</td>
+</tr>
+<tr>
+<td><code>docs-gate</code></td>
+<td>PR</td>
+<td>yes</td>
+<td>the docs match the change — <a href="../ai-sdlc/">ai-sdlc</a>'s shared gate</td>
 </tr>
 <tr>
 <td><code>pr-build</code></td>

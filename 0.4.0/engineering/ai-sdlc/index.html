@@ -1833,6 +1833,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-the-docs-gate-does-and-does-not-replace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the docs gate does, and does not, replace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1988,6 +1999,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-the-docs-gate-does-and-does-not-replace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the docs gate does, and does not, replace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2082,6 +2104,41 @@ exposure as a mutable action; ai-sdlc being ours says who could move a tag, not 
 <p>An upgrade is still a pull request that moves one line, because <code>adopt apply &lt;version&gt;</code> resolves the
 version and rewrites both the SHA and the comment. Nobody resolves a SHA by hand, and nobody has to
 read forty characters of hexadecimal to tell how far behind they are.</p>
+<h2 id="what-the-docs-gate-does-and-does-not-replace">What the docs gate does, and does not, replace<a class="headerlink" href="#what-the-docs-gate-does-and-does-not-replace" title="Link to this section">&para;</a></h2>
+<p>The reconciliation gate — <em>a pull request that changes code must change documentation, or carry
+<code>skip-docs</code></em> — is now ai-sdlc's, called from <code>docs-gate.yml</code>.</p>
+<p><code>docs-test.yml</code> stays, because the shared profile does not cover everything frogs had:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Where it runs now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>docs reconciliation</td>
+<td><code>docs-gate.yml</code> — ai-sdlc's shared workflow</td>
+</tr>
+<tr>
+<td><code>mkdocs build --strict</code></td>
+<td><code>docs-test.yml</code>, still ours</td>
+</tr>
+<tr>
+<td>the CI scripts' own tests, and the action-pin check</td>
+<td><code>docs-test.yml</code>, still ours</td>
+</tr>
+</tbody>
+</table>
+<p>ai-sdlc's mkdocs profile does have a build-and-publish workflow, but it publishes through GitHub
+Pages, and frogs publishes with <code>mike</code> to <code>gh-pages</code> to get the version selector. Replacing a
+working publisher with a differently-shaped one is not a migration, so <code>docs-publish.yml</code> is
+untouched.</p>
+<p>One behavioural difference worth knowing: frogs' gate re-read the pull request's live labels during
+a grace window, to survive <code>skip-docs</code> being added while the check was running. The shared gate
+relies on the <code>labeled</code> trigger instead — adding the label starts a fresh run. Same outcome, fewer
+moving parts, and <code>test_docs_gate_triggers.py</code> still guards the trigger because that is the half
+that cannot be centralised.</p>
 <h2 id="upgrading-and-checking-for-drift">Upgrading, and checking for drift<a class="headerlink" href="#upgrading-and-checking-for-drift" title="Link to this section">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>plan<span class="w">   </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># read-only: what would change</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>apply<span class="w">  </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># writes, on a branch</span>
