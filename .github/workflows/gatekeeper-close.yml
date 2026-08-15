@@ -1,7 +1,7 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.6 hash=086cfed29cca8901
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.6 hash=02d0a7e7cbff1fbe
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
-name: docs-gate
+name: gatekeeper-close
 
 # A caller. The logic is in ai-sdlc; this exists because a trigger
 # cannot be centralised — it must be declared in the repository it
@@ -12,14 +12,15 @@ name: docs-gate
 # which rewrites both the SHA and the comment.
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+  issues:
+    types: [closed]
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
-  docs-gate:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-gate.yml@b201fd36a79f61a7e394467101ddf25a628f21d6 # v0.4.6
+  gatekeeper-close:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-close.yml@b201fd36a79f61a7e394467101ddf25a628f21d6 # v0.4.6
     with:
       ref: b201fd36a79f61a7e394467101ddf25a628f21d6

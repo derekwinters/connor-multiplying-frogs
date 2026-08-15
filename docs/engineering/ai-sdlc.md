@@ -94,6 +94,30 @@ relies on the `labeled` trigger instead — adding the label starts a fresh run.
 moving parts, and `test_docs_gate_triggers.py` still guards the trigger because that is the half
 that cannot be centralised.
 
+## What the pipeline replaced
+
+The whole issue lifecycle now runs from ai-sdlc. What used to live here, and where it went:
+
+| Was here | Now |
+| --- | --- |
+| `gatekeeper-comment.yml` + `pipeline-gatekeeper` | `gatekeeper-comment.yml`, a caller |
+| — | `gatekeeper-close.yml`, a caller — frogs had no equivalent |
+| `dashboard.yml` + `pipeline-dashboard` | `dashboard.yml`, a caller |
+| `gatekeeper-sweep.yml` + `pipeline-reconcile` | **nothing, deliberately** |
+| `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | ai-sdlc skills, installed with `gh skill` |
+| `pipeline-tests.yml` | gone with the code it tested |
+
+### Why there is no sweep any more
+
+The sweep existed because frogs **stored** blockedness as pipeline state, and stored state goes
+stale. ai-sdlc derives blockedness at selection time from the live dependency graph instead. State
+computed when it is used cannot drift, so there is nothing to reconcile — the sweep was not dropped,
+its cause was.
+
+Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
+anything left is **reported on the dashboard rather than silently repaired**. That is the whole
+bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.
+
 ## Upgrading, and checking for drift
 
 ```bash

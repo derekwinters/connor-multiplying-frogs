@@ -1,74 +1,26 @@
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.6 hash=e2a3aa7707a44203
+# Managed by `adopt`. Local edits are preserved but stop this file
+# being updated — `adopt verify` will report it.
 name: gatekeeper-comment
 
-# Derek types `/approve`; the label moves seconds later.
+# A caller. The logic is in ai-sdlc; this exists because a trigger
+# cannot be centralised — it must be declared in the repository it
+# fires for.
 #
-# Deterministic — `run_comment_event.py` is a parser, not a model. This is the
-# boundary between "a human decided" and "the machine acted", and the component
-# that can change state has a fixed vocabulary it either matches or does not.
-#
-# See docs/engineering/issue-pipeline.md.
+# Pinned to a commit rather than a tag: a tag can move, and this runs
+# with this repository's token. Upgrade with `adopt apply <version>`,
+# which rewrites both the SHA and the comment.
 
 on:
   issue_comment:
     types: [created]
 
 permissions:
-  # Labels, comments, and the reaction.
-  issues: write
-  # The dashboard re-render reads the whole board, including open PRs.
-  pull-requests: read
   contents: read
-
-concurrency:
-  # Per issue, and NOT cancel-in-progress. Two commands on one issue must apply
-  # in the order they were written — cancelling the first would drop a command
-  # Derek typed and acknowledge only the second.
-  group: gatekeeper-comment-${{ github.event.issue.number }}
-  cancel-in-progress: false
+  issues: write
 
 jobs:
-  apply:
-    name: Apply the command
-    runs-on: ubuntu-latest
-
-    # Cheap filters, so the common case (an ordinary conversational comment)
-    # costs nothing. The script re-checks the author itself as defense in
-    # depth — a script that is safe only because this `if:` filtered for it is
-    # one careless edit away from not being safe at all.
-    #
-    # **No filter on the body.** There was a `startsWith(…body, '/')` here, and
-    # it was stricter than the contract it was filtering for: a command has to
-    # start its *line*, not the comment, precisely so you can explain yourself
-    # in the same comment. Under that filter this was silently dropped —
-    #
-    #     Looks right to me.
-    #     /approve
-    #
-    # — with no run, no reaction and no ack, which is indistinguishable from
-    # the pipeline being broken. `parse_commands` already ignores a comment
-    # with no command in it, at the cost of one cheap job.
-    if: >-
-      github.event.comment.user.login == github.repository_owner &&
-      github.event.comment.user.type != 'Bot' &&
-      !github.event.issue.pull_request
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Parse and apply
-        env:
-          # GITHUB_TOKEN only, never a PAT. Two reasons, and the second is the
-          # subtle one: the workflow token is scoped to this repository and
-          # expires with the job, AND GitHub suppresses workflow runs from
-          # events initiated by it. A PAT-authored acknowledgement would look
-          # like a new comment and re-trigger this workflow — an unbounded
-          # loop that the platform's own no-recursion guard is what prevents.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          PIPELINE_OWNER: ${{ github.repository_owner }}
-          # Reactive triage. Absent, firing is a clean no-op and the nightly
-          # round picks the issue up — a missing secret costs latency, not
-          # correctness. See issue #83.
-          AI_TRIAGE_URL: ${{ secrets.AI_TRIAGE_URL }}
-          AI_TRIAGE_SECRET: ${{ secrets.AI_TRIAGE_SECRET }}
-        run: python3 .claude/skills/pipeline-gatekeeper/run_comment_event.py
+  gatekeeper-comment:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-comment.yml@b201fd36a79f61a7e394467101ddf25a628f21d6 # v0.4.6
+    with:
+      ref: b201fd36a79f61a7e394467101ddf25a628f21d6

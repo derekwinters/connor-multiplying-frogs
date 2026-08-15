@@ -1,74 +1,29 @@
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.6 hash=65eb18601b11b754
+# Managed by `adopt`. Local edits are preserved but stop this file
+# being updated — `adopt verify` will report it.
 name: dashboard
 
-# Regenerates the dashboard issue from live repo state.
+# A caller. The logic is in ai-sdlc; this exists because a trigger
+# cannot be centralised — it must be declared in the repository it
+# fires for.
 #
-# Deterministic — `render_dashboard.py` is a pure function of the state, with
-# no model anywhere near it. The board is what Derek reads to decide what to
-# approve next, and a generated summary can be fluently, confidently wrong in
-# a way a computed table cannot.
-#
-# WHY THE GATEKEEPER ALSO RE-RENDERS INLINE
-#
-# GitHub suppresses workflow runs from events initiated by `GITHUB_TOKEN`. The
-# gatekeeper's own label moves are made with that token, so they do NOT fire
-# the `issues: labeled` trigger below — this workflow would never see the very
-# changes it most needs to reflect. That is why `run_comment_event.py` and
-# `run_sweep.py` call the renderer directly after their label writes.
-#
-# The trigger here is for label changes made by a human in the GitHub UI, and
-# the schedule is the backstop for everything else.
-#
-# See docs/engineering/issue-pipeline.md.
+# Pinned to a commit rather than a tag: a tag can move, and this runs
+# with this repository's token. Upgrade with `adopt apply <version>`,
+# which rewrites both the SHA and the comment.
 
 on:
   issues:
-    types: [labeled, unlabeled]
+    types: [opened, closed, reopened, labeled, unlabeled, milestoned, demilestoned]
   schedule:
-    # Offset after each nightly routine, so the board reflects the run that
-    # just finished: reconcile 01:00, analysis 02:00, development 03:00.
-    - cron: '40 1 * * *'
-    - cron: '40 2 * * *'
-    - cron: '40 4 * * *'
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
-  # The dashboard issue body.
-  issues: write
-  # The board reports on open PRs.
-  pull-requests: read
   contents: read
-
-concurrency:
-  # One group, and NOT cancel-in-progress — a burst of label changes should
-  # collapse to one final render on the latest state. Cancelling mid-run would
-  # be safe (the render is idempotent), but queueing means the last render in
-  # a burst is the one that sees everything.
-  group: dashboard
-  cancel-in-progress: false
+  issues: write
 
 jobs:
-  render:
-    name: Render the dashboard
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # Computed here rather than in the renderer, which never reads a clock —
-      # that is what keeps `render()` a pure function and the golden test
-      # possible. Central time because that is where Derek and Connor are.
-      - name: Timestamp
-        id: stamp
-        run: |
-          echo "as_of=$(TZ=America/Chicago date '+%-d %b %Y, %-I:%M %p %Z')" \
-            >> "$GITHUB_OUTPUT"
-
-      - name: Render and write
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          DASHBOARD_AS_OF: ${{ steps.stamp.outputs.as_of }}
-        run: |
-          set -euo pipefail
-          python3 .claude/skills/pipeline-dashboard/fetch_state.py \
-            | python3 .claude/skills/pipeline-dashboard/render_dashboard.py --write
+  dashboard:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-dashboard.yml@b201fd36a79f61a7e394467101ddf25a628f21d6 # v0.4.6
+    with:
+      ref: b201fd36a79f61a7e394467101ddf25a628f21d6
