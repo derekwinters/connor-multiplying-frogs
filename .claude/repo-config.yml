@@ -6,21 +6,18 @@
 #
 # See https://derekwinters.github.io/ai-sdlc/spec/configuration/ for the schema.
 
-# Capabilities arrive one at a time, as each replaces the local tooling doing
-# that job today. This list is what is *live*, not what is intended — `adopt`
-# installs everything a declared capability owns on the next run, so declaring
-# `pipeline` before the old gatekeeper is gone would mean two handlers on one
+# Every capability is live. They arrived one at a time, each replacing the
+# local tooling doing that job, because `adopt` installs everything a declared
+# capability owns on its next run — declaring `pipeline` while the old
+# gatekeeper still handled `issue_comment` would have meant two handlers on one
 # event, racing, both writing.
-#
-# The remaining order, each with its issue:
-#   pipeline    #344 and #346, once the colliding workflows are retired
-#   release     with #342, once release-please is reconciled
-#
 # `substrate` is implied and is not listed.
 capabilities:
   - hygiene
   - labels
   - consistency
+  - release
+  - pipeline
 
 # Both markers are present — ProjectSettings/ProjectVersion.txt and mkdocs.yml —
 # and detection would find both. Stated explicitly anyway: a repository that has

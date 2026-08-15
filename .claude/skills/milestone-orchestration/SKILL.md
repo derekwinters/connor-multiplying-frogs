@@ -86,6 +86,7 @@ a workflow, that is the mistake.
 ## See also
 
 - `pipeline-dev` — the scheduled sibling that stops at "PR opened"
+  (from ai-sdlc; install with `gh skill` — see issue #354)
 - `ci-watch` — waits for checks and reports pass or fail
 - `.claude/agents/dev.md` — what actually writes the code
 - `docs/engineering/issue-pipeline.md` — how this differs from the nightly round

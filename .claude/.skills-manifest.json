@@ -12,7 +12,7 @@
     "",
     "  - VENDORED skills are verbatim third-party copies, pinned to an upstream",
     "    commit. They have no local divergence yet, so re-vendoring them is a",
-    "    clean diff — but it is still a manual, reviewed act, not a schedule.",
+    "    clean diff \u2014 but it is still a manual, reviewed act, not a schedule.",
     "",
     "See docs/engineering/issue-pipeline.md."
   ],
@@ -41,25 +41,11 @@
   ],
   "skills": [
     {
-      "name": "release-flow",
-      "ported_from": "derekwinters/lucas-doggiehood",
-      "ported_at": "v0.0.1",
-      "diverged": true,
-      "notes": "Rewritten around this repo's release-please config paths and the pull-request-title-pattern set in .github/release-please/config.json."
-    },
-    {
       "name": "dw-run-tests",
       "ported_from": "derekwinters/lucas-doggiehood",
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Commands resolved to this repo's Core suite and CI scripts; records the EditMode CI-only limitation as a non-deviation. Prefixed dw- because a bare 'run-tests' is a near-miss for the built-in 'run' skill."
-    },
-    {
-      "name": "ci-watch",
-      "ported_from": "derekwinters/lucas-doggiehood",
-      "ported_at": "v0.0.1",
-      "diverged": true,
-      "notes": "Classifier written against this repo's check names and verified on PRs #130 and #123."
     },
     {
       "name": "scaffold-core",
@@ -74,27 +60,6 @@
       "ported_at": "v0.0.1",
       "diverged": true,
       "notes": "Reference only; defers to docs/engineering/tech-stack.md rather than restating the rule, so the two cannot drift."
-    },
-    {
-      "name": "issue-blockers",
-      "ported_from": "derekwinters/lucas-doggiehood",
-      "ported_at": "v0.0.1",
-      "diverged": true,
-      "notes": "Adds an audit subcommand that finds prose blockers with no native relationship; keeps 'Depends on:' as soft ordering."
-    },
-    {
-      "name": "milestone-ops",
-      "ported_from": "derekwinters/lucas-doggiehood",
-      "ported_at": "v0.0.1",
-      "diverged": true,
-      "notes": "Adds the FROZEN marker check from this repo's conventions, and refuses to close a milestone with open issues."
-    },
-    {
-      "name": "pipeline-gatekeeper",
-      "ported_from": "derekwinters/lucas-doggiehood",
-      "ported_at": "v0.0.1",
-      "diverged": true,
-      "notes": "Vocabulary and refusal reason codes follow issues #53-#61; the bad-actor gate and idempotency are enforced inside the parser."
     },
     {
       "name": "ask-matt",
@@ -188,7 +153,7 @@
       "vendored_from": "mattpocock/skills",
       "source_path": "skills/engineering/setup-matt-pocock-skills",
       "diverged": false,
-      "notes": "Generates the docs/agents/ files the other vendored skills look for. Not run yet — it writes repo docs and picks an issue tracker, which is Derek's call."
+      "notes": "Generates the docs/agents/ files the other vendored skills look for. Not run yet \u2014 it writes repo docs and picks an issue tracker, which is Derek's call."
     },
     {
       "name": "tdd",
@@ -238,7 +203,7 @@
       "vendored_from": "mattpocock/skills",
       "source_path": "skills/engineering/wizard",
       "diverged": false,
-      "notes": "Good fit for the Direct Involvement Needed milestone — it generates a bash walkthrough for steps only Derek can do."
+      "notes": "Good fit for the Direct Involvement Needed milestone \u2014 it generates a bash walkthrough for steps only Derek can do."
     },
     {
       "name": "writing-for-agents",
