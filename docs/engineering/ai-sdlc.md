@@ -52,6 +52,24 @@ An upgrade is still a pull request that moves one line, because `adopt apply <ve
 version and rewrites both the SHA and the comment. Nobody resolves a SHA by hand, and nobody has to
 read forty characters of hexadecimal to tell how far behind they are.
 
+## The two escape hatches
+
+Both adopted checks can be overridden, and both do it the same way — with a **label that makes the
+check pass**, never one that skips it. That distinction is the whole design: a skipped required
+check stays pending forever and blocks the merge it was meant to permit, so an `if:` would turn an
+escape hatch into a trap.
+
+| Label | Overrides | Use it when |
+| --- | --- | --- |
+| `no-closing-keyword` | `closing-keyword` | the pull request deliberately closes no issue |
+| `skip-docs` | `docs-gate` | the change genuinely needs no documentation |
+
+Adding either label re-runs its check, because `labeled` is among the caller's triggers. Nothing
+needs pushing. Using one is a decision, so it belongs in `## Deviations and Decisions`.
+
+Verified end to end when the closing-keyword check was adopted: a pull request with no closing
+keyword failed, the label made it pass on a fresh run, and removing the label failed it again.
+
 ## What the docs gate does, and does not, replace
 
 The reconciliation gate — *a pull request that changes code must change documentation, or carry
