@@ -296,3 +296,5 @@ editor, so it runs in CI
 | Core tests | `Tests/Core/` — plain NUnit, fast, no editor |
 | Unity tests | `Assets/Tests/EditMode/` — needs the editor, runs in CI |
 | The app's version | `/VERSION` — release-please only |
+
+@.claude/ai-sdlc/house-rules.md

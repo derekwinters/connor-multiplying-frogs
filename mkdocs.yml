@@ -123,5 +123,6 @@ nav:
       - Issue pipeline: engineering/issue-pipeline.md
       - UI design process: engineering/ui-design-process.md
       - Unity serialization: engineering/unity-serialization.md
+      - ai-sdlc: engineering/ai-sdlc.md
   - Tools:
       - tools/index.md
