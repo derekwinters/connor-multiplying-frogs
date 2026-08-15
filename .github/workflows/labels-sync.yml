@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.6 hash=1aacc65590fc262d
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.8 hash=a2d4bfccad189191
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: labels-sync
@@ -25,6 +25,6 @@ permissions:
 
 jobs:
   labels-sync:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-labels-sync.yml@b201fd36a79f61a7e394467101ddf25a628f21d6 # v0.4.6
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-labels-sync.yml@15714004827e8e431eb5bd446b55de7fcd26aac2 # v0.4.8
     with:
-      ref: b201fd36a79f61a7e394467101ddf25a628f21d6
+      ref: 15714004827e8e431eb5bd446b55de7fcd26aac2
