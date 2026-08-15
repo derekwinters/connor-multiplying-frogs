@@ -12,7 +12,8 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | --- | --- | --- | --- |
 | `pr-title-lint` | PR opened/edited | yes | the squash commit message, and therefore the changelog |
 | `ci-tests` | PR, push to `main` | yes | game logic and scene wiring |
-| `docs-test` | PR, push to `main` | yes | the docs site builds, and the docs match the change |
+| `docs-test` | PR, push to `main` | yes | the docs site builds, and the CI scripts' own tests pass |
+| `docs-gate` | PR | yes | the docs match the change — [ai-sdlc](ai-sdlc.md)'s shared gate |
 | `pr-build` | PR | no | the app still compiles into an installable APK |
 | `rc-build` | manual, tag | no | a release candidate someone can actually play |
 | `release-please` | push to `main` | no | the version, changelog, tag, release, and release APK |
