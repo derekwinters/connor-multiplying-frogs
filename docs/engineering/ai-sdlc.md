@@ -52,6 +52,30 @@ An upgrade is still a pull request that moves one line, because `adopt apply <ve
 version and rewrites both the SHA and the comment. Nobody resolves a SHA by hand, and nobody has to
 read forty characters of hexadecimal to tell how far behind they are.
 
+## What the docs gate does, and does not, replace
+
+The reconciliation gate — *a pull request that changes code must change documentation, or carry
+`skip-docs`* — is now ai-sdlc's, called from `docs-gate.yml`.
+
+`docs-test.yml` stays, because the shared profile does not cover everything frogs had:
+
+| | Where it runs now |
+| --- | --- |
+| docs reconciliation | `docs-gate.yml` — ai-sdlc's shared workflow |
+| `mkdocs build --strict` | `docs-test.yml`, still ours |
+| the CI scripts' own tests, and the action-pin check | `docs-test.yml`, still ours |
+
+ai-sdlc's mkdocs profile does have a build-and-publish workflow, but it publishes through GitHub
+Pages, and frogs publishes with `mike` to `gh-pages` to get the version selector. Replacing a
+working publisher with a differently-shaped one is not a migration, so `docs-publish.yml` is
+untouched.
+
+One behavioural difference worth knowing: frogs' gate re-read the pull request's live labels during
+a grace window, to survive `skip-docs` being added while the check was running. The shared gate
+relies on the `labeled` trigger instead — adding the label starts a fresh run. Same outcome, fewer
+moving parts, and `test_docs_gate_triggers.py` still guards the trigger because that is the half
+that cannot be centralised.
+
 ## Upgrading, and checking for drift
 
 ```bash

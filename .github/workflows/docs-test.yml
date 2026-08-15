@@ -1,5 +1,11 @@
 name: docs-test
 
+# Builds the docs site, and runs the CI scripts' own tests.
+#
+# The reconciliation gate is NOT here any more — it is `docs-gate.yml`, a
+# caller of ai-sdlc's shared workflow. This one keeps the two jobs ai-sdlc
+# does not provide: the strict site build, and the gate tests.
+#
 # Runs on EVERY pull request, with no path filter — deliberately.
 #
 # A path-gated workflow is *absent* on PRs that miss its paths, not skipped, so
@@ -55,8 +61,6 @@ jobs:
 
     permissions:
       contents: read
-      # The gate re-reads the PR's live labels during its grace window.
-      pull-requests: read
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -98,14 +102,3 @@ jobs:
           python3 -m pip install --quiet -r docs/requirements.txt
           mkdocs build --strict
 
-      - name: Check the docs were reconciled
-        if: github.event_name == 'pull_request' && steps.changed.outputs.docs != 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          python3 .github/scripts/docs_reconciliation_gate.py \
-            --changed-files changed-files.txt \
-            --pr "${{ github.event.pull_request.number }}" \
-            --head-ref "${{ github.event.pull_request.head.ref }}" \
-            --labels "${{ join(github.event.pull_request.labels.*.name, ',') }}"

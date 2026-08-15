@@ -23,7 +23,11 @@ Stdlib only, and regex rather than a YAML parse, for the same reason as
 on nothing but the Python already on the runner, with no pip install to import
 `pyyaml` from. The shapes needed here are a nested mapping key and a short list.
 
-See docs/engineering/ci-cd.md and issue #176.
+The gate itself now lives in ai-sdlc and is invoked by a caller workflow
+(#343). This file deliberately still lives here: the trigger is the half that
+cannot be centralised, so it is the half that needs guarding here.
+
+See docs/engineering/ci-cd.md and issues #176, #343.
 """
 
 import re
@@ -32,10 +36,15 @@ from pathlib import Path
 
 WORKFLOWS = Path(__file__).resolve().parents[3] / ".github" / "workflows"
 
-# The gate is wherever this script is invoked from, rather than a hard-coded
-# workflow filename: moving the step to another workflow must move this check
-# with it, not quietly stop checking anything.
-GATE_SCRIPT = "docs_reconciliation_gate.py"
+# The gate is wherever it is *called* from, rather than a hard-coded workflow
+# filename: moving it must move this check with it, not quietly stop checking
+# anything.
+#
+# It used to be our own `docs_reconciliation_gate.py`. It is now a caller of
+# ai-sdlc's shared workflow (#343) — the marker changed, the invariant did not,
+# and the `labeled` trigger is just as load-bearing on a caller as it was on a
+# step.
+GATE_SCRIPT = "reusable-docs-gate.yml"
 
 # GitHub's implicit `types:` for a `pull_request` trigger, used whenever the key
 # is absent. `labeled` is deliberately not among them, which is the whole bug.
