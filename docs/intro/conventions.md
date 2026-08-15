@@ -150,11 +150,30 @@ three places:
 
 ## Labels
 
-Labels are the pipeline's state machine. The list below is mirrored by
-[`.github/labels.yml`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.yml),
-which is the machine-readable source of truth; the `labels-sync` workflow
-applies that file to the repo whenever it changes. **Edit `labels.yml` and this
-page together** — never the GitHub label UI, whose edits the next sync undoes.
+Labels are the pipeline's state machine. The list below is mirrored by **two**
+machine-readable manifests, and the `labels-sync` workflow applies their union
+whenever either changes:
+
+| File | Holds | Who edits it |
+| --- | --- | --- |
+| [`.github/labels.core.yml`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.core.yml) | the shared pipeline vocabulary | **nobody here** — `adopt` installs it, pinned |
+| [`.github/labels.repo.yml`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/.github/labels.repo.yml) | frogs' own `area:*`, `type:*`, `dashboard` | us |
+
+The core manifest is identical in every repository that has adopted
+[ai-sdlc](../engineering/ai-sdlc.md) — the shared code reads those names, so a
+repository that redefines one has a pipeline that does not work while appearing
+adopted. To change a core label, change it in ai-sdlc and move the pin. A label
+defined in both files is a hard error rather than a silent precedence rule.
+
+**Edit `labels.repo.yml` and this page together** — never the GitHub label UI,
+whose edits the next sync undoes.
+
+> **How the spec is changing (#342).** This page used to describe a single
+> `.github/labels.yml` maintained here and applied by our own
+> `sync_labels.py`. The taxonomy is now split — shared vocabulary installed and
+> pinned, local labels ours — and applied by ai-sdlc's sync. The colours of the
+> nine shared labels changed to the shared values as part of that, and
+> `no-closing-keyword` was added. Nothing was renamed or deleted.
 
 ### `area:*` — what part of the game
 
@@ -239,15 +258,14 @@ Deliberate decision, not an oversight:
 
 ## Applying the taxonomy
 
-```bash
-# Preview: validates labels.yml (distinct names, distinct colours, every label
-# described) without touching the repo.
-python .github/scripts/sync_labels.py --dry-run
+Run the **labels-sync** workflow from the Actions tab, or push a change to
+either manifest on `main` — it fires on both paths.
 
-# Apply, if you have a token with `issues: write`.
-GITHUB_TOKEN=... GITHUB_REPOSITORY=derekwinters/connor-multiplying-frogs \
-  python .github/scripts/sync_labels.py
-```
+The sync is idempotent: running it twice changes nothing the second time, which
+is what makes it safe on every push rather than something to run carefully. It
+creates and updates by name, and deletes **only** what the `delete:` list names.
+A label absent from both manifests is left alone, so there is no way to lose a
+label by forgetting to mention it.
 
 ## Issues
 

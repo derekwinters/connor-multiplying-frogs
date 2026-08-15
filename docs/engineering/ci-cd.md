@@ -16,7 +16,7 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | `pr-build` | PR | no | the app still compiles into an installable APK |
 | `rc-build` | manual, tag | no | a release candidate someone can actually play |
 | `release-please` | push to `main` | no | the version, changelog, tag, release, and release APK |
-| `labels-sync` | push to `main` touching `labels.yml` | no | the label taxonomy matches the file |
+| `labels-sync` | push to `main` touching either labels manifest | no | the label taxonomy matches the manifests |
 | `geometry-lint` | PR touching `Assets/Scripts/**` | yes | the named-values rule, ratcheting |
 | `pipeline-tests` | PR/push touching the pipeline skills | fails the PR | the pipeline scripts' own unit tests |
 | `pipeline-*` (others) | schedule, issue comments | no | the issue pipeline itself |

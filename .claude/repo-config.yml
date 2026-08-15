@@ -13,13 +13,14 @@
 # event, racing, both writing.
 #
 # The remaining order, each with its issue:
-#   labels      #342   consistency #343
+#   consistency #343
 #   pipeline    #344 and #346, once the colliding workflows are retired
 #   release     with #342, once release-please is reconciled
 #
 # `substrate` is implied and is not listed.
 capabilities:
   - hygiene
+  - labels
 
 # Both markers are present — ProjectSettings/ProjectVersion.txt and mkdocs.yml —
 # and detection would find both. Stated explicitly anyway: a repository that has

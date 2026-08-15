@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.2 hash=6ae3fa4bc47cae9e
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.3 hash=404f27d8fa131311
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: closing-keyword
@@ -20,6 +20,6 @@ permissions:
 
 jobs:
   closing-keyword:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-closing-keyword.yml@b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3 # v0.4.2
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-closing-keyword.yml@b8c1690e1cdcb09e60531871172270df5e460a24 # v0.4.3
     with:
-      ref: b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3
+      ref: b8c1690e1cdcb09e60531871172270df5e460a24
