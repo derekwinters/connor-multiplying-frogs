@@ -38,7 +38,7 @@ dashboard_issue: 163
 
 # v0.5, v0.6, v0.10 — ordered as versions rather than as strings, so v0.10
 # follows v0.9 instead of preceding v0.2. Non-version milestones
-# ("Direct Involvement Needed", "ai-sdlc adoption") are deliberately outside
+# ("Human", "ai-sdlc adoption") are deliberately outside
 # the ordering and are never the focus milestone.
 milestone_ordering: semver
 

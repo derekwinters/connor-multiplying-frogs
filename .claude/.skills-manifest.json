@@ -203,7 +203,7 @@
       "vendored_from": "mattpocock/skills",
       "source_path": "skills/engineering/wizard",
       "diverged": false,
-      "notes": "Good fit for the Direct Involvement Needed milestone \u2014 it generates a bash walkthrough for steps only Derek can do."
+      "notes": "Good fit for the Human milestone \u2014 it generates a bash walkthrough for steps only Derek can do."
     },
     {
       "name": "writing-for-agents",
