@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.9 hash=42ef46079b95e6c6
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.10 hash=c1dffeb41a8461d1
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: gatekeeper-close
@@ -21,6 +21,6 @@ permissions:
 
 jobs:
   gatekeeper-close:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-close.yml@5bd64847a2140e165f3ad18cf03ca05dc70b4b4c # v0.4.9
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-close.yml@2c800464b1fe5c4741c12ea255b307b9fd9cd0d3 # v0.4.10
     with:
-      ref: 5bd64847a2140e165f3ad18cf03ca05dc70b4b4c
+      ref: 2c800464b1fe5c4741c12ea255b307b9fd9cd0d3
