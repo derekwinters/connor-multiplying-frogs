@@ -64,7 +64,7 @@ Agent environments have no Unity. So:
 - **Copy the shape from a real file in the repo**, changing only values you can
   see the effect of.
 - **Never invent a key.** If the shape you need isn't in the repo, say so, and
-  open a `Direct Involvement Needed` issue for the editor step rather than
+  open a `Human` issue for the editor step rather than
   guessing at the YAML.
 - **Say what you copied from** in the PR — "modelled on
   `Assets/Prefabs/Frog.prefab`" — so a reviewer can check the source rather than

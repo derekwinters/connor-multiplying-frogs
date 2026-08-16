@@ -95,11 +95,11 @@ the artifact you can check out and build.
 
 Never reopen a shipped milestone to hold follow-up work. Follow-up work is new
 work: it goes in the next open version milestone, or in
-`Direct Involvement Needed` if a human has to do it.
+`Human` if a person has to do it.
 
 ### The non-version milestone
 
-`Direct Involvement Needed` is the one milestone with no version and no ship
+`Human` is the one milestone with no version and no ship
 date. It holds work no agent can finish alone — anything needing repo-admin
 rights, a secret, an external account, a purchase, a device in hand, a Unity
 Editor session, or a taste call that is Connor's to make.
@@ -332,7 +332,7 @@ answer turns out to be small enough to just build. Do not quietly retitle a
 question into a task; the distinction is what makes the question queue
 meaningful.
 
-Questions Connor has to answer get the `Direct Involvement Needed` milestone and
+Questions Connor has to answer get the `Human` milestone and
 no version milestone, because they are not shippable work.
 
 ## Docs versioning

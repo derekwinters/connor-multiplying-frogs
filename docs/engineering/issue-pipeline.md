@@ -356,7 +356,7 @@ something is wrong.
 #### Milestone order comes from the title
 
 `vMAJOR.MINOR[.PATCH]` is ordered; anything else is **unordered**. That
-deliberately includes `Direct Involvement Needed` — it never ships, so a blocker
+deliberately includes `Human` — it never ships, so a blocker
 parked there is one nothing will ever build, which is exactly the
 `blocker-unscheduled` case.
 
@@ -1288,7 +1288,7 @@ work that most needs surfacing:
   triage usually has no milestone at all. A focus-scoped Intake is
   structurally near-empty: the section reads "Nothing waiting for triage"
   precisely because the untriaged pile is growing out of sight.
-- **`Direct Involvement Needed` can never be the focus.** It carries no
+- **`Human` can never be the focus.** It carries no
   version and never ships, so a focus-scoped "Waiting for you" hides every
   issue in the one milestone that exists to say *Derek has to do this by
   hand* — which is most of them.

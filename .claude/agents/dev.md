@@ -150,7 +150,7 @@ different? That is the whole test.
 Include: something the issue didn't ask for, or didn't get; a choice between two
 defensible approaches; something left out or stubbed; an escape hatch used
 (`skip-docs`, a geometry exemption, a skipped test); the issue turning out to be
-wrong; a `Direct Involvement Needed` issue opened.
+wrong; a `Human` issue opened.
 
 **`None.` is a fine entry, and the most common correct one.** Zero to two items
 is the norm. Six means the issues are underspecified or the section is being
@@ -179,7 +179,7 @@ Repo-admin settings, secrets, external accounts, purchases, a physical device, a
 Unity Editor session, or a taste call that is Connor's.
 
 Do **not** guess, stub it silently, or park the whole issue. Open **one small
-issue per task** in the `Direct Involvement Needed` milestone saying exactly
+issue per task** in the `Human` milestone saying exactly
 what the human has to do and what it unblocks. Then finish everything in your
 issue that does not depend on it, and say in the PR what you left out.
 
@@ -206,7 +206,7 @@ When you finish, report:
 2. **The PR link**, and whether CI is green.
 3. **Checklist boxes you could not tick**, and why.
 4. **Anything you opened** — a `type:question`, a `type:wireframe`, a
-   `Direct Involvement Needed` issue.
+   `Human` issue.
 5. **What you did not do** that someone might expect you had.
 
 Do not report the loop you followed; it is the same every time. Report what was

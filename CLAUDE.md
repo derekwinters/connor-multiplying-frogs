@@ -43,7 +43,7 @@ a Unity Editor session, and any taste call that is Connor's to make.
 
 When you hit one of these, **do not** guess, stub it out silently, or park the
 whole issue. Open **one small issue per task** in the
-`Direct Involvement Needed` milestone, describing exactly what the human has to
+`Human` milestone, describing exactly what the human has to
 do and what unblocks once they've done it. Then finish everything in your
 current issue that doesn't depend on it, and say in the PR what you left out.
 

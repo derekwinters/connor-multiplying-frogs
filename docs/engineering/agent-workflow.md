@@ -240,7 +240,7 @@ different. That's the whole test. Concretely:
 - You left something out, or stubbed it.
 - You used an escape hatch — `skip-docs`, a geometry exemption, a skipped test.
 - You found the issue was wrong and worked to your own interpretation.
-- You opened a `Direct Involvement Needed` issue because part of it needed a
+- You opened a `Human` issue because part of it needed a
   human.
 
 ### The norm is zero to two items
