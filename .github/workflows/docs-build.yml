@@ -1,7 +1,7 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.9 hash=38e9d5106d4a2fd4
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.9 hash=afc6aa27a9350fcd
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
-name: closing-keyword
+name: docs-build
 
 # A caller. The logic is in ai-sdlc; this exists because a trigger
 # cannot be centralised — it must be declared in the repository it
@@ -13,13 +13,14 @@ name: closing-keyword
 
 on:
   pull_request:
-    types: [opened, edited, reopened, synchronize, labeled, unlabeled]
+  push:
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  closing-keyword:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-closing-keyword.yml@5bd64847a2140e165f3ad18cf03ca05dc70b4b4c # v0.4.9
+  docs-build:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-build.yml@5bd64847a2140e165f3ad18cf03ca05dc70b4b4c # v0.4.9
     with:
       ref: 5bd64847a2140e165f3ad18cf03ca05dc70b4b4c
