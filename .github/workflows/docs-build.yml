@@ -1,7 +1,7 @@
-# ai-sdlc: derekwinters/ai-sdlc@86edeee56e7f976a9c1ab85f3038984eabcc8a51 hash=9a0be2268c3d3016
+# ai-sdlc: derekwinters/ai-sdlc@86edeee56e7f976a9c1ab85f3038984eabcc8a51 hash=15677133eaf40764
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
-name: gatekeeper-close
+name: docs-build
 
 # A caller. The logic is in ai-sdlc; this exists because a trigger
 # cannot be centralised — it must be declared in the repository it
@@ -12,15 +12,15 @@ name: gatekeeper-close
 # which rewrites both the SHA and the comment.
 
 on:
-  issues:
-    types: [closed]
+  pull_request:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
-  gatekeeper-close:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-close.yml@86edeee56e7f976a9c1ab85f3038984eabcc8a51 # 86edeee56e7f976a9c1ab85f3038984eabcc8a51
+  docs-build:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-build.yml@86edeee56e7f976a9c1ab85f3038984eabcc8a51 # 86edeee56e7f976a9c1ab85f3038984eabcc8a51
     with:
       ref: 86edeee56e7f976a9c1ab85f3038984eabcc8a51

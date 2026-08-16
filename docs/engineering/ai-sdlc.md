@@ -52,6 +52,21 @@ An upgrade is still a pull request that moves one line, because `adopt apply <ve
 version and rewrites both the SHA and the comment. Nobody resolves a SHA by hand, and nobody has to
 read forty characters of hexadecimal to tell how far behind they are.
 
+### Pinning a commit, to try unreleased work
+
+`adopt apply` also takes a **bare commit SHA**, and then the pin records that commit twice:
+
+    86edeee56e7f976a9c1ab85f3038984eabcc8a51 86edeee56e7f976a9c1ab85f3038984eabcc8a51
+
+This is how a change is tried here before it has a version — which is the normal case, because this
+repository is where ai-sdlc gets proven and a release should not be cut for something unproven. The
+trade is that the trailing comment on each caller repeats the SHA instead of naming a version, so
+`check_action_pins.py` warns that nobody can tell which version it is. That warning is **correct
+and expected on a commit pin**: there is no version, and that is the point.
+
+A commit pin is temporary. When the work it is testing is released, move the pin to the version, so
+the board reads `v0.5.1` rather than forty characters of hexadecimal.
+
 ## The two escape hatches
 
 Both adopted checks can be overridden, and both do it the same way — with a **label that makes the
