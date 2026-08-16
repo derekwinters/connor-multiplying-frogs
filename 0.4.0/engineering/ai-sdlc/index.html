@@ -1830,6 +1830,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The pin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pinning-a-commit-to-try-unreleased-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pinning a commit, to try unreleased work
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2035,6 +2052,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The pin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pinning-a-commit-to-try-unreleased-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pinning a commit, to try unreleased work
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2182,6 +2216,17 @@ exposure as a mutable action; ai-sdlc being ours says who could move a tag, not 
 <p>An upgrade is still a pull request that moves one line, because <code>adopt apply &lt;version&gt;</code> resolves the
 version and rewrites both the SHA and the comment. Nobody resolves a SHA by hand, and nobody has to
 read forty characters of hexadecimal to tell how far behind they are.</p>
+<h3 id="pinning-a-commit-to-try-unreleased-work">Pinning a commit, to try unreleased work<a class="headerlink" href="#pinning-a-commit-to-try-unreleased-work" title="Link to this section">&para;</a></h3>
+<p><code>adopt apply</code> also takes a <strong>bare commit SHA</strong>, and then the pin records that commit twice:</p>
+<div class="highlight"><pre><span></span><code>86edeee56e7f976a9c1ab85f3038984eabcc8a51 86edeee56e7f976a9c1ab85f3038984eabcc8a51
+</code></pre></div>
+<p>This is how a change is tried here before it has a version — which is the normal case, because this
+repository is where ai-sdlc gets proven and a release should not be cut for something unproven. The
+trade is that the trailing comment on each caller repeats the SHA instead of naming a version, so
+<code>check_action_pins.py</code> warns that nobody can tell which version it is. That warning is <strong>correct
+and expected on a commit pin</strong>: there is no version, and that is the point.</p>
+<p>A commit pin is temporary. When the work it is testing is released, move the pin to the version, so
+the board reads <code>v0.5.1</code> rather than forty characters of hexadecimal.</p>
 <h2 id="the-two-escape-hatches">The two escape hatches<a class="headerlink" href="#the-two-escape-hatches" title="Link to this section">&para;</a></h2>
 <p>Both adopted checks can be overridden, and both do it the same way — with a <strong>label that makes the
 check pass</strong>, never one that skips it. That distinction is the whole design: a skipped required
