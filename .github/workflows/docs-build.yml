@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.10 hash=5bcc8114be3dc21f
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.11 hash=6feb04ac7e3e7b4b
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: docs-build
@@ -21,6 +21,6 @@ permissions:
 
 jobs:
   docs-build:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-build.yml@2c800464b1fe5c4741c12ea255b307b9fd9cd0d3 # v0.4.10
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-build.yml@5e38abf722ebdb6be7b18cc0fa61f8430c454d93 # v0.4.11
     with:
-      ref: 2c800464b1fe5c4741c12ea255b307b9fd9cd0d3
+      ref: 5e38abf722ebdb6be7b18cc0fa61f8430c454d93
