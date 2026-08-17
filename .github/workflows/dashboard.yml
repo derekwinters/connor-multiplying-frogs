@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.13 hash=870d73b2f2bd0301
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.14 hash=71329b73a4f34b86
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: dashboard
@@ -24,6 +24,6 @@ permissions:
 
 jobs:
   dashboard:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-dashboard.yml@89ec2531208f1ba18c1b97930ed13607ca796271 # v0.4.13
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-dashboard.yml@c3d4504d46cf9e9ec03ec25c10d1d789b107eab9 # v0.4.14
     with:
-      ref: 89ec2531208f1ba18c1b97930ed13607ca796271
+      ref: c3d4504d46cf9e9ec03ec25c10d1d789b107eab9
