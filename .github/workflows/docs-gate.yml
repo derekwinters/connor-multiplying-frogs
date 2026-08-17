@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.11 hash=499a5110af012c27
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.12 hash=9ad191f4af11c8e5
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: docs-gate
@@ -20,6 +20,6 @@ permissions:
 
 jobs:
   docs-gate:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-gate.yml@5e38abf722ebdb6be7b18cc0fa61f8430c454d93 # v0.4.11
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-gate.yml@2d06e8d69140f19b8d9af1fb9aca1fe1ea9b8622 # v0.4.12
     with:
-      ref: 5e38abf722ebdb6be7b18cc0fa61f8430c454d93
+      ref: 2d06e8d69140f19b8d9af1fb9aca1fe1ea9b8622
