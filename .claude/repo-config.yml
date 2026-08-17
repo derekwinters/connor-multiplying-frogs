@@ -42,6 +42,17 @@ dashboard_issue: 163
 # the ordering and are never the focus milestone.
 milestone_ordering: semver
 
+# Which of this repository's secrets hold the analysis routine's endpoint and
+# token. Names, never values — `adopt` reads these to write the gatekeeper
+# caller's `secrets:` block, and without them the workflow receives empty
+# strings and triage silently never runs (ai-sdlc#118).
+#
+# These are the same two secrets the pre-adoption gatekeeper used; only the
+# way they reach the workflow has changed.
+fire:
+  endpoint_secret: AI_TRIAGE_URL
+  token_secret: AI_TRIAGE_SECRET
+
 commands:
   # The Core suite: no editor, no licence, about two seconds.
   test: dotnet test Tests/Core/Frogs.Core.Tests.csproj
