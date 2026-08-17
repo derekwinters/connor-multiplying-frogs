@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.12 hash=6ec8fbb2a903b70e
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.13 hash=b2520683f38797bb
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: gatekeeper-comment
@@ -21,9 +21,9 @@ permissions:
 
 jobs:
   gatekeeper-comment:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-comment.yml@2d06e8d69140f19b8d9af1fb9aca1fe1ea9b8622 # v0.4.12
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-comment.yml@89ec2531208f1ba18c1b97930ed13607ca796271 # v0.4.13
     with:
-      ref: 2d06e8d69140f19b8d9af1fb9aca1fe1ea9b8622
+      ref: 89ec2531208f1ba18c1b97930ed13607ca796271
     secrets:
       fire_endpoint: ${{ secrets.AI_TRIAGE_URL }}
       fire_token: ${{ secrets.AI_TRIAGE_SECRET }}
