@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.13 hash=af91156d94108e10
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.14 hash=6c85d9ca69edba53
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: triage
@@ -21,9 +21,9 @@ permissions:
 jobs:
   triage:
     if: github.event.label.name == 'ai-triage'
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-triage.yml@89ec2531208f1ba18c1b97930ed13607ca796271 # v0.4.13
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-triage.yml@c3d4504d46cf9e9ec03ec25c10d1d789b107eab9 # v0.4.14
     with:
-      ref: 89ec2531208f1ba18c1b97930ed13607ca796271
+      ref: c3d4504d46cf9e9ec03ec25c10d1d789b107eab9
     secrets:
       fire_endpoint: ${{ secrets.AI_TRIAGE_URL }}
       fire_token: ${{ secrets.AI_TRIAGE_SECRET }}
