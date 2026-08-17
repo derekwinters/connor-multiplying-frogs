@@ -1,7 +1,7 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.13 hash=01f415bfa8a283c9
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.13 hash=af91156d94108e10
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
-name: docs-build
+name: triage
 
 # A caller. The logic is in ai-sdlc; this exists because a trigger
 # cannot be centralised — it must be declared in the repository it
@@ -12,15 +12,18 @@ name: docs-build
 # which rewrites both the SHA and the comment.
 
 on:
-  pull_request:
-  push:
-    branches: [main]
+  issues:
+    types: [labeled]
 
 permissions:
   contents: read
 
 jobs:
-  docs-build:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-docs-build.yml@89ec2531208f1ba18c1b97930ed13607ca796271 # v0.4.13
+  triage:
+    if: github.event.label.name == 'ai-triage'
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-triage.yml@89ec2531208f1ba18c1b97930ed13607ca796271 # v0.4.13
     with:
       ref: 89ec2531208f1ba18c1b97930ed13607ca796271
+    secrets:
+      fire_endpoint: ${{ secrets.AI_TRIAGE_URL }}
+      fire_token: ${{ secrets.AI_TRIAGE_SECRET }}
