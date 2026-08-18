@@ -62,9 +62,10 @@ commands:
 # Deliberately absent:
 #
 # `labels:` — frogs' pipeline-state labels already match the canonical
-#   vocabulary exactly (ai-triage, pending-approval, needs-clarification,
-#   ready-for-work, in-progress, parked), so there is nothing to map. Checked
-#   against .github/labels.yml rather than assumed.
+#   vocabulary exactly (ai-triage-queued, ai-triage-running, ai-triage-stalled,
+#   pending-approval, needs-clarification, ready-for-work, in-progress, parked),
+#   so there is nothing to map. Checked against .github/labels.core.yml rather
+#   than assumed.
 #
 # `bot:` — the default `github-actions` identity, with the watermark read from
 #   `github-actions[bot]`. Revisit under #339, which asks whether `claude[bot]`
