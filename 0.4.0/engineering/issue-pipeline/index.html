@@ -4299,7 +4299,7 @@ dashboard, and the comment itself. All the payload-shape guesswork lives there
 so the parser never has to know what GitHub's JSON looks like.</p>
 <h4 id="a-dependency-is-an-edge-not-a-number">A dependency is an edge, not a number<a class="headerlink" href="#a-dependency-is-an-edge-not-a-number" title="Link to this section">&para;</a></h4>
 <p><code>blockers</code> and <code>soft_dependencies</code> are lists of <strong>edges</strong>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;open&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;milestone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v0.1&quot;</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span><span class="nt">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">"state"</span><span class="p">:</span><span class="w"> </span><span class="s2">"open"</span><span class="p">,</span><span class="w"> </span><span class="nt">"milestone"</span><span class="p">:</span><span class="w"> </span><span class="s2">"v0.1"</span><span class="p">}</span>
 </code></pre></div>
 <p>Not <code>[20]</code>. The <a href="#gate-2-milestone-order">milestone-order gate</a> is a comparison
 between two milestones, so it needs the blocker's own milestone and its own
@@ -4598,8 +4598,8 @@ is in focus is friction in exactly the wrong place.</p>
 <p>When setting a milestone on an issue, the field takes the milestone's <strong>number</strong>,
 not its title:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">PATCH /repos/{owner}/{repo}/issues/{issue_number}</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">{&quot;milestone&quot;: 2}          ✅</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">{&quot;milestone&quot;: &quot;v0.1&quot;}     ❌ 422, or silently wrong</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">{"milestone": 2}          ✅</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">{"milestone": "v0.1"}     ❌ 422, or silently wrong</span>
 </code></pre></div>
 <p>So anything accepting a title — <code>/milestone v0.1</code>, a triage decision — resolves
 title → number against the live list first, and refuses if the title doesn't
@@ -4906,7 +4906,7 @@ queue they had never reached.</p>
 posted, so the run looked successful from outside; only the label was missing,
 and no exit code, artifact, or test reports a missing label.</p>
 <p>So it is one call that does both writes or neither:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">hand_back</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;pending-approval&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">hand_back</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="mi">47</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">"pending-approval"</span><span class="p">)</span>
 </code></pre></div>
 <p>It <strong>refuses before it writes</strong> in two cases, so a rejected hand-back leaves the
 issue exactly as it was rather than half-written:</p>

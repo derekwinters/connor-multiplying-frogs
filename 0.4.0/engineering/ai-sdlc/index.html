@@ -1884,6 +1884,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-skills-are-not-here-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The skills are not here yet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#why-there-is-no-sweep-any-more" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2106,6 +2117,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-skills-are-not-here-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The skills are not here yet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#why-there-is-no-sweep-any-more" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2320,7 +2342,7 @@ that cannot be centralised.</p>
 </tr>
 <tr>
 <td><code>pipeline-analysis</code>, <code>pipeline-dev</code>, <code>triage-issue</code>, <code>ci-watch</code>, <code>milestone-ops</code>, <code>issue-blockers</code>, <code>release-flow</code></td>
-<td>ai-sdlc skills, installed with <code>gh skill</code></td>
+<td><strong>not installed yet</strong> — see <a href="#the-skills-are-not-here-yet">The skills are not here yet</a></td>
 </tr>
 <tr>
 <td><code>pipeline-tests.yml</code></td>
@@ -2328,6 +2350,22 @@ that cannot be centralised.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="the-skills-are-not-here-yet">The skills are not here yet<a class="headerlink" href="#the-skills-are-not-here-yet" title="Link to this section">&para;</a></h3>
+<p>The workflows arrived; the skills did not. <code>.claude/skills/</code> holds this repository's own —
+<code>core-unity-split</code>, <code>dw-run-tests</code>, <code>grilling</code> and the rest — and nothing from ai-sdlc. The row
+above used to say they were installed with <code>gh skill</code>, and that was a description of the intended
+end state written in the present tense, which is the same failure as a specified-but-uncalled
+function: it reads as covered, so nobody checks.</p>
+<p>Nothing had ever run <code>gh skill install</code> for a consumer. The mechanism was settled in ai-sdlc's
+<code>docs/design.md</code> §7 from the beginning and no job invoked it (ai-sdlc#144).</p>
+<p>What installs them is <code>skills-update.yml</code>, an ai-sdlc caller that runs on a schedule, installs what
+<code>skills:</code> in <code>repo-config.yml</code> names, and opens a <strong>pull request</strong> — never a direct commit, because
+an installed skill is an instruction an agent reads and a timer that put unreviewed ones into its
+context would be a consent problem rather than an untidiness. A skill edited here is reported and
+left alone, never overwritten.</p>
+<p>It arrives with the ai-sdlc release after v0.4.16. The <code>skills:</code> key does not exist in the version
+this repository currently pins, so adding it before the pin moves would make every config load fail
+on an unknown key. Tracked in #376.</p>
 <h3 id="why-there-is-no-sweep-any-more">Why there is no sweep any more<a class="headerlink" href="#why-there-is-no-sweep-any-more" title="Link to this section">&para;</a></h3>
 <p>The sweep existed because frogs <strong>stored</strong> blockedness as pipeline state, and stored state goes
 stale. ai-sdlc derives blockedness at selection time from the live dependency graph instead. State

@@ -2443,16 +2443,16 @@ version</strong> — anything reading <code>/VERSION</code> has to cut the comme
 trim.</p>
 <p>Do not reimplement that per caller. <code>Frogs.Core.AppVersion.ReadFrom(contents)</code>
 does it once, and is covered by the fast suite:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AppVersion</span><span class="p">.</span><span class="n">ReadFrom</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="s">&quot;VERSION&quot;</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">var</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AppVersion</span><span class="p">.</span><span class="n">ReadFrom</span><span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="s">"VERSION"</span><span class="p">));</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">version</span><span class="p">.</span><span class="n">Major</span><span class="p">;</span><span class="w">      </span><span class="c1">// 0</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">version</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span><span class="w"> </span><span class="c1">// &quot;0.0.1&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">version</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span><span class="w"> </span><span class="c1">// "0.0.1"</span>
 </code></pre></div>
 <p>It throws <code>FormatException</code> on a file with only a marker and no version, and on
 anything that isn't three non-negative numbers — a malformed <code>/VERSION</code> has to
 fail at the point of reading rather than silently become <code>0.0.0</code> in a shipped
 APK.</p>
 <p>For shell consumers, the equivalent is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>cut<span class="w"> </span>-d<span class="s1">&#39;#&#39;</span><span class="w"> </span>-f1<span class="w"> </span>VERSION<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;[:space:]&#39;</span><span class="k">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>cut<span class="w"> </span>-d<span class="s1">'#'</span><span class="w"> </span>-f1<span class="w"> </span>VERSION<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">'[:space:]'</span><span class="k">)</span>
 </code></pre></div>
 <h2 id="conventional-commits-drive-the-bump">Conventional Commits drive the bump<a class="headerlink" href="#conventional-commits-drive-the-bump" title="Link to this section">&para;</a></h2>
 <p>The version moves because of what the commits say. Nobody decides it.</p>
