@@ -1,0 +1,27 @@
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.17 hash=c3a2e816f6f56db4
+# Managed by `adopt`. Local edits are preserved but stop this file
+# being updated — `adopt verify` will report it.
+name: skills-update
+
+# A caller. The logic is in ai-sdlc; this exists because a trigger
+# cannot be centralised — it must be declared in the repository it
+# fires for.
+#
+# Pinned to a commit rather than a tag: a tag can move, and this runs
+# with this repository's token. Upgrade with `adopt apply <version>`,
+# which rewrites both the SHA and the comment.
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  skills-update:
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-skills-update.yml@3dc920ad50ab950023fbd5362362528726be0dcf # v0.4.17
+    with:
+      ref: 3dc920ad50ab950023fbd5362362528726be0dcf

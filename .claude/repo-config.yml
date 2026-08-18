@@ -53,6 +53,32 @@ fire:
   endpoint_secret: AI_TRIAGE_URL
   token_secret: AI_TRIAGE_SECRET
 
+# The ai-sdlc skills installed here, kept at the pin by `skills-update.yml`.
+# This repository's list, not a central registry's — DIST says the repository
+# owns it, because the two previous attempts at a fleet-wide skill sync both
+# read a registry and both reverted work a repository had done.
+#
+# These are the skills something *in this repository* invokes: the analysis
+# session reads `triage-issue`, the dev agent reads `pipeline-dev`, and the
+# rest are run by hand or by an agent. Deliberately absent are the skills that
+# only ever run inside a reusable workflow — `pipeline-gatekeeper`,
+# `pipeline-dashboard`, `label-sync`, `closing-keyword`, `docs-gate`. Those
+# execute from ai-sdlc's own checkout (`SKILL_ROOT=.ai-sdlc`), so a copy here
+# would be a second version to keep in step for no gain.
+#
+# `adopt` is absent for a different reason: it imports `lib.config`, which is
+# not part of the skill, so an installed copy cannot run — upgrades are run
+# from an ai-sdlc checkout instead. `issue-blockers` has the same defect
+# (`lib.github`) and is listed anyway: it is genuinely one of ours, and the fix
+# belongs upstream. Both are flagged in ai-sdlc#149.
+skills:
+  - triage-issue
+  - pipeline-dev
+  - ci-watch
+  - milestone-ops
+  - issue-blockers
+  - release-flow
+
 commands:
   # The Core suite: no editor, no licence, about two seconds.
   test: dotnet test Tests/Core/Frogs.Core.Tests.csproj
