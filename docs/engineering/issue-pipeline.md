@@ -37,7 +37,9 @@ Exactly one state label per open issue.
 | State | Meaning | Set by | Leaves when |
 | --- | --- | --- | --- |
 | *(none)* | brand new, not yet admitted | issue creation | `/admit` |
-| `ai-triage` | queued for automated triage | `/admit`, `/propose`, `/revise`, `/unpark` | triage finishes |
+| `ai-triage-queued` | admitted; no analysis session started yet | `/admit`, `/propose`, `/revise`, `/unpark` | the fire handler starts a session |
+| `ai-triage-running` | a session was started and has not answered | the fire handler | analysis routes it, or the sweep gives up on it |
+| `ai-triage-stalled` | the session never answered; needs a person | the hourly sweep | `/admit`, and nothing else — no automatic path leaves this state |
 | `pending-approval` | triaged; waiting on a human | triage | `/approve`, `/park` |
 | `needs-clarification` | triage could not proceed without an answer | triage | `/revise <answer>`, `/park`, or the blocker sweep |
 | `ready-for-work` | approved and eligible for the builder | `/approve` | the builder picks it up |
@@ -49,7 +51,7 @@ which the pipeline never triages or works.
 
 **There is no `/retriage`.** This table named one twice, and it has never
 existed: `parse_commands.COMMANDS` has no such entry, so typing it earns the
-unknown-command reaction rather than a re-triage. The way back to `ai-triage`
+unknown-command reaction rather than a re-triage. The way back to `ai-triage-queued`
 from a question is `/revise <your answer>` — the one command that returns an
 issue to triage *with a note attached*, which is exactly what an answer is. The
 verb reads oddly on that route and the hand-back footer says so in plainer
@@ -65,11 +67,11 @@ rather than adds; the reconciler flags any issue carrying two.
 ### The normal path
 
 ```text
-(new) → ai-triage → pending-approval → ready-for-work → in-progress → closed
-                            ↓                ↑
-                   needs-clarification ──────┘
-                            ↓
-                         parked → (unpark) → ai-triage
+(new) → ai-triage-queued → ai-triage-running → pending-approval → ready-for-work → in-progress → closed
+              ↑                     ↓                  ↓                ↑
+              │             ai-triage-stalled  needs-clarification ─────┘
+              │                     ↓                  ↓
+              └────── /admit ───────┘               parked → (unpark) → ai-triage-queued
 ```
 
 ## Commands
@@ -80,10 +82,10 @@ explain yourself in the same comment.
 
 | Command | Effect |
 | --- | --- |
-| `/admit` | bring an issue into the pipeline — it becomes `ai-triage`. |
+| `/admit` | bring an issue into the pipeline — it becomes `ai-triage-queued`. |
 | `/propose` | ask triage to produce a plan for it. |
 | `/approve` | the plan is right → `ready-for-work`. Subject to both approval gates. |
-| `/revise <notes>` | the plan is not right → back to `ai-triage`, with the notes. |
+| `/revise <notes>` | the plan is not right → back to `ai-triage-queued`, with the notes. |
 | `/redo` | the built work is not right → queue it again. |
 | `/park` | set aside deliberately. |
 | `/unpark` | bring it back. |
@@ -384,7 +386,7 @@ at the next approval — or not at all, if the issue was already approved.
 ## Auto-revisit when a blocker clears
 
 An issue parked in `needs-clarification` **because it was blocked** has nothing
-to wake it. Analysis only acts on `ai-triage`, and the gatekeeper otherwise only
+to wake it. Analysis only acts on `ai-triage-queued`, and the gatekeeper otherwise only
 acts on comments — so without this the issue waits for a human to remember it,
 which is the same as waiting forever.
 
@@ -469,7 +471,7 @@ actioned set is skipped.
 - **Anything not in `needs-clarification`** — an issue already
   `pending-approval` or `ready-for-work` is not waiting on a blocker.
 
-A revisit adds `ai-triage`, removes `needs-clarification`, and posts a short
+A revisit adds `ai-triage-queued`, removes `needs-clarification`, and posts a short
 comment naming the cleared blockers — so the transition is visible in the
 thread rather than being a label that changed itself overnight.
 
@@ -575,7 +577,7 @@ mistakes.
 ### Reactive triage
 
 Waiting until 02:00 to triage an issue filed at 09:00 is a bad experience when
-the person who filed it is sitting right there. So the moment `ai-triage` is
+the person who filed it is sitting right there. So the moment `ai-triage-queued` is
 **newly** added, the gatekeeper job — already running — makes an **outbound
 POST** to a poke-only Routine.
 
@@ -594,7 +596,7 @@ already succeeded by then.
 
 `run_comment_event.py` fires after its label write; `run_sweep.py` fires from
 both of its paths, because a cleared blocker and a requeue each land an issue in
-`ai-triage` without anyone typing a command.
+`ai-triage-queued` without anyone typing a command.
 
 The sweep fires **at most once per issue per pass**. A revisit does not update
 the in-memory issue that reconcile then reads, so the same issue can look newly
@@ -709,7 +711,7 @@ the defence; the Routine ignoring it is the other half, and its prompt says so.
 ### Analysis — find what needs triage
 
 `select_triage.py` lists candidate issues. An issue is eligible when it is
-**open** and carries **`ai-triage`**, and is none of the following:
+**open** and carries **`ai-triage-queued`**, and is none of the following:
 
 | Excluded | Why |
 | --- | --- |
@@ -717,7 +719,7 @@ the defence; the Routine ignoring it is the other half, and its prompt says so.
 | `dashboard` | The pipeline's own furniture, not something the pipeline works on. |
 | `parked` | A decision the owner made with `/park`. Triage does not get to overrule it — only `/unpark` does. |
 
-Carrying `ai-triage` is the whole entry condition, so an issue with no state
+Carrying `ai-triage-queued` is the whole entry condition, so an issue with no state
 label at all is not a candidate: it has not been `/admit`ted, and admitting is
 the owner's call. That is the same rule the command table above describes, and
 picking up unadmitted issues would make `/admit` mean nothing.
@@ -750,13 +752,17 @@ which change without the eligibility rules changing. A limit baked into the
 discovery script is one nobody can adjust for a busy night without editing a
 file with tests pinned to it.
 
-A triage that fails is one issue's problem — it keeps `ai-triage` and the next
-round picks it up. The round does not abort for it.
+A triage that fails is one issue's problem — the round does not abort for it.
+A session that starts and never answers is moved to `ai-triage-stalled` by the
+hourly sweep, which is a **detector, not a retrier**: it starts no session of
+its own, because a scheduled job that can start them can spend the account's
+usage limits overnight while nobody is watching. Deciding that another session
+is worth spending is `/admit`, and it is a person's call.
 
 #### The scheduled round is the backstop, not the main path
 
 Reactive triage is how an issue normally gets triaged: the gatekeeper fires it
-the moment `ai-triage` appears, and the issue is analyzed within minutes.
+the moment `ai-triage-queued` appears, and the issue is analyzed within minutes.
 
 The 02:00 round exists for what reactive triage missed — a failed POST, secrets
 that were never configured, a label changed by hand instead of by a command, an
@@ -815,20 +821,20 @@ The analysis comment is posted **before** the state label is set, always.
 
 This is what makes the bad state structurally impossible rather than merely
 unlikely. A run that dies between the two writes leaves either a plan still
-sitting on `ai-triage` — untriaged, which the next round simply redoes — or
+sitting on `ai-triage-queued` — untriaged, which the next round simply redoes — or
 `pending-approval` with nothing to approve, which is silent: the pipeline
 believes the issue is handled and it waits on a human who has nothing to read.
 
-`ai-triage` is removed in the same write that adds the new state, so a hand-back
+`ai-triage-queued` is removed in the same write that adds the new state, so a hand-back
 rests in exactly one state. An issue carrying both gets triaged again by the
 next analysis round while it sits waiting for Derek.
 
 ##### The write is code, not an instruction
 
 `hand_back.py` performs both writes. This used to be prose in the skill file —
-"remove `ai-triage` in the same write that adds the new state" — carried out by
+"remove `ai-triage-queued` in the same write that adds the new state" — carried out by
 a model at the end of a long analysis, and it was skipped in practice: sixteen
-issues sat on `ai-triage` with finished plans on them, waiting for an approval
+issues sat on `ai-triage-queued` with finished plans on them, waiting for an approval
 queue they had never reached.
 
 Nothing failed when it was skipped, which is the whole problem. The comment was
@@ -872,7 +878,7 @@ one description of what each command does. The single exception is `/revise` on
 the clarification route, where the canonical gloss ("the plan is not right") is
 false, because triage wrote no plan. That override is the visible edge of a real
 gap in the vocabulary: there is no verb for *here is the answer, look again*,
-and `/revise` is doing that job because it is the only route back to `ai-triage`
+and `/revise` is doing that job because it is the only route back to `ai-triage-queued`
 that carries a note.
 
 #### Re-fire repair
@@ -909,7 +915,7 @@ bot count — a human pasting a checklist is not a triage run.
 
 `reconcile.py` imports it rather than carrying a second copy. Two copies drift,
 and this particular drift is self-sustaining: reconcile finds no analysis and
-returns the issue to `ai-triage`, triage finds the analysis it wrote and repairs
+returns the issue to `ai-triage-queued`, triage finds the analysis it wrote and repairs
 the label instead, reconcile returns it again. Neither side is wrong on its own
 terms, so nothing surfaces as an error — the issue just cycles. The side that
 writes the format owns the recognizer.
@@ -993,7 +999,7 @@ whether to watermark. Three rules worth knowing:
   milestone — because "your command was refused" and "your command was partly
   applied" need very different responses.
 
-Reactive triage fires **only when `ai-triage` is newly present**. An idempotent
+Reactive triage fires **only when `ai-triage-queued` is newly present**. An idempotent
 re-add — a replay, or a second `/admit` on an already-admitted issue — must not
 fire it again, or one stuck comment becomes a triage run every sweep.
 
@@ -1189,7 +1195,7 @@ labels claim against what GitHub shows, and sorts each finding into
 | --- | --- | --- | --- |
 | `strip_labels` | closed issue still carrying a pipeline-state label | remove it | every pass |
 | `requeue` | open, `in-progress`, no open PR, not on `main` | → `ready-for-work` | **cron only** |
-| `requeue_triage` | a state label with no triage-authored analysis | → `ai-triage` | **cron only** |
+| `requeue_triage` | a state label with no triage-authored analysis | → `ai-triage-queued` | **cron only** |
 
 **Flagged, never touched** — anything needing judgement:
 
@@ -1260,7 +1266,7 @@ sections, in order:
 | --- | --- | --- |
 | 🎯 Focus | the four-slice pie for the focus milestone | focus |
 | 🔨 Ready queue | `ready-for-work`, headed by the build cap | focus |
-| 📥 Intake | `ai-triage` — waiting to be analyzed, plus unadmitted work | board-wide |
+| 📥 Intake | `ai-triage-queued` — waiting to be analyzed, plus unadmitted work | board-wide |
 | ✋ Waiting for you | `pending-approval` — waiting on Derek | board-wide |
 | ❓ Needs clarification | blocked on a question | board-wide |
 | ⏸️ Parked | set aside, listed so it can be found | board-wide |
@@ -1283,7 +1289,7 @@ look at* — and an issue does not stop needing to be looked at by sitting
 outside the milestone currently being built. Scoping those to focus hides the
 work that most needs surfacing:
 
-- **Intake is the worst case.** `ai-triage` means the issue has *not* been
+- **Intake is the worst case.** `ai-triage-queued` means the issue has *not* been
   triaged, and triage is what decides its milestone — so an issue waiting for
   triage usually has no milestone at all. A focus-scoped Intake is
   structurally near-empty: the section reads "Nothing waiting for triage"
@@ -1305,7 +1311,7 @@ it. If every table were focus-scoped, that column would be a constant.
 
 An issue with **no pipeline-state label at all** has not been `/admit`ted, and
 the nightly analysis run will never pick it up — [its entry condition is
-`ai-triage` and nothing else](#analysis--find-what-needs-triage). Left off the
+`ai-triage-queued` and nothing else](#analysis--find-what-needs-triage). Left off the
 board entirely, such an issue is invisible until somebody happens to scroll
 the issue list, which on this repo meant seven of twenty-one open issues.
 
@@ -1313,7 +1319,7 @@ So Intake lists both, and marks the difference:
 
 | Row | Means | Who moves it |
 | --- | --- | --- |
-| plain | `ai-triage` — the pipeline has it | tonight's analysis run |
+| plain | `ai-triage-queued` — the pipeline has it | tonight's analysis run |
 | `🚪 not admitted` | no state label — nothing has it | Derek, with `/admit` |
 
 The flag is not decoration. The two piles are waiting on different things, and
@@ -1393,7 +1399,7 @@ The focus milestone is summarised as four slices:
 | Slice | What is in it |
 | --- | --- |
 | **Unplanned** | `parked`, or carrying no pipeline-state label at all |
-| **In Planning** | `ai-triage`, `pending-approval`, `needs-clarification` |
+| **In Planning** | `ai-triage-queued`, `pending-approval`, `needs-clarification` |
 | **Ready** | `ready-for-work`, `in-progress` |
 | **Done** | closed, whatever its labels say |
 
