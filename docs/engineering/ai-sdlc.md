@@ -119,8 +119,29 @@ The whole issue lifecycle now runs from ai-sdlc. What used to live here, and whe
 | — | `gatekeeper-close.yml`, a caller — frogs had no equivalent |
 | `dashboard.yml` + `pipeline-dashboard` | `dashboard.yml`, a caller |
 | `gatekeeper-sweep.yml` + `pipeline-reconcile` | **nothing, deliberately** |
-| `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | ai-sdlc skills, installed with `gh skill` |
+| `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | **not installed yet** — see [The skills are not here yet](#the-skills-are-not-here-yet) |
 | `pipeline-tests.yml` | gone with the code it tested |
+
+### The skills are not here yet
+
+The workflows arrived; the skills did not. `.claude/skills/` holds this repository's own —
+`core-unity-split`, `dw-run-tests`, `grilling` and the rest — and nothing from ai-sdlc. The row
+above used to say they were installed with `gh skill`, and that was a description of the intended
+end state written in the present tense, which is the same failure as a specified-but-uncalled
+function: it reads as covered, so nobody checks.
+
+Nothing had ever run `gh skill install` for a consumer. The mechanism was settled in ai-sdlc's
+`docs/design.md` §7 from the beginning and no job invoked it (ai-sdlc#144).
+
+What installs them is `skills-update.yml`, an ai-sdlc caller that runs on a schedule, installs what
+`skills:` in `repo-config.yml` names, and opens a **pull request** — never a direct commit, because
+an installed skill is an instruction an agent reads and a timer that put unreviewed ones into its
+context would be a consent problem rather than an untidiness. A skill edited here is reported and
+left alone, never overwritten.
+
+It arrives with the ai-sdlc release after v0.4.16. The `skills:` key does not exist in the version
+this repository currently pins, so adding it before the pin moves would make every config load fail
+on an unknown key. Tracked in #376.
 
 ### Why there is no sweep any more
 
