@@ -63,8 +63,8 @@ fire:
 # rest are run by hand or by an agent. Deliberately absent are the skills that
 # only ever run inside a reusable workflow — `pipeline-gatekeeper`,
 # `pipeline-dashboard`, `label-sync`, `closing-keyword`, `docs-gate`. Those
-# execute from ai-sdlc's own checkout (`SKILL_ROOT=.ai-sdlc`), so a copy here
-# would be a second version to keep in step for no gain.
+# execute from ai-sdlc's own checkout (`SKILL_ROOT=.ai-sdlc-checkout`), so a
+# copy here would be a second version to keep in step for no gain.
 #
 # `adopt` is absent for a different reason: it imports `lib.config`, which is
 # not part of the skill, so an installed copy cannot run — upgrades are run

@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.17 hash=eb3190f5e3cc6362
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.18 hash=3b11127bafadea92
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 # House rules
@@ -8,6 +8,12 @@ repository's own `CLAUDE.md` holds everything specific to it.
 
 Where CI enforces a rule, this says so and names the check. The rules here that CI *cannot* check
 are the ones that need you to have read them.
+
+**ai-sdlc owns this repository's issues, labels, milestones, triage, pull-request gates and
+releases.** What is installed here and at which version is in `.ai-sdlc/adoption.md`, what this
+repository decides for itself is in `.ai-sdlc/repo-config.yml`, and the `ai-sdlc` skill has the
+detail. Read them before changing any of those things or any document describing them — the rules
+are not in this repository, so what you find here is a caller, not the mechanism.
 
 ## Commits and pull requests
 

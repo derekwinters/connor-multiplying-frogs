@@ -41,6 +41,13 @@
   ],
   "skills": [
     {
+      "name": "ai-sdlc",
+      "installed_by": "adopt",
+      "upstream": "derekwinters/ai-sdlc",
+      "diverged": false,
+      "notes": "Not ported and not vendored: written by `adopt apply`, which regenerates it at every upgrade, and it carries an ai-sdlc provenance header inside its frontmatter. Editing it makes it a conflict, so it stops being updated. `sync: disabled` above is about `skills-update.yml`, which does not touch this one \u2014 it has no `gh skill` provenance keys, so it classifies as unmanaged and is left alone."
+    },
+    {
       "name": "dw-run-tests",
       "ported_from": "derekwinters/lucas-doggiehood",
       "ported_at": "v0.0.1",
