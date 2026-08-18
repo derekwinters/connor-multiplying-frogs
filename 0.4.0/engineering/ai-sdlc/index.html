@@ -1808,6 +1808,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What lives where now">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two things that point at ai-sdlc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2041,6 +2058,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What lives where now">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two things that point at ai-sdlc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2197,16 +2231,24 @@ tested. This repository is a consumer of it.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>.claude/repo-config.yml</code></td>
+<td><code>.ai-sdlc/repo-config.yml</code></td>
 <td>What <em>this</em> repository is — its capabilities, owners, dashboard, commands</td>
 </tr>
 <tr>
-<td><code>.claude/ai-sdlc.pin</code></td>
+<td><code>.ai-sdlc/ai-sdlc.pin</code></td>
 <td>The version of ai-sdlc being followed</td>
 </tr>
 <tr>
-<td><code>.claude/ai-sdlc/house-rules.md</code></td>
+<td><code>.ai-sdlc/house-rules.md</code></td>
 <td>The shared rules, installed here so agents read them without a network</td>
+</tr>
+<tr>
+<td><code>.ai-sdlc/adoption.md</code></td>
+<td>Generated from <code>repo-config.yml</code>: what is installed here, and at what version</td>
+</tr>
+<tr>
+<td><code>.claude/skills/ai-sdlc/SKILL.md</code></td>
+<td>The discovery surface, at the path Claude Code requires</td>
 </tr>
 <tr>
 <td><code>.github/workflows/*.yml</code> callers</td>
@@ -2216,6 +2258,33 @@ tested. This repository is a consumer of it.</p>
 </table>
 <p>A caller is about fifteen lines: a trigger and a <code>uses:</code>. Everything it calls is in ai-sdlc, at the
 pinned version.</p>
+<p>Everything but the last two lives under <code>.ai-sdlc/</code>, which is ai-sdlc's own name. Until v0.4.18 it
+was all under <code>.claude/</code>, and that was wrong in a way worth stating: a GitHub Actions job parsing
+<code>capabilities</code> and <code>owners</code> has nothing to do with an AI coding assistant, and squatting in a
+vendor namespace took a dependency on somebody else's naming for nothing. <code>.claude/skills/</code> is the
+one exception, because Claude Code requires that path.</p>
+<p><code>adopt apply</code> did the move, in the same run as the v0.4.18 upgrade: <code>repo-config.yml</code> moved
+byte-for-byte with its comments intact, the old copies went, and the import line at the bottom of
+<code>CLAUDE.md</code> was repointed.</p>
+<h3 id="the-two-things-that-point-at-ai-sdlc">The two things that point at ai-sdlc<a class="headerlink" href="#the-two-things-that-point-at-ai-sdlc" title="Link to this section">&para;</a></h3>
+<p><code>adoption.md</code> and the <code>ai-sdlc</code> skill are the answer to <em>how does an agent working here know any of
+this</em>. They are not alternatives:</p>
+<ul>
+<li>The <code>@.ai-sdlc/house-rules.md</code> import in <code>CLAUDE.md</code> is <strong>always on</strong>. It is read every session,
+  which is why it has to stay short, and it is what carries the one sentence saying ai-sdlc governs
+  this repository's issues, labels, milestones, triage, gates and releases.</li>
+<li>The <code>ai-sdlc</code> skill is loaded <strong>on demand</strong>, so it can afford detail. But loading it is a
+  judgement the model makes from its description, and you cannot go looking for a skill about a
+  thing you do not know exists — which is exactly the failure here, an agent editing a stale
+  pipeline doc with no idea ai-sdlc owns it. Hence the always-on sentence as well.</li>
+</ul>
+<p><code>adoption.md</code> is <strong>generated</strong> and holds only resolved state: the pin, the capabilities and profiles
+in force, the pipeline-state labels this repository actually uses, the callers installed, the skills
+installed, and links into the specification at the exact commit this repository runs. It explains
+nothing, deliberately. Every hand-maintained copy of something ai-sdlc generates has drifted here
+eventually — four label colours in <code>conventions.md</code> disagreed with <code>labels.core.yml</code>, and 27
+references survived a pipeline state that no longer existed. Do not edit it: change
+<code>repo-config.yml</code> and run <code>adopt apply</code>.</p>
 <h2 id="capabilities-arrive-one-at-a-time">Capabilities arrive one at a time<a class="headerlink" href="#capabilities-arrive-one-at-a-time" title="Link to this section">&para;</a></h2>
 <p>ai-sdlc is six capabilities, ordered so each may depend only on those below it:</p>
 <div class="highlight"><pre><span></span><code>substrate → hygiene → consistency → labels → release → pipeline
@@ -2228,7 +2297,7 @@ writing.</p>
 deliberately not a version milestone: this is infrastructure, and a version number belongs to a
 release of the game.</p>
 <h2 id="the-pin">The pin<a class="headerlink" href="#the-pin" title="Link to this section">&para;</a></h2>
-<p><code>.claude/ai-sdlc.pin</code> records the version <strong>and</strong> the commit it resolves to:</p>
+<p><code>.ai-sdlc/ai-sdlc.pin</code> records the version <strong>and</strong> the commit it resolves to:</p>
 <div class="highlight"><pre><span></span><code>v0.4.2 b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3
 </code></pre></div>
 <p>The callers reference that commit, with the version as a trailing comment — the same form as every
