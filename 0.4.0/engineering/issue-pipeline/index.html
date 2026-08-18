@@ -4079,10 +4079,22 @@ anyone else is ignored. See <a href="#the-bad-actor-gate">the bad-actor gate</a>
 <td><code>/admit</code></td>
 </tr>
 <tr>
-<td><code>ai-triage</code></td>
-<td>queued for automated triage</td>
+<td><code>ai-triage-queued</code></td>
+<td>admitted; no analysis session started yet</td>
 <td><code>/admit</code>, <code>/propose</code>, <code>/revise</code>, <code>/unpark</code></td>
-<td>triage finishes</td>
+<td>the fire handler starts a session</td>
+</tr>
+<tr>
+<td><code>ai-triage-running</code></td>
+<td>a session was started and has not answered</td>
+<td>the fire handler</td>
+<td>analysis routes it, or the sweep gives up on it</td>
+</tr>
+<tr>
+<td><code>ai-triage-stalled</code></td>
+<td>the session never answered; needs a person</td>
+<td>the hourly sweep</td>
+<td><code>/admit</code>, and nothing else — no automatic path leaves this state</td>
 </tr>
 <tr>
 <td><code>pending-approval</code></td>
@@ -4120,7 +4132,7 @@ anyone else is ignored. See <a href="#the-bad-actor-gate">the bad-actor gate</a>
 which the pipeline never triages or works.</p>
 <p><strong>There is no <code>/retriage</code>.</strong> This table named one twice, and it has never
 existed: <code>parse_commands.COMMANDS</code> has no such entry, so typing it earns the
-unknown-command reaction rather than a re-triage. The way back to <code>ai-triage</code>
+unknown-command reaction rather than a re-triage. The way back to <code>ai-triage-queued</code>
 from a question is <code>/revise &lt;your answer&gt;</code> — the one command that returns an
 issue to triage <em>with a note attached</em>, which is exactly what an answer is. The
 verb reads oddly on that route and the hand-back footer says so in plainer
@@ -4131,11 +4143,11 @@ words; see <a href="#the-hand-back-footer">the footer</a>.</p>
 <p><strong>Invariant:</strong> an issue has at most one state label. The gatekeeper <em>replaces</em>
 rather than adds; the reconciler flags any issue carrying two.</p>
 <h3 id="the-normal-path">The normal path<a class="headerlink" href="#the-normal-path" title="Link to this section">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>(new) → ai-triage → pending-approval → ready-for-work → in-progress → closed
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                            ↓                ↑
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                   needs-clarification ──────┘
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                            ↓
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                         parked → (unpark) → ai-triage
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>(new) → ai-triage-queued → ai-triage-running → pending-approval → ready-for-work → in-progress → closed
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>              ↑                     ↓                  ↓                ↑
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>              │             ai-triage-stalled  needs-clarification ─────┘
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>              │                     ↓                  ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>              └────── /admit ───────┘               parked → (unpark) → ai-triage-queued
 </code></pre></div>
 <h2 id="commands">Commands<a class="headerlink" href="#commands" title="Link to this section">&para;</a></h2>
 <p>Every command is a line in an issue comment beginning with <code>/</code>. A comment may
@@ -4151,7 +4163,7 @@ explain yourself in the same comment.</p>
 <tbody>
 <tr>
 <td><code>/admit</code></td>
-<td>bring an issue into the pipeline — it becomes <code>ai-triage</code>.</td>
+<td>bring an issue into the pipeline — it becomes <code>ai-triage-queued</code>.</td>
 </tr>
 <tr>
 <td><code>/propose</code></td>
@@ -4163,7 +4175,7 @@ explain yourself in the same comment.</p>
 </tr>
 <tr>
 <td><code>/revise &lt;notes&gt;</code></td>
-<td>the plan is not right → back to <code>ai-triage</code>, with the notes.</td>
+<td>the plan is not right → back to <code>ai-triage-queued</code>, with the notes.</td>
 </tr>
 <tr>
 <td><code>/redo</code></td>
@@ -4459,7 +4471,7 @@ changed.</p>
 at the next approval — or not at all, if the issue was already approved.</p>
 <h2 id="auto-revisit-when-a-blocker-clears">Auto-revisit when a blocker clears<a class="headerlink" href="#auto-revisit-when-a-blocker-clears" title="Link to this section">&para;</a></h2>
 <p>An issue parked in <code>needs-clarification</code> <strong>because it was blocked</strong> has nothing
-to wake it. Analysis only acts on <code>ai-triage</code>, and the gatekeeper otherwise only
+to wake it. Analysis only acts on <code>ai-triage-queued</code>, and the gatekeeper otherwise only
 acts on comments — so without this the issue waits for a human to remember it,
 which is the same as waiting forever.</p>
 <p>This is a <strong>state-derived transition, not a command</strong>. The sweep computes it.</p>
@@ -4545,7 +4557,7 @@ actioned set is skipped.</p>
 <li><strong>Anything not in <code>needs-clarification</code></strong> — an issue already
   <code>pending-approval</code> or <code>ready-for-work</code> is not waiting on a blocker.</li>
 </ul>
-<p>A revisit adds <code>ai-triage</code>, removes <code>needs-clarification</code>, and posts a short
+<p>A revisit adds <code>ai-triage-queued</code>, removes <code>needs-clarification</code>, and posts a short
 comment naming the cleared blockers — so the transition is visible in the
 thread rather than being a label that changed itself overnight.</p>
 <h2 id="focus-and-cap-live-on-the-dashboard-issue"><code>/focus</code> and <code>/cap</code> live on the dashboard issue<a class="headerlink" href="#focus-and-cap-live-on-the-dashboard-issue" title="Link to this section">&para;</a></h2>
@@ -4659,7 +4671,7 @@ order that ran them the other way would spend each night acting on yesterday's
 mistakes.</p>
 <h3 id="reactive-triage">Reactive triage<a class="headerlink" href="#reactive-triage" title="Link to this section">&para;</a></h3>
 <p>Waiting until 02:00 to triage an issue filed at 09:00 is a bad experience when
-the person who filed it is sitting right there. So the moment <code>ai-triage</code> is
+the person who filed it is sitting right there. So the moment <code>ai-triage-queued</code> is
 <strong>newly</strong> added, the gatekeeper job — already running — makes an <strong>outbound
 POST</strong> to a poke-only Routine.</p>
 <p>Outbound specifically, because a workflow triggered by the token's own label
@@ -4674,7 +4686,7 @@ already succeeded by then.</p>
 <h4 id="both-entry-points-fire-and-each-issue-fires-once">Both entry points fire, and each issue fires once<a class="headerlink" href="#both-entry-points-fire-and-each-issue-fires-once" title="Link to this section">&para;</a></h4>
 <p><code>run_comment_event.py</code> fires after its label write; <code>run_sweep.py</code> fires from
 both of its paths, because a cleared blocker and a requeue each land an issue in
-<code>ai-triage</code> without anyone typing a command.</p>
+<code>ai-triage-queued</code> without anyone typing a command.</p>
 <p>The sweep fires <strong>at most once per issue per pass</strong>. A revisit does not update
 the in-memory issue that reconcile then reads, so the same issue can look newly
 triageable twice in one sweep — and two fires are two triage sessions racing on
@@ -4764,7 +4776,7 @@ the defence; the Routine ignoring it is the other half, and its prompt says so.<
 <h2 id="what-each-stage-does">What each stage does<a class="headerlink" href="#what-each-stage-does" title="Link to this section">&para;</a></h2>
 <h3 id="analysis-find-what-needs-triage">Analysis — find what needs triage<a class="headerlink" href="#analysis-find-what-needs-triage" title="Link to this section">&para;</a></h3>
 <p><code>select_triage.py</code> lists candidate issues. An issue is eligible when it is
-<strong>open</strong> and carries <strong><code>ai-triage</code></strong>, and is none of the following:</p>
+<strong>open</strong> and carries <strong><code>ai-triage-queued</code></strong>, and is none of the following:</p>
 <table>
 <thead>
 <tr>
@@ -4787,7 +4799,7 @@ the defence; the Routine ignoring it is the other half, and its prompt says so.<
 </tr>
 </tbody>
 </table>
-<p>Carrying <code>ai-triage</code> is the whole entry condition, so an issue with no state
+<p>Carrying <code>ai-triage-queued</code> is the whole entry condition, so an issue with no state
 label at all is not a candidate: it has not been <code>/admit</code>ted, and admitting is
 the owner's call. That is the same rule the command table above describes, and
 picking up unadmitted issues would make <code>/admit</code> mean nothing.</p>
@@ -4814,11 +4826,15 @@ work through it: the right number depends on rate limits and runner capacity,
 which change without the eligibility rules changing. A limit baked into the
 discovery script is one nobody can adjust for a busy night without editing a
 file with tests pinned to it.</p>
-<p>A triage that fails is one issue's problem — it keeps <code>ai-triage</code> and the next
-round picks it up. The round does not abort for it.</p>
+<p>A triage that fails is one issue's problem — the round does not abort for it.
+A session that starts and never answers is moved to <code>ai-triage-stalled</code> by the
+hourly sweep, which is a <strong>detector, not a retrier</strong>: it starts no session of
+its own, because a scheduled job that can start them can spend the account's
+usage limits overnight while nobody is watching. Deciding that another session
+is worth spending is <code>/admit</code>, and it is a person's call.</p>
 <h4 id="the-scheduled-round-is-the-backstop-not-the-main-path">The scheduled round is the backstop, not the main path<a class="headerlink" href="#the-scheduled-round-is-the-backstop-not-the-main-path" title="Link to this section">&para;</a></h4>
 <p>Reactive triage is how an issue normally gets triaged: the gatekeeper fires it
-the moment <code>ai-triage</code> appears, and the issue is analyzed within minutes.</p>
+the moment <code>ai-triage-queued</code> appears, and the issue is analyzed within minutes.</p>
 <p>The 02:00 round exists for what reactive triage missed — a failed POST, secrets
 that were never configured, a label changed by hand instead of by a command, an
 issue carried back by the blocker sweep. On a healthy night it finds nothing.
@@ -4890,17 +4906,17 @@ survives into the build because it was already written down.</p>
 <p>The analysis comment is posted <strong>before</strong> the state label is set, always.</p>
 <p>This is what makes the bad state structurally impossible rather than merely
 unlikely. A run that dies between the two writes leaves either a plan still
-sitting on <code>ai-triage</code> — untriaged, which the next round simply redoes — or
+sitting on <code>ai-triage-queued</code> — untriaged, which the next round simply redoes — or
 <code>pending-approval</code> with nothing to approve, which is silent: the pipeline
 believes the issue is handled and it waits on a human who has nothing to read.</p>
-<p><code>ai-triage</code> is removed in the same write that adds the new state, so a hand-back
+<p><code>ai-triage-queued</code> is removed in the same write that adds the new state, so a hand-back
 rests in exactly one state. An issue carrying both gets triaged again by the
 next analysis round while it sits waiting for Derek.</p>
 <h5 id="the-write-is-code-not-an-instruction">The write is code, not an instruction<a class="headerlink" href="#the-write-is-code-not-an-instruction" title="Link to this section">&para;</a></h5>
 <p><code>hand_back.py</code> performs both writes. This used to be prose in the skill file —
-"remove <code>ai-triage</code> in the same write that adds the new state" — carried out by
+"remove <code>ai-triage-queued</code> in the same write that adds the new state" — carried out by
 a model at the end of a long analysis, and it was skipped in practice: sixteen
-issues sat on <code>ai-triage</code> with finished plans on them, waiting for an approval
+issues sat on <code>ai-triage-queued</code> with finished plans on them, waiting for an approval
 queue they had never reached.</p>
 <p>Nothing failed when it was skipped, which is the whole problem. The comment was
 posted, so the run looked successful from outside; only the label was missing,
@@ -4948,7 +4964,7 @@ one description of what each command does. The single exception is <code>/revise
 the clarification route, where the canonical gloss ("the plan is not right") is
 false, because triage wrote no plan. That override is the visible edge of a real
 gap in the vocabulary: there is no verb for <em>here is the answer, look again</em>,
-and <code>/revise</code> is doing that job because it is the only route back to <code>ai-triage</code>
+and <code>/revise</code> is doing that job because it is the only route back to <code>ai-triage-queued</code>
 that carries a note.</p>
 <h4 id="re-fire-repair">Re-fire repair<a class="headerlink" href="#re-fire-repair" title="Link to this section">&para;</a></h4>
 <p>Triage runs twice more often than you would think: a sweep catches a comment
@@ -4997,7 +5013,7 @@ Prose mentioning either phrase does not match, and only comments authored by the
 bot count — a human pasting a checklist is not a triage run.</p>
 <p><code>reconcile.py</code> imports it rather than carrying a second copy. Two copies drift,
 and this particular drift is self-sustaining: reconcile finds no analysis and
-returns the issue to <code>ai-triage</code>, triage finds the analysis it wrote and repairs
+returns the issue to <code>ai-triage-queued</code>, triage finds the analysis it wrote and repairs
 the label instead, reconcile returns it again. Neither side is wrong on its own
 terms, so nothing surfaces as an error — the issue just cycles. The side that
 writes the format owns the recognizer.</p>
@@ -5097,7 +5113,7 @@ whether to watermark. Three rules worth knowing:</p>
   milestone — because "your command was refused" and "your command was partly
   applied" need very different responses.</li>
 </ul>
-<p>Reactive triage fires <strong>only when <code>ai-triage</code> is newly present</strong>. An idempotent
+<p>Reactive triage fires <strong>only when <code>ai-triage-queued</code> is newly present</strong>. An idempotent
 re-add — a replay, or a second <code>/admit</code> on an already-admitted issue — must not
 fire it again, or one stuck comment becomes a triage run every sweep.</p>
 <h3 id="recording-dependencies">Recording dependencies<a class="headerlink" href="#recording-dependencies" title="Link to this section">&para;</a></h3>
@@ -5307,7 +5323,7 @@ labels claim against what GitHub shows, and sorts each finding into
 <tr>
 <td><code>requeue_triage</code></td>
 <td>a state label with no triage-authored analysis</td>
-<td>→ <code>ai-triage</code></td>
+<td>→ <code>ai-triage-queued</code></td>
 <td><strong>cron only</strong></td>
 </tr>
 </tbody>
@@ -5409,7 +5425,7 @@ sections, in order:</p>
 </tr>
 <tr>
 <td>📥 Intake</td>
-<td><code>ai-triage</code> — waiting to be analyzed, plus unadmitted work</td>
+<td><code>ai-triage-queued</code> — waiting to be analyzed, plus unadmitted work</td>
 <td>board-wide</td>
 </tr>
 <tr>
@@ -5456,7 +5472,7 @@ look at</em> — and an issue does not stop needing to be looked at by sitting
 outside the milestone currently being built. Scoping those to focus hides the
 work that most needs surfacing:</p>
 <ul>
-<li><strong>Intake is the worst case.</strong> <code>ai-triage</code> means the issue has <em>not</em> been
+<li><strong>Intake is the worst case.</strong> <code>ai-triage-queued</code> means the issue has <em>not</em> been
   triaged, and triage is what decides its milestone — so an issue waiting for
   triage usually has no milestone at all. A focus-scoped Intake is
   structurally near-empty: the section reads "Nothing waiting for triage"
@@ -5476,7 +5492,7 @@ it. If every table were focus-scoped, that column would be a constant.</p>
 <h4 id="intake-carries-two-piles-and-flags-which-is-which">Intake carries two piles, and flags which is which<a class="headerlink" href="#intake-carries-two-piles-and-flags-which-is-which" title="Link to this section">&para;</a></h4>
 <p>An issue with <strong>no pipeline-state label at all</strong> has not been <code>/admit</code>ted, and
 the nightly analysis run will never pick it up — <a href="#analysis--find-what-needs-triage">its entry condition is
-<code>ai-triage</code> and nothing else</a>. Left off the
+<code>ai-triage-queued</code> and nothing else</a>. Left off the
 board entirely, such an issue is invisible until somebody happens to scroll
 the issue list, which on this repo meant seven of twenty-one open issues.</p>
 <p>So Intake lists both, and marks the difference:</p>
@@ -5491,7 +5507,7 @@ the issue list, which on this repo meant seven of twenty-one open issues.</p>
 <tbody>
 <tr>
 <td>plain</td>
-<td><code>ai-triage</code> — the pipeline has it</td>
+<td><code>ai-triage-queued</code> — the pipeline has it</td>
 <td>tonight's analysis run</td>
 </tr>
 <tr>
@@ -5569,7 +5585,7 @@ star logic would be a bug that reorganises the pipeline.</p>
 </tr>
 <tr>
 <td><strong>In Planning</strong></td>
-<td><code>ai-triage</code>, <code>pending-approval</code>, <code>needs-clarification</code></td>
+<td><code>ai-triage-queued</code>, <code>pending-approval</code>, <code>needs-clarification</code></td>
 </tr>
 <tr>
 <td><strong>Ready</strong></td>

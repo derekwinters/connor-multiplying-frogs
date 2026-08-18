@@ -1884,10 +1884,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-skills-are-not-here-yet" class="md-nav__link">
+  <a href="#how-the-skills-get-here" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The skills are not here yet
+        How the skills get here
       
     </span>
   </a>
@@ -1895,10 +1895,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-there-is-no-sweep-any-more" class="md-nav__link">
+  <a href="#the-sweep-is-back-for-a-different-reason" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why there is no sweep any more
+        The sweep is back, for a different reason
       
     </span>
   </a>
@@ -2117,10 +2117,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-skills-are-not-here-yet" class="md-nav__link">
+  <a href="#how-the-skills-get-here" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The skills are not here yet
+        How the skills get here
       
     </span>
   </a>
@@ -2128,10 +2128,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-there-is-no-sweep-any-more" class="md-nav__link">
+  <a href="#the-sweep-is-back-for-a-different-reason" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why there is no sweep any more
+        The sweep is back, for a different reason
       
     </span>
   </a>
@@ -2338,11 +2338,11 @@ that cannot be centralised.</p>
 </tr>
 <tr>
 <td><code>gatekeeper-sweep.yml</code> + <code>pipeline-reconcile</code></td>
-<td><strong>nothing, deliberately</strong></td>
+<td><code>gatekeeper-sweep.yml</code>, a caller — same name, different job</td>
 </tr>
 <tr>
 <td><code>pipeline-analysis</code>, <code>pipeline-dev</code>, <code>triage-issue</code>, <code>ci-watch</code>, <code>milestone-ops</code>, <code>issue-blockers</code>, <code>release-flow</code></td>
-<td><strong>not installed yet</strong> — see <a href="#the-skills-are-not-here-yet">The skills are not here yet</a></td>
+<td>named in <code>repo-config.yml</code>, installed by <code>skills-update.yml</code> — see <a href="#how-the-skills-get-here">How the skills get here</a></td>
 </tr>
 <tr>
 <td><code>pipeline-tests.yml</code></td>
@@ -2350,7 +2350,7 @@ that cannot be centralised.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="the-skills-are-not-here-yet">The skills are not here yet<a class="headerlink" href="#the-skills-are-not-here-yet" title="Link to this section">&para;</a></h3>
+<h3 id="how-the-skills-get-here">How the skills get here<a class="headerlink" href="#how-the-skills-get-here" title="Link to this section">&para;</a></h3>
 <p>The workflows arrived; the skills did not. <code>.claude/skills/</code> holds this repository's own —
 <code>core-unity-split</code>, <code>dw-run-tests</code>, <code>grilling</code> and the rest — and nothing from ai-sdlc. The row
 above used to say they were installed with <code>gh skill</code>, and that was a description of the intended
@@ -2363,14 +2363,29 @@ function: it reads as covered, so nobody checks.</p>
 an installed skill is an instruction an agent reads and a timer that put unreviewed ones into its
 context would be a consent problem rather than an untidiness. A skill edited here is reported and
 left alone, never overwritten.</p>
-<p>It arrives with the ai-sdlc release after v0.4.16. The <code>skills:</code> key does not exist in the version
-this repository currently pins, so adding it before the pin moves would make every config load fail
-on an unknown key. Tracked in #376.</p>
-<h3 id="why-there-is-no-sweep-any-more">Why there is no sweep any more<a class="headerlink" href="#why-there-is-no-sweep-any-more" title="Link to this section">&para;</a></h3>
-<p>The sweep existed because frogs <strong>stored</strong> blockedness as pipeline state, and stored state goes
-stale. ai-sdlc derives blockedness at selection time from the live dependency graph instead. State
-computed when it is used cannot drift, so there is nothing to reconcile — the sweep was not dropped,
-its cause was.</p>
+<p>It arrived with v0.4.17, and <code>repo-config.yml</code> now names six: <code>triage-issue</code>, <code>pipeline-dev</code>,
+<code>ci-watch</code>, <code>milestone-ops</code>, <code>issue-blockers</code> and <code>release-flow</code>. The list is not every skill —
+<code>pipeline-gatekeeper</code>, <code>pipeline-dashboard</code>, <code>label-sync</code>, <code>closing-keyword</code> and <code>docs-gate</code> only
+ever execute from ai-sdlc's own checkout inside a reusable workflow, so a copy here would be a
+second version to keep at the pin that nothing reads.</p>
+<p><code>adopt</code> is absent despite the upgrade command below naming it: the skill imports <code>lib.config</code>,
+which is not part of the skill, so an installed copy raises <code>ModuleNotFoundError</code>. Upgrades are run
+from an ai-sdlc checkout until that is fixed. <code>issue-blockers</code> has the same defect and is listed
+anyway, because it is genuinely one of ours and the fix belongs upstream — both are ai-sdlc#149.</p>
+<p>One repository setting is still needed before the job can finish: Actions must be allowed to open
+pull requests (#378).</p>
+<h3 id="the-sweep-is-back-for-a-different-reason">The sweep is back, for a different reason<a class="headerlink" href="#the-sweep-is-back-for-a-different-reason" title="Link to this section">&para;</a></h3>
+<p>frogs' original sweep existed because frogs <strong>stored</strong> blockedness as pipeline state, and stored
+state goes stale. ai-sdlc derives blockedness at selection time from the live dependency graph
+instead. State computed when it is used cannot drift, so that sweep was not dropped — its cause
+was.</p>
+<p>v0.4.17 brought a different one. Firing triage is a poke, and a poke can be lost: a routine that
+never starts, starts and dies, or is refused leaves the issue exactly as it was, and nothing looks
+at it again. Eight issues sat stranded here overnight that way (#373). <code>gatekeeper-sweep.yml</code> runs
+hourly and moves an issue whose session never answered to <code>ai-triage-stalled</code>.</p>
+<p>It <strong>starts no sessions</strong>. A scheduled job that can start them can spend the account's usage limits
+while nobody is watching, so the sweep only writes labels — whatever it gets wrong, it gets wrong
+cheaply. Deciding another session is worth spending is <code>/admit</code>.</p>
 <p>Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
 anything left is <strong>reported on the dashboard rather than silently repaired</strong>. That is the whole
 bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.</p>

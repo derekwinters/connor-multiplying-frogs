@@ -2755,18 +2755,28 @@ change them only to override it.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>ai-triage</code></td>
-<td><code>#FBCA04</code></td>
-<td>Queued for automated triage; the pipeline owns it next</td>
+<td><code>ai-triage-queued</code></td>
+<td><code>#1D76DB</code></td>
+<td>Admitted; no analysis session has been started yet</td>
+</tr>
+<tr>
+<td><code>ai-triage-running</code></td>
+<td><code>#006B75</code></td>
+<td>A session was started and has not answered yet</td>
+</tr>
+<tr>
+<td><code>ai-triage-stalled</code></td>
+<td><code>#B60205</code></td>
+<td>The session never answered — needs a person, not another poke</td>
 </tr>
 <tr>
 <td><code>pending-approval</code></td>
-<td><code>#E99695</code></td>
+<td><code>#FBCA04</code></td>
 <td>Triaged and waiting on a human <code>/approve</code> comment</td>
 </tr>
 <tr>
 <td><code>needs-clarification</code></td>
-<td><code>#F29513</code></td>
+<td><code>#D93F0B</code></td>
 <td>Blocked on an answer from a human before it can proceed</td>
 </tr>
 <tr>
@@ -2776,12 +2786,12 @@ change them only to override it.</p>
 </tr>
 <tr>
 <td><code>in-progress</code></td>
-<td><code>#2188FF</code></td>
+<td><code>#5319E7</code></td>
 <td>An agent is actively building this issue right now</td>
 </tr>
 <tr>
 <td><code>parked</code></td>
-<td><code>#BFBFBF</code></td>
+<td><code>#C5DEF5</code></td>
 <td>Deliberately set aside; the pipeline will not pick it up</td>
 </tr>
 <tr>
@@ -2791,9 +2801,14 @@ change them only to override it.</p>
 </tr>
 </tbody>
 </table>
-<p>The normal path is <code>ai-triage</code> → <code>pending-approval</code> → <code>ready-for-work</code> →
-<code>in-progress</code> → closed. <code>needs-clarification</code> and <code>parked</code> are the two ways out
-of that path, and both need a human to get back on it.</p>
+<p>The colours are <code>.github/labels.core.yml</code>'s, which <code>labels-sync</code> applies. Four
+of them were wrong here before this table was checked against that file.</p>
+<p>The normal path is <code>ai-triage-queued</code> → <code>ai-triage-running</code> →
+<code>pending-approval</code> → <code>ready-for-work</code> → <code>in-progress</code> → closed.
+<code>needs-clarification</code> and <code>parked</code> are the two ways out of that path, and both
+need a human to get back on it. <code>ai-triage-stalled</code> is a third: the hourly sweep
+puts an issue there when its analysis session never answered, and only <code>/admit</code>
+takes it back.</p>
 <h4 id="the-invariant-ready-for-work-has-a-milestone">The invariant: <code>ready-for-work</code> ⇒ has a milestone<a class="headerlink" href="#the-invariant-ready-for-work-has-a-milestone" title="Link to this section">&para;</a></h4>
 <p><strong>An issue labelled <code>ready-for-work</code> always has a milestone.</strong> No exceptions.</p>
 <p>This is the one label rule the tooling enforces rather than merely assumes. The
