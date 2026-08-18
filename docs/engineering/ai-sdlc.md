@@ -118,11 +118,11 @@ The whole issue lifecycle now runs from ai-sdlc. What used to live here, and whe
 | `gatekeeper-comment.yml` + `pipeline-gatekeeper` | `gatekeeper-comment.yml`, a caller |
 | — | `gatekeeper-close.yml`, a caller — frogs had no equivalent |
 | `dashboard.yml` + `pipeline-dashboard` | `dashboard.yml`, a caller |
-| `gatekeeper-sweep.yml` + `pipeline-reconcile` | **nothing, deliberately** |
-| `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | **not installed yet** — see [The skills are not here yet](#the-skills-are-not-here-yet) |
+| `gatekeeper-sweep.yml` + `pipeline-reconcile` | `gatekeeper-sweep.yml`, a caller — same name, different job |
+| `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | named in `repo-config.yml`, installed by `skills-update.yml` — see [How the skills get here](#how-the-skills-get-here) |
 | `pipeline-tests.yml` | gone with the code it tested |
 
-### The skills are not here yet
+### How the skills get here
 
 The workflows arrived; the skills did not. `.claude/skills/` holds this repository's own —
 `core-unity-split`, `dw-run-tests`, `grilling` and the rest — and nothing from ai-sdlc. The row
@@ -139,16 +139,35 @@ an installed skill is an instruction an agent reads and a timer that put unrevie
 context would be a consent problem rather than an untidiness. A skill edited here is reported and
 left alone, never overwritten.
 
-It arrives with the ai-sdlc release after v0.4.16. The `skills:` key does not exist in the version
-this repository currently pins, so adding it before the pin moves would make every config load fail
-on an unknown key. Tracked in #376.
+It arrived with v0.4.17, and `repo-config.yml` now names six: `triage-issue`, `pipeline-dev`,
+`ci-watch`, `milestone-ops`, `issue-blockers` and `release-flow`. The list is not every skill —
+`pipeline-gatekeeper`, `pipeline-dashboard`, `label-sync`, `closing-keyword` and `docs-gate` only
+ever execute from ai-sdlc's own checkout inside a reusable workflow, so a copy here would be a
+second version to keep at the pin that nothing reads.
 
-### Why there is no sweep any more
+`adopt` is absent despite the upgrade command below naming it: the skill imports `lib.config`,
+which is not part of the skill, so an installed copy raises `ModuleNotFoundError`. Upgrades are run
+from an ai-sdlc checkout until that is fixed. `issue-blockers` has the same defect and is listed
+anyway, because it is genuinely one of ours and the fix belongs upstream — both are ai-sdlc#149.
 
-The sweep existed because frogs **stored** blockedness as pipeline state, and stored state goes
-stale. ai-sdlc derives blockedness at selection time from the live dependency graph instead. State
-computed when it is used cannot drift, so there is nothing to reconcile — the sweep was not dropped,
-its cause was.
+One repository setting is still needed before the job can finish: Actions must be allowed to open
+pull requests (#378).
+
+### The sweep is back, for a different reason
+
+frogs' original sweep existed because frogs **stored** blockedness as pipeline state, and stored
+state goes stale. ai-sdlc derives blockedness at selection time from the live dependency graph
+instead. State computed when it is used cannot drift, so that sweep was not dropped — its cause
+was.
+
+v0.4.17 brought a different one. Firing triage is a poke, and a poke can be lost: a routine that
+never starts, starts and dies, or is refused leaves the issue exactly as it was, and nothing looks
+at it again. Eight issues sat stranded here overnight that way (#373). `gatekeeper-sweep.yml` runs
+hourly and moves an issue whose session never answered to `ai-triage-stalled`.
+
+It **starts no sessions**. A scheduled job that can start them can spend the account's usage limits
+while nobody is watching, so the sweep only writes labels — whatever it gets wrong, it gets wrong
+cheaply. Deciding another session is worth spending is `/admit`.
 
 Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
 anything left is **reported on the dashboard rather than silently repaired**. That is the whole

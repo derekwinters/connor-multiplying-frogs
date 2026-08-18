@@ -208,17 +208,25 @@ change them only to override it.
 
 | Label | Colour | Meaning |
 | --- | --- | --- |
-| `ai-triage` | `#FBCA04` | Queued for automated triage; the pipeline owns it next |
-| `pending-approval` | `#E99695` | Triaged and waiting on a human `/approve` comment |
-| `needs-clarification` | `#F29513` | Blocked on an answer from a human before it can proceed |
+| `ai-triage-queued` | `#1D76DB` | Admitted; no analysis session has been started yet |
+| `ai-triage-running` | `#006B75` | A session was started and has not answered yet |
+| `ai-triage-stalled` | `#B60205` | The session never answered — needs a person, not another poke |
+| `pending-approval` | `#FBCA04` | Triaged and waiting on a human `/approve` comment |
+| `needs-clarification` | `#D93F0B` | Blocked on an answer from a human before it can proceed |
 | `ready-for-work` | `#0E8A16` | Approved and eligible for the nightly builder to pick up |
-| `in-progress` | `#2188FF` | An agent is actively building this issue right now |
-| `parked` | `#BFBFBF` | Deliberately set aside; the pipeline will not pick it up |
+| `in-progress` | `#5319E7` | An agent is actively building this issue right now |
+| `parked` | `#C5DEF5` | Deliberately set aside; the pipeline will not pick it up |
 | `dashboard` | `#FEF2C0` | The single live pipeline dashboard issue |
 
-The normal path is `ai-triage` → `pending-approval` → `ready-for-work` →
-`in-progress` → closed. `needs-clarification` and `parked` are the two ways out
-of that path, and both need a human to get back on it.
+The colours are `.github/labels.core.yml`'s, which `labels-sync` applies. Four
+of them were wrong here before this table was checked against that file.
+
+The normal path is `ai-triage-queued` → `ai-triage-running` →
+`pending-approval` → `ready-for-work` → `in-progress` → closed.
+`needs-clarification` and `parked` are the two ways out of that path, and both
+need a human to get back on it. `ai-triage-stalled` is a third: the hourly sweep
+puts an issue there when its analysis session never answered, and only `/admit`
+takes it back.
 
 #### The invariant: `ready-for-work` ⇒ has a milestone
 
