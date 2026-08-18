@@ -297,4 +297,4 @@ editor, so it runs in CI
 | Unity tests | `Assets/Tests/EditMode/` — needs the editor, runs in CI |
 | The app's version | `/VERSION` — release-please only |
 
-@.claude/ai-sdlc/house-rules.md
+@.ai-sdlc/house-rules.md

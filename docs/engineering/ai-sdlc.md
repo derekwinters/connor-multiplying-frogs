@@ -14,13 +14,46 @@ The logic lives in ai-sdlc. This repository holds only the parts that genuinely 
 
 | Here | Why it cannot be centralised |
 | --- | --- |
-| `.claude/repo-config.yml` | What *this* repository is — its capabilities, owners, dashboard, commands |
-| `.claude/ai-sdlc.pin` | The version of ai-sdlc being followed |
-| `.claude/ai-sdlc/house-rules.md` | The shared rules, installed here so agents read them without a network |
+| `.ai-sdlc/repo-config.yml` | What *this* repository is — its capabilities, owners, dashboard, commands |
+| `.ai-sdlc/ai-sdlc.pin` | The version of ai-sdlc being followed |
+| `.ai-sdlc/house-rules.md` | The shared rules, installed here so agents read them without a network |
+| `.ai-sdlc/adoption.md` | Generated from `repo-config.yml`: what is installed here, and at what version |
+| `.claude/skills/ai-sdlc/SKILL.md` | The discovery surface, at the path Claude Code requires |
 | `.github/workflows/*.yml` callers | A trigger must be declared in the repository it fires for |
 
 A caller is about fifteen lines: a trigger and a `uses:`. Everything it calls is in ai-sdlc, at the
 pinned version.
+
+Everything but the last two lives under `.ai-sdlc/`, which is ai-sdlc's own name. Until v0.4.18 it
+was all under `.claude/`, and that was wrong in a way worth stating: a GitHub Actions job parsing
+`capabilities` and `owners` has nothing to do with an AI coding assistant, and squatting in a
+vendor namespace took a dependency on somebody else's naming for nothing. `.claude/skills/` is the
+one exception, because Claude Code requires that path.
+
+`adopt apply` did the move, in the same run as the v0.4.18 upgrade: `repo-config.yml` moved
+byte-for-byte with its comments intact, the old copies went, and the import line at the bottom of
+`CLAUDE.md` was repointed.
+
+### The two things that point at ai-sdlc
+
+`adoption.md` and the `ai-sdlc` skill are the answer to *how does an agent working here know any of
+this*. They are not alternatives:
+
+- The `@.ai-sdlc/house-rules.md` import in `CLAUDE.md` is **always on**. It is read every session,
+  which is why it has to stay short, and it is what carries the one sentence saying ai-sdlc governs
+  this repository's issues, labels, milestones, triage, gates and releases.
+- The `ai-sdlc` skill is loaded **on demand**, so it can afford detail. But loading it is a
+  judgement the model makes from its description, and you cannot go looking for a skill about a
+  thing you do not know exists — which is exactly the failure here, an agent editing a stale
+  pipeline doc with no idea ai-sdlc owns it. Hence the always-on sentence as well.
+
+`adoption.md` is **generated** and holds only resolved state: the pin, the capabilities and profiles
+in force, the pipeline-state labels this repository actually uses, the callers installed, the skills
+installed, and links into the specification at the exact commit this repository runs. It explains
+nothing, deliberately. Every hand-maintained copy of something ai-sdlc generates has drifted here
+eventually — four label colours in `conventions.md` disagreed with `labels.core.yml`, and 27
+references survived a pipeline state that no longer existed. Do not edit it: change
+`repo-config.yml` and run `adopt apply`.
 
 ## Capabilities arrive one at a time
 
@@ -39,7 +72,7 @@ release of the game.
 
 ## The pin
 
-`.claude/ai-sdlc.pin` records the version **and** the commit it resolves to:
+`.ai-sdlc/ai-sdlc.pin` records the version **and** the commit it resolves to:
 
     v0.4.2 b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3
 
