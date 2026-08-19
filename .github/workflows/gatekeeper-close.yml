@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.19 hash=832ebdb74ad5d17e
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=dd0556d6389e05eb
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: gatekeeper-close
@@ -10,6 +10,9 @@ name: gatekeeper-close
 # Pinned to a commit rather than a tag: a tag can move, and this runs
 # with this repository's token. Upgrade with `adopt apply <version>`,
 # which rewrites both the SHA and the comment.
+#
+# Nothing is checked out here. The action is fetched by the runner,
+# outside this repository's workspace.
 
 on:
   issues:
@@ -19,8 +22,17 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  # Every writer on one issue serialises. `set_labels` replaces the whole
+  # label set rather than patching it, so two runs would read-modify-write
+  # the same list and one would silently lose.
+  group: gatekeeper-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
 jobs:
   gatekeeper-close:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-close.yml@37493f389288fd0a44b5832f067f754554d640a3 # v0.4.19
-    with:
-      ref: 37493f389288fd0a44b5832f067f754554d640a3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: derekwinters/ai-sdlc/.github/actions/gatekeeper@99b15339e95c2767f4a5007ed6bc3d0b4a1c9754 # v0.4.20
+        with:
+          mode: closed

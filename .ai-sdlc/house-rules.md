@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.19 hash=3b11127bafadea92
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=3b11127bafadea92
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 # House rules

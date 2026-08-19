@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.19 hash=ffdf01bba84da1a2
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=273bc5ddc6b187de
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: docs-gate
@@ -25,4 +25,4 @@ jobs:
   docs-gate:
     runs-on: ubuntu-latest
     steps:
-      - uses: derekwinters/ai-sdlc/.github/actions/docs-gate@37493f389288fd0a44b5832f067f754554d640a3 # v0.4.19
+      - uses: derekwinters/ai-sdlc/.github/actions/docs-gate@99b15339e95c2767f4a5007ed6bc3d0b4a1c9754 # v0.4.20

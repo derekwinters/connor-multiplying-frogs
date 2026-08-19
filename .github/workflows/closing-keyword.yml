@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.19 hash=90f17e32e4d2d822
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=8eea3de78998aa38
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: closing-keyword
@@ -25,4 +25,4 @@ jobs:
   closing-keyword:
     runs-on: ubuntu-latest
     steps:
-      - uses: derekwinters/ai-sdlc/.github/actions/closing-keyword@37493f389288fd0a44b5832f067f754554d640a3 # v0.4.19
+      - uses: derekwinters/ai-sdlc/.github/actions/closing-keyword@99b15339e95c2767f4a5007ed6bc3d0b4a1c9754 # v0.4.20

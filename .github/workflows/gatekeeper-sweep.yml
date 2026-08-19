@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.19 hash=c5fd45d38e4c3886
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=6af2e3db303676ee
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: gatekeeper-sweep
@@ -10,6 +10,9 @@ name: gatekeeper-sweep
 # Pinned to a commit rather than a tag: a tag can move, and this runs
 # with this repository's token. Upgrade with `adopt apply <version>`,
 # which rewrites both the SHA and the comment.
+#
+# Nothing is checked out here. The action is fetched by the runner,
+# outside this repository's workspace.
 
 on:
   schedule:
@@ -20,9 +23,17 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  # One sweep at a time, and never cancelled: it reads the whole board,
+  # and a cancelled run leaves the labels it was moving half applied.
+  group: gatekeeper-sweep
+  cancel-in-progress: false
+
 jobs:
   gatekeeper-sweep:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-gatekeeper-sweep.yml@37493f389288fd0a44b5832f067f754554d640a3 # v0.4.19
-    with:
-      ref: 37493f389288fd0a44b5832f067f754554d640a3
-      stale_after: 1800
+    runs-on: ubuntu-latest
+    steps:
+      - uses: derekwinters/ai-sdlc/.github/actions/gatekeeper@99b15339e95c2767f4a5007ed6bc3d0b4a1c9754 # v0.4.20
+        with:
+          mode: sweep
+          stale-after: "1800"

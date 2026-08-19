@@ -41,8 +41,8 @@ editing one:
 
 | Shape | Which | What runs |
 | --- | --- | --- |
-| **Action** | `closing-keyword.yml`, `docs-gate.yml` | One `uses:` step. GitHub fetches the action into the runner's own directory; **nothing of ai-sdlc's enters this repository's workspace**. |
-| **Reusable workflow** | the other eight | The called workflow checks ai-sdlc out into `.ai-sdlc-checkout/` and runs a script from it. |
+| **Action** | `closing-keyword.yml`, `docs-gate.yml`, and the four gatekeeper callers | One `uses:` step. GitHub fetches the action into the runner's own directory; **nothing of ai-sdlc's enters this repository's workspace**. |
+| **Reusable workflow** | `dashboard.yml`, `labels-sync.yml`, `skills-update.yml`, `docs-build.yml` | The called workflow checks ai-sdlc out into `.ai-sdlc-checkout/` and runs a script from it. |
 
 The action shape is where the rest are going. It removes a whole class of problem rather than
 avoiding it: `actions/checkout` empties the directory it writes into, so anything ai-sdlc fetches
@@ -55,7 +55,27 @@ there is no pair to keep in step.
 
 **A converted caller's status check is renamed**, because GitHub names a reusable workflow's check
 `<workflow> / <job>` and an action's `<job>`. That is a branch-protection change and only Derek can
-make it — #383.
+make it — #383. It affects only checks that gate a pull request, so the gatekeeper callers — which
+run on issues — are unaffected.
+
+### The gatekeeper is one action, and every writer on an issue now queues
+
+Four callers — `gatekeeper-comment`, `gatekeeper-close`, `triage` and `gatekeeper-sweep` — run the
+same action and differ only in the `mode:` they ask for and the trigger that starts them.
+
+Converting them settled something that had been wrong here since triage arrived. `triage.yml` used
+to have a concurrency group of its own, so a triage fire could run *at the same time* as a
+gatekeeper comment on the same issue. That is not harmless: every label write goes through
+`set_labels`, which replaces the whole label set rather than patching it, so two runs on one issue
+read-modify-write the same list and one silently loses — whichever label each meant to change.
+
+The gatekeeper's own moves cannot trigger triage, because GitHub starts no run from an event its
+token authored. But labelling an issue **by hand** while a `/admit` is in flight could, and
+labelling by hand is precisely what the triage caller was added for (ai-sdlc#123).
+
+All three issue-scoped callers now share `gatekeeper-<issue number>`, and none may be cancelled: a
+cancelled run leaves the label set half applied. A triage fire may now wait a few seconds behind a
+comment on the same issue, which is the trade.
 
 ### The two things that point at ai-sdlc
 
