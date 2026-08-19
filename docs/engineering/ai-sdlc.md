@@ -34,6 +34,29 @@ one exception, because Claude Code requires that path.
 byte-for-byte with its comments intact, the old copies went, and the import line at the bottom of
 `CLAUDE.md` was repointed.
 
+### Two kinds of caller
+
+Since v0.4.19 the callers here come in two shapes, and the difference is worth knowing before
+editing one:
+
+| Shape | Which | What runs |
+| --- | --- | --- |
+| **Action** | `closing-keyword.yml`, `docs-gate.yml` | One `uses:` step. GitHub fetches the action into the runner's own directory; **nothing of ai-sdlc's enters this repository's workspace**. |
+| **Reusable workflow** | the other eight | The called workflow checks ai-sdlc out into `.ai-sdlc-checkout/` and runs a script from it. |
+
+The action shape is where the rest are going. It removes a whole class of problem rather than
+avoiding it: `actions/checkout` empties the directory it writes into, so anything ai-sdlc fetches
+into this workspace is one naming collision away from replacing a file we committed — which is
+exactly why the checkout path had to be renamed away from `.ai-sdlc` when the configuration moved
+there. A run that fetches nothing cannot collide with anything.
+
+An action caller also carries **one** reference rather than a `uses:` and a matching `ref:`, so
+there is no pair to keep in step.
+
+**A converted caller's status check is renamed**, because GitHub names a reusable workflow's check
+`<workflow> / <job>` and an action's `<job>`. That is a branch-protection change and only Derek can
+make it — #383.
+
 ### The two things that point at ai-sdlc
 
 `adoption.md` and the `ai-sdlc` skill are the answer to *how does an agent working here know any of
@@ -127,7 +150,7 @@ The reconciliation gate — *a pull request that changes code must change docume
 
 | | Where it runs now |
 | --- | --- |
-| docs reconciliation | `docs-gate.yml` — ai-sdlc's shared workflow |
+| docs reconciliation | `docs-gate.yml` — ai-sdlc's shared action |
 | `mkdocs build --strict` | `docs-test.yml`, still ours |
 | the CI scripts' own tests, and the action-pin check | `docs-test.yml`, still ours |
 
