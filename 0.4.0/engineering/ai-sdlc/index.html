@@ -1823,6 +1823,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gatekeeper is one action, and every writer on an issue now queues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2084,6 +2095,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gatekeeper is one action, and every writer on an issue now queues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2302,12 +2324,12 @@ editing one:</p>
 <tbody>
 <tr>
 <td><strong>Action</strong></td>
-<td><code>closing-keyword.yml</code>, <code>docs-gate.yml</code></td>
+<td><code>closing-keyword.yml</code>, <code>docs-gate.yml</code>, and the four gatekeeper callers</td>
 <td>One <code>uses:</code> step. GitHub fetches the action into the runner's own directory; <strong>nothing of ai-sdlc's enters this repository's workspace</strong>.</td>
 </tr>
 <tr>
 <td><strong>Reusable workflow</strong></td>
-<td>the other eight</td>
+<td><code>dashboard.yml</code>, <code>labels-sync.yml</code>, <code>skills-update.yml</code>, <code>docs-build.yml</code></td>
 <td>The called workflow checks ai-sdlc out into <code>.ai-sdlc-checkout/</code> and runs a script from it.</td>
 </tr>
 </tbody>
@@ -2321,7 +2343,22 @@ there. A run that fetches nothing cannot collide with anything.</p>
 there is no pair to keep in step.</p>
 <p><strong>A converted caller's status check is renamed</strong>, because GitHub names a reusable workflow's check
 <code>&lt;workflow&gt; / &lt;job&gt;</code> and an action's <code>&lt;job&gt;</code>. That is a branch-protection change and only Derek can
-make it — #383.</p>
+make it — #383. It affects only checks that gate a pull request, so the gatekeeper callers — which
+run on issues — are unaffected.</p>
+<h3 id="the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues">The gatekeeper is one action, and every writer on an issue now queues<a class="headerlink" href="#the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues" title="Link to this section">&para;</a></h3>
+<p>Four callers — <code>gatekeeper-comment</code>, <code>gatekeeper-close</code>, <code>triage</code> and <code>gatekeeper-sweep</code> — run the
+same action and differ only in the <code>mode:</code> they ask for and the trigger that starts them.</p>
+<p>Converting them settled something that had been wrong here since triage arrived. <code>triage.yml</code> used
+to have a concurrency group of its own, so a triage fire could run <em>at the same time</em> as a
+gatekeeper comment on the same issue. That is not harmless: every label write goes through
+<code>set_labels</code>, which replaces the whole label set rather than patching it, so two runs on one issue
+read-modify-write the same list and one silently loses — whichever label each meant to change.</p>
+<p>The gatekeeper's own moves cannot trigger triage, because GitHub starts no run from an event its
+token authored. But labelling an issue <strong>by hand</strong> while a <code>/admit</code> is in flight could, and
+labelling by hand is precisely what the triage caller was added for (ai-sdlc#123).</p>
+<p>All three issue-scoped callers now share <code>gatekeeper-&lt;issue number&gt;</code>, and none may be cancelled: a
+cancelled run leaves the label set half applied. A triage fire may now wait a few seconds behind a
+comment on the same issue, which is the trade.</p>
 <h3 id="the-two-things-that-point-at-ai-sdlc">The two things that point at ai-sdlc<a class="headerlink" href="#the-two-things-that-point-at-ai-sdlc" title="Link to this section">&para;</a></h3>
 <p><code>adoption.md</code> and the <code>ai-sdlc</code> skill are the answer to <em>how does an agent working here know any of
 this</em>. They are not alternatives:</p>
