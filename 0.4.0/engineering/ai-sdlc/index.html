@@ -1812,6 +1812,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#two-kinds-of-caller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two kinds of caller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2062,6 +2073,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#two-kinds-of-caller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two kinds of caller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2266,6 +2288,40 @@ one exception, because Claude Code requires that path.</p>
 <p><code>adopt apply</code> did the move, in the same run as the v0.4.18 upgrade: <code>repo-config.yml</code> moved
 byte-for-byte with its comments intact, the old copies went, and the import line at the bottom of
 <code>CLAUDE.md</code> was repointed.</p>
+<h3 id="two-kinds-of-caller">Two kinds of caller<a class="headerlink" href="#two-kinds-of-caller" title="Link to this section">&para;</a></h3>
+<p>Since v0.4.19 the callers here come in two shapes, and the difference is worth knowing before
+editing one:</p>
+<table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>Which</th>
+<th>What runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Action</strong></td>
+<td><code>closing-keyword.yml</code>, <code>docs-gate.yml</code></td>
+<td>One <code>uses:</code> step. GitHub fetches the action into the runner's own directory; <strong>nothing of ai-sdlc's enters this repository's workspace</strong>.</td>
+</tr>
+<tr>
+<td><strong>Reusable workflow</strong></td>
+<td>the other eight</td>
+<td>The called workflow checks ai-sdlc out into <code>.ai-sdlc-checkout/</code> and runs a script from it.</td>
+</tr>
+</tbody>
+</table>
+<p>The action shape is where the rest are going. It removes a whole class of problem rather than
+avoiding it: <code>actions/checkout</code> empties the directory it writes into, so anything ai-sdlc fetches
+into this workspace is one naming collision away from replacing a file we committed — which is
+exactly why the checkout path had to be renamed away from <code>.ai-sdlc</code> when the configuration moved
+there. A run that fetches nothing cannot collide with anything.</p>
+<p>An action caller also carries <strong>one</strong> reference rather than a <code>uses:</code> and a matching <code>ref:</code>, so
+there is no pair to keep in step.</p>
+<p><strong>A converted caller's status check is renamed</strong>, because GitHub names a reusable workflow's check
+<code>&lt;workflow&gt; / &lt;job&gt;</code> and an action's <code>&lt;job&gt;</code>. That is a branch-protection change and only Derek can
+make it — #383.</p>
 <h3 id="the-two-things-that-point-at-ai-sdlc">The two things that point at ai-sdlc<a class="headerlink" href="#the-two-things-that-point-at-ai-sdlc" title="Link to this section">&para;</a></h3>
 <p><code>adoption.md</code> and the <code>ai-sdlc</code> skill are the answer to <em>how does an agent working here know any of
 this</em>. They are not alternatives:</p>
@@ -2362,7 +2418,7 @@ keyword failed, the label made it pass on a fresh run, and removing the label fa
 <tbody>
 <tr>
 <td>docs reconciliation</td>
-<td><code>docs-gate.yml</code> — ai-sdlc's shared workflow</td>
+<td><code>docs-gate.yml</code> — ai-sdlc's shared action</td>
 </tr>
 <tr>
 <td><code>mkdocs build --strict</code></td>
