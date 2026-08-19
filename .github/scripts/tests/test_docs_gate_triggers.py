@@ -40,11 +40,12 @@ WORKFLOWS = Path(__file__).resolve().parents[3] / ".github" / "workflows"
 # filename: moving it must move this check with it, not quietly stop checking
 # anything.
 #
-# It used to be our own `docs_reconciliation_gate.py`. It is now a caller of
-# ai-sdlc's shared workflow (#343) — the marker changed, the invariant did not,
-# and the `labeled` trigger is just as load-bearing on a caller as it was on a
-# step.
-GATE_SCRIPT = "reusable-docs-gate.yml"
+# It used to be our own `docs_reconciliation_gate.py`, then a caller of
+# ai-sdlc's shared workflow (#343), and since v0.4.19 a caller of its shared
+# *action* (#384). The marker has changed three times and the invariant has not:
+# the `labeled` trigger is exactly as load-bearing on a caller as it was on a
+# step, because it is what makes adding `skip-docs` start a fresh run.
+GATE_SCRIPT = "/.github/actions/docs-gate@"
 
 # GitHub's implicit `types:` for a `pull_request` trigger, used whenever the key
 # is absent. `labeled` is deliberately not among them, which is the whole bug.

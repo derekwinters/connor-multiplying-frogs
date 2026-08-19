@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.18 hash=8ac1664d7521ed96
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.19 hash=90f17e32e4d2d822
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: closing-keyword
@@ -10,6 +10,9 @@ name: closing-keyword
 # Pinned to a commit rather than a tag: a tag can move, and this runs
 # with this repository's token. Upgrade with `adopt apply <version>`,
 # which rewrites both the SHA and the comment.
+#
+# Nothing is checked out here. The action is fetched by the runner,
+# outside this repository's workspace.
 
 on:
   pull_request:
@@ -20,6 +23,6 @@ permissions:
 
 jobs:
   closing-keyword:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-closing-keyword.yml@6e1c76d7d8d81725d1363dc62edd38bf569afe45 # v0.4.18
-    with:
-      ref: 6e1c76d7d8d81725d1363dc62edd38bf569afe45
+    runs-on: ubuntu-latest
+    steps:
+      - uses: derekwinters/ai-sdlc/.github/actions/closing-keyword@37493f389288fd0a44b5832f067f754554d640a3 # v0.4.19
