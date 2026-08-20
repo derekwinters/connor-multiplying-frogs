@@ -2543,8 +2543,11 @@ hand them a GitHub client, which happens in ai-sdlc's tests and never here. ai-s
 all four to instructions: <code>issue-blockers</code>, <code>milestone-ops</code>, <code>pipeline-dev</code> and <code>triage-issue</code>
 carry no Python at all now, and do their GitHub work through the new <code>github-api</code> skill, which is
 the single statement of what may be read and written and what may not.</p>
-<p>One repository setting is still needed before the job can finish: Actions must be allowed to open
-pull requests (#378).</p>
+<p>That setting was granted in #378, and the job has been opening its pull request since — but until
+ai-sdlc v0.4.22 it could only ever open it <strong>once</strong>. Every later run pushed to a branch the runner
+had never fetched, <code>--force-with-lease</code> refused, and the job died at its last step with the pull
+request still sitting open looking current. So #380 offered the same six skills at the same
+three-day-old ai-sdlc commit through four releases (ai-sdlc#170).</p>
 <h3 id="the-sweep-is-back-for-a-different-reason">The sweep is back, for a different reason<a class="headerlink" href="#the-sweep-is-back-for-a-different-reason" title="Link to this section">&para;</a></h3>
 <p>frogs' original sweep existed because frogs <strong>stored</strong> blockedness as pipeline state, and stored
 state goes stale. ai-sdlc derives blockedness at selection time from the live dependency graph
