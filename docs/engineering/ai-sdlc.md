@@ -233,8 +233,11 @@ all four to instructions: `issue-blockers`, `milestone-ops`, `pipeline-dev` and 
 carry no Python at all now, and do their GitHub work through the new `github-api` skill, which is
 the single statement of what may be read and written and what may not.
 
-One repository setting is still needed before the job can finish: Actions must be allowed to open
-pull requests (#378).
+That setting was granted in #378, and the job has been opening its pull request since — but until
+ai-sdlc v0.4.22 it could only ever open it **once**. Every later run pushed to a branch the runner
+had never fetched, `--force-with-lease` refused, and the job died at its last step with the pull
+request still sitting open looking current. So #380 offered the same six skills at the same
+three-day-old ai-sdlc commit through four releases (ai-sdlc#170).
 
 ### The sweep is back, for a different reason
 

@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.21 hash=3c56e1f13d5b0ed0
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.22 hash=a862b8ab94f0ebca
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: gatekeeper-comment
@@ -34,7 +34,7 @@ jobs:
     if: github.event.issue.pull_request == null
     runs-on: ubuntu-latest
     steps:
-      - uses: derekwinters/ai-sdlc/.github/actions/gatekeeper@3705c94e75b3051ffe8b6087cac5eafbda4c1062 # v0.4.21
+      - uses: derekwinters/ai-sdlc/.github/actions/gatekeeper@cde337066fdce3b688d2f9cd83a992f048278784 # v0.4.22
         with:
           mode: comment
           fire-endpoint: ${{ secrets.AI_TRIAGE_URL }}
