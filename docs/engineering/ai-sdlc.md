@@ -196,6 +196,7 @@ The whole issue lifecycle now runs from ai-sdlc. What used to live here, and whe
 | `dashboard.yml` + `pipeline-dashboard` | `dashboard.yml`, a caller |
 | `gatekeeper-sweep.yml` + `pipeline-reconcile` | `gatekeeper-sweep.yml`, a caller — same name, different job |
 | `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | named in `repo-config.yml`, installed by `skills-update.yml` — see [How the skills get here](#how-the-skills-get-here) |
+| — | `github-api`, new with v0.4.21: how an agent reads and changes anything in GitHub |
 | `pipeline-tests.yml` | gone with the code it tested |
 
 ### How the skills get here
@@ -215,16 +216,22 @@ an installed skill is an instruction an agent reads and a timer that put unrevie
 context would be a consent problem rather than an untidiness. A skill edited here is reported and
 left alone, never overwritten.
 
-It arrived with v0.4.17, and `repo-config.yml` now names six: `triage-issue`, `pipeline-dev`,
-`ci-watch`, `milestone-ops`, `issue-blockers` and `release-flow`. The list is not every skill —
-`pipeline-gatekeeper`, `pipeline-dashboard`, `label-sync`, `closing-keyword` and `docs-gate` only
-ever execute from ai-sdlc's own checkout inside a reusable workflow, so a copy here would be a
-second version to keep at the pin that nothing reads.
+It arrived with v0.4.17, and `repo-config.yml` now names seven: `github-api`, `triage-issue`,
+`pipeline-dev`, `issue-blockers`, `ci-watch`, `milestone-ops` and `release-flow`. The list is not
+every skill — `pipeline-gatekeeper`, `pipeline-dashboard`, `label-sync`, `closing-keyword` and
+`docs-gate` are **scripts**, fetched into the runner by an ai-sdlc action and never installed here,
+so a copy would be a second version to keep at the pin that nothing reads.
 
-`adopt` is absent despite the upgrade command below naming it: the skill imports `lib.config`,
-which is not part of the skill, so an installed copy raises `ModuleNotFoundError`. Upgrades are run
-from an ai-sdlc checkout until that is fixed. `issue-blockers` has the same defect and is listed
-anyway, because it is genuinely one of ours and the fix belongs upstream — both are ai-sdlc#149.
+`adopt` is absent despite the upgrade command below naming it: it is a script too, and imports
+`lib.config`, which is not part of the skill — so an installed copy raises `ModuleNotFoundError`.
+Upgrades are run from an ai-sdlc checkout, and that is the intended arrangement rather than a gap.
+
+**`issue-blockers` used to be listed with a caveat**, because it had the same import and the
+installed copy could not run. Four skills had that shape — they were Python expecting somebody to
+hand them a GitHub client, which happens in ai-sdlc's tests and never here. ai-sdlc#153 converted
+all four to instructions: `issue-blockers`, `milestone-ops`, `pipeline-dev` and `triage-issue`
+carry no Python at all now, and do their GitHub work through the new `github-api` skill, which is
+the single statement of what may be read and written and what may not.
 
 One repository setting is still needed before the job can finish: Actions must be allowed to open
 pull requests (#378).

@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=3b11127bafadea92
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.21 hash=f1e96c1610bce615
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 # House rules
@@ -81,6 +81,15 @@ not a login stands behind it. Say *that* the thing happened and let whoever owns
 This applies to text you did not write. Error messages, response bodies, and stack traces quote the
 values they were handed, so a branch that reports a raw body needs redaction rather than trust —
 which is why a leak usually survives deleting the line that was leaking on purpose.
+
+**Read back what was actually published.** After opening a pull request, filing an issue, or leaving
+a comment, fetch the stored text and check it against what you sent. Tooling rewrites and appends:
+an attribution footer written as a plain link has been rewritten on the way in to carry a session
+identifier, on every pull request created, in more than one repository — and omitting the footer
+entirely did not prevent it, because it is **appended after** the author has finished. Nothing you
+wrote was wrong and the private link is published anyway, which is exactly why writing carefully
+cannot be the whole rule. Only looking afterwards catches it, and editing it out afterwards is what
+fixes it.
 
 ## Work only a human can do
 

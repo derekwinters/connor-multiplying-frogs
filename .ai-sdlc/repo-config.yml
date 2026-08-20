@@ -58,25 +58,30 @@ fire:
 # owns it, because the two previous attempts at a fleet-wide skill sync both
 # read a registry and both reverted work a repository had done.
 #
-# These are the skills something *in this repository* invokes: the analysis
-# session reads `triage-issue`, the dev agent reads `pipeline-dev`, and the
-# rest are run by hand or by an agent. Deliberately absent are the skills that
-# only ever run inside a reusable workflow — `pipeline-gatekeeper`,
-# `pipeline-dashboard`, `label-sync`, `closing-keyword`, `docs-gate`. Those
-# execute from ai-sdlc's own checkout (`SKILL_ROOT=.ai-sdlc-checkout`), so a
-# copy here would be a second version to keep in step for no gain.
+# These are the skills something *in this repository* invokes: `github-api`
+# governs every GitHub read and write an agent makes here, the analysis session
+# reads `triage-issue`, the dev agent reads `pipeline-dev`, and the rest are run
+# by an agent as needed. Deliberately absent are the skills that only ever run
+# inside an ai-sdlc action — `pipeline-gatekeeper`, `pipeline-dashboard`,
+# `label-sync`, `closing-keyword`, `docs-gate`. Those execute from ai-sdlc's own
+# tree, which the runner fetches outside this workspace entirely, so a copy here
+# would be a second version to keep in step for no gain.
 #
 # `adopt` is absent for a different reason: it imports `lib.config`, which is
-# not part of the skill, so an installed copy cannot run — upgrades are run
-# from an ai-sdlc checkout instead. `issue-blockers` has the same defect
-# (`lib.github`) and is listed anyway: it is genuinely one of ours, and the fix
-# belongs upstream. Both are flagged in ai-sdlc#149.
+# not part of the skill, so an installed copy cannot run — upgrades are run from
+# an ai-sdlc checkout instead.
+#
+# `issue-blockers` used to be listed with a caveat: it imported `lib.github`, so
+# the installed copy raised ModuleNotFoundError. ai-sdlc#153 fixed that at the
+# source — it and the three beside it carry no Python at all now, and do their
+# GitHub work through `github-api`.
 skills:
+  - github-api
   - triage-issue
   - pipeline-dev
+  - issue-blockers
   - ci-watch
   - milestone-ops
-  - issue-blockers
   - release-flow
 
 commands:

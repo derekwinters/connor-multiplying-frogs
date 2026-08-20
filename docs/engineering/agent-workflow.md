@@ -51,18 +51,25 @@ and fixed independently:
 | `ci-watch` | watching a PR's checks and diagnosing a red one |
 | `scaffold-core` | creating a new Core type with its test, wired to the right asmdef |
 | `core-unity-split` | reference: what may and may not live in Core |
-| `issue-blockers` | reading and editing native blocked-by relationships |
+| `github-api` | what may be read and written in GitHub, and what may not |
+| `issue-blockers` | recording and reading native blocked-by relationships |
 | `milestone-ops` | milestone queries and moves |
 | `release-flow` | driving a release through release-please |
+
+The last four come from ai-sdlc and are installed by `skills-update.yml`. Since
+ai-sdlc v0.4.21 they carry no scripts: they are instructions, and the GitHub
+reads and writes they describe go through `github-api` rather than through
+Python that expected somebody to hand it a client.
 
 The pipeline skills — `pipeline-gatekeeper`, `pipeline-analysis`,
 `triage-issue`, `pipeline-dev`, `pipeline-reconcile`, `pipeline-dashboard` — are
 a separate family. They operate the queue rather than write game code. See
 [Issue pipeline](issue-pipeline.md).
 
-Skills in this repo are **isolated copies**: they are not synced from anywhere,
+Skills written **here** are isolated copies: they are not synced from anywhere,
 so a fix made here stays here and a change made elsewhere does not silently
-arrive.
+arrive. The ones named in `repo-config.yml` are the exception — `skills-update`
+keeps those at ai-sdlc's pin and opens a pull request when they move.
 
 ## How an issue gets worked
 
