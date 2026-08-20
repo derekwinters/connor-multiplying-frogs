@@ -2421,8 +2421,12 @@ and fixed independently:</p>
 <td>reference: what may and may not live in Core</td>
 </tr>
 <tr>
+<td><code>github-api</code></td>
+<td>what may be read and written in GitHub, and what may not</td>
+</tr>
+<tr>
 <td><code>issue-blockers</code></td>
-<td>reading and editing native blocked-by relationships</td>
+<td>recording and reading native blocked-by relationships</td>
 </tr>
 <tr>
 <td><code>milestone-ops</code></td>
@@ -2434,13 +2438,18 @@ and fixed independently:</p>
 </tr>
 </tbody>
 </table>
+<p>The last four come from ai-sdlc and are installed by <code>skills-update.yml</code>. Since
+ai-sdlc v0.4.21 they carry no scripts: they are instructions, and the GitHub
+reads and writes they describe go through <code>github-api</code> rather than through
+Python that expected somebody to hand it a client.</p>
 <p>The pipeline skills — <code>pipeline-gatekeeper</code>, <code>pipeline-analysis</code>,
 <code>triage-issue</code>, <code>pipeline-dev</code>, <code>pipeline-reconcile</code>, <code>pipeline-dashboard</code> — are
 a separate family. They operate the queue rather than write game code. See
 <a href="../issue-pipeline/">Issue pipeline</a>.</p>
-<p>Skills in this repo are <strong>isolated copies</strong>: they are not synced from anywhere,
+<p>Skills written <strong>here</strong> are isolated copies: they are not synced from anywhere,
 so a fix made here stays here and a change made elsewhere does not silently
-arrive.</p>
+arrive. The ones named in <code>repo-config.yml</code> are the exception — <code>skills-update</code>
+keeps those at ai-sdlc's pin and opens a pull request when they move.</p>
 <h2 id="how-an-issue-gets-worked">How an issue gets worked<a class="headerlink" href="#how-an-issue-gets-worked" title="Link to this section">&para;</a></h2>
 <ol>
 <li><strong>Pick one issue.</strong> From the focus milestone, <code>ready-for-work</code>, not blocked.

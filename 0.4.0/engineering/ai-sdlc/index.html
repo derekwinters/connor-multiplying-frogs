@@ -2507,6 +2507,10 @@ that cannot be centralised.</p>
 <td>named in <code>repo-config.yml</code>, installed by <code>skills-update.yml</code> — see <a href="#how-the-skills-get-here">How the skills get here</a></td>
 </tr>
 <tr>
+<td>—</td>
+<td><code>github-api</code>, new with v0.4.21: how an agent reads and changes anything in GitHub</td>
+</tr>
+<tr>
 <td><code>pipeline-tests.yml</code></td>
 <td>gone with the code it tested</td>
 </tr>
@@ -2525,15 +2529,20 @@ function: it reads as covered, so nobody checks.</p>
 an installed skill is an instruction an agent reads and a timer that put unreviewed ones into its
 context would be a consent problem rather than an untidiness. A skill edited here is reported and
 left alone, never overwritten.</p>
-<p>It arrived with v0.4.17, and <code>repo-config.yml</code> now names six: <code>triage-issue</code>, <code>pipeline-dev</code>,
-<code>ci-watch</code>, <code>milestone-ops</code>, <code>issue-blockers</code> and <code>release-flow</code>. The list is not every skill —
-<code>pipeline-gatekeeper</code>, <code>pipeline-dashboard</code>, <code>label-sync</code>, <code>closing-keyword</code> and <code>docs-gate</code> only
-ever execute from ai-sdlc's own checkout inside a reusable workflow, so a copy here would be a
-second version to keep at the pin that nothing reads.</p>
-<p><code>adopt</code> is absent despite the upgrade command below naming it: the skill imports <code>lib.config</code>,
-which is not part of the skill, so an installed copy raises <code>ModuleNotFoundError</code>. Upgrades are run
-from an ai-sdlc checkout until that is fixed. <code>issue-blockers</code> has the same defect and is listed
-anyway, because it is genuinely one of ours and the fix belongs upstream — both are ai-sdlc#149.</p>
+<p>It arrived with v0.4.17, and <code>repo-config.yml</code> now names seven: <code>github-api</code>, <code>triage-issue</code>,
+<code>pipeline-dev</code>, <code>issue-blockers</code>, <code>ci-watch</code>, <code>milestone-ops</code> and <code>release-flow</code>. The list is not
+every skill — <code>pipeline-gatekeeper</code>, <code>pipeline-dashboard</code>, <code>label-sync</code>, <code>closing-keyword</code> and
+<code>docs-gate</code> are <strong>scripts</strong>, fetched into the runner by an ai-sdlc action and never installed here,
+so a copy would be a second version to keep at the pin that nothing reads.</p>
+<p><code>adopt</code> is absent despite the upgrade command below naming it: it is a script too, and imports
+<code>lib.config</code>, which is not part of the skill — so an installed copy raises <code>ModuleNotFoundError</code>.
+Upgrades are run from an ai-sdlc checkout, and that is the intended arrangement rather than a gap.</p>
+<p><strong><code>issue-blockers</code> used to be listed with a caveat</strong>, because it had the same import and the
+installed copy could not run. Four skills had that shape — they were Python expecting somebody to
+hand them a GitHub client, which happens in ai-sdlc's tests and never here. ai-sdlc#153 converted
+all four to instructions: <code>issue-blockers</code>, <code>milestone-ops</code>, <code>pipeline-dev</code> and <code>triage-issue</code>
+carry no Python at all now, and do their GitHub work through the new <code>github-api</code> skill, which is
+the single statement of what may be read and written and what may not.</p>
 <p>One repository setting is still needed before the job can finish: Actions must be allowed to open
 pull requests (#378).</p>
 <h3 id="the-sweep-is-back-for-a-different-reason">The sweep is back, for a different reason<a class="headerlink" href="#the-sweep-is-back-for-a-different-reason" title="Link to this section">&para;</a></h3>
