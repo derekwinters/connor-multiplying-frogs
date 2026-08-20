@@ -1,4 +1,4 @@
-# ai-sdlc: derekwinters/ai-sdlc@v0.4.20 hash=d138e7b5d566e71c
+# ai-sdlc: derekwinters/ai-sdlc@v0.4.21 hash=4c7041473be67df3
 # Managed by `adopt`. Local edits are preserved but stop this file
 # being updated — `adopt verify` will report it.
 name: skills-update
@@ -22,6 +22,6 @@ permissions:
 
 jobs:
   skills-update:
-    uses: derekwinters/ai-sdlc/.github/workflows/reusable-skills-update.yml@99b15339e95c2767f4a5007ed6bc3d0b4a1c9754 # v0.4.20
+    uses: derekwinters/ai-sdlc/.github/workflows/reusable-skills-update.yml@3705c94e75b3051ffe8b6087cac5eafbda4c1062 # v0.4.21
     with:
-      ref: 99b15339e95c2767f4a5007ed6bc3d0b4a1c9754
+      ref: 3705c94e75b3051ffe8b6087cac5eafbda4c1062
