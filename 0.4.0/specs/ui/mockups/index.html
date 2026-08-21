@@ -2087,18 +2087,8 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 <td><a href="../game-board/">Game board</a></td>
 </tr>
 <tr>
-<td>Game board, paler water</td>
-<td><a href="game-board-paler-water.html"><code>game-board-paler-water.html</code></a></td>
-<td><a href="../game-board/">Game board</a></td>
-</tr>
-<tr>
 <td>Game board, on a wider screen</td>
 <td><a href="game-board-wide.html"><code>game-board-wide.html</code></a></td>
-<td><a href="../game-board/">Game board</a></td>
-</tr>
-<tr>
-<td>Game board, turn banner with a swatch</td>
-<td><a href="game-board-banner-swatch.html"><code>game-board-banner-swatch.html</code></a></td>
 <td><a href="../game-board/">Game board</a></td>
 </tr>
 <tr>
@@ -2176,26 +2166,27 @@ landed on top of "Designed by Connor". Given a band of its own instead, it cost
 exactly the same panel height as its rival — so the question the pair was opened
 to ask, which placement is cheaper, turned out to have no answer, and the choice
 was decided on what the block should read as instead.</p>
-<p>The game board's water pair is the other live one, and it is the second kind: a
-real choice, drawn twice. <code>game-board.html</code> and <code>game-board-paler-water.html</code>
-are the same canvas differing in exactly one value — the water's blue. Connor
-picks one on the tablet, the spec page takes the answer, and the losing file is
-deleted. Until then, an edit to the board's layout has to be made in <strong>both</strong>
-files, which is the cost of the pair and the reason it does not stay open long.</p>
-<p>The board's <strong>fourth</strong> file, <code>game-board-banner-swatch.html</code>, is another of the
-second kind — a real choice drawn twice. Since
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a> the
-header no longer carries a player chip, and the open question is whether it
-should keep the frog's <em>colour</em> as a bare swatch or say whose turn it is in
-words alone. <code>game-board.html</code> draws words alone and is the proposal; this file
-draws the swatch. The loser is deleted.</p>
-<p><strong>Four files for one screen is two more than a screen should need</strong>, and it is
-worth saying plainly rather than letting it accumulate quietly. Two of the four
-exist because two questions are open at once — which blue the water is, and
-whether the banner keeps a swatch — and each is a <code>Connor looks at it on the
-tablet</code> call that costs minutes to answer and is costing an edit to four files
-until it is. The third is the wide drawing, which is permanent. If a fifth board
-file is ever proposed, that is the moment to close the open questions first.</p>
+<p>The game board's water pair is <strong>resolved</strong>. <code>game-board.html</code> and
+<code>game-board-paler-water.html</code> were the same canvas differing in exactly one
+value — the water's blue — and Derek picked <code>#9FD8F2</code> on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a>. The
+losing file is deleted, which is what the pair existed for and why it did not
+stay open long.</p>
+<p>Worth recording, because it is not what a colour question usually costs: settling
+the water moved the other two surfaces as well. The log and the lily pad are
+constrained by the frogs that have to sit on them, and the arithmetic left the
+pad only two usable regions with nothing in between — see
+<a href="../game-board/#how-the-ponds-colours-are-constrained">how the pond's colours are constrained</a>.
+The four frog colours moved too, which reverses a rule that page used to carry.</p>
+<p>The board's banner pair is <strong>resolved</strong> as well. <code>game-board-banner-swatch.html</code>
+asked whether the header should keep the frog's colour as a bare swatch once
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a> took
+the player chip out of it. Derek settled it: no swatch, words alone. That file
+is deleted.</p>
+<p>So the board is back to <strong>two</strong> files — the reference canvas and the wide
+drawing — from the four it briefly carried. Both of the extras were live
+questions, and both were answered by looking rather than arguing, which is what
+a comparison file is for and why it should not stay open long.</p>
 <p>The board's <strong>third</strong> file, <code>game-board-wide.html</code>, is a fifth kind that no
 other screen has: the same layout drawn at a second width. It is not a choice
 and there is nothing to pick between — it is the only way to see a rule that

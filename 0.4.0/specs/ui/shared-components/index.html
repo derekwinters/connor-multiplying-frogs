@@ -3451,37 +3451,86 @@ lightness alone, which is why the set is not four mid-tone colours.</p>
 <tr>
 <th>Frog</th>
 <th>Constant</th>
-<th>Wireframe placeholder</th>
+<th>Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Green</td>
 <td><code>FrogGreen</code></td>
-<td><code>#3F8E4F</code></td>
+<td><code>#3E933E</code></td>
 </tr>
 <tr>
 <td>Blue</td>
 <td><code>FrogBlue</code></td>
-<td><code>#2C6DAF</code></td>
+<td><code>#37609A</code></td>
 </tr>
 <tr>
 <td>Orange</td>
 <td><code>FrogOrange</code></td>
-<td><code>#D2762B</code></td>
+<td><code>#D38231</code></td>
 </tr>
 <tr>
 <td>Pink</td>
 <td><code>FrogPink</code></td>
-<td><code>#C24C86</code></td>
+<td><code>#D41C78</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>These four values are placeholders, not the palette.</strong> The mockups need
-<em>something</em> to draw, and four separable hues taken from the classroom pieces is
-the least-committing thing to draw. The real palette is an <code>area:art</code> decision
-and it lands with the frog sprites; when it does, these four constants take the
-real values and nothing else on any screen changes.</p>
+<p><strong>These four are still placeholders for the real palette</strong>, which is an
+<code>area:art</code> decision that lands with the frog sprites. What changed on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a> is
+that they are no longer <em>arbitrary</em> placeholders: they were <strong>derived</strong> to clear
+<a href="../game-board/#keeping-the-frogs-visible">the game board's separability bar</a>
+against the pond's three surfaces, rather than picked as four plausible hues and
+checked afterwards.</p>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#3F8E4F</code></td>
+<td><code>#3E933E</code></td>
+<td>the pond moved; see below</td>
+</tr>
+<tr>
+<td><code>#2C6DAF</code></td>
+<td><code>#37609A</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>#D2762B</code></td>
+<td><code>#D38231</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>#C24C86</code></td>
+<td><code>#D41C78</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Two things follow, and both matter more than the hex codes.</p>
+<p><strong>The frogs are now allowed to move when the pond does.</strong> <code>game-board.md</code> used
+to say <em>"the surface moves, not the frog"</em>; Derek reversed that on #301, because
+with the surfaces he had picked <strong>no set of four frog colours existed at all</strong>.
+The reversal is recorded on that page. When the real palette arrives it still
+has to clear the bar, and the arithmetic that constrains it is
+<a href="../game-board/#how-the-ponds-colours-are-constrained">written out there</a> — it is
+narrow, and a palette chosen without reading it will not fit.</p>
+<p><strong>The third invariant below is still not satisfied.</strong> These four step
+<strong>1.28 : 1</strong> apart in lightness at worst. That is better than the values they
+replace, which stepped <strong>1.11 : 1</strong> — four mid-tones, exactly what the invariant
+says the set is not — but it is not "distinguishable by lightness alone" in any
+strong sense, and it is the most the available band allows once four colours
+share it. The invariant and the separability bar are in genuine tension; neither
+is wrong, and no set satisfies both today. Said here rather than left for
+somebody to find by measuring.</p>
 <h4 id="4-states_4">4. States<a class="headerlink" href="#4-states_4" title="Link to this section">&para;</a></h4>
 <p>A frog colour has no states. It is used as a fill by the components that do.</p>
 <h4 id="5-behaviour_4">5. Behaviour<a class="headerlink" href="#5-behaviour_4" title="Link to this section">&para;</a></h4>
