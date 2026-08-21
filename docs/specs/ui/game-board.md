@@ -213,6 +213,13 @@ The lane:
 | --- | --- | --- |
 | Lane band height | `LaneHeight` | 184 px |
 | Lily pad diameter | `LilyPadDiameter` | 112 px |
+| Notch depth, as a fraction of the radius | `LilyPadNotchDepth` | 0.15 |
+| Notch widths in the variation table | `LilyPadNotchAngles` | 10°, 15°, 20°, 25° |
+| Veins per pad | `LilyPadVeinCount` | 5 |
+| Vein gap at the centre, fraction of the radius | `LilyPadVeinInset` | 0.20 |
+| Vein gap at the rim, fraction of the radius | `LilyPadVeinOutset` | 0.12 |
+| Vein stroke | `LilyPadVeinWidth` | 2.5 px |
+| Vein opacity, drawn in `LilyPadEdge` | `LilyPadVeinOpacity` | 0.5 |
 | Frog piece diameter | `FrogPieceDiameter` | 88 px |
 | Frog piece outline | `FrogPieceOutline` | 4 px |
 | Lily pad and log outline | `TrackOutline` | 3 px |
@@ -222,6 +229,68 @@ The lane:
 | Gaps the leftover width is divided between | `LanePositionGapCount` | 8 |
 | Chip gutter width | `LaneGutterWidth` | 256 px |
 | Gap between chip and track | `LaneGutterGap` | 48 px |
+
+### The lily pad is notched, veined, and varies per pad
+
+A pad is a circle with a wedge cut from it and five veins across it. Both the
+notch's **width** and the direction it **points** vary from pad to pad, so a
+four-frog board draws 28 pads that are not 28 identical discs.
+
+**The variation is a pure function of where the pad is.** A twelve-entry table,
+indexed by the pad's own coordinates:
+
+```text
+index = (lane × 5 + position) mod 12
+```
+
+| # | Notch | Points at | | # | Notch | Points at |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0 | 20° | 14° | | 6 | 10° | 260° |
+| 1 | 10° | 212° | | 7 | 15° | 131° |
+| 2 | 25° | 96° | | 8 | 25° | 341° |
+| 3 | 15° | 308° | | 9 | 15° | 78° |
+| 4 | 20° | 175° | | 10 | 20° | 238° |
+| 5 | 25° | 47° | | 11 | 10° | 158° |
+
+Angles are measured the way the mockup's SVG measures them: 0° points right
+along the lane, 90° points down. The `× 5` offset exists so the four lanes do
+not line up into visible columns; the rotations span the whole circle rather
+than clustering, because an earlier draft confined them to the bottom
+semicircle and read as "all the notches point down at slightly different
+angles", which is not variation.
+
+**Being derived rather than random is the whole design, and it buys four
+things:**
+
+- **Nothing is stored and nothing is saved.** A random-per-game variation would
+  have to persist, or a resumed game would come back with differently shaped
+  pads — and the save format is Core's under
+  [ADR-0004](../../adr/0004-core-owns-the-save-format.md), so that would be a
+  schema change and a migration for a cosmetic detail.
+- **A pad never changes shape** when the board redraws, when a frog hops, or
+  between devices and runs.
+- **Rotation is free at runtime** — you rotate the transform. So the
+  implementation needs **four sprites, one per entry in `LilyPadNotchAngles`**,
+  not twelve. The same holds when real art replaces these shapes.
+- It is **presentation, not game logic**, so it belongs in the Unity layer
+  rather than Core — but it is a static pure function and is testable as one.
+
+**The veins radiate from the circle's geometric centre**, not from the notch's
+apex. The notch stopping short of the diameter is the notch's business; the
+veins ignore it. Drawn from the apex the fan sits off-centre and leans
+differently on every pad, which is what made an earlier draft look uneven.
+
+The five are **symmetric about the notch's own axis**, so one vein runs straight
+out opposite the notch and two pairs sit either side of it. An even count
+straddles that line and reads less like a leaf. Each vein stops short at both
+ends — `LilyPadVeinInset` at the centre so the five do not converge into a dark
+hub, and `LilyPadVeinOutset` at the rim.
+
+**None of this changes `LilyPadDiameter`.** 112 px is the number that
+[decided lanes-across over lanes-up](#why-the-lanes-run-across); only the
+outline and the surface moved. And note that a frog covers all but a 12 px ring
+of the pad it sits on, so the veins and most of the notch are visible on
+**empty** pads — which is most of the board, but never the pad being looked at.
 
 The two shared logs. They belong to the pond, so they are their own table:
 
@@ -642,6 +711,11 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   Two to four frogs sit on the Start log at the beginning of every game and
   gather on the End log as they finish — that is a shared drawing, not a shared
   position, per the invariant above.
+    Each pad is a notched circle with five veins, and its notch's width and
+    direction come from
+    [the variation table](#the-lily-pad-is-notched-veined-and-varies-per-pad)
+    rather than being the same on every pad.
+
 - **Frog piece** — one per lane, on its current position, in the frog's colour.
   On a shared log it sits on its own lane's centre line, which is what keeps
   "frogs never interact" true in the picture as well as in the state.
