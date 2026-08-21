@@ -18,7 +18,6 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Game setup, before names | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
 | Game board, on a wider screen | [`game-board-wide.html`](game-board-wide.html) | [Game board](../game-board.md) |
-| Game board, turn banner with a swatch | [`game-board-banner-swatch.html`](game-board-banner-swatch.html) | [Game board](../game-board.md) |
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
@@ -75,21 +74,16 @@ pad only two usable regions with nothing in between — see
 [how the pond's colours are constrained](../game-board.md#how-the-ponds-colours-are-constrained).
 The four frog colours moved too, which reverses a rule that page used to carry.
 
-The board's **fourth** file, `game-board-banner-swatch.html`, is another of the
-second kind — a real choice drawn twice. Since
-[#326](https://github.com/derekwinters/connor-multiplying-frogs/issues/326) the
-header no longer carries a player chip, and the open question is whether it
-should keep the frog's *colour* as a bare swatch or say whose turn it is in
-words alone. `game-board.html` draws words alone and is the proposal; this file
-draws the swatch. The loser is deleted.
+The board's banner pair is **resolved** as well. `game-board-banner-swatch.html`
+asked whether the header should keep the frog's colour as a bare swatch once
+[#326](https://github.com/derekwinters/connor-multiplying-frogs/issues/326) took
+the player chip out of it. Derek settled it: no swatch, words alone. That file
+is deleted.
 
-**Four files for one screen is two more than a screen should need**, and it is
-worth saying plainly rather than letting it accumulate quietly. Two of the four
-exist because two questions are open at once — which blue the water is, and
-whether the banner keeps a swatch — and each is a `Connor looks at it on the
-tablet` call that costs minutes to answer and is costing an edit to four files
-until it is. The third is the wide drawing, which is permanent. If a fifth board
-file is ever proposed, that is the moment to close the open questions first.
+So the board is back to **two** files — the reference canvas and the wide
+drawing — from the four it briefly carried. Both of the extras were live
+questions, and both were answered by looking rather than arguing, which is what
+a comparison file is for and why it should not stay open long.
 
 The board's **third** file, `game-board-wide.html`, is a fifth kind that no
 other screen has: the same layout drawn at a second width. It is not a choice

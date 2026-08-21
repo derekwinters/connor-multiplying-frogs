@@ -677,17 +677,18 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 [`mockups/game-board.html`](mockups/game-board.html) — the reference canvas, and
 the one to build from. Beside it,
 [`mockups/game-board-wide.html`](mockups/game-board-wide.html) draws the same
-board at 2560 × 1200, and
-[`mockups/game-board-banner-swatch.html`](mockups/game-board-banner-swatch.html)
-draws the reference canvas again with a colour swatch in the turn banner — the
-one live comparison left on this screen.
+board at 2560 × 1200.
 
-`game-board-paler-water.html` is **deleted**. Its question is answered: Derek
-picked `#9FD8F2` over the paler `#B5E3F7` on
-[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301), so
-the losing drawing goes, the way
-`title-screen-resume-primary.html` did. That takes this screen from four files
-to three, and answering the banner-swatch question takes it to two.
+**Two files, and no live comparisons.** Both questions this screen was carrying
+are answered, and both losing drawings are deleted.
+
+`game-board-paler-water.html` is deleted: Derek picked `#9FD8F2` over the paler
+`#B5E3F7` on
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301).
+`game-board-banner-swatch.html` is deleted too: he settled the banner question
+in the same session — no swatch. Both go the way
+`title-screen-resume-primary.html` did, because a mockup nobody can build to is
+one that confuses the next reader.
 
 **The wide file is deliberately not at the reference canvas**, which every other
 mockup in this project is. It has to be: the whole of
@@ -731,23 +732,18 @@ decided against; keeping a mockup of a layout nobody is building is how a
   `LilyPadGreen` were settled in the same session and are no longer proposals
   either — but note that neither was a free choice: see
   [how the pond's colours are constrained](#how-the-ponds-colours-are-constrained).
-- **Should the turn banner show the frog's colour at all?** Derek asked for the
-  chip to go, and it has. What is open is whether a small swatch should stay in
-  front of the words. Two files differ in exactly that:
-  `game-board.html` (words alone, the proposal) and
-  [`game-board-banner-swatch.html`](mockups/game-board-banner-swatch.html).
+- **Should the turn banner show the frog's colour at all? Settled: no.** Derek's
+  call — the banner is words alone, and `game-board-banner-swatch.html` is
+  deleted. The reasoning that was proposed for it holds: the lane chip below
+  already carries that colour in the same Active state on the same screen; a
+  bare swatch outside a chip would have been a new element needing a constant of
+  its own for a lone circle belonging to nothing; and the player chip's
+  accessibility invariant — *"a word, always, never colour alone"* — forbids
+  colour without a word and permits the inverse.
 
-    Words alone is proposed, for three reasons. The lane chip below already
-    carries that colour in the same Active state on the same screen. A bare
-    swatch outside a chip would be a **new element** — the 64 px circle inside a
-    player chip is that component's `PlayerSwatchDiameter`, and lifting it out
-    means naming a constant for a lone circle that belongs to nothing. And the
-    chip's accessibility invariant is *"a word, always, never colour alone"*,
-    which forbids colour without a word and permits the inverse.
-
-    The case against, worth stating because it is real: the header becomes the
-    only place on the board that names the active player without showing their
-    colour.
+    The cost accepted with it, stated when it was proposed and still true: the
+  header is the only place on the board that names the active player without
+  showing their colour.
 - **Does the gap look right when it is wider than the lily pad?** At the
   reference canvas `LanePositionGap` is 48 px against a 112 px
   `LilyPadDiameter`, and the pads plainly read as a track. On the wide drawing
