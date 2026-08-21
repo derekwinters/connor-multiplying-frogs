@@ -375,6 +375,27 @@ row: the chip has always drawn the frog's name, and until
 [#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310) a
 frog's name was always its colour's.
 
+**Active still has callers, checked rather than assumed.**
+[#326](https://github.com/derekwinters/connor-multiplying-frogs/issues/326)
+removed the one Active chip in the game board's *header* and asked whether the
+state still earns its place on this component. It does, in four places, and
+three of them are not the board:
+
+| Screen | Where the Active chip is |
+| --- | --- |
+| [Game board](game-board.md) | the active frog's **lane** chip, in the pond |
+| [Roll and card](roll-and-card.md) | the `whose` region, beside `rolled` |
+| [Working-out grid](working-out-grid.md) | the `header`, beside `Work it out` |
+| [Answer result](answer-result.md) | **none** — it draws a `pad 7 → 8` chip, not an Active one |
+
+So the board's header was never the state's only caller, and dropping it there
+changes nothing here. What is worth noticing is the last row: the four screens
+of a single turn were already not uniform about this, which is part of why
+removing the header chip from the board does not make the turn sequence
+inconsistent — it was never consistent, and the chip's job differs by screen. On
+the board the lane chip makes a header chip redundant; in the two dialogs there
+are no lanes, so nothing else there carries the colour.
+
 The Active row dropped "filled background": the mockups' `.chip.act` rule
 gives the ring and the bold weight but leaves the base chip background
 unchanged, and the chip invariant only requires the active chip be visibly
