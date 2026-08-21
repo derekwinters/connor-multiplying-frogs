@@ -3031,14 +3031,21 @@ method body.</strong></p>
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
 <a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">// Yes.</span>
 <a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LaneWinningPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_lanePositionGap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">48f</span><span class="p">;</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_lanePositionGapMin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">48f</span><span class="p">;</span>
 <a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_frogHopDuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4f</span><span class="p">;</span>
 </code></pre></div>
 <p>None of those three names is invented here. <code>LaneWinningPosition</code>,
-<code>LanePositionGap</code> and <code>FrogHopDuration</code> are what
+<code>LanePositionGapMin</code> and <code>FrogHopDuration</code> are what
 <a href="../../specs/ui/game-board/">the game board spec</a> already calls those numbers,
 and a constant in the code keeps the name the spec page gave it so the two can
 be checked against each other.</p>
+<p>The example says <code>LanePositionGapMin</code> rather than <code>LanePositionGap</code> for a
+reason worth noticing: since
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/325">#325</a> the
+gap itself is <strong>derived from the screen's width</strong> and is not a number anybody
+types. Its floor still is. A derived value does not escape this rule — it gets
+a named function of named constants, not an expression inlined at the one call
+site that needed it.</p>
 <h3 id="why-this-is-a-rule-and-not-a-preference">Why this is a rule and not a preference<a class="headerlink" href="#why-this-is-a-rule-and-not-a-preference" title="Link to this section">&para;</a></h3>
 <ul>
 <li><strong>Tuning is the game.</strong> Whether a wrong answer costs a lily pad or costs

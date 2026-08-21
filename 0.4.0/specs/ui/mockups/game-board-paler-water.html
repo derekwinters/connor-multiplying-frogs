@@ -61,12 +61,31 @@
     --pad:#CCEAAF; --pad-edge:#7FAE5E;
     --log:#E2C79C; --log-edge:#A97F4F;
     --band:#E2E8E5;
+
+    /* THE TWO NUMBERS THAT MAKE THE POND ELASTIC.
+
+       --canvas is the width of the screen this file is a picture of.
+       --lane-gap is LanePositionGap, and it is DERIVED from that width:
+
+           LanePositionGap = (canvas - 1536) / 8,  floored at 48
+
+       1536 px is everything on the row that does not stretch — two safe
+       margins, the chip gutter, its gap, and the two logs and seven lily pads
+       at their own fixed sizes. 8 is the number of gaps between them. At
+       canvas 1920 the formula gives exactly 48, which is why this drawing is
+       pixel-identical to the one before the pond became elastic.
+
+       The floor is what stops a narrower-than-16:10 screen from squeezing the
+       pads together: below 1920 the board stops spreading and is centred,
+       which is what it has always done. */
+    --canvas:1920px;
+    --lane-gap:48px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
   /* PondWater is the whole screen, not a band inside it — the header and the
      controls are drawn on top of the water. */
-  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+  .frame{width:var(--canvas);height:1200px;position:relative;overflow:hidden;
          background:var(--water);color:var(--ink);
          font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .abs{position:absolute}
@@ -131,7 +150,7 @@
     <!-- THE SHARED END LOG — one for the whole pond, position 8 of all four
          lanes and the winning space. Blue is home on it, on lane 2's centre
          line (y=484, i.e. 356 down the log). -->
-    <div class="log" style="left:1696px;top:128px;height:896px">End<span class="frog"
+    <div class="log" style="right:48px;top:128px;height:896px">End<span class="frog"
          style="background:var(--blue);top:356px"></span></div>
 
     <!-- The lanes. A lane is now its chip and its own seven lily pads; both
@@ -140,7 +159,7 @@
       <!-- lane 1 green, on its third lily pad -->
       <div class="row" style="height:184px;gap:0">
         <div style="width:48px"></div><div class="chip act"><span class="sw" style="background:var(--green)"></span><span><b>Green</b><s>3 of 8</s></span></div>
-        <div class="row" style="margin-left:272px;gap:48px">
+        <div class="row" style="margin-left:calc(224px + var(--lane-gap));gap:var(--lane-gap)">
           <div class="pad"></div><div class="pad"></div>
           <div class="pad"><span class="frog" style="background:var(--green)"></span></div>
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
@@ -149,21 +168,21 @@
       <!-- lane 2 blue, home on the shared End log -->
       <div class="row" style="height:184px;gap:0">
         <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--blue)"></span><span><b>Blue</b><s>Home!</s></span></div>
-        <div class="row" style="margin-left:272px;gap:48px">
+        <div class="row" style="margin-left:calc(224px + var(--lane-gap));gap:var(--lane-gap)">
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
         </div>
       </div>
       <!-- lane 3 orange, still on the shared Start log -->
       <div class="row" style="height:184px;gap:0">
         <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--orange)"></span><span><b>Orange</b><s>0 of 8</s></span></div>
-        <div class="row" style="margin-left:272px;gap:48px">
+        <div class="row" style="margin-left:calc(224px + var(--lane-gap));gap:var(--lane-gap)">
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
         </div>
       </div>
       <!-- lane 4 pink, on its sixth lily pad -->
       <div class="row" style="height:184px;gap:0">
         <div style="width:48px"></div><div class="chip"><span class="sw" style="background:var(--pink)"></span><span><b>Pink</b><s>6 of 8</s></span></div>
-        <div class="row" style="margin-left:272px;gap:48px">
+        <div class="row" style="margin-left:calc(224px + var(--lane-gap));gap:var(--lane-gap)">
           <div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div><div class="pad"></div>
           <div class="pad"><span class="frog" style="background:var(--pink)"></span></div>
           <div class="pad"></div>

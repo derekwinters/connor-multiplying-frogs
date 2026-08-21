@@ -2092,6 +2092,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 <td><a href="../game-board/">Game board</a></td>
 </tr>
 <tr>
+<td>Game board, on a wider screen</td>
+<td><a href="game-board-wide.html"><code>game-board-wide.html</code></a></td>
+<td><a href="../game-board/">Game board</a></td>
+</tr>
+<tr>
 <td>Roll and card</td>
 <td><a href="roll-and-card.html"><code>roll-and-card.html</code></a></td>
 <td><a href="../roll-and-card/">Roll and card</a></td>
@@ -2166,12 +2171,22 @@ landed on top of "Designed by Connor". Given a band of its own instead, it cost
 exactly the same panel height as its rival — so the question the pair was opened
 to ask, which placement is cheaper, turned out to have no answer, and the choice
 was decided on what the block should read as instead.</p>
-<p>The game board's pair is the other live one, and it is the second kind: a real
-choice, drawn twice. <code>game-board.html</code> and <code>game-board-paler-water.html</code> are
-the same canvas differing in exactly one value — the water's blue. Connor picks
-one on the tablet, the spec page takes the answer, and the losing file is
+<p>The game board's water pair is the other live one, and it is the second kind: a
+real choice, drawn twice. <code>game-board.html</code> and <code>game-board-paler-water.html</code>
+are the same canvas differing in exactly one value — the water's blue. Connor
+picks one on the tablet, the spec page takes the answer, and the losing file is
 deleted. Until then, an edit to the board's layout has to be made in <strong>both</strong>
 files, which is the cost of the pair and the reason it does not stay open long.</p>
+<p>The board's <strong>third</strong> file, <code>game-board-wide.html</code>, is a fifth kind that no
+other screen has: the same layout drawn at a second width. It is not a choice
+and there is nothing to pick between — it is the only way to see a rule that
+only exists between two widths. Since
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/325">#325</a> the
+pond spreads to fill whatever screen it is on, so at 1920 the board is what it
+always was and at 2560 the lily pads sit 128 px apart instead of 48. Both
+drawings are generated from the same two CSS variables — the canvas width and
+the derived gap — which is why keeping them in step costs almost nothing
+despite there now being three board files.</p>
 <p>Game setup has <strong>four</strong> files, which is three more than a screen should need,
 and each has a different job. <code>game-setup-names-set.html</code> is the screen at
 rest and the one to build from. The two <code>name-edit-</code> files are the third kind
@@ -2220,6 +2235,12 @@ entire point.</p>
 <li><strong>Sized to the target viewport</strong> with a fixed-size container, so it renders at
   1:1 rather than filling whatever window it opens in. State the device and
   dimensions in a comment at the top of the file.</li>
+<li><strong>One canvas: 1920 × 1200.</strong> There is exactly one exception in this folder and
+  it is <a href="game-board-wide.html"><code>game-board-wide.html</code></a>, at 2560 × 1200. It earns
+  it: the pond's layout is elastic, so its whole subject is what happens at a
+  width that is not the reference canvas, and no drawing at 1920 can show that.
+  A file that wants this exception has to be about a rule that only exists
+  between two widths — not merely inconvenient to draw at 1920.</li>
 <li><strong>Real proportions, real units.</strong> The numbers in the mockup are the numbers in
   the spec page's constants table. If they disagree, one of them is a bug.</li>
 <li><strong>Placeholder content is honest</strong> — the longest plausible score, not <code>0</code>; a
