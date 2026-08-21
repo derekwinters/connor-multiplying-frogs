@@ -326,14 +326,25 @@ decision, in his words, on
 | Element | Constant | Value |
 | --- | --- | --- |
 | The water — the pond, and the whole screen behind it | `PondWater` | `#9FD8F2` |
-| Lily pad | `LilyPadGreen` | `#CCEAAF` |
-| Lily pad rim | `LilyPadEdge` | `#7FAE5E` |
-| Log | `LogBrown` | `#E2C79C` |
-| Log rim | `LogEdge` | `#A97F4F` |
+| Lily pad | `LilyPadGreen` | `#B2E67F` |
+| Lily pad rim | `LilyPadEdge` | `#6E9E4A` |
+| Log | `LogBrown` | `#4A2E1A` |
+| `Start` / `End` on a log | `LogLabelInk` | `#C6B49C` |
 | Header and controls bands | `BandFill` | `#E2E8E5` |
 | Band hairline | `BandEdge` | `#B9C0BD` |
 | The board's words | `BoardInk` | `#1E2422` |
 | Frog piece outline | `PieceEdge` | black at 35% |
+
+**`LogEdge` is gone.** The log has no rim. On the old tan log the rim did real
+work — it was 2.33 : 1 against the water and it was what made a log read as
+floating *on* the pond rather than as a hole in it. Against dark chocolate the
+log clears the water by 8 : 1 unaided, and a rim darker than the fill measured
+1.4 : 1 against it: invisible, and doing nothing that needed doing.
+
+**`LogLabelInk` is new**, and it exists because the log moved. `Start` and `End`
+used to be drawn in a mid-brown chosen against a pale tan; on the new log that
+is unreadable. They now sit at the **top** of each log rather than its middle,
+in a light ink measuring 6.1 : 1 against the fill.
 
 The four frog colours are not here. They are one table for the whole game, on
 [shared components](shared-components.md#frog-colours), because a frog is the
@@ -493,16 +504,80 @@ What the table's values measure, as *contrast : 1 / ΔE*:
 
 | | The water | A lily pad | A log |
 | --- | --- | --- | --- |
-| `FrogGreen` | 2.61 / 60.4 | 3.07 / **40.8** | 2.48 / 50.7 |
-| `FrogBlue` | 3.47 / 46.8 | 4.08 / 83.0 | 3.29 / 75.5 |
-| `FrogOrange` | 2.13 / 87.9 | 2.51 / 65.8 | **2.02** / 46.0 |
-| `FrogPink` | 2.91 / 73.8 | 3.42 / 89.5 | 2.76 / 67.6 |
+| `FrogGreen` `#3E933E` | 2.49 / 70.1 | 2.66 / 33.9 | 3.21 / 65.6 |
+| `FrogBlue` `#37609A` | 4.11 / 49.3 | 4.40 / 100.3 | 1.95 / 57.3 |
+| `FrogOrange` `#D38231` | 1.94 / 84.7 | 2.07 / 64.3 | 4.13 / 55.8 |
+| `FrogPink` `#D41C78` | 3.20 / 92.3 | 3.43 / 122.1 | 2.50 / 69.5 |
 
-Every pair clears the bar. The two tightest are the two the change was always
-going to squeeze: the green frog on a green lily pad (ΔE 40.8, on a bar of 30)
-and the orange frog on a brown log (contrast 2.02 : 1, on a bar of 1.9). If a
-future repaint cannot clear the bar, **the surface moves, not the frog** — the
-frog colours are an `area:art` decision that this page does not own.
+Every pair clears the bar, and this set was **derived against the bar rather
+than picked and then checked** — see [how the pond's colours are
+constrained](#how-the-ponds-colours-are-constrained) below, which is the part
+worth reading before changing any of these six values.
+
+### The rule this page used to carry
+
+Until [#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301)
+this section ended:
+
+> If a future repaint cannot clear the bar, **the surface moves, not the frog**
+> — the frog colours are an `area:art` decision that this page does not own.
+
+**Derek reversed that**, in his words: *"we can change frog colors too."* It was
+the right call and it was necessary — with the surfaces he picked, no set of
+four frog colours existed, so a rule that only ever moved the surface had no
+move left to make. The frog colours are still an `area:art` decision and this
+page still does not own them; what has changed is that they are now *in scope*
+when the pond is repainted, instead of being fixed points the surfaces have to
+work around.
+
+### How the pond's colours are constrained
+
+This is the working, kept because the six values above look arbitrary without it
+and because the next person to repaint the pond will otherwise rediscover it the
+slow way.
+
+Every frog must clear 1.9 : 1 against all three surfaces. That pins them into a
+band, and the band is narrow:
+
+- **The water sets a ceiling.** A frog lighter than the water would need a
+  relative luminance of 1.24, and pure white is 1.0. So every frog must be
+  *darker* than the water, at **L ≤ 0.307**.
+- **The log sets a floor.** At `LogBrown`'s L = 0.035, a frog must be
+  **L ≥ 0.111**.
+- So every frog lives in a band spanning **2.22 : 1**, total, whatever its hue.
+
+The pad then has to sit 1.9 : 1 clear of that *whole* band, which leaves it two
+regions and no middle:
+
+| Pad must be | Meaning |
+| --- | --- |
+| **L ≥ 0.629** | about as light as the water |
+| **L ≤ 0.035** | about as dark as the log |
+
+`LilyPadGreen` is L = 0.676, in the light region. A mid-green at L = 0.379 was
+drawn and is in neither: three of the four frogs failed against it, `FrogGreen`
+on both measures at ΔE 21. A near-black pad at L = 0.033 was also drawn and does
+comply, but it puts the pad at the log's exact luminance — the two surfaces then
+differ by hue alone, which is the failure mode the two-measure bar exists to
+catch, and it renders the pad's veins invisible.
+
+**The threshold is a cliff, not a slope.** `#9CE45C` at L = 0.633 passes;
+`#93E04F` at L = 0.601 fails. `LilyPadGreen` is the darkest natural leaf green
+available, not a preference.
+
+### The invariant the frog colours still do not satisfy
+
+[Shared components](shared-components.md#frog-colours) requires that *"the four
+are distinguishable to a colour-blind player by lightness alone."* Measured, the
+four above step **1.28 : 1** between neighbours at worst.
+
+That is better than the placeholders they replace, which stepped **1.11 : 1**
+and were four mid-tones — the exact thing that invariant says the set is not.
+But 1.28 : 1 is not a comfortable margin, and it is the most the 2.22 : 1 band
+allows once four colours have to share it. **The invariant is not currently
+satisfied by any set that also clears the separability bar**, and that is worth
+knowing rather than discovering later: it is a genuine tension between two rules
+this project holds, not an oversight in the values.
 
 One number in that palette is deliberately low and is not about frogs: the log
 and the water are almost the same brightness (1.05 : 1) and a long way apart in
@@ -600,19 +675,20 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 ## Mockup
 
 [`mockups/game-board.html`](mockups/game-board.html) — the reference canvas, and
-the one to build against. Beside it,
+the one to build from. Beside it,
 [`mockups/game-board-wide.html`](mockups/game-board-wide.html) draws the same
-board at 2560 × 1200, and — until Connor has picked the water —
-[`mockups/game-board-paler-water.html`](mockups/game-board-paler-water.html)
-draws the reference canvas again in the other blue.
+board at 2560 × 1200.
 
-A fourth file,
-[`mockups/game-board-banner-swatch.html`](mockups/game-board-banner-swatch.html),
-draws the header with a colour swatch in front of the words. It is a comparison
-and nothing else — see [the open question](#open-questions) — and it is deleted
-when that is settled. Four files for one screen is two more than a screen should
-need; the water pair and this pair are both live questions, and both should be
-closed rather than left open.
+**Two files, and no live comparisons.** Both questions this screen was carrying
+are answered, and both losing drawings are deleted.
+
+`game-board-paler-water.html` is deleted: Derek picked `#9FD8F2` over the paler
+`#B5E3F7` on
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301).
+`game-board-banner-swatch.html` is deleted too: he settled the banner question
+in the same session — no swatch. Both go the way
+`title-screen-resume-primary.html` did, because a mockup nobody can build to is
+one that confuses the next reader.
 
 **The wide file is deliberately not at the reference canvas**, which every other
 mockup in this project is. It has to be: the whole of
@@ -627,15 +703,6 @@ byte-for-byte the same rendering, not merely "looks the same". That is the
 check that the reference canvas is still a picture of the game, and it is the
 reason `game-board.html`'s diff in this change is a comment and two CSS
 variables rather than a redraw.
-
-The reference file and the paler-water file differ in **one value**:
-`PondWater`. `game-board.html` draws the
-proposal in the table above, `#9FD8F2`; the second draws `#B5E3F7`, the same
-blue with more light in it. Everything else on the two canvases is identical to
-the pixel. Open both on the tablet, one after the other, and say which is the
-pond — comparing two pictures is a much easier conversation than critiquing
-one, and the losing file is deleted when the answer arrives, the way
-`title-screen-resume-primary.html` was.
 
 Drawn in the state that exercises every case at once: four frogs, one home on
 the End log, one still on its Start log, two mid-lane, Green to roll — and
@@ -659,31 +726,24 @@ decided against; keeping a mockup of a layout nobody is building is how a
 
 ## Open questions
 
-- **Which blue is the water?** Blue is settled; this blue is not. Two are drawn
-  — `#9FD8F2` in `game-board.html` and the paler `#B5E3F7` beside it — and
-  Connor picks, on the tablet, at 1:1. Both clear
-  [the separability bar](#keeping-the-frogs-visible), so either can be taken as
-  it stands; a third blue of his own choosing has to be measured against that
-  bar before it lands. The same is true of `LogBrown` and `LilyPadGreen`, which
-  are drawn once each rather than twice — say if either is wrong and it gets
-  the same treatment.
-- **Should the turn banner show the frog's colour at all?** Derek asked for the
-  chip to go, and it has. What is open is whether a small swatch should stay in
-  front of the words. Two files differ in exactly that:
-  `game-board.html` (words alone, the proposal) and
-  [`game-board-banner-swatch.html`](mockups/game-board-banner-swatch.html).
+- **Which blue is the water? Settled: `#9FD8F2`.** Derek's call on
+  [#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301),
+  over the paler `#B5E3F7`. The losing mockup is deleted. `LogBrown` and
+  `LilyPadGreen` were settled in the same session and are no longer proposals
+  either — but note that neither was a free choice: see
+  [how the pond's colours are constrained](#how-the-ponds-colours-are-constrained).
+- **Should the turn banner show the frog's colour at all? Settled: no.** Derek's
+  call — the banner is words alone, and `game-board-banner-swatch.html` is
+  deleted. The reasoning that was proposed for it holds: the lane chip below
+  already carries that colour in the same Active state on the same screen; a
+  bare swatch outside a chip would have been a new element needing a constant of
+  its own for a lone circle belonging to nothing; and the player chip's
+  accessibility invariant — *"a word, always, never colour alone"* — forbids
+  colour without a word and permits the inverse.
 
-    Words alone is proposed, for three reasons. The lane chip below already
-    carries that colour in the same Active state on the same screen. A bare
-    swatch outside a chip would be a **new element** — the 64 px circle inside a
-    player chip is that component's `PlayerSwatchDiameter`, and lifting it out
-    means naming a constant for a lone circle that belongs to nothing. And the
-    chip's accessibility invariant is *"a word, always, never colour alone"*,
-    which forbids colour without a word and permits the inverse.
-
-    The case against, worth stating because it is real: the header becomes the
-    only place on the board that names the active player without showing their
-    colour.
+    The cost accepted with it, stated when it was proposed and still true: the
+  header is the only place on the board that names the active player without
+  showing their colour.
 - **Does the gap look right when it is wider than the lily pad?** At the
   reference canvas `LanePositionGap` is 48 px against a 112 px
   `LilyPadDiameter`, and the pads plainly read as a track. On the wide drawing
