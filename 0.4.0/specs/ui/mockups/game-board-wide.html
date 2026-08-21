@@ -138,10 +138,16 @@
 <body>
 <div class="frame">
     <div class="band" style="top:0;height:128px;background:var(--band);border-bottom:3px solid var(--faint)"></div>
-    <div class="abs row" style="left:48px;top:16px;gap:24px">
-      <div class="chip act"><span class="sw" style="background:var(--green)"></span><span>Green</span></div>
-      <div style="font-size:52px;font-weight:700">Green frog's turn</div>
-    </div>
+    <!-- TURN BANNER — words alone. The player chip that used to sit in front of
+         these words is gone (#326): the active frog's own lane chip, directly
+         below in the pond, already says the same thing in the same Active state.
+         So the banner starts at SafeMargin and `TurnBannerGap` no longer exists.
+
+         The wording is `Green's turn`, not `Green frog's turn`. These mockups
+         were stale — game-board.md has said name-and-nothing-else since #310,
+         because `Connor frog's turn` is not a sentence anybody would write. -->
+    <div class="abs" style="left:48px;top:16px;height:96px;display:flex;align-items:center;
+                            font-size:52px;font-weight:700">Green's turn</div>
     <div class="abs gear" style="right:48px;top:16px">⚙</div>
 
     <!-- THE SHARED START LOG — one for the whole pond, position 0 of all four

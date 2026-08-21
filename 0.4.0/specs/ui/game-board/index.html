@@ -1161,6 +1161,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-constant-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The constant this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-invariant-this-page-used-to-carry" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2254,6 +2265,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-constant-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The constant this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-invariant-this-page-used-to-carry" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2381,7 +2403,11 @@ mistake for frogs sharing something, which is why it is written down here.
 <strong>Invariant:</strong> the board never moves on its own. A frog moves only as the direct
 result of the answer the player just gave.
 <strong>Invariant:</strong> whose turn it is is stated in words in the header, not only shown
-by a highlight.
+by a highlight. Since
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a> the
+words are the <em>only</em> thing in the header that says it, so this invariant is no
+longer a floor the layout comfortably clears — it is the layout. Nothing may
+remove those words in favour of a colour, a ring, or an arrow.
 <strong>Invariant:</strong> <code>Roll</code> is the only way to start a turn, and it is disabled the
 moment it is pressed until the turn resolves. A double-tap cannot roll twice.
 <strong>Invariant:</strong> nothing on this screen is destructive. Ending the game lives
@@ -2619,11 +2645,6 @@ lanes-across</strong> after seeing both drawn.</p>
 <td>Turn banner text size</td>
 <td><code>TurnBannerSize</code></td>
 <td>52 px</td>
-</tr>
-<tr>
-<td>Gap between the banner's chip and its words</td>
-<td><code>TurnBannerGap</code></td>
-<td>24 px</td>
 </tr>
 <tr>
 <td>Settings button, square</td>
@@ -2986,10 +3007,13 @@ not a track, and there is nothing about them that a wider screen should stretch.
 The two are not in tension: a band's <em>contents</em> stretch when they are a track
 whose whole job is to show distance travelled, and do not when they are a
 button.</p>
-<p><strong>A control anchored to a band's edge follows the screen's edge.</strong> The turn chip
-and the settings gear sit <code>SafeMargin</code> in from the real left and right edges of
-the screen, because <code>SafeMargin</code> is a margin from the screen and not from a
-rectangle nobody can see. <code>Roll</code> is centred and does not care either way.</p>
+<p><strong>A control anchored to a band's edge follows the screen's edge.</strong> The turn
+banner and the settings gear sit <code>SafeMargin</code> in from the real left and right
+edges of the screen, because <code>SafeMargin</code> is a margin from the screen and not
+from a rectangle nobody can see. This used to say "the turn chip", and the chip
+is gone — see
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a>;
+what is anchored there now is the words themselves. <code>Roll</code> is centred and does not care either way.</p>
 <p><strong>Extra height goes to <code>pond</code> and nowhere else</strong> — the same answer
 <a href="#anchors">Anchors</a> already gives for a <em>shorter</em> screen, in the other
 direction. The two bands keep their heights, because a smaller <code>Roll</code> is the
@@ -3000,6 +3024,34 @@ verified, not assumed: <code>game-board.html</code> renders byte-for-byte the sa
 and after the pond became elastic. What is <em>not</em> pixel-identical at any other
 width is now the point, which is why this change comes with
 <a href="#mockup">a second drawing</a> rather than a rule alone.</p>
+<h3 id="the-constant-this-page-used-to-carry">The constant this page used to carry<a class="headerlink" href="#the-constant-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Value</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TurnBannerGap</code></td>
+<td><em>(gone)</em></td>
+<td>was 24 px</td>
+<td>It measured the gap between the banner's chip and its words. There is no chip</td>
+</tr>
+</tbody>
+</table>
+<p><code>TurnBannerGap</code> is <strong>removed, not redefined.</strong> Under the option this page did
+not take — a small colour swatch in front of the words — it would have survived
+with the same 24 px value and a new meaning, which is the kind of survival that
+leaves a constant meaning two things a year apart. Words alone need no gap,
+because there is nothing to gap.</p>
+<p><code>PlayerChipWidth</code> is untouched: the lane chips still use it, and so do
+<a href="../roll-and-card/">roll and card</a> and the
+<a href="../working-out-grid/">working-out grid</a>. Only this screen's header stopped
+drawing one.</p>
 <h3 id="the-invariant-this-page-used-to-carry">The invariant this page used to carry<a class="headerlink" href="#the-invariant-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/325">#325</a>
 this section carried one invariant covering all three bands, and it ended with a
@@ -3099,11 +3151,19 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li>
-<p><strong>Turn banner</strong> — <code>Green's turn</code>, left of the header, with that frog's
-  <a href="../shared-components/#player-chip">player chip</a> in its active state. The
+<p><strong>Turn banner</strong> — <code>Green's turn</code> at <code>TurnBannerSize</code>, starting at
+  <code>SafeMargin</code> from the real left edge of the header band and vertically centred
+  in it. <strong>Words alone: no chip, no swatch, no colour</strong> — settled,
+  <a href="#open-questions">open question</a>. The
   wording is the frog's <strong>name and nothing else</strong> — <code>Green's turn</code> for a frog
   still on its default, <code>Connor's turn</code> for one that has been renamed on
   <a href="../game-setup/">game setup</a>.</p>
+<p>The <a href="../shared-components/#player-chip">player chip</a> that used to sit in
+front of these words is gone. Derek's reason is the whole argument: <em>"it's
+already selected in the lanes section too"</em> — the active frog's own lane
+chip, directly below in the pond, carries the same name, the same colour and
+the same Active ring. The header chip was the third statement of a thing the
+screen said twice already.</p>
 <p>It used to read <code>Green frog's turn</code>, and the reason given was that frogs
 have no other name. They do now, so the justification went with the word:
 <code>Connor frog's turn</code> is not a sentence anybody would write. Rather than
@@ -3171,6 +3231,13 @@ the one to build against. Beside it,
 board at 2560 × 1200, and — until Connor has picked the water —
 <a href="../mockups/game-board-paler-water.html"><code>mockups/game-board-paler-water.html</code></a>
 draws the reference canvas again in the other blue.</p>
+<p>A fourth file,
+<a href="../mockups/game-board-banner-swatch.html"><code>mockups/game-board-banner-swatch.html</code></a>,
+draws the header with a colour swatch in front of the words. It is a comparison
+and nothing else — see <a href="#open-questions">the open question</a> — and it is deleted
+when that is settled. Four files for one screen is two more than a screen should
+need; the water pair and this pair are both live questions, and both should be
+closed rather than left open.</p>
 <p><strong>The wide file is deliberately not at the reference canvas</strong>, which every other
 mockup in this project is. It has to be: the whole of
 <a href="#anchors">the elastic pond</a> is what happens at a width that is not 1920, and a
@@ -3218,7 +3285,22 @@ decided against; keeping a mockup of a layout nobody is building is how a
   are drawn once each rather than twice — say if either is wrong and it gets
   the same treatment.</li>
 <li>
-<p><strong>Does the gap look right when it is wider than the lily pad?</strong> At the
+<p><strong>Should the turn banner show the frog's colour at all?</strong> Derek asked for the
+  chip to go, and it has. What is open is whether a small swatch should stay in
+  front of the words. Two files differ in exactly that:
+  <code>game-board.html</code> (words alone, the proposal) and
+  <a href="../mockups/game-board-banner-swatch.html"><code>game-board-banner-swatch.html</code></a>.</p>
+<p>Words alone is proposed, for three reasons. The lane chip below already
+carries that colour in the same Active state on the same screen. A bare
+swatch outside a chip would be a <strong>new element</strong> — the 64 px circle inside a
+player chip is that component's <code>PlayerSwatchDiameter</code>, and lifting it out
+means naming a constant for a lone circle that belongs to nothing. And the
+chip's accessibility invariant is <em>"a word, always, never colour alone"</em>,
+which forbids colour without a word and permits the inverse.</p>
+<p>The case against, worth stating because it is real: the header becomes the
+only place on the board that names the active player without showing their
+colour.
+- <strong>Does the gap look right when it is wider than the lily pad?</strong> At the
   reference canvas <code>LanePositionGap</code> is 48 px against a 112 px
   <code>LilyPadDiameter</code>, and the pads plainly read as a track. On the wide drawing
   the gap is <strong>128 px — wider than the pad itself</strong>, and seven pads further

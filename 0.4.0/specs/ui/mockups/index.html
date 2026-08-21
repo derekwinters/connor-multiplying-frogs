@@ -2097,6 +2097,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 <td><a href="../game-board/">Game board</a></td>
 </tr>
 <tr>
+<td>Game board, turn banner with a swatch</td>
+<td><a href="game-board-banner-swatch.html"><code>game-board-banner-swatch.html</code></a></td>
+<td><a href="../game-board/">Game board</a></td>
+</tr>
+<tr>
 <td>Roll and card</td>
 <td><a href="roll-and-card.html"><code>roll-and-card.html</code></a></td>
 <td><a href="../roll-and-card/">Roll and card</a></td>
@@ -2177,6 +2182,20 @@ are the same canvas differing in exactly one value — the water's blue. Connor
 picks one on the tablet, the spec page takes the answer, and the losing file is
 deleted. Until then, an edit to the board's layout has to be made in <strong>both</strong>
 files, which is the cost of the pair and the reason it does not stay open long.</p>
+<p>The board's <strong>fourth</strong> file, <code>game-board-banner-swatch.html</code>, is another of the
+second kind — a real choice drawn twice. Since
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a> the
+header no longer carries a player chip, and the open question is whether it
+should keep the frog's <em>colour</em> as a bare swatch or say whose turn it is in
+words alone. <code>game-board.html</code> draws words alone and is the proposal; this file
+draws the swatch. The loser is deleted.</p>
+<p><strong>Four files for one screen is two more than a screen should need</strong>, and it is
+worth saying plainly rather than letting it accumulate quietly. Two of the four
+exist because two questions are open at once — which blue the water is, and
+whether the banner keeps a swatch — and each is a <code>Connor looks at it on the
+tablet</code> call that costs minutes to answer and is costing an edit to four files
+until it is. The third is the wide drawing, which is permanent. If a fifth board
+file is ever proposed, that is the moment to close the open questions first.</p>
 <p>The board's <strong>third</strong> file, <code>game-board-wide.html</code>, is a fifth kind that no
 other screen has: the same layout drawn at a second width. It is not a choice
 and there is nothing to pick between — it is the only way to see a rule that

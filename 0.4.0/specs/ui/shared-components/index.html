@@ -3337,6 +3337,44 @@ change and would need its own wireframe.</p>
 row: the chip has always drawn the frog's name, and until
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/310">#310</a> a
 frog's name was always its colour's.</p>
+<p><strong>Active still has callers, checked rather than assumed.</strong>
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a>
+removed the one Active chip in the game board's <em>header</em> and asked whether the
+state still earns its place on this component. It does, in four places, and
+three of them are not the board:</p>
+<table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Where the Active chip is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../game-board/">Game board</a></td>
+<td>the active frog's <strong>lane</strong> chip, in the pond</td>
+</tr>
+<tr>
+<td><a href="../roll-and-card/">Roll and card</a></td>
+<td>the <code>whose</code> region, beside <code>rolled</code></td>
+</tr>
+<tr>
+<td><a href="../working-out-grid/">Working-out grid</a></td>
+<td>the <code>header</code>, beside <code>Work it out</code></td>
+</tr>
+<tr>
+<td><a href="../answer-result/">Answer result</a></td>
+<td><strong>none</strong> — it draws a <code>pad 7 → 8</code> chip, not an Active one</td>
+</tr>
+</tbody>
+</table>
+<p>So the board's header was never the state's only caller, and dropping it there
+changes nothing here. What is worth noticing is the last row: the four screens
+of a single turn were already not uniform about this, which is part of why
+removing the header chip from the board does not make the turn sequence
+inconsistent — it was never consistent, and the chip's job differs by screen. On
+the board the lane chip makes a header chip redundant; in the two dialogs there
+are no lanes, so nothing else there carries the colour.</p>
 <p>The Active row dropped "filled background": the mockups' <code>.chip.act</code> rule
 gives the ring and the bold weight but leaves the base chip background
 unchanged, and the chip invariant only requires the active chip be visibly
