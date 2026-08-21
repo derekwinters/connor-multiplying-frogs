@@ -41,12 +41,17 @@
   :root{
     --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
     --accent:#2E7D4F; --warn:#B03A2E;
-    --green:#3F8E4F; --blue:#2C6DAF; --orange:#D2762B; --pink:#C24C86;
-    /* game-board.md's Colours table. The one line that differs between this
-       file and game-board-paler-water.html is --water. */
+    --green:#3E933E; --blue:#37609A; --orange:#D38231; --pink:#D41C78;
+    /* game-board.md's Colours table.
+       PondWater is SETTLED at #9FD8F2 — Derek picked it over the paler #B5E3F7,
+       and that comparison file is deleted (#301). The pond's other two surfaces
+       moved with the decision: the log is now a dark chocolate and the pad a
+       lighter leaf green than before, and both had to move together because of
+       the separability arithmetic on the spec page. There is no --log-edge any
+       more; the log is a flat silhouette. */
     --water:#9FD8F2;
-    --pad:#CCEAAF; --pad-edge:#7FAE5E;
-    --log:#E2C79C; --log-edge:#A97F4F;
+    --pad:#B2E67F; --pad-edge:#6E9E4A;
+    --log:#4A2E1A; --log-label:#C6B49C;
     --band:#E2E8E5;
 
     /* THE TWO NUMBERS THAT MAKE THE POND ELASTIC.
@@ -98,8 +103,14 @@
   .pad{width:112px;height:112px;border-radius:50%;background:var(--pad);border:3px solid var(--pad-edge);flex:none;position:relative}
   /* One per pond, not one per lane. Width is LogWidth (176); height is
      SharedLogHeight (896, the whole pond band), set inline. */
-  .log{position:absolute;width:176px;border-radius:24px;background:var(--log);border:3px solid var(--log-edge);
-       display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A6A3F}
+  /* No border: LogEdge is gone. On the old tan log the rim was what made a log
+     read as floating ON the water; against dark chocolate the log clears the
+     water by 8:1 on its own and a darker rim was invisible against the fill.
+     The label moved to the TOP of the log and to LogLabelInk, because the old
+     brown label was chosen for a tan log and is unreadable on this one. */
+  .log{position:absolute;width:176px;border-radius:24px;background:var(--log);
+       display:flex;align-items:flex-start;justify-content:center;padding-top:28px;
+       font-size:26px;color:var(--log-label);letter-spacing:.04em}
   .frog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;
         border:4px solid rgba(0,0,0,.35)}
   .scrim{position:absolute;inset:0;background:rgba(20,26,24,.66)}

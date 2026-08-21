@@ -487,18 +487,46 @@ lightness alone, which is why the set is not four mid-tone colours.
 
 #### 3. Named constants
 
-| Frog | Constant | Wireframe placeholder |
+| Frog | Constant | Value |
 | --- | --- | --- |
-| Green | `FrogGreen` | `#3F8E4F` |
-| Blue | `FrogBlue` | `#2C6DAF` |
-| Orange | `FrogOrange` | `#D2762B` |
-| Pink | `FrogPink` | `#C24C86` |
+| Green | `FrogGreen` | `#3E933E` |
+| Blue | `FrogBlue` | `#37609A` |
+| Orange | `FrogOrange` | `#D38231` |
+| Pink | `FrogPink` | `#D41C78` |
 
-**These four values are placeholders, not the palette.** The mockups need
-*something* to draw, and four separable hues taken from the classroom pieces is
-the least-committing thing to draw. The real palette is an `area:art` decision
-and it lands with the frog sprites; when it does, these four constants take the
-real values and nothing else on any screen changes.
+**These four are still placeholders for the real palette**, which is an
+`area:art` decision that lands with the frog sprites. What changed on
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301) is
+that they are no longer *arbitrary* placeholders: they were **derived** to clear
+[the game board's separability bar](game-board.md#keeping-the-frogs-visible)
+against the pond's three surfaces, rather than picked as four plausible hues and
+checked afterwards.
+
+| Was | Is now | Why |
+| --- | --- | --- |
+| `#3F8E4F` | `#3E933E` | the pond moved; see below |
+| `#2C6DAF` | `#37609A` | |
+| `#D2762B` | `#D38231` | |
+| `#C24C86` | `#D41C78` | |
+
+Two things follow, and both matter more than the hex codes.
+
+**The frogs are now allowed to move when the pond does.** `game-board.md` used
+to say *"the surface moves, not the frog"*; Derek reversed that on #301, because
+with the surfaces he had picked **no set of four frog colours existed at all**.
+The reversal is recorded on that page. When the real palette arrives it still
+has to clear the bar, and the arithmetic that constrains it is
+[written out there](game-board.md#how-the-ponds-colours-are-constrained) — it is
+narrow, and a palette chosen without reading it will not fit.
+
+**The third invariant below is still not satisfied.** These four step
+**1.28 : 1** apart in lightness at worst. That is better than the values they
+replace, which stepped **1.11 : 1** — four mid-tones, exactly what the invariant
+says the set is not — but it is not "distinguishable by lightness alone" in any
+strong sense, and it is the most the available band allows once four colours
+share it. The invariant and the separability bar are in genuine tension; neither
+is wrong, and no set satisfies both today. Said here rather than left for
+somebody to find by measuring.
 
 #### 4. States
 

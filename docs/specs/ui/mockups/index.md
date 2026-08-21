@@ -17,7 +17,6 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Game setup, naming a frog — the alternative | [`game-setup-name-edit-pencil.html`](game-setup-name-edit-pencil.html) | [Game setup](../game-setup.md) |
 | Game setup, before names | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
-| Game board, paler water | [`game-board-paler-water.html`](game-board-paler-water.html) | [Game board](../game-board.md) |
 | Game board, on a wider screen | [`game-board-wide.html`](game-board-wide.html) | [Game board](../game-board.md) |
 | Game board, turn banner with a swatch | [`game-board-banner-swatch.html`](game-board-banner-swatch.html) | [Game board](../game-board.md) |
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
@@ -62,12 +61,19 @@ exactly the same panel height as its rival — so the question the pair was open
 to ask, which placement is cheaper, turned out to have no answer, and the choice
 was decided on what the block should read as instead.
 
-The game board's water pair is the other live one, and it is the second kind: a
-real choice, drawn twice. `game-board.html` and `game-board-paler-water.html`
-are the same canvas differing in exactly one value — the water's blue. Connor
-picks one on the tablet, the spec page takes the answer, and the losing file is
-deleted. Until then, an edit to the board's layout has to be made in **both**
-files, which is the cost of the pair and the reason it does not stay open long.
+The game board's water pair is **resolved**. `game-board.html` and
+`game-board-paler-water.html` were the same canvas differing in exactly one
+value — the water's blue — and Derek picked `#9FD8F2` on
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301). The
+losing file is deleted, which is what the pair existed for and why it did not
+stay open long.
+
+Worth recording, because it is not what a colour question usually costs: settling
+the water moved the other two surfaces as well. The log and the lily pad are
+constrained by the frogs that have to sit on them, and the arithmetic left the
+pad only two usable regions with nothing in between — see
+[how the pond's colours are constrained](../game-board.md#how-the-ponds-colours-are-constrained).
+The four frog colours moved too, which reverses a rule that page used to carry.
 
 The board's **fourth** file, `game-board-banner-swatch.html`, is another of the
 second kind — a real choice drawn twice. Since
