@@ -42,13 +42,8 @@ a corner and this is a section with a heading in it — see
 
 A centred [dialog](shared-components.md#dialog), `SettingsDialogWidth` by
 `SettingsDialogHeight`. Actions are a single left-aligned column at full inner
-width; the primary button is right-aligned below them; the `about` block is
-left-aligned at the panel's inner left edge.
-
-The primary button is described as *right-aligned below the actions* rather
-than *bottom-right*, which is what this page used to say, because under one of
-the two placements it is no longer flush to the bottom — see
-[open question 1](#open-questions).
+width; the primary button is bottom-right; the `about` block is left-aligned at
+the panel's inner left edge, `SettingsAboutTopOffset` down from the panel's top.
 
 `End the game` is separated from everything below it by
 `ButtonDestructiveGap` — 96 px, which is nearly a whole button's height of
@@ -63,9 +58,16 @@ game`. The column's top edge is whatever is left over. Laid out the other way
 round, from the top down, the gap would be a consequence of arithmetic and a
 longer label or a shorter panel could quietly close it.
 
-**Where `about` sits is the one thing this page does not yet fix.** Two
-placements are drawn, and [open question 1](#open-questions) is the choice
-between them. Everything above is true of both.
+`about` sits **under the title**, between it and the actions column — settled,
+[open question 1](#open-questions). It is measured from the top of the panel
+down, unlike the actions column below it, because it is a header: it belongs to
+`Settings` above it, not to the buttons below it, and it should not move when a
+button label or the panel's height changes.
+
+That is why the two directions meet in the middle of this panel. The `about`
+block grows downward from the title; the actions column grows upward from the
+button row; and the space between them is what is left over. Each half is
+anchored to the thing it belongs to.
 
 ## Named constants
 
@@ -82,6 +84,8 @@ between them. Everything above is true of both.
 | Line box, as a ratio of each line's own size | `SettingsAboutLineHeight` | 1.2 |
 | Gap between the three lines of `about` | `SettingsAboutLineGap` | 12 px |
 | Height of the whole `about` block | `SettingsAboutBlockHeight` | 144 px |
+| `about` down from the panel's top edge | `SettingsAboutTopOffset` | 164 px |
+| Gap below `about`, before the actions column | `SettingsAboutSectionGap` | 72 px |
 
 `SettingsAboutBlockHeight` is derived, and the arithmetic sums exactly, which is
 why it is a round number rather than a rounded one:
@@ -95,24 +99,23 @@ It is named anyway rather than left to be recomputed. The block's height is what
 sets `SettingsDialogHeight`, and a number that three other numbers depend on is
 a number worth being able to say out loud.
 
-The two placements each need one constant of their own, and only one of these
-two rows survives [open question 1](#open-questions):
-
-| Placement | Element | Constant | Value |
-| --- | --- | --- | --- |
-| In the footprint | `about` up from the panel's bottom edge | `SettingsAboutBottomOffset` | 60 px |
-| Under the title | `about` down from the panel's top edge | `SettingsAboutTopOffset` | 164 px |
-
 `SettingsAboutTopOffset` is not a free number: it is `DialogPadding` (56) + the
 title's line box (68) + `DialogTitleGap` (40). It is stated as a single offset
 because that is how the block is positioned, and derived here so a change to
 `DialogTitleGap` is visibly a change to this too.
 
-The footprint placement also needs a gap above the block, separating it from the
-button row: `SettingsAboutGap`, 56 px. It is deliberately **not**
-`ButtonDestructiveGap`. Nothing in `about` is a button, so the destructive gap
-has no work to do there, and reusing it would imply a safety rule that isn't
-being applied.
+The title's line box is 68 px — `DialogTitleSize` 56 at `SettingsAboutLineHeight`
+1.2, rounded up to a whole pixel. It is written down because `DialogTitleGap` is
+measured from it, and a line box left to a font's default is a gap that is 40 px
+in one renderer and 43 px in the next. The mockup sets it explicitly for the
+same reason.
+
+`SettingsAboutSectionGap` is deliberately **not** `ButtonDestructiveGap`, even
+though it is the gap immediately above a column that ends in a destructive
+button. Nothing in `about` is a button, so the destructive gap has no work to do
+there, and reusing the name would imply a safety rule that is not being applied.
+It is also not `DialogTitleGap`: that one separates a title from its body, and
+`about` is not this dialog's body — the actions are.
 
 ### The built dialog does not have these numbers yet
 
@@ -121,27 +124,29 @@ being applied.
 wireframe. That divergence is deliberate and is the normal state of a screen
 between its wireframe and its implementation: **this page is authoritative and
 the code follows it**, per
-[wireframe before UI code](../../engineering/ui-design-process.md). The
-implementation issue is opened against whichever placement
-[open question 1](#open-questions) settles on, and it is the PR that brings the
-two back into agreement. Nothing should be built from this page until then,
-because half of it is still a question.
+[wireframe before UI code](../../engineering/ui-design-process.md). Bringing the
+two back into agreement is the implementation issue's job, and that issue is
+blocked by this wireframe.
 
 ### The constants this page used to carry
 
 | Was | Is now | Value | Note |
 | --- | --- | --- | --- |
-| `SettingsVersionBottomOffset` | `SettingsAboutBottomOffset` | 60 px | Unchanged; now measures the whole block, not one line |
-| `SettingsDialogHeight` | `SettingsDialogHeight` | 760 → 970 px | The About block's 144 px plus the gap it needs |
+| `SettingsVersionBottomOffset` | *(gone)* | was 60 px | Nothing is anchored to the panel's bottom-left any more |
+| `SettingsDialogHeight` | `SettingsDialogHeight` | 760 → 970 px | The About block's 144 px plus the gap above it |
 
-The offset is renamed and not removed, for the same reason the title screen's
-[`Play*` constants were renamed](title-screen.md#what-became-of-the-play-constants):
-its value has not changed and its job has, and a constant named after a version
-string will eventually be applied to one.
+`SettingsVersionBottomOffset` is **removed, not renamed**, which is the opposite
+of what happened to the title screen's
+[`Play*` constants](title-screen.md#what-became-of-the-play-constants). Those
+were renamed because their job survived under a new name. This one's job does
+not survive: it existed to hold a version string up off the panel's bottom edge,
+and after this change nothing sits at the panel's bottom-left at all. The
+version is inside `about`, at the top, positioned by `SettingsAboutTopOffset`
+and its two siblings.
 
-`SettingsVersionBottomOffset` only survives at all under the footprint
-placement. Under the header placement there is nothing left at the bottom of
-the panel to offset, and the constant goes.
+A constant that is deleted rather than renamed is worth saying out loud, because
+the code still declares it. Deleting it is part of the implementation issue, not
+something to leave behind as a value nothing reads.
 
 ## Elements
 
@@ -210,22 +215,22 @@ buttons in a row.
 
 ## Mockup
 
-Two, and they are a **live pair** — a real choice drawn twice, per
-[the loop](../../engineering/ui-design-process.md#the-loop). They are the same
-900 × 970 canvas, the same stylesheet, the same three lines of text, differing
-in exactly one thing: where the block sits.
+[`mockups/settings-dialog.html`](mockups/settings-dialog.html) — the agreed
+picture, with `about` under the title.
 
-- [`mockups/settings-dialog.html`](mockups/settings-dialog.html) — **in the
-  footprint**, bottom-left, in a band of its own beneath the button row.
-- [`mockups/settings-dialog-about-header.html`](mockups/settings-dialog-about-header.html)
-  — **under the title**, reading as a header.
+It was one of a pair. Both files were the same 900 × 970 canvas with the same
+stylesheet and the same three lines of text, differing in exactly one thing:
+whether `about` sat under the title or in the footprint at the bottom-left.
+[Open question 1](#open-questions) is now settled, so the winning drawing takes
+this page's plain filename and the footprint file is deleted — the same thing
+that happened to the title screen's
+[`RESUME`-primary comparison](title-screen.md#mockup), and for the same reason:
+a mockup nobody can build to is a mockup that confuses the next reader.
 
-Until [open question 1](#open-questions) is settled, an edit to this dialog's
-layout has to be made in **both** files. That is the cost of the pair and the
-reason it should not stay open long — the same cost the
-[game board's water pair](mockups/index.md) carries.
+### What drawing the pair changed
 
-### What drawing them changed
+Worth keeping, because it is why the numbers on this page are what they are, and
+because the finding inverted the question the pair was opened to ask.
 
 [#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322)
 proposed the footprint option as the block *"sharing its row with `Back to the
@@ -233,35 +238,36 @@ game` on the right"*, and expected it to be the cheap one because the version
 already lived down there. It is not drawable that way. `Back to the game`
 renders 531 px wide, so of `SettingsActionWidth`'s 788 px it leaves 257 px on
 the left, and `Designed by Connor` at `SettingsAboutCreditSize` needs about 300.
-Drawn as proposed, the primary button sits on top of the credit line.
+Drawn as proposed, the primary button sat on top of the credit line.
 
-So the block gets a band of its own beneath the button row, and both placements
-cost the panel the same 210 px of height. **Height is therefore not what picks
-between them**, which is the opposite of what the issue expected, and it is the
-kind of thing a sum does not tell you and a picture does.
+Given a band of its own instead, the footprint option cost the panel the same
+210 px of height as the header option. **Height did not pick between them** —
+which is the opposite of what the issue expected, and is the kind of thing a sum
+does not tell you and a picture does.
+
+What picked between them was what the block reads *as*, and one structural
+consequence: under the header placement `Back to the game` stays exactly
+`DialogPadding` up from the panel's bottom edge, which is where
+[shared-components.md](shared-components.md#dialog) puts a dialog's button row.
+The footprint placement lifted it 260 px to make room for a band underneath.
 
 ## Open questions
 
-- **1. Where does the About block go — the footprint, or under the title?**
-  The live question, and the reason there are two mockups. Neither is cheaper
-  than the other, so it is a question about what the block should read *as*:
-    - **In the footprint**, it is a colophon: the name and credit are the small
-      print under the things the dialog is for. The cost is that `Back to the
-      game` is no longer `DialogPadding` up from the panel's bottom edge — it is
-      lifted 260 px to make room for the band underneath — and
-      [shared-components.md](shared-components.md#dialog) says a dialog's
-      buttons "sit in a single row along the bottom of the panel". This
-      placement puts something below that row.
-    - **Under the title**, it is a header: the dialog announces the game before
-      it offers the two actions, the button row stays exactly where the shared
-      component puts it, and `Designed by Connor` is the second thing read
-      rather than the second-to-last. The cost is that it prints the version
-      where headers go, and a version is a footnote.
+- **1. Where does the About block go? Settled: under the title.** Derek's call
+  on [#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322).
+  The two placements cost the same height, so the choice was about what the
+  block should read as, and the header reading won on two counts: `about`
+  announces the game before the dialog offers its two actions, and the button
+  row stays exactly where the shared
+  [dialog](shared-components.md#dialog) component puts it — flush to
+  `DialogPadding` — rather than being lifted to make room for a band beneath it.
 
-    Connor picks, on the tablet, at 1:1. Closing
-    [#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322)
-    is the approval, and the losing file is deleted then — not kept, because a
-    mockup nobody can build to is a mockup that confuses the next reader.
+  The cost accepted with it: the version now prints near the top of the dialog,
+  where headers go, and a version is a footnote. It is the smallest line in the
+  block and the only one in grey, which is the whole of the mitigation. If that
+  reads wrong on the tablet it is a reason to reopen this, not a reason to move
+  the block back — the footprint placement's own cost has not gone anywhere.
+
 - **2. Is `Settings` still the right title for this dialog?** Not proposed as a
   change, flagged as a thing to notice: a dialog titled `Settings` whose
   contents are two buttons and a credit is arguably titled wrong, and it is more

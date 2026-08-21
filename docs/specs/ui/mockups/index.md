@@ -24,8 +24,7 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Working-out grid, `331 × 41` grown to the cap | [`working-out-grid-331x41-grown.html`](working-out-grid-331x41-grown.html) | [Working-out grid](../working-out-grid.md) |
 | Answer result — right | [`answer-result-right.html`](answer-result-right.html) | [Answer result](../answer-result.md) |
 | Answer result — wrong | [`answer-result-wrong.html`](answer-result-wrong.html) | [Answer result](../answer-result.md) |
-| Settings dialog, About in the footprint | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
-| Settings dialog, About under the title | [`settings-dialog-about-header.html`](settings-dialog-about-header.html) | [Settings dialog](../settings-dialog.md) |
+| Settings dialog | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
 
@@ -45,20 +44,21 @@ Derek settled the question — smaller cells for the addition rows only — so t
 file now draws the answer instead: the same six rows at
 `GridAdditionRowHeight`, fitting with 16 px to spare.
 
-The settings dialog's pair is the newest live one, and it is the second kind
-too. `settings-dialog.html` and `settings-dialog-about-header.html` are the
-same 900 × 970 canvas with the same stylesheet, differing in exactly one thing
-— whether the About block sits in the footprint or under the title. Connor
-picks on the tablet, the spec page takes the answer, and the losing file is
-deleted.
+The settings dialog used to have a pair, drawn by
+[#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322) to
+ask where the About block should sit — in the footprint, or under the title.
+Derek picked under the title, so `settings-dialog.html` is that drawing and the
+footprint file is deleted.
 
-That pair is also the clearest example on this page of why a mockup is worth
-drawing rather than reasoning about.
-[#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322)
-expected the footprint option to be the cheap one, sharing the panel's bottom
-row with `Back to the game`. Drawn, the button turned out to be 531 px wide and
-landed on top of "Designed by Connor". Both options cost the same height in the
-end, which inverted the question the pair was opened to ask.
+It is worth recording what that pair established before it was resolved,
+because it is the clearest example on this page of why a mockup is drawn rather
+than reasoned about. The footprint option was expected to be the cheap one: the
+version already lived at the bottom-left, so the block was to share that row
+with `Back to the game`. Drawn, the button turned out to be 531 px wide and
+landed on top of "Designed by Connor". Given a band of its own instead, it cost
+exactly the same panel height as its rival — so the question the pair was opened
+to ask, which placement is cheaper, turned out to have no answer, and the choice
+was decided on what the block should read as instead.
 
 The game board's pair is the other live one, and it is the second kind: a real
 choice, drawn twice. `game-board.html` and `game-board-paler-water.html` are
