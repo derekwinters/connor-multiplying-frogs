@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Multiplying Frogs — Settings dialog, About in the footprint
+  Multiplying Frogs — Settings dialog, About under the title
   Device: kids' Android tablet, held landscape.
   Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
 
@@ -9,32 +9,30 @@
   Numbers here are the numbers in the spec page's constants table.
 
   This is one of a PAIR, drawn by issue #322 to ask one question: where does the
-  About section go? This file answers "in the footprint", at the bottom-left
-  where the version already lived. Its twin, settings-dialog-about-header.html,
-  answers "under the title". The two files are identical but for that, down to
-  the stylesheet and the panel size.
+  About section go? This file answers "under the title" — the block sits
+  `DialogTitleGap` beneath `Settings` and reads as a header rather than as a
+  footnote. Its twin, settings-dialog.html, answers "in the footprint".
+  The two files are identical but for that, down to the stylesheet and the
+  panel size.
 
-  WHAT DRAWING THIS CHANGED. Issue #322 proposed this option as the block
-  "sharing its row with `Back to the game` on the right". It does not fit.
-  `Back to the game` renders 531 px wide, so of the 788 px of inner width it
-  leaves 257 px on the left, and "Designed by Connor" at
-  `SettingsAboutCreditSize` needs about 300. Drawn as proposed, the primary
-  button sits on top of the credit line. So the block gets a band of its own
-  BENEATH the button row rather than beside it, and the option costs the same
-  210 px of height as its twin — which is the finding, and the reason to look
-  at a picture instead of a sum.
+  BOTH OPTIONS COST THE SAME HEIGHT. The panel grows 760 -> 970 px here and
+  760 -> 970 px there. That was not the expectation going in — the footprint
+  was meant to be the cheap one, because the version already lived down there —
+  and it stopped being true when the twin was drawn and `Back to the game`
+  landed on top of the credit line. See that file's header. So height is not
+  what picks between these two, and the choice is entirely about what the block
+  should read AS.
 
-  The consequence to weigh, and the argument for the twin: `Back to the game`
-  is no longer `DialogPadding` up from the panel's bottom edge. It is 260 px up,
-  because the About band is under it, and shared-components.md#dialog says
-  buttons "sit in a single row along the bottom of the panel". This option puts
-  something below that row.
+  What this option buys. `Back to the game` stays exactly `DialogPadding` up
+  from the panel's bottom edge, which is where shared-components.md#dialog puts
+  a dialog's button row; the twin lifts it 260 px to make room for the block
+  underneath. And "Designed by Connor" is the second thing read on the dialog
+  rather than the second-to-last. That line is the one line in the game that is
+  about Connor, so how loudly it reads is his call — which is why this is drawn
+  rather than argued.
 
-  `ButtonDestructiveGap` is untouched at 96 px and is still measured from
-  `End the game` to the button row below it. The About band is separated from
-  that row by `SettingsAboutGap`, which is a different number for a different
-  job: nothing in the About band is a button, so the destructive gap has no
-  work to do there.
+  What it costs. It prints the version at the TOP of the dialog, where headers
+  go, and a version is a footnote. That is the thing to look at hardest here.
 
   Two earlier corrections, made by issue #222, are preserved: the action buttons
   sit against a padding box (`.panel` is `box-sizing:border-box` with a 3 px
@@ -50,7 +48,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Multiplying Frogs — Settings dialog, About in the footprint</title>
+<title>Multiplying Frogs — Settings dialog, About under the title</title>
 <style>
   :root{
     --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
@@ -125,26 +123,27 @@
          Padding box is 894 x 964, and every offset below is against that. -->
     <div class="abs panel" style="left:510px;top:115px;width:900px;height:970px">
 
+      <!-- Top-down, because in this option the About block is a header and a
+           header is measured from the top:
+             Settings     56 -> 124    (DialogTitleSize 56 in a 68 px line box)
+             About block 164 -> 308    (DialogTitleGap 40, then 144)
+           and then the actions column resumes being measured bottom-up:
+             How to play  380 -> 492   (SettingsAboutSectionGap 72 below 308)
+             End the game 588 -> 700
+             Back to the game 796 -> 908  (DialogPadding 56 up from 964) -->
       <div class="abs dlgtitle" style="left:56px;top:56px">Settings</div>
 
-      <!-- Bottom-up, exactly as the spec page positions this column. Read it
-           from the bottom of the file upward, which is the order it is built in:
-             About block      760 -> 904   then SettingsAboutBottomOffset 60 -> 964
-             Back to the game 592 -> 704   (SettingsAboutGap 56 above the block)
-             End the game     384 -> 496   (ButtonDestructiveGap 96)
-             How to play      176 -> 288   (SettingsActionGap 96)
-           and the space between the title's 124 and How to play's 176 is what
-           is left over, which is what the spec page says it is. -->
-      <div class="abs btn s off" style="left:56px;top:176px;width:788px">How to play</div>
-      <div class="abs btn d" style="left:56px;top:384px;width:788px">End the game</div>
-
-      <div class="abs btn p" style="right:56px;top:592px">Back to the game</div>
-
-      <div class="abs about" style="left:56px;bottom:60px">
+      <div class="abs about" style="left:56px;top:164px">
         <div class="name">Multiplying Frogs</div>
         <div class="credit">Designed by Connor</div>
         <div class="ver">v0.4.0</div>
       </div>
+
+      <div class="abs btn s off" style="left:56px;top:380px;width:788px">How to play</div>
+      <div class="abs btn d" style="left:56px;top:588px;width:788px">End the game</div>
+
+      <div class="abs btn p" style="right:56px;bottom:56px">Back to the game</div>
     </div>
+</div>
 </body>
 </html>

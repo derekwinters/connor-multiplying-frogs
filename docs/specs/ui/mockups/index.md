@@ -24,7 +24,8 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Working-out grid, `331 × 41` grown to the cap | [`working-out-grid-331x41-grown.html`](working-out-grid-331x41-grown.html) | [Working-out grid](../working-out-grid.md) |
 | Answer result — right | [`answer-result-right.html`](answer-result-right.html) | [Answer result](../answer-result.md) |
 | Answer result — wrong | [`answer-result-wrong.html`](answer-result-wrong.html) | [Answer result](../answer-result.md) |
-| Settings dialog | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
+| Settings dialog, About in the footprint | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
+| Settings dialog, About under the title | [`settings-dialog-about-header.html`](settings-dialog-about-header.html) | [Settings dialog](../settings-dialog.md) |
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
 
@@ -44,7 +45,22 @@ Derek settled the question — smaller cells for the addition rows only — so t
 file now draws the answer instead: the same six rows at
 `GridAdditionRowHeight`, fitting with 16 px to spare.
 
-The game board's pair is the live one, and it is the second kind: a real
+The settings dialog's pair is the newest live one, and it is the second kind
+too. `settings-dialog.html` and `settings-dialog-about-header.html` are the
+same 900 × 970 canvas with the same stylesheet, differing in exactly one thing
+— whether the About block sits in the footprint or under the title. Connor
+picks on the tablet, the spec page takes the answer, and the losing file is
+deleted.
+
+That pair is also the clearest example on this page of why a mockup is worth
+drawing rather than reasoning about.
+[#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322)
+expected the footprint option to be the cheap one, sharing the panel's bottom
+row with `Back to the game`. Drawn, the button turned out to be 531 px wide and
+landed on top of "Designed by Connor". Both options cost the same height in the
+end, which inverted the question the pair was opened to ask.
+
+The game board's pair is the other live one, and it is the second kind: a real
 choice, drawn twice. `game-board.html` and `game-board-paler-water.html` are
 the same canvas differing in exactly one value — the water's blue. Connor picks
 one on the tablet, the spec page takes the answer, and the losing file is
