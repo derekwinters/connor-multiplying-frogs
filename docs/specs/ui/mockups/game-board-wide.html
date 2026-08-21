@@ -1,54 +1,58 @@
 <!doctype html>
 <!--
-  Multiplying Frogs — Game board
+  Multiplying Frogs — Game board, on a wider screen
   Device: kids' Android tablet, held landscape.
-  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+  Canvas: 2560 x 1200 — DELIBERATELY NOT the 1920 x 1200 reference canvas.
 
-  Numbers here are the numbers in the spec page's constants table, and so are
-  the colours: game-board.md now has a Colours table, and --water, --pad,
-  --pad-edge, --log and --log-edge below are its rows.
+  WHY THIS FILE BREAKS THE ONE-CANVAS RULE. Every other mockup in this
+  directory is drawn at 1920 x 1200, because a mockup at some other size is a
+  mockup of a screen nobody has. This one is the exception, and issue #325 asks
+  for it by name: the whole point of the elastic pond is what happens at a width
+  that is NOT the reference canvas, and a drawing at one width cannot show that.
+  Its twin, game-board.html, is the reference canvas and is the one to build
+  against.
 
-  THE POND IS WATER. Blue water, brown logs, green lily pads — Derek's call on
-  issue #291. Blue is settled; WHICH blue is Connor's, and there are two files:
-  this one draws PondWater #9FD8F2, and game-board-paler-water.html draws
-  #B5E3F7. They differ in that one value and in nothing else. Open both.
+  WHAT 2560 STANDS FOR. The tablet reports roughly 2000 x 920 of usable
+  viewport, which is about 2.17 : 1 against the reference canvas's 1.6 : 1.
+  Because the canvas scales to height, that is the same shape as 2609 x 1200 in
+  reference units. This file rounds that to 2560 x 1200 — 2.13 : 1, within a
+  hair of the device — because it makes the derived gap land on a whole number
+  that can be checked against the constants table by eye:
 
-  Every frog is drawn on something it has to be legible against — Green and
-  Pink on lily pads, Orange on the Start log, Blue home on the End log — so the
-  contrast question is in the picture. Every frog/surface pair clears the bar
-  the spec page sets; the two tightest are Green on a lily pad and Orange on a
-  log, which are the two to look at hardest.
+      LanePositionGap = (2560 - 1536) / 8 = 128 px
 
-  The four frog colours are untouched by this drawing. They are placeholders
-  for the real palette, which is an area:art decision, and a frog that is hard
-  to see is a reason to move the surface under it, not the frog.
+  WHAT TO LOOK AT. Compare this against game-board.html and the difference is
+  the whole of issue #325:
 
-  ONE Start log and ONE End log for the whole pond, spanning every lane in
-  play — not one pair per lane. Count them: there are two logs on this canvas,
-  whatever the lane count.
+    - The chips and the Start log are hard against the left safe margin, not
+      floating ~300 px in from it. They did not move relative to the board; the
+      board stopped being a 1920 px picture centred in a wider band.
+    - The End log is hard against the right safe margin.
+    - The seven lily pads are 128 px apart instead of 48, spread evenly in what
+      is left between the two logs.
 
-  The three questions #289 left open about the logs are settled, by Derek on
-  issue #296, and this draws the answers:
-    1. The logs span the FULL POND (SharedLogHeight = 896 px), not the lanes in
-       play. Same height at two frogs as at four. This drawing used to show the
-       736 px lanes-in-play proposal; #296 chose the other one.
-    2. Each frog sits on its own lane's centre line, so the log is shared and
-       the positions plainly are not.
-    3. LogRadius (24 px) and TrackOutline (3 px) are unchanged from the old
-       176 x 120 log.
+  AND THE THING TO LOOK AT HARDEST. At this width the gap (128 px) is wider
+  than the lily pad (112 px). Seven pads further apart than they are big may
+  read as scattered stepping stones rather than as a track to hop along, and
+  this is the drawing that can answer that. If it does read wrong, the fix is a
+  cap on the gap, not a return to the centred board — see the spec page's open
+  question. Nothing about the pads themselves changed: LilyPadDiameter is still
+  112 px, because growing the pads is a different and much bigger change.
 
-  Horizontal arithmetic, unchanged by the sharing:
+  Everything else on this canvas is identical to game-board.html — same
+  colours, same logs, same lane stack, same frogs on the same surfaces.
+
+  Horizontal arithmetic at this width:
     48 margin + 256 chip + 48 gap
-      + 176 log + 48 + (7 x 112 + 6 x 48) + 48 + 176 log
-      + 48 margin = 1920.
-  Vertical: pond is 1200 - 128 - 176 = 896, and both logs fill it, y=128 to
-  y=1024. Four lanes at 184 = 736, centred in that band, so the lane stack runs
-  from y=208 to y=944 with the logs standing 80 px proud at each end.
+      + 176 log + 128 + (7 x 112 + 6 x 128) + 128 + 176 log
+      + 48 margin = 2560.
+  Vertical is unchanged and does not stretch: pond is 1200 - 128 - 176 = 896,
+  both logs fill it, four lanes at 184 = 736 centred in that band.
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Multiplying Frogs — Game board</title>
+<title>Multiplying Frogs — Game board, on a wider screen</title>
 <style>
   :root{
     --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
@@ -77,8 +81,8 @@
        The floor is what stops a narrower-than-16:10 screen from squeezing the
        pads together: below 1920 the board stops spreading and is centred,
        which is what it has always done. */
-    --canvas:1920px;
-    --lane-gap:48px;
+    --canvas:2560px;
+    --lane-gap:128px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}

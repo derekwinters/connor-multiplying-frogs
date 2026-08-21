@@ -446,15 +446,23 @@ yield return new WaitForSeconds(0.4f);
 
 // Yes.
 const int LaneWinningPosition = 8;
-[SerializeField] float _lanePositionGap = 48f;
+[SerializeField] float _lanePositionGapMin = 48f;
 [SerializeField] float _frogHopDuration = 0.4f;
 ```
 
 None of those three names is invented here. `LaneWinningPosition`,
-`LanePositionGap` and `FrogHopDuration` are what
+`LanePositionGapMin` and `FrogHopDuration` are what
 [the game board spec](../specs/ui/game-board.md) already calls those numbers,
 and a constant in the code keeps the name the spec page gave it so the two can
 be checked against each other.
+
+The example says `LanePositionGapMin` rather than `LanePositionGap` for a
+reason worth noticing: since
+[#325](https://github.com/derekwinters/connor-multiplying-frogs/issues/325) the
+gap itself is **derived from the screen's width** and is not a number anybody
+types. Its floor still is. A derived value does not escape this rule — it gets
+a named function of named constants, not an expression inlined at the one call
+site that needed it.
 
 ### Why this is a rule and not a preference
 

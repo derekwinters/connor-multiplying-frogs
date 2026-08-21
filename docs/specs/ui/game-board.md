@@ -68,20 +68,65 @@ height, in this order and with no gaps:
 - `controls` — pinned to the bottom, `BoardControlsHeight` tall, full width.
 
 "Full width" and "the top" mean the screen's, not the reference canvas's, on a
-device that is not 16:10 — a band reaches the edges the way the water does. What
-the bands *contain* is measured in the reference canvas, which is what every
-number below is in. The whole of that rule, and the one control it moves, is
+device that is not 16:10 — a band reaches the edges the way the water does.
+
+What the bands *contain* divides in two, and this is the division
+[#325](https://github.com/derekwinters/connor-multiplying-frogs/issues/325)
+introduced:
+
+- **`header` and `controls` are measured in the reference canvas.** The turn
+  banner, the gear and `Roll` are anchored controls, and a wider screen moves
+  the two that are anchored to an edge without resizing any of them.
+- **The `pond` is measured in the screen.** Its row is a track whose job is to
+  show how far along a lane a frog has got, so it spreads to whatever width it
+  is given — see [across the pond](#anchors) below.
+
+Every number in the tables below is still in reference-canvas units, and every
+one of them still means exactly what it says. `LanePositionGap` is the single
+exception, and it is derived rather than typed.
+
+The whole of that rule, and the one control it moves, is
 [the bands reach the edges too](#the-bands-reach-the-edges-too).
 
 Across the pond, the nine positions occupy the same nine columns in every lane,
-and their total width is fixed by the position count rather than by the space
-available:
+and **the row spans the whole screen** — the chips and the Start log against the
+real left safe margin, the End log against the real right one, and the seven
+lily pads spread evenly in whatever is left between them:
 
-- `chip` — pinned to the **left** safe margin, `LaneGutterWidth` wide.
-- `start-log` — `LaneGutterGap` to the right of the chips.
+- `chip` — pinned to the **left** safe margin, `LaneGutterWidth` wide. It does
+  not stretch; see [why the gutter does not
+  stretch](#why-the-gutter-does-not-stretch).
+- `start-log` — `LaneGutterGap` to the right of the chips. Everything to the
+  left of its right-hand edge is fixed, so the Start log sits at the same x on
+  every screen.
 - `track` — this lane's seven lily pads, `LanePositionGap` from the Start log,
-  from each other, and from the End log.
+  from each other, and from the End log. That gap is **derived from the screen's
+  width**, not typed into the table.
 - `end-log` — pinned to the **right** edge of the safe area.
+
+`LanePositionGap` is the one number on this page that the screen decides:
+
+```text
+LanePositionGap = max( LanePositionGapMin, (screen width − LaneFixedWidth) ÷ LanePositionGapCount )
+```
+
+`LaneFixedWidth` is everything on the row that does not stretch, and
+`LanePositionGapCount` is the number of gaps the slack is divided between —
+one either side of the pads, six among them. Both are in
+[the constants table](#named-constants), and the arithmetic that produces them
+is [worked through there](#the-horizontal-arithmetic).
+
+**At exactly 1920 px the formula gives exactly 48 px**, which was
+`LanePositionGap`'s typed value before this change. That is not a coincidence to
+be grateful for — it is the condition this rule was chosen to satisfy, so that
+the reference canvas keeps being a picture of the game. It is checked rather
+than assumed: [the mockup renders byte-identical](#mockup) at 1920 before and
+after.
+
+The floor is what a *narrower* screen gets. Below 1920 px the formula would
+start closing the pads up, so it stops: the board keeps its reference width and
+is centred, exactly as it always was. **The pond spreads on screens wider than
+16:10 and is unchanged on everything else.**
 
 Both logs are `SharedLogHeight` tall, which is the height of the `pond` band on
 the reference canvas: they fill it, edge to edge with the two hairlines, whether
@@ -168,7 +213,10 @@ The lane:
 | Frog piece diameter | `FrogPieceDiameter` | 88 px |
 | Frog piece outline | `FrogPieceOutline` | 4 px |
 | Lily pad and log outline | `TrackOutline` | 3 px |
-| Gap between positions | `LanePositionGap` | 48 px |
+| Gap between positions | `LanePositionGap` | derived — see [Anchors](#anchors) |
+| Smallest that gap may be | `LanePositionGapMin` | 48 px |
+| Everything on the row that does not stretch | `LaneFixedWidth` | 1536 px |
+| Gaps the leftover width is divided between | `LanePositionGapCount` | 8 |
 | Chip gutter width | `LaneGutterWidth` | 256 px |
 | Gap between chip and track | `LaneGutterGap` | 48 px |
 
@@ -198,12 +246,57 @@ It is written as the band's own arithmetic rather than as the bare 896 because
 the log **is** the band: if `BoardHeaderHeight` or `BoardControlsHeight` ever
 moves, the logs move with it and nobody has to remember them.
 
-That horizontal arithmetic is exact and worth keeping exact, and sharing the
-logs does not disturb it, because a shared log stands in the same column its
-per-lane predecessor did: two logs at 176, seven pads at 112 and eight gaps at
-48 is 1520 px across the pond; plus a 256 px chip gutter, a 48 px gap and two
-48 px margins, that is 1920 px on the nose. If a constant here changes, one of
-the others has to move with it.
+### The horizontal arithmetic
+
+The row used to sum to 1920 px exactly, and the page said so. It still does at
+1920 — but it now sums to the screen's width at every width, because one term in
+it is the term that absorbs the difference.
+
+Split the row into what is fixed and what stretches:
+
+```text
+LaneFixedWidth  =  48 margin + 256 chip gutter + 48 gap
+                     + 176 Start log + 7 × 112 pads + 176 End log
+                     + 48 margin
+                =  1536 px
+
+LanePositionGapCount  =  8      one gap either side of the pads, six among them
+
+LanePositionGap  =  max( 48, (screen width − 1536) ÷ 8 )
+```
+
+Checked at the two widths that are drawn:
+
+| Screen | Slack over `LaneFixedWidth` | `LanePositionGap` | Row sums to |
+| --- | --- | --- | --- |
+| 1920 px — the reference canvas | 384 | **48 px** | 1536 + 8 × 48 = 1920 |
+| 2560 px — the wide drawing | 1024 | **128 px** | 1536 + 8 × 128 = 2560 |
+
+`LaneFixedWidth` is written as its own constant rather than left as a sum
+nobody can name, because it is now load-bearing: it is the term the elastic gap
+is computed against, so a change to `LaneGutterWidth`, `LogWidth`,
+`LilyPadDiameter`, `LaneGutterGap` or `SafeMargin` is a change to it. **If a
+constant here changes, `LaneFixedWidth` moves with it** — and unlike before,
+nothing else has to, because the gap absorbs the difference by construction.
+That is the one genuine simplification in this change: the row used to have to
+be rebalanced by hand.
+
+Sharing the logs did not disturb this arithmetic and neither does spreading it:
+a shared log still stands in the same column its per-lane predecessor did, and
+position 0 is still on the Start log at every width.
+
+### Why the gutter does not stretch
+
+`LaneGutterWidth` is 256 px on every screen. Widening it on a wider tablet was
+considered — frogs have typed names now, so more room for a long one is a real
+benefit — and rejected, because it would make **how much of a name fits depend
+on the device**. A name that shows in full on the tablet and truncates on a
+narrower screen is a bug that only appears on one person's hardware, which is
+the worst kind to be told about.
+
+If 256 px turns out to be too tight for the names Connor types, the fix is to
+make it a bigger fixed number, decided once and drawn — not to make it elastic.
+That is a separate change and it wants its own issue.
 
 Vertically, the pond band is `1200 − BoardHeaderHeight − BoardControlsHeight` =
 896 px, which is `SharedLogHeight` — the logs fill it exactly. Four lanes at
@@ -293,12 +386,20 @@ each of its ends, and two grey bars floating on a pond is a rendering fault
 rather than a design. That is what the tablet was doing until this was written
 down.
 
-**Invariant:** what a band *contains* is still laid out in the reference canvas,
-centred. The lanes are the reference canvas's safe area wide and the two shared
-logs stand in the columns those lanes' tracks start and end in, on every screen,
-so every constant in the table below keeps meaning exactly what it says and
-position 0 is still on the Start log. The band grows; the board inside it does
-not.
+**Invariant:** the `pond`'s row **grows with the band**. The chips and the Start
+log sit against the real left safe margin, the End log against the real right
+one, and `LanePositionGap` takes up the difference. Position 0 is still on the
+Start log and position 8 still on the End log, at every width.
+
+**Invariant:** what `header` and `controls` contain is still laid out in the
+reference canvas. The turn banner, the gear and `Roll` are anchored controls,
+not a track, and there is nothing about them that a wider screen should stretch.
+
+The second of those is what the first used to say about all three bands — see
+[the invariant this page used to carry](#the-invariant-this-page-used-to-carry).
+The two are not in tension: a band's *contents* stretch when they are a track
+whose whole job is to show distance travelled, and do not when they are a
+button.
 
 **A control anchored to a band's edge follows the screen's edge.** The turn chip
 and the settings gear sit `SafeMargin` in from the real left and right edges of
@@ -311,8 +412,40 @@ direction. The two bands keep their heights, because a smaller `Roll` is the
 wrong thing to trade away, and what a taller screen shows more of is water: the
 logs and the lane stack keep their reference size, centred in the band.
 
-At exactly 1920 × 1200 all of this is pixel-identical to the mockups, which is
-why it is a rule stated on this page rather than a new picture to draw.
+At exactly 1920 × 1200 all of this is pixel-identical to the reference mockup —
+verified, not assumed: `game-board.html` renders byte-for-byte the same before
+and after the pond became elastic. What is *not* pixel-identical at any other
+width is now the point, which is why this change comes with
+[a second drawing](#mockup) rather than a rule alone.
+
+### The invariant this page used to carry
+
+Until [#325](https://github.com/derekwinters/connor-multiplying-frogs/issues/325)
+this section carried one invariant covering all three bands, and it ended with a
+sentence that was quoted elsewhere on this page:
+
+> **Invariant:** what a band *contains* is still laid out in the reference
+> canvas, centred. The lanes are the reference canvas's safe area wide and the
+> two shared logs stand in the columns those lanes' tracks start and end in, on
+> every screen, so every constant in the table below keeps meaning exactly what
+> it says and position 0 is still on the Start log. **The band grows; the board
+> inside it does not.**
+
+That is no longer true of the `pond`, and it is exactly what Derek asked to
+change after seeing the built board: the board was a 1920 px picture centred in
+a wider band, so the chips floated some 300 px in from the edge of a screen they
+were supposed to be pinned to.
+
+It remains true of `header` and `controls`, in the invariant above. The old
+wording is kept here rather than deleted, the way
+[`working-out-grid.md` keeps the invariants it used to
+carry](working-out-grid.md#the-invariants-this-page-used-to-carry): a reader who
+remembers the old rule needs to find out that it moved, not to find no trace of
+it and assume they misremembered.
+
+What did **not** change with it: every constant in the table still means exactly
+what it says, and `LanePositionGap` is the single exception — it is the one
+number a screen is now allowed to decide.
 
 ### Keeping the frogs visible
 
@@ -434,11 +567,29 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 
 ## Mockup
 
-[`mockups/game-board.html`](mockups/game-board.html) — and, until Connor has
-picked the water, [`mockups/game-board-paler-water.html`](mockups/game-board-paler-water.html)
-beside it.
+[`mockups/game-board.html`](mockups/game-board.html) — the reference canvas, and
+the one to build against. Beside it,
+[`mockups/game-board-wide.html`](mockups/game-board-wide.html) draws the same
+board at 2560 × 1200, and — until Connor has picked the water —
+[`mockups/game-board-paler-water.html`](mockups/game-board-paler-water.html)
+draws the reference canvas again in the other blue.
 
-The two files differ in **one value**: `PondWater`. `game-board.html` draws the
+**The wide file is deliberately not at the reference canvas**, which every other
+mockup in this project is. It has to be: the whole of
+[the elastic pond](#anchors) is what happens at a width that is not 1920, and a
+drawing at one width cannot show it. 2560 × 1200 is 2.13 : 1, within a hair of
+the roughly 2.17 : 1 the tablet actually reports, and it is the width at which
+the derived gap lands on a whole 128 px that can be checked against the
+constants table by eye.
+
+**At 1920 the two board drawings are the same picture as before this change** —
+byte-for-byte the same rendering, not merely "looks the same". That is the
+check that the reference canvas is still a picture of the game, and it is the
+reason `game-board.html`'s diff in this change is a comment and two CSS
+variables rather than a redraw.
+
+The reference file and the paler-water file differ in **one value**:
+`PondWater`. `game-board.html` draws the
 proposal in the table above, `#9FD8F2`; the second draws `#B5E3F7`, the same
 blue with more light in it. Everything else on the two canvases is identical to
 the pixel. Open both on the tablet, one after the other, and say which is the
@@ -476,6 +627,25 @@ decided against; keeping a mockup of a layout nobody is building is how a
   bar before it lands. The same is true of `LogBrown` and `LilyPadGreen`, which
   are drawn once each rather than twice — say if either is wrong and it gets
   the same treatment.
+- **Does the gap look right when it is wider than the lily pad?** At the
+  reference canvas `LanePositionGap` is 48 px against a 112 px
+  `LilyPadDiameter`, and the pads plainly read as a track. On the wide drawing
+  the gap is **128 px — wider than the pad itself**, and seven pads further
+  apart than they are big could read as scattered stepping stones rather than as
+  something to hop along. [The wide mockup](mockups/game-board-wide.html) exists
+  to answer this, and it is a look-at-it call on the tablet, not an argument.
+
+    If it does read wrong, the fix is a **cap** — a `LanePositionGapMax` beside
+    the existing floor, with the leftover width going to water at the pond's
+    right-hand end rather than into the gaps — and *not* a return to the centred
+    board, which is the thing being fixed. No cap is proposed here, because
+    proposing a number for a problem nobody has seen yet is how a constants
+    table fills up with values nobody can justify.
+
+    The neighbouring option, growing the pads to fill the space, is a different
+    and much bigger change: `LilyPadDiameter` is 112 px because
+    [that is what decided lanes-across over lanes-up](#why-the-lanes-run-across),
+    and moving it reopens that decision. It wants its own issue if it is wanted.
 - **Do the header and controls bands change?** They are `BandFill`, the pale
   grey-green chosen to sit against a pale board, and this change
   [deliberately left them alone](#the-bands-are-unchanged-deliberately). Against

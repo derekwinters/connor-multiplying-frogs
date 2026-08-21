@@ -18,6 +18,7 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Game setup, before names | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
 | Game board, paler water | [`game-board-paler-water.html`](game-board-paler-water.html) | [Game board](../game-board.md) |
+| Game board, on a wider screen | [`game-board-wide.html`](game-board-wide.html) | [Game board](../game-board.md) |
 | Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
@@ -60,12 +61,23 @@ exactly the same panel height as its rival — so the question the pair was open
 to ask, which placement is cheaper, turned out to have no answer, and the choice
 was decided on what the block should read as instead.
 
-The game board's pair is the other live one, and it is the second kind: a real
-choice, drawn twice. `game-board.html` and `game-board-paler-water.html` are
-the same canvas differing in exactly one value — the water's blue. Connor picks
-one on the tablet, the spec page takes the answer, and the losing file is
+The game board's water pair is the other live one, and it is the second kind: a
+real choice, drawn twice. `game-board.html` and `game-board-paler-water.html`
+are the same canvas differing in exactly one value — the water's blue. Connor
+picks one on the tablet, the spec page takes the answer, and the losing file is
 deleted. Until then, an edit to the board's layout has to be made in **both**
 files, which is the cost of the pair and the reason it does not stay open long.
+
+The board's **third** file, `game-board-wide.html`, is a fifth kind that no
+other screen has: the same layout drawn at a second width. It is not a choice
+and there is nothing to pick between — it is the only way to see a rule that
+only exists between two widths. Since
+[#325](https://github.com/derekwinters/connor-multiplying-frogs/issues/325) the
+pond spreads to fill whatever screen it is on, so at 1920 the board is what it
+always was and at 2560 the lily pads sit 128 px apart instead of 48. Both
+drawings are generated from the same two CSS variables — the canvas width and
+the derived gap — which is why keeping them in step costs almost nothing
+despite there now being three board files.
 
 Game setup has **four** files, which is three more than a screen should need,
 and each has a different job. `game-setup-names-set.html` is the screen at
@@ -124,6 +136,12 @@ entire point.
 - **Sized to the target viewport** with a fixed-size container, so it renders at
   1:1 rather than filling whatever window it opens in. State the device and
   dimensions in a comment at the top of the file.
+- **One canvas: 1920 × 1200.** There is exactly one exception in this folder and
+  it is [`game-board-wide.html`](game-board-wide.html), at 2560 × 1200. It earns
+  it: the pond's layout is elastic, so its whole subject is what happens at a
+  width that is not the reference canvas, and no drawing at 1920 can show that.
+  A file that wants this exception has to be about a rule that only exists
+  between two widths — not merely inconvenient to draw at 1920.
 - **Real proportions, real units.** The numbers in the mockup are the numbers in
   the spec page's constants table. If they disagree, one of them is a bug.
 - **Placeholder content is honest** — the longest plausible score, not `0`; a
