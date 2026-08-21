@@ -8,18 +8,44 @@
   can be told apart in a picture; the palette is an area:art decision.
   Numbers here are the numbers in the spec page's constants table.
 
-  Two corrections, made by issue #222 when it built this dialog, both bringing
-  the picture back into line with the constants table it claims to draw:
+  THE AGREED PICTURE. Issue #322 added the About section and drew it twice —
+  once under the title, once in the footprint at the bottom-left where the
+  version used to live. Derek picked under the title, so this file is that, and
+  the footprint file is deleted: a mockup nobody can build to is a mockup that
+  confuses the next reader.
 
-  1. `How to play` now carries the `.btn.off` disabled treatment. The screen it
-     would open has no wireframe yet, and the spec page's own open question
-     proposes "present and disabled" — this used to draw it at full opacity.
-  2. The two action buttons moved up 10 px. `.panel` is `box-sizing:border-box`
-     with a 3 px border, so absolutely positioned children resolve against a
-     754 px padding box: at the old offsets the gap under `End the game`
-     rendered as 86 px, not the 96 px `ButtonDestructiveGap` the table and
-     shared-components.md#button both state. `Back to the game` and the version
-     stayed put — they sit at `DialogPadding`, which is right.
+  What the comparison established, kept because it is the reason these numbers
+  are what they are:
+
+  - The footprint option was proposed as the block "sharing its row with `Back
+    to the game` on the right", and expected to be the cheap one because the
+    version already lived down there. It is not drawable that way. `Back to the
+    game` renders 531 px wide, so of the 788 px of inner width it leaves 257 px
+    on the left, and "Designed by Connor" at `SettingsAboutCreditSize` needs
+    about 300. Drawn as proposed, the primary button sat on top of the credit
+    line.
+  - Given a band of its own instead, the footprint option cost the panel the
+    same 210 px of height as this one. So height did not pick between them.
+  - What picked between them was what the block reads AS, and one structural
+    consequence: here `Back to the game` stays exactly `DialogPadding` up from
+    the panel's bottom edge, which is where shared-components.md#dialog puts a
+    dialog's button row. The footprint option lifted it 260 px to make room for
+    a band underneath.
+
+  The panel grows 760 -> 970 px to hold the block. `ButtonDestructiveGap` is
+  untouched at 96 px and the actions column is still positioned from the bottom
+  of the panel up, so the gap stays the layout rather than a leftover.
+
+  Two earlier corrections, made by issue #222, are preserved: the action buttons
+  sit against a padding box (`.panel` is `box-sizing:border-box` with a 3 px
+  border), and `How to play` carries the disabled treatment because the screen
+  it opens has no wireframe yet (#324).
+
+  That disabled treatment is redrawn here. It used to be a flat grey fill, which
+  shared-components.md#button says is wrong — disabled is the kind's own
+  appearance at `ButtonDisabledOpacity` (0.40) — and that page asks for the
+  mockups to be brought into line the next time they are touched. This is that
+  time.
 -->
 <html lang="en">
 <head>
@@ -49,7 +75,7 @@
   .btn.p{background:var(--accent);color:#fff}
   .btn.s{border:4px solid var(--line);color:var(--ink)}
   .btn.d{border:4px solid var(--warn);color:var(--warn)}
-  .btn.off{background:#C9D2CE;color:#8C9793}
+  .btn.off{opacity:.40}
   .chip{width:256px;height:96px;border-radius:20px;border:3px solid var(--faint);display:flex;
         align-items:center;gap:24px;padding:0 20px;font-size:32px;background:#fff;flex:none}
   .chip.act{border:6px solid var(--ink);font-weight:700}
@@ -76,17 +102,48 @@
         display:flex;align-items:center;justify-content:center}
   .gear{width:96px;height:96px;border-radius:50%;border:4px solid var(--line);display:flex;align-items:center;
         justify-content:center;font-size:44px}
+
+  /* DialogTitleSize 56 px in a 68 px line box — 56 x 1.2 rounded up to a
+     whole pixel, so `DialogTitleGap` below it is 40 px in any renderer and
+     not 43 px in the one that shipped a tighter default. */
+  .dlgtitle{font-size:56px;line-height:68px;font-weight:700}
+
+  /* The About block. 144 px tall, and the arithmetic sums exactly:
+     40x1.2 + 12 + 32x1.2 + 12 + 28x1.2  =  48 + 12 + 38.4 + 12 + 33.6  =  144. */
+  .about{display:flex;flex-direction:column;gap:12px}
+  .about .name{font-size:40px;line-height:1.2;font-weight:700;color:var(--ink)}
+  .about .credit{font-size:32px;line-height:1.2;color:var(--ink)}
+  .about .ver{font-size:28px;line-height:1.2;color:var(--line)}
 </style>
 </head>
 <body>
 <div class="frame">
     <div class="abs" style="inset:0;background:#E2E8E5"></div>
     <div class="scrim"></div>
-    <div class="abs panel" style="left:510px;top:220px;width:900px;height:760px">
-      <div class="abs" style="left:56px;top:56px;font-size:56px;font-weight:700">Settings</div>
-      <div class="abs btn s off" style="left:56px;top:170px;width:788px">How to play</div>
-      <div class="abs btn d" style="left:56px;top:378px;width:788px">End the game</div>
-      <div class="abs" style="left:56px;bottom:60px;font-size:28px;color:#6C7873">v0.1.0</div>
+
+    <!-- Panel 900 x 970, centred: left (1920-900)/2 = 510, top (1200-970)/2 = 115.
+         Padding box is 894 x 964, and every offset below is against that. -->
+    <div class="abs panel" style="left:510px;top:115px;width:900px;height:970px">
+
+      <!-- Top-down, because in this option the About block is a header and a
+           header is measured from the top:
+             Settings     56 -> 124    (DialogTitleSize 56 in a 68 px line box)
+             About block 164 -> 308    (DialogTitleGap 40, then 144)
+           and then the actions column resumes being measured bottom-up:
+             How to play  380 -> 492   (SettingsAboutSectionGap 72 below 308)
+             End the game 588 -> 700
+             Back to the game 796 -> 908  (DialogPadding 56 up from 964) -->
+      <div class="abs dlgtitle" style="left:56px;top:56px">Settings</div>
+
+      <div class="abs about" style="left:56px;top:164px">
+        <div class="name">Multiplying Frogs</div>
+        <div class="credit">Designed by Connor</div>
+        <div class="ver">v0.4.0</div>
+      </div>
+
+      <div class="abs btn s off" style="left:56px;top:380px;width:788px">How to play</div>
+      <div class="abs btn d" style="left:56px;top:588px;width:788px">End the game</div>
+
       <div class="abs btn p" style="right:56px;bottom:56px">Back to the game</div>
     </div>
 </div>

@@ -1186,6 +1186,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-built-dialog-does-not-have-these-numbers-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The built dialog does not have these numbers yet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-constants-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The constants this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1211,10 +1239,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-it-is-this-thin" class="md-nav__link">
+  <a href="#why-it-is-this-thin-and-what-the-about-block-does-to-that-argument" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why it is this thin
+        Why it is this thin, and what the About block does to that argument
       
     </span>
   </a>
@@ -1229,6 +1257,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Mockup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-drawing-the-pair-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What drawing the pair changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2056,6 +2101,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-built-dialog-does-not-have-these-numbers-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The built dialog does not have these numbers yet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-constants-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The constants this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2081,10 +2154,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-it-is-this-thin" class="md-nav__link">
+  <a href="#why-it-is-this-thin-and-what-the-about-block-does-to-that-argument" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why it is this thin
+        Why it is this thin, and what the About block does to that argument
       
     </span>
   </a>
@@ -2099,6 +2172,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Mockup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-drawing-the-pair-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What drawing the pair changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2140,7 +2230,9 @@
 
 <h1 id="settings-dialog">Settings dialog<a class="headerlink" href="#settings-dialog" title="Link to this section">&para;</a></h1>
 <p>The gear on the <a href="../game-board/">game board</a>. It holds the rules, the way out of
-a game, and which version you are running.</p>
+a game, and — since <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/322">#322</a>
+— an About section saying what this game is, who designed it, and which version
+you are running.</p>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
 <p><strong>Invariant:</strong> opening this changes nothing about the game. It is a menu, not a
 turn.
@@ -2151,7 +2243,13 @@ It is the way out of a game, and a way out that is only available to whoever
 happens to be holding the tablet is not a way out.
 <strong>Invariant:</strong> nothing here can change a rule of the game mid-play. There is no
 difficulty setting, no player count, no undo.
-<strong>Invariant:</strong> the version string comes from <code>/VERSION</code>.</p>
+<strong>Invariant:</strong> the version string comes from <code>/VERSION</code>. Moving where it is
+drawn does not change where it is read from — the About block renders
+<code>AppVersion</code>, and a build stamp printed as a literal is a build stamp that will
+eventually be wrong.
+<strong>Invariant:</strong> the About block is text and only text. It carries no control, no
+link, and nothing tappable. It is the one part of this dialog that is not a way
+to do something.</p>
 <h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2170,8 +2268,8 @@ difficulty setting, no player count, no undo.
 <td><code>How to play</code>, then <code>End the game</code></td>
 </tr>
 <tr>
-<td><code>footprint</code></td>
-<td>Version string</td>
+<td><code>about</code></td>
+<td>The game's name, <code>Designed by Connor</code>, and the version</td>
 </tr>
 <tr>
 <td><code>controls</code></td>
@@ -2179,10 +2277,15 @@ difficulty setting, no player count, no undo.
 </tr>
 </tbody>
 </table>
+<p><code>about</code> replaces the region this page used to call <code>footprint</code>, which held the
+version string alone. The name changes because a footprint is a thing tucked in
+a corner and this is a section with a heading in it — see
+<a href="#the-constants-this-page-used-to-carry">the constants this page used to carry</a>.</p>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <p>A centred <a href="../shared-components/#dialog">dialog</a>, <code>SettingsDialogWidth</code> by
 <code>SettingsDialogHeight</code>. Actions are a single left-aligned column at full inner
-width; <code>footprint</code> sits bottom-left; the primary button bottom-right.</p>
+width; the primary button is bottom-right; the <code>about</code> block is left-aligned at
+the panel's inner left edge, <code>SettingsAboutTopOffset</code> down from the panel's top.</p>
 <p><code>End the game</code> is separated from everything below it by
 <code>ButtonDestructiveGap</code> — 96 px, which is nearly a whole button's height of
 empty space. That gap is the layout, not decoration: <code>Back to the game</code> is the
@@ -2194,6 +2297,15 @@ above the button row, and <code>How to play</code> sits <code>SettingsActionGap<
 game</code>. The column's top edge is whatever is left over. Laid out the other way
 round, from the top down, the gap would be a consequence of arithmetic and a
 longer label or a shorter panel could quietly close it.</p>
+<p><code>about</code> sits <strong>under the title</strong>, between it and the actions column — settled,
+<a href="#open-questions">open question 1</a>. It is measured from the top of the panel
+down, unlike the actions column below it, because it is a header: it belongs to
+<code>Settings</code> above it, not to the buttons below it, and it should not move when a
+button label or the panel's height changes.</p>
+<p>That is why the two directions meet in the middle of this panel. The <code>about</code>
+block grows downward from the title; the actions column grows upward from the
+button row; and the space between them is what is left over. Each half is
+anchored to the thing it belongs to.</p>
 <h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2212,7 +2324,7 @@ longer label or a shorter panel could quietly close it.</p>
 <tr>
 <td>Dialog height</td>
 <td><code>SettingsDialogHeight</code></td>
-<td>760 px</td>
+<td>970 px</td>
 </tr>
 <tr>
 <td>Action button width</td>
@@ -2230,24 +2342,142 @@ longer label or a shorter panel could quietly close it.</p>
 <td>96 px</td>
 </tr>
 <tr>
-<td>Version label's offset from the panel's bottom edge</td>
-<td><code>SettingsVersionBottomOffset</code></td>
-<td>60 px</td>
+<td>Game name size, in <code>about</code></td>
+<td><code>SettingsAboutNameSize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td>Credit size, in <code>about</code></td>
+<td><code>SettingsAboutCreditSize</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Version size, in <code>about</code></td>
+<td><a href="../title-screen/#named-constants"><code>VersionLabelSize</code></a></td>
+<td>28 px</td>
+</tr>
+<tr>
+<td>Line box, as a ratio of each line's own size</td>
+<td><code>SettingsAboutLineHeight</code></td>
+<td>1.2</td>
+</tr>
+<tr>
+<td>Gap between the three lines of <code>about</code></td>
+<td><code>SettingsAboutLineGap</code></td>
+<td>12 px</td>
+</tr>
+<tr>
+<td>Height of the whole <code>about</code> block</td>
+<td><code>SettingsAboutBlockHeight</code></td>
+<td>144 px</td>
+</tr>
+<tr>
+<td><code>about</code> down from the panel's top edge</td>
+<td><code>SettingsAboutTopOffset</code></td>
+<td>164 px</td>
+</tr>
+<tr>
+<td>Gap below <code>about</code>, before the actions column</td>
+<td><code>SettingsAboutSectionGap</code></td>
+<td>72 px</td>
 </tr>
 </tbody>
 </table>
+<p><code>SettingsAboutBlockHeight</code> is derived, and the arithmetic sums exactly, which is
+why it is a round number rather than a rounded one:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>40 × 1.2  +  12  +  32 × 1.2  +  12  +  28 × 1.2
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   48     +  12  +    38.4    +  12  +    33.6     =  144
+</code></pre></div>
+<p>It is named anyway rather than left to be recomputed. The block's height is what
+sets <code>SettingsDialogHeight</code>, and a number that three other numbers depend on is
+a number worth being able to say out loud.</p>
+<p><code>SettingsAboutTopOffset</code> is not a free number: it is <code>DialogPadding</code> (56) + the
+title's line box (68) + <code>DialogTitleGap</code> (40). It is stated as a single offset
+because that is how the block is positioned, and derived here so a change to
+<code>DialogTitleGap</code> is visibly a change to this too.</p>
+<p>The title's line box is 68 px — <code>DialogTitleSize</code> 56 at <code>SettingsAboutLineHeight</code>
+1.2, rounded up to a whole pixel. It is written down because <code>DialogTitleGap</code> is
+measured from it, and a line box left to a font's default is a gap that is 40 px
+in one renderer and 43 px in the next. The mockup sets it explicitly for the
+same reason.</p>
+<p><code>SettingsAboutSectionGap</code> is deliberately <strong>not</strong> <code>ButtonDestructiveGap</code>, even
+though it is the gap immediately above a column that ends in a destructive
+button. Nothing in <code>about</code> is a button, so the destructive gap has no work to do
+there, and reusing the name would imply a safety rule that is not being applied.
+It is also not <code>DialogTitleGap</code>: that one separates a title from its body, and
+<code>about</code> is not this dialog's body — the actions are.</p>
+<h3 id="the-built-dialog-does-not-have-these-numbers-yet">The built dialog does not have these numbers yet<a class="headerlink" href="#the-built-dialog-does-not-have-these-numbers-yet" title="Link to this section">&para;</a></h3>
+<p><code>SettingsDialogView</code> carries <code>SettingsDialogHeight = 760f</code> and
+<code>SettingsVersionBottomOffset = 60f</code>, which is what this page said before this
+wireframe. That divergence is deliberate and is the normal state of a screen
+between its wireframe and its implementation: <strong>this page is authoritative and
+the code follows it</strong>, per
+<a href="../../../engineering/ui-design-process/">wireframe before UI code</a>. Bringing the
+two back into agreement is the implementation issue's job, and that issue is
+blocked by this wireframe.</p>
+<h3 id="the-constants-this-page-used-to-carry">The constants this page used to carry<a class="headerlink" href="#the-constants-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Value</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SettingsVersionBottomOffset</code></td>
+<td><em>(gone)</em></td>
+<td>was 60 px</td>
+<td>Nothing is anchored to the panel's bottom-left any more</td>
+</tr>
+<tr>
+<td><code>SettingsDialogHeight</code></td>
+<td><code>SettingsDialogHeight</code></td>
+<td>760 → 970 px</td>
+<td>The About block's 144 px plus the gap above it</td>
+</tr>
+</tbody>
+</table>
+<p><code>SettingsVersionBottomOffset</code> is <strong>removed, not renamed</strong>, which is the opposite
+of what happened to the title screen's
+<a href="../title-screen/#what-became-of-the-play-constants"><code>Play*</code> constants</a>. Those
+were renamed because their job survived under a new name. This one's job does
+not survive: it existed to hold a version string up off the panel's bottom edge,
+and after this change nothing sits at the panel's bottom-left at all. The
+version is inside <code>about</code>, at the top, positioned by <code>SettingsAboutTopOffset</code>
+and its two siblings.</p>
+<p>A constant that is deleted rather than renamed is worth saying out loud, because
+the code still declares it. Deleting it is part of the implementation issue, not
+something to leave behind as a value nothing reads.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong><code>How to play</code></strong> — secondary <a href="../shared-components/#button">button</a>. Opens the
-  rules. See the open question below: the screen it opens does not exist yet.</li>
+  rules. Still disabled: the screen it opens is being designed in
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>
+  and until that lands there is nothing to open.</li>
 <li><strong><code>End the game</code></strong> — destructive button. Opens
   <a href="../end-game-confirm/">end-game confirm</a>. Never ends anything by itself.</li>
 <li><strong><code>Back to the game</code></strong> — primary button. Closes and returns to exactly the
   board state that was there.</li>
-<li><strong>Version</strong> — <code>v0.1.0</code>, quiet, bottom-left, at
-  <a href="../title-screen/#named-constants"><code>VersionLabelSize</code></a>. The same value doing
-  the same job as the title screen's own version readout, under the identical
-  name — not a second constant for the same number.</li>
+<li><strong><code>about</code></strong> — three lines, left-aligned, stacked, <code>SettingsAboutLineGap</code>
+  apart. Not a button, not tappable, no state:<ol>
+<li><strong><code>Multiplying Frogs</code></strong> at <code>SettingsAboutNameSize</code>, bold. The same words
+   the title screen already draws — <code>TitleScreenView</code>'s own <code>TitleLabel</code>,
+   at a smaller size. This is the game saying its own name, not a second
+   wordmark. Note that <code>SettingsDialogView</code> has a <code>TitleLabel</code> of its own
+   and it is the string <code>Settings</code>; these two are not the same constant and
+   must not be made to share one.</li>
+<li><strong><code>Designed by Connor</code></strong> at <code>SettingsAboutCreditSize</code>. Derek's wording,
+   and the default answer; see <a href="#open-questions">open question 3</a>, which is
+   Connor's to settle because the line is about him.</li>
+<li><strong>The version</strong> at <code>VersionLabelSize</code>, in the mockup's <code>--line</code> grey,
+   from <code>/VERSION</code> via <code>AppVersion</code>. The same value doing the same job as
+   the title screen's own version readout, under the identical name — not a
+   second constant for the same number.</li>
+</ol>
+</li>
 </ul>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
@@ -2257,30 +2487,108 @@ longer label or a shorter panel could quietly close it.</p>
   <a href="../shared-components/#dialog">dialog rule</a>.</li>
 <li>Closing returns to the board with nothing changed: same turn, same positions,
   same enabled <code>Roll</code>.</li>
+<li>Nothing in <code>about</code> responds to a touch, including a long one. There is no
+  build-info easter egg behind seven taps on the version.</li>
 </ul>
-<h2 id="why-it-is-this-thin">Why it is this thin<a class="headerlink" href="#why-it-is-this-thin" title="Link to this section">&para;</a></h2>
-<p>Because v1 genuinely has nothing to configure. There is no audio to mute, no
-account to sign out of, no difficulty to set, no data to clear. Every one of
-those is either
+<h2 id="why-it-is-this-thin-and-what-the-about-block-does-to-that-argument">Why it is this thin, and what the About block does to that argument<a class="headerlink" href="#why-it-is-this-thin-and-what-the-about-block-does-to-that-argument" title="Link to this section">&para;</a></h2>
+<p>This page used to argue that the dialog holds exactly <strong>the two things a player
+actually needs mid-game — the rules, and the exit</strong> — and that a settings screen
+padded out with toggles that do nothing is worse than a short one. That argument
+stands, and v1 still has nothing to configure: no audio to mute, no account to
+sign out of, no difficulty to set, no data to clear. Every one of those is either
 <a href="../../future-ideas/">parked</a> or ruled out by <code>CLAUDE.md</code>.</p>
-<p>A settings screen padded out with toggles that do nothing is worse than a short
-one. What this dialog is <em>for</em> is the two things a player actually needs
-mid-game — the rules, and the exit.</p>
-<p>If audio lands, the mute control belongs here, and it is the reason this dialog
-is a list rather than two buttons in a row.</p>
+<p>The About block is a third thing, and it is honestly <strong>not</strong> one a player needs
+mid-game. The argument for it anyway is that it is not a control:</p>
+<ul>
+<li><strong>It cannot be operated, so it cannot be operated by mistake.</strong> The reason the
+  dialog stays thin is that every extra control is another thing a child can
+  press mid-turn. Text adds nothing to that count.</li>
+<li><strong>The version was already here</strong>, doing exactly this job, and doing it as a
+  lonely string in a corner. The block is mostly that string given the two lines
+  of context that make it legible.</li>
+<li><strong>There is nowhere else for the credit to go.</strong> The title screen is
+  <a href="../title-screen/#invariants">capped at two interactive elements</a> and its art
+  fills the canvas; the board is the game. This is the only surface in v1 that
+  can hold a sentence.</li>
+</ul>
+<p>What has <strong>not</strong> changed is the rule underneath the argument: nothing lands on
+this dialog that a player could press. If audio ever arrives, the mute control
+belongs here, and it is still the reason this dialog is a list rather than two
+buttons in a row.</p>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
-<p><a href="../mockups/settings-dialog.html"><code>mockups/settings-dialog.html</code></a></p>
+<p><a href="../mockups/settings-dialog.html"><code>mockups/settings-dialog.html</code></a> — the agreed
+picture, with <code>about</code> under the title.</p>
+<p>It was one of a pair. Both files were the same 900 × 970 canvas with the same
+stylesheet and the same three lines of text, differing in exactly one thing:
+whether <code>about</code> sat under the title or in the footprint at the bottom-left.
+<a href="#open-questions">Open question 1</a> is now settled, so the winning drawing takes
+this page's plain filename and the footprint file is deleted — the same thing
+that happened to the title screen's
+<a href="../title-screen/#mockup"><code>RESUME</code>-primary comparison</a>, and for the same reason:
+a mockup nobody can build to is a mockup that confuses the next reader.</p>
+<h3 id="what-drawing-the-pair-changed">What drawing the pair changed<a class="headerlink" href="#what-drawing-the-pair-changed" title="Link to this section">&para;</a></h3>
+<p>Worth keeping, because it is why the numbers on this page are what they are, and
+because the finding inverted the question the pair was opened to ask.</p>
+<p><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/322">#322</a>
+proposed the footprint option as the block <em>"sharing its row with <code>Back to the
+game</code> on the right"</em>, and expected it to be the cheap one because the version
+already lived down there. It is not drawable that way. <code>Back to the game</code>
+renders 531 px wide, so of <code>SettingsActionWidth</code>'s 788 px it leaves 257 px on
+the left, and <code>Designed by Connor</code> at <code>SettingsAboutCreditSize</code> needs about 300.
+Drawn as proposed, the primary button sat on top of the credit line.</p>
+<p>Given a band of its own instead, the footprint option cost the panel the same
+210 px of height as the header option. <strong>Height did not pick between them</strong> —
+which is the opposite of what the issue expected, and is the kind of thing a sum
+does not tell you and a picture does.</p>
+<p>What picked between them was what the block reads <em>as</em>, and one structural
+consequence: under the header placement <code>Back to the game</code> stays exactly
+<code>DialogPadding</code> up from the panel's bottom edge, which is where
+<a href="../shared-components/#dialog">shared-components.md</a> puts a dialog's button row.
+The footprint placement lifted it 260 px to make room for a band underneath.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>What does <code>How to play</code> open?</strong> There is no wireframe for it, which means
-  under <a href="../../../engineering/ui-design-process/">rule 8</a> it cannot be built yet.
-  Options: a plain scrolling text panel of
-  <a href="../../../intro/how-to-play/">how to play</a>, or a picture of the rules card from
-  the classroom game — which is charming, and is the actual source of the rules.
-  Needs its own <code>type:wireframe</code> issue before the button does anything.</li>
-<li><strong>Should the button be hidden until that exists, or present and disabled?</strong>
-  Proposed: present. A disabled button that appears later is less confusing than
-  a button that appears from nowhere.</li>
+<li><strong>1. Where does the About block go? Settled: under the title.</strong> Derek's call
+  on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/322">#322</a>.
+  The two placements cost the same height, so the choice was about what the
+  block should read as, and the header reading won on two counts: <code>about</code>
+  announces the game before the dialog offers its two actions, and the button
+  row stays exactly where the shared
+  <a href="../shared-components/#dialog">dialog</a> component puts it — flush to
+  <code>DialogPadding</code> — rather than being lifted to make room for a band beneath it.</li>
+</ul>
+<p>The cost accepted with it: the version now prints near the top of the dialog,
+  where headers go, and a version is a footnote. It is the smallest line in the
+  block and the only one in grey, which is the whole of the mitigation. If that
+  reads wrong on the tablet it is a reason to reopen this, not a reason to move
+  the block back — the footprint placement's own cost has not gone anywhere.</p>
+<ul>
+<li><strong>2. Is <code>Settings</code> still the right title for this dialog?</strong> Not proposed as a
+  change, flagged as a thing to notice: a dialog titled <code>Settings</code> whose
+  contents are two buttons and a credit is arguably titled wrong, and it is more
+  obviously wrong under the header placement, where <code>Settings</code> and
+  <code>Multiplying Frogs</code> sit four lines apart doing similar jobs. Left open
+  deliberately — renaming it is a change to what the gear means, which is a
+  bigger question than where a credit line goes.</li>
+<li><strong>3. Is <code>Designed by Connor</code> the right words?</strong> Derek wrote it and it is the
+  default. It is the one line in the game that is about Connor, so it is his to
+  change, and it is worth actually asking him rather than shipping the default
+  because nobody did.</li>
+<li><strong>4. Does the title screen change too? Proposed: no.</strong> It shows the same name
+  and its own version readout at the same <code>VersionLabelSize</code>, and after this
+  change the two pages both draw a version — which is fine, because they are
+  drawing the same value from the same place under the same constant, not
+  disagreeing about where a version lives. The title screen is already an about
+  screen in effect: it is the game's name at 160 px over its own art. Adding a
+  credit line there is a change to
+  <a href="../title-screen/#invariants">its first invariant</a> about what is on that
+  screen, and it is not what
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/322">#322</a>
+  asked for.</li>
+<li><strong>What does <code>How to play</code> open?</strong> Being answered by
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>,
+  which is designing the screen. Until it lands the button stays present and
+  disabled, which is the answer this page already settled: a disabled button
+  that appears later is less confusing than a button that appears from nowhere.</li>
 </ul>
 
 
