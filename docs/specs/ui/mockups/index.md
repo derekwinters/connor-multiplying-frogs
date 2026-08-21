@@ -44,7 +44,23 @@ Derek settled the question — smaller cells for the addition rows only — so t
 file now draws the answer instead: the same six rows at
 `GridAdditionRowHeight`, fitting with 16 px to spare.
 
-The game board's pair is the live one, and it is the second kind: a real
+The settings dialog used to have a pair, drawn by
+[#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322) to
+ask where the About block should sit — in the footprint, or under the title.
+Derek picked under the title, so `settings-dialog.html` is that drawing and the
+footprint file is deleted.
+
+It is worth recording what that pair established before it was resolved,
+because it is the clearest example on this page of why a mockup is drawn rather
+than reasoned about. The footprint option was expected to be the cheap one: the
+version already lived at the bottom-left, so the block was to share that row
+with `Back to the game`. Drawn, the button turned out to be 531 px wide and
+landed on top of "Designed by Connor". Given a band of its own instead, it cost
+exactly the same panel height as its rival — so the question the pair was opened
+to ask, which placement is cheaper, turned out to have no answer, and the choice
+was decided on what the block should read as instead.
+
+The game board's pair is the other live one, and it is the second kind: a real
 choice, drawn twice. `game-board.html` and `game-board-paler-water.html` are
 the same canvas differing in exactly one value — the water's blue. Connor picks
 one on the tablet, the spec page takes the answer, and the losing file is
