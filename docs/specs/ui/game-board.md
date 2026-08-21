@@ -22,7 +22,11 @@ mistake for frogs sharing something, which is why it is written down here.
 **Invariant:** the board never moves on its own. A frog moves only as the direct
 result of the answer the player just gave.
 **Invariant:** whose turn it is is stated in words in the header, not only shown
-by a highlight.
+by a highlight. Since
+[#326](https://github.com/derekwinters/connor-multiplying-frogs/issues/326) the
+words are the *only* thing in the header that says it, so this invariant is no
+longer a floor the layout comfortably clears — it is the layout. Nothing may
+remove those words in favour of a colour, a ring, or an arrow.
 **Invariant:** `Roll` is the only way to start a turn, and it is disabled the
 moment it is pressed until the turn resolves. A double-tap cannot roll twice.
 **Invariant:** nothing on this screen is destructive. Ending the game lives
@@ -177,7 +181,6 @@ lanes-across** after seeing both drawn.
 | Controls band height | `BoardControlsHeight` | 176 px |
 | Hairline under `header`, over `controls` | `BoardBandOutline` | 3 px |
 | Turn banner text size | `TurnBannerSize` | 52 px |
-| Gap between the banner's chip and its words | `TurnBannerGap` | 24 px |
 | Settings button, square | `SettingsButtonSize` | 96 px |
 | Settings gear glyph size | `SettingsGlyphSize` | 44 px |
 | Settings button outline | `SettingsButtonOutline` | 4 px |
@@ -401,10 +404,13 @@ The two are not in tension: a band's *contents* stretch when they are a track
 whose whole job is to show distance travelled, and do not when they are a
 button.
 
-**A control anchored to a band's edge follows the screen's edge.** The turn chip
-and the settings gear sit `SafeMargin` in from the real left and right edges of
-the screen, because `SafeMargin` is a margin from the screen and not from a
-rectangle nobody can see. `Roll` is centred and does not care either way.
+**A control anchored to a band's edge follows the screen's edge.** The turn
+banner and the settings gear sit `SafeMargin` in from the real left and right
+edges of the screen, because `SafeMargin` is a margin from the screen and not
+from a rectangle nobody can see. This used to say "the turn chip", and the chip
+is gone — see
+[#326](https://github.com/derekwinters/connor-multiplying-frogs/issues/326);
+what is anchored there now is the words themselves. `Roll` is centred and does not care either way.
 
 **Extra height goes to `pond` and nowhere else** — the same answer
 [Anchors](#anchors) already gives for a *shorter* screen, in the other
@@ -417,6 +423,23 @@ verified, not assumed: `game-board.html` renders byte-for-byte the same before
 and after the pond became elastic. What is *not* pixel-identical at any other
 width is now the point, which is why this change comes with
 [a second drawing](#mockup) rather than a rule alone.
+
+### The constant this page used to carry
+
+| Was | Is now | Value | Note |
+| --- | --- | --- | --- |
+| `TurnBannerGap` | *(gone)* | was 24 px | It measured the gap between the banner's chip and its words. There is no chip |
+
+`TurnBannerGap` is **removed, not redefined.** Under the option this page did
+not take — a small colour swatch in front of the words — it would have survived
+with the same 24 px value and a new meaning, which is the kind of survival that
+leaves a constant meaning two things a year apart. Words alone need no gap,
+because there is nothing to gap.
+
+`PlayerChipWidth` is untouched: the lane chips still use it, and so do
+[roll and card](roll-and-card.md) and the
+[working-out grid](working-out-grid.md). Only this screen's header stopped
+drawing one.
 
 ### The invariant this page used to carry
 
@@ -500,11 +523,20 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 
 ## Elements
 
-- **Turn banner** — `Green's turn`, left of the header, with that frog's
-  [player chip](shared-components.md#player-chip) in its active state. The
+- **Turn banner** — `Green's turn` at `TurnBannerSize`, starting at
+  `SafeMargin` from the real left edge of the header band and vertically centred
+  in it. **Words alone: no chip, no swatch, no colour** — settled,
+  [open question](#open-questions). The
   wording is the frog's **name and nothing else** — `Green's turn` for a frog
   still on its default, `Connor's turn` for one that has been renamed on
   [game setup](game-setup.md).
+
+    The [player chip](shared-components.md#player-chip) that used to sit in
+    front of these words is gone. Derek's reason is the whole argument: *"it's
+    already selected in the lanes section too"* — the active frog's own lane
+    chip, directly below in the pond, carries the same name, the same colour and
+    the same Active ring. The header chip was the third statement of a thing the
+    screen said twice already.
 
     It used to read `Green frog's turn`, and the reason given was that frogs
     have no other name. They do now, so the justification went with the word:
@@ -574,6 +606,14 @@ board at 2560 × 1200, and — until Connor has picked the water —
 [`mockups/game-board-paler-water.html`](mockups/game-board-paler-water.html)
 draws the reference canvas again in the other blue.
 
+A fourth file,
+[`mockups/game-board-banner-swatch.html`](mockups/game-board-banner-swatch.html),
+draws the header with a colour swatch in front of the words. It is a comparison
+and nothing else — see [the open question](#open-questions) — and it is deleted
+when that is settled. Four files for one screen is two more than a screen should
+need; the water pair and this pair are both live questions, and both should be
+closed rather than left open.
+
 **The wide file is deliberately not at the reference canvas**, which every other
 mockup in this project is. It has to be: the whole of
 [the elastic pond](#anchors) is what happens at a width that is not 1920, and a
@@ -627,6 +667,23 @@ decided against; keeping a mockup of a layout nobody is building is how a
   bar before it lands. The same is true of `LogBrown` and `LilyPadGreen`, which
   are drawn once each rather than twice — say if either is wrong and it gets
   the same treatment.
+- **Should the turn banner show the frog's colour at all?** Derek asked for the
+  chip to go, and it has. What is open is whether a small swatch should stay in
+  front of the words. Two files differ in exactly that:
+  `game-board.html` (words alone, the proposal) and
+  [`game-board-banner-swatch.html`](mockups/game-board-banner-swatch.html).
+
+    Words alone is proposed, for three reasons. The lane chip below already
+    carries that colour in the same Active state on the same screen. A bare
+    swatch outside a chip would be a **new element** — the 64 px circle inside a
+    player chip is that component's `PlayerSwatchDiameter`, and lifting it out
+    means naming a constant for a lone circle that belongs to nothing. And the
+    chip's accessibility invariant is *"a word, always, never colour alone"*,
+    which forbids colour without a word and permits the inverse.
+
+    The case against, worth stating because it is real: the header becomes the
+    only place on the board that names the active player without showing their
+    colour.
 - **Does the gap look right when it is wider than the lily pad?** At the
   reference canvas `LanePositionGap` is 48 px against a 112 px
   `LilyPadDiameter`, and the pads plainly read as a track. On the wide drawing
