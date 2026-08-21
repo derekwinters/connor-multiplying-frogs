@@ -90,7 +90,7 @@ radius, and duration on the screen, named and valued.
 | Element | Constant | Value |
 | --- | --- | --- |
 | `Roll` button width | `RollButtonWidth` | 480 px |
-| Gap between positions in a lane | `LanePositionGap` | 48 px |
+| Smallest gap between positions in a lane | `LanePositionGapMin` | 48 px |
 
 Same names in the code. See
 [named constants are the origin](../../engineering/ui-design-process.md#the-named-constants-are-the-origin-not-an-afterthought).
