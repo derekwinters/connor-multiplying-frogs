@@ -1089,6 +1089,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-lily-pad-is-notched-veined-and-varies-per-pad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The lily pad is notched, veined, and varies per pad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-horizontal-arithmetic" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2226,6 +2237,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-lily-pad-is-notched-veined-and-varies-per-pad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The lily pad is notched, veined, and varies per pad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-horizontal-arithmetic" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2798,6 +2820,41 @@ band whatever it is.</p>
 <td>112 px</td>
 </tr>
 <tr>
+<td>Notch depth, as a fraction of the radius</td>
+<td><code>LilyPadNotchDepth</code></td>
+<td>0.15</td>
+</tr>
+<tr>
+<td>Notch widths in the variation table</td>
+<td><code>LilyPadNotchAngles</code></td>
+<td>10°, 15°, 20°, 25°</td>
+</tr>
+<tr>
+<td>Veins per pad</td>
+<td><code>LilyPadVeinCount</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td>Vein gap at the centre, fraction of the radius</td>
+<td><code>LilyPadVeinInset</code></td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>Vein gap at the rim, fraction of the radius</td>
+<td><code>LilyPadVeinOutset</code></td>
+<td>0.12</td>
+</tr>
+<tr>
+<td>Vein stroke</td>
+<td><code>LilyPadVeinWidth</code></td>
+<td>2.5 px</td>
+</tr>
+<tr>
+<td>Vein opacity, drawn in <code>LilyPadEdge</code></td>
+<td><code>LilyPadVeinOpacity</code></td>
+<td>0.5</td>
+</tr>
+<tr>
 <td>Frog piece diameter</td>
 <td><code>FrogPieceDiameter</code></td>
 <td>88 px</td>
@@ -2844,6 +2901,119 @@ band whatever it is.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="the-lily-pad-is-notched-veined-and-varies-per-pad">The lily pad is notched, veined, and varies per pad<a class="headerlink" href="#the-lily-pad-is-notched-veined-and-varies-per-pad" title="Link to this section">&para;</a></h3>
+<p>A pad is a circle with a wedge cut from it and five veins across it. Both the
+notch's <strong>width</strong> and the direction it <strong>points</strong> vary from pad to pad, so a
+four-frog board draws 28 pads that are not 28 identical discs.</p>
+<p><strong>The variation is a pure function of where the pad is.</strong> A twelve-entry table,
+indexed by the pad's own coordinates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>index = (lane × 5 + position) mod 12
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Notch</th>
+<th>Points at</th>
+<th></th>
+<th>#</th>
+<th>Notch</th>
+<th>Points at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>20°</td>
+<td>14°</td>
+<td></td>
+<td>6</td>
+<td>10°</td>
+<td>260°</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10°</td>
+<td>212°</td>
+<td></td>
+<td>7</td>
+<td>15°</td>
+<td>131°</td>
+</tr>
+<tr>
+<td>2</td>
+<td>25°</td>
+<td>96°</td>
+<td></td>
+<td>8</td>
+<td>25°</td>
+<td>341°</td>
+</tr>
+<tr>
+<td>3</td>
+<td>15°</td>
+<td>308°</td>
+<td></td>
+<td>9</td>
+<td>15°</td>
+<td>78°</td>
+</tr>
+<tr>
+<td>4</td>
+<td>20°</td>
+<td>175°</td>
+<td></td>
+<td>10</td>
+<td>20°</td>
+<td>238°</td>
+</tr>
+<tr>
+<td>5</td>
+<td>25°</td>
+<td>47°</td>
+<td></td>
+<td>11</td>
+<td>10°</td>
+<td>158°</td>
+</tr>
+</tbody>
+</table>
+<p>Angles are measured the way the mockup's SVG measures them: 0° points right
+along the lane, 90° points down. The <code>× 5</code> offset exists so the four lanes do
+not line up into visible columns; the rotations span the whole circle rather
+than clustering, because an earlier draft confined them to the bottom
+semicircle and read as "all the notches point down at slightly different
+angles", which is not variation.</p>
+<p><strong>Being derived rather than random is the whole design, and it buys four
+things:</strong></p>
+<ul>
+<li><strong>Nothing is stored and nothing is saved.</strong> A random-per-game variation would
+  have to persist, or a resumed game would come back with differently shaped
+  pads — and the save format is Core's under
+  <a href="../../../adr/0004-core-owns-the-save-format/">ADR-0004</a>, so that would be a
+  schema change and a migration for a cosmetic detail.</li>
+<li><strong>A pad never changes shape</strong> when the board redraws, when a frog hops, or
+  between devices and runs.</li>
+<li><strong>Rotation is free at runtime</strong> — you rotate the transform. So the
+  implementation needs <strong>four sprites, one per entry in <code>LilyPadNotchAngles</code></strong>,
+  not twelve. The same holds when real art replaces these shapes.</li>
+<li>It is <strong>presentation, not game logic</strong>, so it belongs in the Unity layer
+  rather than Core — but it is a static pure function and is testable as one.</li>
+</ul>
+<p><strong>The veins radiate from the circle's geometric centre</strong>, not from the notch's
+apex. The notch stopping short of the diameter is the notch's business; the
+veins ignore it. Drawn from the apex the fan sits off-centre and leans
+differently on every pad, which is what made an earlier draft look uneven.</p>
+<p>The five are <strong>symmetric about the notch's own axis</strong>, so one vein runs straight
+out opposite the notch and two pairs sit either side of it. An even count
+straddles that line and reads less like a leaf. Each vein stops short at both
+ends — <code>LilyPadVeinInset</code> at the centre so the five do not converge into a dark
+hub, and <code>LilyPadVeinOutset</code> at the rim.</p>
+<p><strong>None of this changes <code>LilyPadDiameter</code>.</strong> 112 px is the number that
+<a href="#why-the-lanes-run-across">decided lanes-across over lanes-up</a>; only the
+outline and the surface moved. And note that a frog covers all but a 12 px ring
+of the pad it sits on, so the veins and most of the notch are visible on
+<strong>empty</strong> pads — which is most of the board, but never the pad being looked at.</p>
 <p>The two shared logs. They belong to the pond, so they are their own table:</p>
 <table>
 <thead>
@@ -2891,14 +3061,14 @@ moves, the logs move with it and nobody has to remember them.</p>
 1920 — but it now sums to the screen's width at every width, because one term in
 it is the term that absorbs the difference.</p>
 <p>Split the row into what is fixed and what stretches:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>LaneFixedWidth  =  48 margin + 256 chip gutter + 48 gap
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                     + 176 Start log + 7 × 112 pads + 176 End log
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                     + 48 margin
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>                =  1536 px
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>LanePositionGapCount  =  8      one gap either side of the pads, six among them
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>LanePositionGap  =  max( 48, (screen width − 1536) ÷ 8 )
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>LaneFixedWidth  =  48 margin + 256 chip gutter + 48 gap
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                     + 176 Start log + 7 × 112 pads + 176 End log
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                     + 48 margin
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>                =  1536 px
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>LanePositionGapCount  =  8      one gap either side of the pads, six among them
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>LanePositionGap  =  max( 48, (screen width − 1536) ÷ 8 )
 </code></pre></div>
 <p>Checked at the two widths that are drawn:</p>
 <table>
@@ -3335,12 +3505,18 @@ question 4, settled by Derek.
   Two to four frogs sit on the Start log at the beginning of every game and
   gather on the End log as they finish — that is a shared drawing, not a shared
   position, per the invariant above.
-- <strong>Frog piece</strong> — one per lane, on its current position, in the frog's colour.
-  On a shared log it sits on its own lane's centre line, which is what keeps
-  "frogs never interact" true in the picture as well as in the state.
-- <strong>Pad count</strong> — on the chip: <code>3 of 8</code>, so progress is readable in words as
-  well as by looking.</p>
+Each pad is a notched circle with five veins, and its notch's width and
+direction come from
+<a href="#the-lily-pad-is-notched-veined-and-varies-per-pad">the variation table</a>
+rather than being the same on every pad.</p>
 </li>
+<li>
+<p><strong>Frog piece</strong> — one per lane, on its current position, in the frog's colour.
+  On a shared log it sits on its own lane's centre line, which is what keeps
+  "frogs never interact" true in the picture as well as in the state.</p>
+</li>
+<li><strong>Pad count</strong> — on the chip: <code>3 of 8</code>, so progress is readable in words as
+  well as by looking.</li>
 </ul>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
