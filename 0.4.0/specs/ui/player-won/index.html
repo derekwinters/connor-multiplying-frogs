@@ -12,13 +12,13 @@
         <meta name="author" content="Derek Winters">
       
       
-        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.4.0/specs/ui/end-game-confirm/">
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.4.0/specs/ui/player-won/">
       
       
-        <link rel="prev" href="../settings-dialog/">
+        <link rel="prev" href="../answer-result/">
       
       
-        <link rel="next" href="../game-over/">
+        <link rel="next" href="../settings-dialog/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>End-game confirm - Multiplying Frogs</title>
+        <title>A player has won - Multiplying Frogs</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#end-the-game-confirm" class="md-skip">
+        <a href="#a-player-has-won" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              End-game confirm
+              A player has won
             
           </span>
         </div>
@@ -1084,62 +1084,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../player-won/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    A player has won
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../settings-dialog/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Settings dialog
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -1159,7 +1103,7 @@
   <span class="md-ellipsis">
     
   
-    End-game confirm
+    A player has won
   
 
     
@@ -1177,7 +1121,7 @@
   <span class="md-ellipsis">
     
   
-    End-game confirm
+    A player has won
   
 
     
@@ -1280,17 +1224,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#who-may-end-a-game" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Who may end a game
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#open-questions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1305,6 +1238,62 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2122,17 +2111,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#who-may-end-a-game" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Who may end a game
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#open-questions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2160,7 +2138,7 @@
 
 
   
-    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/end-game-confirm.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/player-won.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2168,21 +2146,32 @@
   
 
 
-<h1 id="end-the-game-confirm">End the game — confirm<a class="headerlink" href="#end-the-game-confirm" title="Link to this section">&para;</a></h1>
-<p>The one dialog in the game that can take something away from somebody who did
-nothing wrong. It asks first, and it says who it is asking on behalf of.</p>
+<h1 id="a-player-has-won">A player has won<a class="headerlink" href="#a-player-has-won" title="Link to this section">&para;</a></h1>
+<p>The moment a frog gets home. One dialog, immediately after the winning hop
+finishes, saying that this frog has arrived — and then handing on.</p>
+<p>Before <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/328">#328</a>
+there was nothing here at all. A child who won got a dialog telling them whose
+turn it was next, and then watched everybody else finish.</p>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
-<p><strong>Invariant:</strong> the game does not end without this dialog. Nothing else in the
-game ends a game early.
-<strong>Invariant:</strong> the confirm <strong>names the cost</strong> — how many frogs are still
-swimming — rather than asking an abstract <em>"Are you sure?"</em>. A confirm that
-gives no new information is a confirm people learn to tap through.
-<strong>Invariant:</strong> the safe option is the primary button and is on the right, where
-the thumb is. The destructive option is the outlined one, on the left, a full
-<code>ButtonDestructiveGap</code> away.
-<strong>Invariant:</strong> the hardware back button keeps playing. Back never ends a game.
-<strong>Invariant:</strong> cancelling returns to the exact board state — same turn, same
-positions.</p>
+<p><strong>Invariant:</strong> getting home is marked. Every frog that reaches the End log gets
+this dialog — the first one and the last one alike. It is the one screen in the
+game that is about a single child's moment rather than about the state of the
+game.
+<strong>Invariant:</strong> only the <strong>first</strong> frog home "wins". Under the current rules the
+first frog to reach the End log is the winner and the rest are ranked behind it,
+so the wording changes after the first — see
+<a href="#elements">Elements</a>. Saying "wins" four times in one game would be four lies
+after the first.
+<strong>Invariant:</strong> this dialog changes nothing about the game. It does not end it,
+does not skip anyone, does not reorder anything. It is an announcement, and the
+rule it announces is
+<a href="../game-board/">game board</a>'s: a frog that reaches the End log stays there and
+<strong>play continues</strong>.
+<strong>Invariant:</strong> it carries no standings. <a href="../game-over/">Game over</a> lists every
+frog in finishing order; a second table in different words on the screen before
+it would be the same information twice.
+<strong>Invariant:</strong> the hardware back button does <strong>nothing</strong> here. See
+<a href="#behaviour">Behaviour</a>.</p>
 <h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2193,24 +2182,30 @@ positions.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>question</code></td>
-<td><code>End the game for everyone?</code></td>
+<td><code>frog</code></td>
+<td>The frog that just got home, drawn large</td>
 </tr>
 <tr>
-<td><code>cost</code></td>
-<td>What ending it now actually does</td>
+<td><code>headline</code></td>
+<td><code>Blue wins!</code>, or <code>Pink is home!</code></td>
 </tr>
 <tr>
 <td><code>controls</code></td>
-<td><code>End the game</code> and <code>Keep playing</code></td>
+<td>The one button, which hands on</td>
 </tr>
 </tbody>
 </table>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
-<p>A centred <a href="../shared-components/#dialog">dialog</a>, <code>ConfirmDialogWidth</code> by
-<code>ConfirmDialogHeight</code>. Question at the top of the padding box, cost beneath it
-at <code>ConfirmBodyWidth</code>, buttons on the bottom row — destructive left, primary
-right.</p>
+<p>A centred <a href="../shared-components/#dialog">dialog</a>, <code>WonDialogWidth</code> by
+<code>WonDialogHeight</code>, over a dimmed copy of the board.</p>
+<p>Measured from the panel's top down, because the frog is the thing this screen is
+about and everything else follows it:</p>
+<ul>
+<li><code>frog</code> — horizontally centred, <code>DialogPadding</code> from the panel's top edge.</li>
+<li><code>headline</code> — <code>WonHeadlineGap</code> below the frog, horizontally centred, one line.</li>
+<li><code>controls</code> — bottom-right at <code>DialogPadding</code>, where
+  <a href="../shared-components/#dialog">the shared dialog</a> puts a button row.</li>
+</ul>
 <h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2223,112 +2218,170 @@ right.</p>
 <tbody>
 <tr>
 <td>Dialog width</td>
-<td><code>ConfirmDialogWidth</code></td>
-<td>1160 px</td>
+<td><code>WonDialogWidth</code></td>
+<td>900 px</td>
 </tr>
 <tr>
 <td>Dialog height</td>
-<td><code>ConfirmDialogHeight</code></td>
-<td>540 px</td>
+<td><code>WonDialogHeight</code></td>
+<td>640 px</td>
 </tr>
 <tr>
-<td>Question size</td>
-<td><code>ConfirmQuestionSize</code></td>
-<td>56 px</td>
+<td>The frog, drawn large</td>
+<td><code>WonFrogDiameter</code></td>
+<td>220 px</td>
 </tr>
 <tr>
-<td>Body size</td>
-<td><code>ConfirmBodySize</code></td>
+<td>Frog outline</td>
+<td><code>WonFrogOutline</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Gap between the frog and the headline</td>
+<td><code>WonHeadlineGap</code></td>
 <td>40 px</td>
 </tr>
 <tr>
-<td>Body column width</td>
-<td><code>ConfirmBodyWidth</code></td>
-<td>1048 px</td>
+<td>Headline size</td>
+<td><code>WonHeadlineSize</code></td>
+<td>76 px</td>
 </tr>
 <tr>
-<td>Cost line spacing</td>
-<td><code>ConfirmBodyLineHeight</code></td>
-<td>1.4×</td>
+<td>Headline line box</td>
+<td><code>WonHeadlineLineBox</code></td>
+<td>92 px</td>
 </tr>
 </tbody>
 </table>
+<p>The arithmetic down the panel, against a 634 px padding box:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>DialogPadding 56 + WonFrogDiameter 220        -&gt; frog     56 .. 276
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>WonHeadlineGap 40 + WonHeadlineLineBox 92     -&gt; headline 316 .. 408
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ButtonHeight 112, DialogPadding 56 up         -&gt; button   466 .. 578
+</code></pre></div>
+<p><strong><code>WonFrogDiameter</code> is deliberately not the board's <code>FrogPieceDiameter</code></strong>
+(88 px). This is the one screen in the game that draws a frog big, and that is
+what it is for: the board says a frog moved, and this says a frog arrived. A
+constant that happened to equal the board's would be re-used by someone later
+and drag the two into step.</p>
+<p><code>WonHeadlineLineBox</code> is written down rather than left to a font's default for
+the same reason the settings dialog's title box is: <code>WonHeadlineGap</code> is measured
+from it, and a line box that varies by renderer is a gap that varies by
+renderer.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>Question</strong> — <code>End the game for everyone?</code> The words <em>for everyone</em> are the
-  point of the sentence.</li>
+<li><strong><code>frog</code></strong> — the frog that just got home, at <code>WonFrogDiameter</code> in its own
+  colour, with the <code>PieceEdge</code> outline at <code>WonFrogOutline</code>. Not a
+  <a href="../shared-components/#player-chip">player chip</a>: a chip carries a name and a
+  pad count, and both are wrong here — the name is in the headline and the pad
+  count is now <code>8 of 8</code> for everyone this dialog appears for.</li>
 <li>
-<p><strong>Cost</strong> — built from the live game state, not a fixed string. <strong>Two</strong> of its
-  numbers are live, not one: how many frogs are still swimming, and how many
-  frogs are in the game.</p>
+<p><strong><code>headline</code></strong> — at <code>WonHeadlineSize</code>, and its wording is the one thing on
+  this page that depends on game state:</p>
 <table>
 <thead>
 <tr>
-<th>Situation</th>
-<th>Body</th>
+<th>When</th>
+<th>Reads</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Some frogs still going</td>
-<td><code>&lt;Count&gt; frogs are still swimming. Ending it now stops the game for all &lt;roster&gt; players and shows the results.</code></td>
+<td>The <strong>first</strong> frog home</td>
+<td><code>Blue wins!</code></td>
 </tr>
 <tr>
-<td>Only one frog left going</td>
-<td><code>One frog is still swimming. Ending it now stops the game for all &lt;roster&gt; players and shows the results.</code></td>
+<td>Any <strong>later</strong> frog home</td>
+<td><code>Pink is home!</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>&lt;Count&gt;</code> is how many frogs are still swimming, spelled as a capitalised
-word — <code>Two</code>, <code>Three</code>, <code>Four</code>. <code>&lt;roster&gt;</code> is how many frogs are in the
-game, spelled as a lower-case word — <code>two</code>, <code>three</code>, <code>four</code>. Neither is
-ever a digit, and neither is ever a fixed string: a game is
-<a href="../game-setup/#invariants">two to four frogs</a>, so <em>all four players</em> is
-simply false in a game of two or three, in the one dialog whose entire
-protection is that it says something true and specific every time.</p>
-<p>Three frogs still swimming in a four-player game therefore reads <em>Three
-frogs are still swimming. Ending it now stops the game for all four players
-and shows the results.</em> — the sentence
-<a href="../mockups/end-game-confirm.html">the mockup</a> draws.</p>
-<p>There is no everybody-is-home wording, and there does not need to be:
-<a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">the game ends itself</a>
-the moment the last frog lands on its End log, so this dialog can never open
-on a finished game. At least one frog is always still swimming when it
-appears — which is exactly why it has something to warn about.</p>
+<p>The frog's name is whatever it is called — its colour by default, or the
+name typed on <a href="../game-setup/">game setup</a>, so <code>Connor wins!</code> for a renamed
+frog. Same rule as the board's turn banner: the name and nothing else.</p>
 </li>
 <li>
-<p><strong><code>End the game</code></strong> — destructive <a href="../shared-components/#button">button</a>. Goes
-  to <a href="../game-over/">game over</a> with the standings as they are.</p>
+<p><strong><code>controls</code></strong> — one primary <a href="../shared-components/#button">button</a>, named for
+  what happens next, exactly as
+  <a href="../answer-result/">answer result</a>'s is:</p>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>Reads</th>
+<th>Hands to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>There is a next player</td>
+<td><code>Green's turn</code></td>
+<td>the next player's turn on the board</td>
+</tr>
+<tr>
+<td>That frog was the <strong>last</strong> one home</td>
+<td><code>See the results</code></td>
+<td><a href="../game-over/">game over</a></td>
+</tr>
+</tbody>
+</table>
+<p>The second case is the one <code>Game.IsOver</code> has just become true for.</p>
 </li>
-<li><strong><code>Keep playing</code></strong> — primary button. Returns to the board.</li>
 </ul>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
-<li>Reached only from <a href="../settings-dialog/">settings dialog</a>.</li>
-<li>Ending the game is <strong>not</strong> the same as losing it. Every frog keeps the pads it
-  has, and <a href="../game-over/">game over</a> shows the order they finished in — which is
-  why the wording is <em>stops the game and shows the results</em> rather than
-  <em>quits</em>.</li>
-<li>Hardware back does what <code>Keep playing</code> does.</li>
-<li>There is no second confirm. One confirm that says something useful beats two
-  that do not.</li>
+<li><strong>Entry.</strong> Opens once the winning hop has finished — the seam
+  <code>AppRoot.HandOffFinished</code> already sits on, between the hop completing and the
+  next player's turn starting. It opens <em>after</em> <a href="../answer-result/">answer result</a>
+  has closed and the frog has landed, not instead of it: the answer result
+  reports the answer, this reports the arrival.</li>
+<li><strong>Exit.</strong> The button closes it. If there is a next player, the board is
+  underneath with that player's turn already begun. If there is not, the game
+  over screen follows.</li>
+<li><strong>Hardware back does nothing.</strong> This makes a <strong>fourth</strong> dialog with an inert
+  back, alongside roll and card, the working-out grid and answer result — and
+  for the same reason they have one: it sits inside the turn's own chain, and a
+  stray press should not fast-forward past a moment the game just stopped to
+  mark. <code>shared-components.md</code>'s dialog invariant is updated to say four.</li>
+<li><strong>The game does not end here</strong>, whatever the headline says. Play continues
+  until every frog is home, which is
+  <a href="../game-board/#behaviour">the board's rule</a> and
+  <a href="../../reference/#where-v1-fills-a-gap-the-board-leaves-open">Derek's recorded provisional call</a>,
+  not a classroom-game rule. Whether it <em>should</em> end when the first frog gets
+  home is <a href="#open-questions">an open question</a> and is Connor's, not this
+  wireframe's.</li>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
-<p><a href="../mockups/end-game-confirm.html"><code>mockups/end-game-confirm.html</code></a> — drawn in the
-three-frogs-still-swimming state, which is the one where the confirm has
-something to lose.</p>
-<h2 id="who-may-end-a-game">Who may end a game<a class="headerlink" href="#who-may-end-a-game" title="Link to this section">&para;</a></h2>
-<p><strong>Anyone, on anyone's turn.</strong> Derek's call in
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/186">issue #186</a>.</p>
-<p>The alternative was restricting it to the current player, and it was rejected
-because the tablet cannot tell who is holding it — the restriction would have
-been a guess dressed as a rule. What actually protects a game in progress is
-this dialog telling you, before you act, how many frogs you are about to stop.</p>
-<p>That is why the cost sentence is built from live state rather than being a fixed
-string. It is the whole of the protection, so it has to say something true and
-specific every time.</p>
+<ul>
+<li><a href="../mockups/player-won-first.html"><code>mockups/player-won-first.html</code></a> — the first
+  frog home. <code>Blue wins!</code>, handing to the next player.</li>
+<li><a href="../mockups/player-won-later.html"><code>mockups/player-won-later.html</code></a> — the last
+  frog home. <code>Pink is home!</code>, handing to the results.</li>
+</ul>
+<p>Two files rather than one because the headline and the button each have two
+states, and the two drawings cover all of both: a later frog that is <strong>not</strong> the
+last combines the second file's headline with the first file's button, and
+introduces no third thing to look at.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
-<p>None.</p>
+<ul>
+<li><strong>Should the game end when the first frog gets home?</strong> Not proposed here, and
+  deliberately not decided here. Today play continues, which is Derek's recorded
+  provisional call rather than a classroom rule — and a dialog that says
+  <code>Blue wins!</code> while the game carries on is exactly the moment somebody will ask
+  why it does. It is a <strong>rule</strong> change, so it is Connor's, and it wants its own
+  <code>type:question</code> issue rather than being folded into a layout.</li>
+<li><strong>What does the answer result's button say on the winning move?</strong>
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/287">#287</a>
+  asks this, and this page changes what it means. That button used to be the
+  last thing a winner read; now this dialog follows it. The placeholder
+  <code>Game over</code> is worse than it was — it announces an ending that has not
+  happened yet and that this dialog is about to talk over. Answering #287 should
+  be done with this page in view.</li>
+<li><strong>Does the moment want more than a dialog?</strong> A bigger chip state, an animation
+  on the lane, a sound. Audio is <a href="../../future-ideas/">parked</a>. If the dialog
+  turns out to be the wrong shape for this — if what Connor wants is the board
+  celebrating rather than a panel interrupting — that is a legitimate answer and
+  it is still a wireframe.</li>
+</ul>
 
 
 

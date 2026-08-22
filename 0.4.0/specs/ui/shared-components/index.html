@@ -825,6 +825,8 @@
       
         
       
+        
+      
     
     
     
@@ -1561,6 +1563,34 @@
     
   
     Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../player-won/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A player has won
   
 
     
@@ -3095,8 +3125,10 @@ no close cross. It is left by pressing one of its buttons, so a game is never
 half-answered because a sleeve brushed the glass.
 <strong>Invariant:</strong> the hardware back button does what the dialog's <em>least
 destructive</em> button does, and never what its most destructive one does —
-except the three dialogs whose pages make back inert (roll and card,
-working-out grid, answer result), where back does nothing.</p>
+except the four dialogs whose pages make back inert (roll and card,
+working-out grid, answer result, <a href="../player-won/">a player has won</a>), where back
+does nothing. All four sit inside a single turn's own chain, where a stray press
+should not fast-forward past something the game stopped to show.</p>
 <h4 id="3-named-constants_2">3. Named constants<a class="headerlink" href="#3-named-constants_2" title="Link to this section">&para;</a></h4>
 <table>
 <thead>

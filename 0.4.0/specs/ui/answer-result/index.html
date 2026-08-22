@@ -18,7 +18,7 @@
         <link rel="prev" href="../working-out-grid/">
       
       
-        <link rel="next" href="../settings-dialog/">
+        <link rel="next" href="../player-won/">
       
       
         
@@ -825,6 +825,8 @@
       
         
       
+        
+      
     
     
     
@@ -1225,6 +1227,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../player-won/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A player has won
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2392,7 +2422,8 @@ the placeholder's name changed here — see
 </ul>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>What does the button say when there is no next player?</strong> On the hop that
+<li>
+<p><strong>What does the button say when there is no next player?</strong> On the hop that
   gets the <em>last</em> frog home, the game ends itself
   (<a href="../game-board/">game board</a>) and there is nobody to hand the device to — so
   the rule above, "named for the next player", has no answer for that one turn.
@@ -2400,12 +2431,19 @@ the placeholder's name changed here — see
   It currently reads <code>Game over</code>, borrowed from
   <a href="../game-over/">game over</a>'s own words for the screen it now leads to, as a
   placeholder rather than a decision. Connor's to settle — asked in
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/287">#287</a>.</li>
-<li><strong>Does a right answer get any celebration beyond the hop?</strong> Audio is
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/287">#287</a>.</p>
+<p><strong>This got worse, not better, since #287 was asked.</strong> Since
+<a href="../player-won/">a player has won</a> landed, this button is no longer the last
+thing a winner reads: the hop it starts now ends in a dialog saying
+<code>Blue wins!</code>, and only after <em>that</em> does the game over screen appear. So
+<code>Game over</code> announces an ending that has not happened yet and that the next
+dialog is about to talk over. Answer #287 with that page in view.
+- <strong>Does a right answer get any celebration beyond the hop?</strong> Audio is
   <a href="../../future-ideas/">parked</a>, and a "correct" chime is the most likely parked
-  item to be promoted. If it is, this is the screen it plays on.</li>
-<li><strong>Should the wrong state offer to show the working?</strong> Ruled out by ADR-0002 —
-  noted here so it is not re-proposed as a kindness.</li>
+  item to be promoted. If it is, this is the screen it plays on.
+- <strong>Should the wrong state offer to show the working?</strong> Ruled out by ADR-0002 —
+  noted here so it is not re-proposed as a kindness.</p>
+</li>
 </ul>
 
 
