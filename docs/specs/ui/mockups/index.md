@@ -140,7 +140,17 @@ is what the pair of board files is for.
 ## What a mockup is, and is not
 
 **Is:** static HTML and CSS, one file, no build step, no framework, no
-JavaScript beyond nothing at all. A picture that happens to be made of divs.
+JavaScript beyond nothing at all. A picture that happens to be made of divs —
+and, in one place, of SVG.
+
+**Inline SVG is allowed where a shape cannot be a div.** The game board's lily
+pads are the only current case: since
+[#396](https://github.com/derekwinters/connor-multiplying-frogs/issues/396) a
+pad is a notched circle with veins, and a CSS border cannot follow a notch. The
+SVG is inline, static, has no script and fetches nothing, so every reason the
+"is not" list below exists still holds. It is not a licence to reach for SVG
+because it is easier — the test is whether the shape is expressible as a styled
+box at all.
 
 **Is not:** a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it
