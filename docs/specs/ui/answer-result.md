@@ -141,6 +141,13 @@ the placeholder's name changed here — see
   [game over](game-over.md)'s own words for the screen it now leads to, as a
   placeholder rather than a decision. Connor's to settle — asked in
   [#287](https://github.com/derekwinters/connor-multiplying-frogs/issues/287).
+
+    **This got worse, not better, since #287 was asked.** Since
+    [a player has won](player-won.md) landed, this button is no longer the last
+    thing a winner reads: the hop it starts now ends in a dialog saying
+    `Blue wins!`, and only after *that* does the game over screen appear. So
+    `Game over` announces an ending that has not happened yet and that the next
+    dialog is about to talk over. Answer #287 with that page in view.
 - **Does a right answer get any celebration beyond the hop?** Audio is
   [parked](../future-ideas.md), and a "correct" chime is the most likely parked
   item to be promoted. If it is, this is the screen it plays on.

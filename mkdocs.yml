@@ -102,6 +102,7 @@ nav:
           - Roll and card: specs/ui/roll-and-card.md
           - Working-out grid: specs/ui/working-out-grid.md
           - Answer result: specs/ui/answer-result.md
+          - A player has won: specs/ui/player-won.md
           - Settings dialog: specs/ui/settings-dialog.md
           - End-game confirm: specs/ui/end-game-confirm.md
           - Game over: specs/ui/game-over.md
