@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.4.0...v0.5.0) (2026-08-22)
+
+
+### Features
+
+* **ai-sdlc:** adopt ai-sdlc at v0.4.2, starting with hygiene ([#349](https://github.com/derekwinters/connor-multiplying-frogs/issues/349)) ([5dce4ab](https://github.com/derekwinters/connor-multiplying-frogs/commit/5dce4aba057a5ac74fc7a0158b37334f241a32d7)), closes [#340](https://github.com/derekwinters/connor-multiplying-frogs/issues/340)
+* **ai-sdlc:** adopt the shared docs reconciliation gate ([#352](https://github.com/derekwinters/connor-multiplying-frogs/issues/352)) ([6383ef6](https://github.com/derekwinters/connor-multiplying-frogs/commit/6383ef68433da60ca7da01852b6c66590a3bfc37)), closes [#343](https://github.com/derekwinters/connor-multiplying-frogs/issues/343)
+* **ai-sdlc:** fire triage from the label event ([#370](https://github.com/derekwinters/connor-multiplying-frogs/issues/370)) ([f60c16e](https://github.com/derekwinters/connor-multiplying-frogs/commit/f60c16ece0ae429c06bd126ce0d212084d68e081)), closes [#369](https://github.com/derekwinters/connor-multiplying-frogs/issues/369)
+* **ai-sdlc:** run the whole issue pipeline from ai-sdlc ([#355](https://github.com/derekwinters/connor-multiplying-frogs/issues/355)) ([f894aa7](https://github.com/derekwinters/connor-multiplying-frogs/commit/f894aa781d2435a62da2febfb10a3f571442ec96)), closes [#344](https://github.com/derekwinters/connor-multiplying-frogs/issues/344)
+* **ai-sdlc:** split the label taxonomy and adopt the shared sync ([#351](https://github.com/derekwinters/connor-multiplying-frogs/issues/351)) ([2e170f0](https://github.com/derekwinters/connor-multiplying-frogs/commit/2e170f07351378311fa379ba34fe6bd9884af550)), closes [#342](https://github.com/derekwinters/connor-multiplying-frogs/issues/342)
+
+
+### Bug Fixes
+
+* **ai-sdlc:** move the pin to v0.4.8 so the gatekeeper can run ([#357](https://github.com/derekwinters/connor-multiplying-frogs/issues/357)) ([4d3dc7f](https://github.com/derekwinters/connor-multiplying-frogs/commit/4d3dc7f433ae72eca80b9c977ea3a44810c8da46)), closes [#346](https://github.com/derekwinters/connor-multiplying-frogs/issues/346)
+* **ai-sdlc:** wire the analysis routine's secrets to the gatekeeper ([#368](https://github.com/derekwinters/connor-multiplying-frogs/issues/368)) ([34607da](https://github.com/derekwinters/connor-multiplying-frogs/commit/34607da4504d20022d381fc5fb22290688bed7d6)), closes [#367](https://github.com/derekwinters/connor-multiplying-frogs/issues/367)
+
 ## [0.4.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.3.0...v0.4.0) (2026-08-13)
 
 
