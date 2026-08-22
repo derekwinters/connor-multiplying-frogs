@@ -734,7 +734,9 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   `FrogHopDuration` (0.4 s), one pad's distance. It is the only motion on the
   board, which is what makes it worth watching.
 - A frog that reaches the End log stays there and its chip switches to the
-  `Home` state. **Play continues** — the other frogs keep taking turns. That is
+  `Home` state, and [a player has won](player-won.md) opens to say so — the one
+  screen in the game about a single child's moment. **Play continues** — the
+  other frogs keep taking turns, and that dialog changes nothing about it. That is
   Derek's provisional call recorded in
   [the reference material](../reference/index.md#where-v1-fills-a-gap-the-board-leaves-open),
   not something the classroom board says.

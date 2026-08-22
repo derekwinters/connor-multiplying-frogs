@@ -24,6 +24,8 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Working-out grid, `331 × 41` grown to the cap | [`working-out-grid-331x41-grown.html`](working-out-grid-331x41-grown.html) | [Working-out grid](../working-out-grid.md) |
 | Answer result — right | [`answer-result-right.html`](answer-result-right.html) | [Answer result](../answer-result.md) |
 | Answer result — wrong | [`answer-result-wrong.html`](answer-result-wrong.html) | [Answer result](../answer-result.md) |
+| A player has won — first frog home | [`player-won-first.html`](player-won-first.html) | [A player has won](../player-won.md) |
+| A player has won — last frog home | [`player-won-later.html`](player-won-later.html) | [A player has won](../player-won.md) |
 | Settings dialog | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |

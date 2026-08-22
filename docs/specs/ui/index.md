@@ -21,6 +21,7 @@ Every screen and every dialog in v1, in the order a game meets them.
 | [Roll and card](roll-and-card.md) | The die, the pile it maps to, the card you drew |
 | [Working-out grid](working-out-grid.md) | The grid and keypad you answer on |
 | [Answer result](answer-result.md) | Right or wrong, and what your frog does |
+| [A player has won](player-won.md) | The moment a frog gets home |
 | [Settings dialog](settings-dialog.md) | The rules, the exit, the version |
 | [End-game confirm](end-game-confirm.md) | The one dialog that can end everybody's game |
 | [Game over](game-over.md) | Who won, and where everybody got to |
