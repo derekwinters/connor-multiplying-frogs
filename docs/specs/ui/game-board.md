@@ -225,7 +225,7 @@ The lane:
 | Vein opacity, drawn in `LilyPadEdge` | `LilyPadVeinOpacity` | 0.5 |
 | Frog piece diameter | `FrogPieceDiameter` | 88 px |
 | Frog piece outline | `FrogPieceOutline` | 4 px |
-| Lily pad and log outline | `TrackOutline` | 3 px |
+| Lily pad outline | `TrackOutline` | 3 px |
 | Gap between positions | `LanePositionGap` | derived — see [Anchors](#anchors) |
 | Smallest that gap may be | `LanePositionGapMin` | 48 px |
 | Everything on the row that does not stretch | `LaneFixedWidth` | 1536 px |
@@ -302,6 +302,20 @@ The two shared logs. They belong to the pond, so they are their own table:
 | Log width | `LogWidth` | 176 px |
 | Log height | `SharedLogHeight` | 896 px — `1200 − BoardHeaderHeight − BoardControlsHeight` |
 | Log corner radius | `LogRadius` | 24 px |
+| `Start` / `End` text size | `LogLabelSize` | 26 px |
+| How far below the log's top edge that word starts | `LogLabelTopPadding` | 28 px |
+
+`TrackOutline` is **not** in this table, and that is the change rather than an
+omission: the log has no rim, so it draws no outline at any width. It is the
+lily pad's constant now. The two label rows are the mockup's `.log` rule read
+back as named values — the log was drawing no word at all before
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301)
+moved it to the top, so neither number had anywhere to live.
+
+`LogLabelTopPadding` is measured from the log's own top edge, not from the pond
+band's. The two are the same line at the reference canvas and would stop being
+so the moment a log were ever inset in its band, and it is the log the word
+belongs to.
 
 `LogHeight` (120 px) is **gone**, not renamed to something with the same
 meaning. It was the height of a log sized to sit inside one 184 px lane, and
@@ -681,11 +695,18 @@ satisfied by any set that also clears the separability bar**, and that is worth
 knowing rather than discovering later: it is a genuine tension between two rules
 this project holds, not an oversight in the values.
 
-One number in that palette is deliberately low and is not about frogs: the log
-and the water are almost the same brightness (1.05 : 1) and a long way apart in
-hue (ΔE 46.3). What makes a log read as a log floating on water is its
-`LogEdge` rim, which is 2.33 : 1 against the water. That is what `TrackOutline`
-is for.
+One number in the palette this replaced was deliberately low and was not about
+frogs: the old tan log and the water were almost the same brightness (1.05 : 1)
+and a long way apart in hue (ΔE 46.3), so the fill could not separate them and
+what made a log read as a log floating on water was its `LogEdge` rim, at
+2.33 : 1 against the water.
+
+**Neither is true of `#4A2E1A`.** The log clears the water by **8.0 : 1** and
+ΔE **75.0** on its own, which is the whole reason [the rim could
+go](#colours) — and it is why `TrackOutline` is now the lily pad's constant
+alone. The word written on the log is held to the bar in its place:
+`LogLabelInk` measures **6.1 : 1** and ΔE **53.0** against the fill, and with no
+rim behind it the fill is the only thing it has to clear.
 
 ### The bands are unchanged, deliberately
 
@@ -741,9 +762,14 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   has to itself. The pad a frog is on is drawn no differently from the others;
   the frog on it is the marker.
 - **Start log × 1, End log × 1** — one of each for the whole board, however many
-  frogs are playing, each filling the pond band top to bottom. They are the ends
-  of every lane at once. The Start log is a real position a frog occupies, and a
-  wrong answer there leaves the frog where it is; see
+  frogs are playing, each filling the pond band top to bottom, in `LogBrown`
+  with **no rim**. Each says what it is — `Start` and `End`, at
+  `LogLabelSize`, in `LogLabelInk`, centred across the log and
+  `LogLabelTopPadding` below its **top** edge. Top rather than middle because
+  the middle of a log is where the frogs stand: every lane's centre line
+  crosses both logs, so a centred word is a word with a frog on it. They are the
+  ends of every lane at once. The Start log is a real position a frog occupies,
+  and a wrong answer there leaves the frog where it is; see
   [the Start log is a floor](../reference/index.md#the-start-log-is-a-floor-not-a-special-space).
   Two to four frogs sit on the Start log at the beginning of every game and
   gather on the End log as they finish — that is a shared drawing, not a shared
@@ -828,10 +854,16 @@ visible in the picture rather than only asserted in a table.
 
 It draws the three questions #289 left open as Derek answered them on #296: the
 logs fill the pond band top to bottom rather than stopping at the lanes in play,
-each frog sits on its own lane's centre line, and the corner and outline are the
-`LogRadius` and `TrackOutline` they always were. Only the first of the three
-moved — the mockup originally drew a 736 px log spanning the four lanes, and was
-redrawn to 896 px when the answer arrived.
+each frog sits on its own lane's centre line, and the corner is the `LogRadius`
+it always was. Only the first of the three moved — the mockup originally drew a
+736 px log spanning the four lanes, and was redrawn to 896 px when the answer
+arrived.
+
+The third of those answers was *"the corner and outline are the `LogRadius` and
+`TrackOutline` they always were"*, and **half of it has since been overtaken**:
+#301 deleted `LogEdge`, so the log draws no outline at all. The corner is
+untouched. Said here rather than quietly reworded, because #296 settled that
+question and it is worth knowing which later change reopened it and why.
 
 The rejected lanes-up variant is not committed. It was drawn, compared, and
 decided against; keeping a mockup of a layout nobody is building is how a
@@ -894,4 +926,7 @@ Derek on
 [issue #296](https://github.com/derekwinters/connor-multiplying-frogs/issues/296),
 and are recorded above rather than here: the log spans the full pond whatever
 the player count, a frog on a log sits on its own lane's centre line, and the
-log keeps `LogRadius` and `TrackOutline` as they are.
+log keeps `LogRadius` as it is. The last of those three was later overtaken in
+part — `LogEdge` is gone and the log has no rim, per
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301) and
+[the mockup note above](#mockup).

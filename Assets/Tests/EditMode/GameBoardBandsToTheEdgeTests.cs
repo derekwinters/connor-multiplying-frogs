@@ -337,8 +337,8 @@ namespace Frogs.Unity.EditModeTests
                 var view = BoardOn(canvas);
 
                 var screen = BoundsOf(canvas, canvas);
-                var startLog = BoundsOf(view.StartLogOutline.rectTransform, canvas);
-                var endLog = BoundsOf(view.EndLogOutline.rectTransform, canvas);
+                var startLog = BoundsOf(view.StartLog.rectTransform, canvas);
+                var endLog = BoundsOf(view.EndLog.rectTransform, canvas);
 
                 // Everything to the left of the Start log's right-hand edge is
                 // fixed — a safe margin, the chip gutter and the gap after
@@ -497,7 +497,7 @@ namespace Frogs.Unity.EditModeTests
                     + GameBoardLaneView.LaneGutterGap;
 
                 AssertBounds(
-                    view.StartLogOutline.rectTransform,
+                    view.StartLog.rectTransform,
                     canvas,
                     Rect.MinMaxRect(
                         startLogLeft,
@@ -506,7 +506,7 @@ namespace Frogs.Unity.EditModeTests
                         pondCentre + (GameBoardScreenView.SharedLogHeight / 2f)),
                     "the Start log");
                 AssertBounds(
-                    view.EndLogOutline.rectTransform,
+                    view.EndLog.rectTransform,
                     canvas,
                     Rect.MinMaxRect(
                         right - GameBoardScreenView.SafeMargin - GameBoardScreenView.LogWidth,

@@ -135,7 +135,7 @@ namespace Frogs.Unity.EditModeTests
                 }
 
                 Assert.That(
-                    view.StartLogOutline.rectTransform.rect.height,
+                    view.StartLog.rectTransform.rect.height,
                     Is.EqualTo(GameBoardScreenView.SharedLogHeight).Within(Tolerance),
                     "the logs are still the reference pond's height — the extra height a taller "
                     + "device gives us is water, not log");

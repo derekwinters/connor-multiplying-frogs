@@ -93,6 +93,25 @@ namespace Frogs.Unity.Views
         public const float LogRadius = 24f;
 
         /// <summary>
+        /// How big the word on a log is — `LogLabelSize`.
+        ///
+        /// The log used to draw no word at all in this view, and the mockup's
+        /// used to be a mid-brown one down the middle of a pale tan log. It is
+        /// at the **top** now, in `LogLabelInk`, because the middle of a log
+        /// is where the frogs stand: the pond band is `SharedLogHeight` tall
+        /// and every lane's centre line crosses both logs, so a centred word
+        /// is a word with a frog on it.
+        /// </summary>
+        public const float LogLabelSize = 26f;
+
+        /// <summary>
+        /// How far below the top of its log the word starts —
+        /// `LogLabelTopPadding`. The committed mockup's `.log` rule, which is
+        /// the drawing this screen is built to.
+        /// </summary>
+        public const float LogLabelTopPadding = 28f;
+
+        /// <summary>
         /// How tall a shared log is: the pond band's own height, so the log
         /// fills the band edge to edge with the two hairlines.
         ///
@@ -151,6 +170,11 @@ namespace Frogs.Unity.Views
         const string TurnBannerFormat = "{0}'s turn";
         const string RollLabel = "Roll";
 
+        // What each log says. `start-log` and `end-log` are the spec page's
+        // names for the two parts; these are the words drawn on them.
+        const string StartLogLabelText = "Start";
+        const string EndLogLabelText = "End";
+
         // No imported font — matches Button.cs's, PlayerChip.cs's and
         // GameSetupScreenView.cs's own choice, for the same reason (no
         // external assets).
@@ -178,10 +202,10 @@ namespace Frogs.Unity.Views
         GameBoardSettingsButton _settingsButton;
 
         RectTransform _pondRect;
-        Image _startLogOutline;
-        Image _startLogFill;
-        Image _endLogOutline;
-        Image _endLogFill;
+        Image _startLog;
+        Text _startLogLabel;
+        Image _endLog;
+        Text _endLogLabel;
         readonly List<GameBoardLaneView> _lanes = new List<GameBoardLaneView>();
         readonly Dictionary<FrogColour, GameBoardLaneView> _lanesByColour = new Dictionary<FrogColour, GameBoardLaneView>();
 
@@ -193,13 +217,12 @@ namespace Frogs.Unity.Views
         Game _game;
 
         static Sprite s_logSprite;
-        static Sprite s_logFillSprite;
 
-        // The log's rim and its fill are two images, the inner one inset by
-        // TrackOutline — the same two-image shape every outlined element on
-        // this screen uses. Each gets a sprite generated at its own radius
-        // rather than one sprite stretched to two sizes, so the inset one
-        // keeps its curve instead of squaring off.
+        // One sprite, because a log is one drawing. It used to be two — a rim
+        // at LogRadius around a fill inset by TrackOutline, each generated at
+        // its own radius so the inner one kept its curve. `LogEdge` is gone
+        // (#301), so there is no rim to generate and no inset to keep clear
+        // of: the log's own fill reaches its full LogWidth x SharedLogHeight.
         static Sprite LogSprite
         {
             get
@@ -210,20 +233,6 @@ namespace Frogs.Unity.Views
                 }
 
                 return s_logSprite;
-            }
-        }
-
-        static Sprite LogFillSprite
-        {
-            get
-            {
-                if (s_logFillSprite == null)
-                {
-                    s_logFillSprite = RoundedRectSprite.CreateRoundedRect(
-                        Mathf.RoundToInt(LogRadius - GameBoardLaneView.TrackOutline));
-                }
-
-                return s_logFillSprite;
             }
         }
 
@@ -327,48 +336,54 @@ namespace Frogs.Unity.Views
 
         /// <summary>
         /// `start-log` — **one** log down the left of the pond, position 0 of
-        /// every lane at once. This is its rim; <see cref="StartLogFill"/> is
-        /// the wood inside it.
+        /// every lane at once.
+        ///
+        /// This is the whole log: one image at `LogWidth` x
+        /// `SharedLogHeight`, in `LogBrown`, with no rim. It used to be a rim
+        /// and a separate fill, and `StartLogFill` is gone with `LogEdge`
+        /// rather than renamed — there is no second layer left for a name to
+        /// point at.
         /// </summary>
-        public Image StartLogOutline
+        public Image StartLog
         {
             get
             {
                 EnsureInitialized();
-                return _startLogOutline;
+                return _startLog;
             }
         }
 
-        /// <summary>The Start log's fill, inset by `TrackOutline`.</summary>
-        public Image StartLogFill
+        /// <summary>`Start`, written along the top of the Start log in `LogLabelInk`.</summary>
+        public Text StartLogLabel
         {
             get
             {
                 EnsureInitialized();
-                return _startLogFill;
+                return _startLogLabel;
             }
         }
 
         /// <summary>
         /// `end-log` — **one** log down the right of the pond, position 8 of
-        /// every lane at once, and the winning space.
+        /// every lane at once, and the winning space. One image, no rim, as
+        /// <see cref="StartLog"/> is.
         /// </summary>
-        public Image EndLogOutline
+        public Image EndLog
         {
             get
             {
                 EnsureInitialized();
-                return _endLogOutline;
+                return _endLog;
             }
         }
 
-        /// <summary>The End log's fill, inset by `TrackOutline`.</summary>
-        public Image EndLogFill
+        /// <summary>`End`, written along the top of the End log in `LogLabelInk`.</summary>
+        public Text EndLogLabel
         {
             get
             {
                 EnsureInitialized();
-                return _endLogFill;
+                return _endLogLabel;
             }
         }
 
@@ -681,8 +696,8 @@ namespace Frogs.Unity.Views
             // after it. The End log is pinned to the right of the safe area,
             // where every lane's track ends. Neither is placed by a number of
             // its own.
-            _startLogOutline = BuildSharedLog("StartLog", 0f, out _startLogFill);
-            _endLogOutline = BuildSharedLog("EndLog", 1f, out _endLogFill);
+            _startLog = BuildSharedLog("StartLog", 0f, StartLogLabelText, out _startLogLabel);
+            _endLog = BuildSharedLog("EndLog", 1f, EndLogLabelText, out _endLogLabel);
 
             PlaceSharedLogs(PondRowWidth);
         }
@@ -709,11 +724,11 @@ namespace Frogs.Unity.Views
         {
             var half = rowWidth / 2f;
 
-            _startLogOutline.rectTransform.anchoredPosition = new Vector2(
+            _startLog.rectTransform.anchoredPosition = new Vector2(
                 -half + SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
                 0f);
 
-            _endLogOutline.rectTransform.anchoredPosition = new Vector2(half - SafeMargin, 0f);
+            _endLog.rectTransform.anchoredPosition = new Vector2(half - SafeMargin, 0f);
         }
 
         // One shared log — LogWidth across, SharedLogHeight tall, vertically
@@ -721,40 +736,58 @@ namespace Frogs.Unity.Views
         // Every lane's centre line crosses it, which is what lets a frog on a
         // log still sit on its own lane's line.
         //
+        // One image, and one word written along the top of it. The log used to
+        // be two images, a `LogEdge` rim around a fill inset by TrackOutline;
+        // the rim is gone (#301) and so is the inset, so the log's own fill is
+        // the drawing and it reaches the log's full size. `TrackOutline` is
+        // the lily pad's now — the log is no longer one of the elements that
+        // draws one.
+        //
         // `edge` is which of the log's own sides is the one placed against the
         // row's end — its left (0) or its right (1). Where that end is, is
         // PlaceSharedLogs'.
-        Image BuildSharedLog(string logName, float edge, out Image fill)
+        Image BuildSharedLog(string logName, float edge, string labelText, out Text label)
         {
             var logGO = new GameObject(logName, typeof(RectTransform), typeof(Image));
-            var outline = logGO.GetComponent<Image>();
-            outline.sprite = LogSprite;
-            outline.type = Image.Type.Sliced;
-            outline.color = BoardColours.LogEdge;
-            outline.raycastTarget = false;
+            var log = logGO.GetComponent<Image>();
+            log.sprite = LogSprite;
+            log.type = Image.Type.Sliced;
+            log.color = BoardColours.LogBrown;
+            log.raycastTarget = false;
 
-            var logRect = outline.rectTransform;
+            var logRect = log.rectTransform;
             logRect.SetParent(_pondRect, worldPositionStays: false);
             logRect.anchorMin = new Vector2(0.5f, 0.5f);
             logRect.anchorMax = new Vector2(0.5f, 0.5f);
             logRect.pivot = new Vector2(edge, 0.5f);
             logRect.sizeDelta = new Vector2(LogWidth, SharedLogHeight);
 
-            var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
-            fill = fillGO.GetComponent<Image>();
-            fill.sprite = LogFillSprite;
-            fill.type = Image.Type.Sliced;
-            fill.color = BoardColours.LogBrown;
-            fill.raycastTarget = false;
+            var labelGO = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            label = labelGO.GetComponent<Text>();
+            label.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
+            label.fontSize = (int)LogLabelSize;
+            label.color = BoardColours.LogLabelInk;
+            label.alignment = TextAnchor.UpperCenter;
+            label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            label.verticalOverflow = VerticalWrapMode.Overflow;
+            label.raycastTarget = false;
+            label.text = labelText;
 
-            var fillRect = fill.rectTransform;
-            fillRect.SetParent(logRect, worldPositionStays: false);
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
-            fillRect.offsetMin = new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline);
-            fillRect.offsetMax = new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline);
+            // Pinned across the top of its own log, LogLabelTopPadding down
+            // from its top edge. It stretches to the log's width rather than
+            // sizing to the text, so `UpperCenter` centres the word on the log
+            // instead of on itself — and it is a child of the log, so it
+            // travels with it when PlaceSharedLogs moves the log on a wider
+            // screen.
+            var labelRect = label.rectTransform;
+            labelRect.SetParent(logRect, worldPositionStays: false);
+            labelRect.anchorMin = new Vector2(0f, 1f);
+            labelRect.anchorMax = new Vector2(1f, 1f);
+            labelRect.pivot = new Vector2(0.5f, 1f);
+            labelRect.sizeDelta = new Vector2(0f, LogLabelSize);
+            labelRect.anchoredPosition = new Vector2(0f, -LogLabelTopPadding);
 
-            return outline;
+            return log;
         }
 
         void BuildControls()

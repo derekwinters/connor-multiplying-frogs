@@ -11,12 +11,12 @@ using FrogColours = Frogs.Unity.UI.FrogColours;
 namespace Frogs.Unity.EditModeTests
 {
     /// <summary>
-    /// The pond reads as water — issue #291, and
+    /// The pond reads as water — issues #291 and #301, and
     /// docs/specs/ui/game-board.md § Colours, which is where the board's
     /// colours now live. Written before the change, per
     /// docs/engineering/testing.md's sanctioned flow: pushed unexecuted, with
-    /// CI turning them red against the old pale values before green — there is
-    /// no editor here to watch them fail in.
+    /// CI turning them red against the values they replace before green —
+    /// there is no editor here to watch them fail in.
     ///
     /// The hex values are written out **as literals** rather than read from
     /// <see cref="BoardColours"/>. A test that asserts a constant equals itself
@@ -37,10 +37,10 @@ namespace Frogs.Unity.EditModeTests
         // docs/specs/ui/game-board.md § Colours — the page's own table,
         // copied by hand rather than read from the code under test.
         static readonly Color PondWater = new Color32(0x9F, 0xD8, 0xF2, 0xFF);
-        static readonly Color LilyPadGreen = new Color32(0xCC, 0xEA, 0xAF, 0xFF);
-        static readonly Color LilyPadEdge = new Color32(0x7F, 0xAE, 0x5E, 0xFF);
-        static readonly Color LogBrown = new Color32(0xE2, 0xC7, 0x9C, 0xFF);
-        static readonly Color LogEdge = new Color32(0xA9, 0x7F, 0x4F, 0xFF);
+        static readonly Color LilyPadGreen = new Color32(0xB2, 0xE6, 0x7F, 0xFF);
+        static readonly Color LilyPadEdge = new Color32(0x6E, 0x9E, 0x4A, 0xFF);
+        static readonly Color LogBrown = new Color32(0x4A, 0x2E, 0x1A, 0xFF);
+        static readonly Color LogLabelInk = new Color32(0xC6, 0xB4, 0x9C, 0xFF);
         static readonly Color BandFill = new Color32(0xE2, 0xE8, 0xE5, 0xFF);
         static readonly Color BoardInk = new Color32(0x1E, 0x24, 0x22, 0xFF);
 
@@ -110,8 +110,20 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        /// <summary>
+        /// The log is one colour and one shape — game-board.md § Colours.
+        ///
+        /// **`LogEdge` is gone**, so this asserts the *absence* of a rim as
+        /// well as the presence of the fill. On the old pale tan log a rim was
+        /// what made a log read as floating on the pond rather than as a hole
+        /// in it; against `#4A2E1A` the fill clears the water on its own, and
+        /// a rim darker than that fill was invisible. A log that quietly
+        /// regrew a second painted layer would look almost right and would be
+        /// nobody's decision, which is why one Image per log is asserted
+        /// rather than assumed.
+        /// </summary>
         [Test]
-        public void BothLogsAreBrown()
+        public void BothLogsAreBrown_AndNeitherHasARim()
         {
             var view = CreateView(TwoFrogGame());
 
@@ -119,29 +131,127 @@ namespace Frogs.Unity.EditModeTests
             {
                 // Two logs for the whole pond, not a pair per lane (#296), so
                 // this walks the board rather than every lane on it.
-                var logs = new Dictionary<string, KeyValuePair<Image, Image>>
+                var logs = new Dictionary<string, Image>
                 {
-                    { "Start", new KeyValuePair<Image, Image>(view.StartLogFill, view.StartLogOutline) },
-                    { "End", new KeyValuePair<Image, Image>(view.EndLogFill, view.EndLogOutline) },
+                    { "Start", view.StartLog },
+                    { "End", view.EndLog },
                 };
 
                 foreach (var log in logs)
                 {
                     Assert.That(
-                        log.Value.Key.color,
+                        log.Value.color,
                         Is.EqualTo(LogBrown),
                         $"the {log.Key} log is `LogBrown`");
+
                     Assert.That(
-                        log.Value.Value.color,
-                        Is.EqualTo(LogEdge),
-                        $"the {log.Key} log has the `LogEdge` rim, which is what "
-                        + "separates a log from the water it floats on — the two are close in "
-                        + "brightness on purpose and far apart in hue");
+                        log.Value.GetComponentsInChildren<Image>(includeInactive: true).Length,
+                        Is.EqualTo(1),
+                        $"the {log.Key} log draws one thing — its own fill. `LogEdge` is gone "
+                        + "and the log has no rim, so there is no second painted layer inside it.");
                 }
             }
             finally
             {
                 Destroy(view);
+            }
+        }
+
+        /// <summary>
+        /// `Start` and `End`, at the **top** of their own log, in
+        /// `LogLabelInk` — game-board.md § Colours and the committed mockup's
+        /// `.log` rule.
+        ///
+        /// Top rather than middle, because the middle of a log is where frogs
+        /// stand: the pond band is 896 px tall and every lane's centre line
+        /// crosses both logs, so a centred word is a word with a frog on it.
+        /// </summary>
+        [Test]
+        public void EachLogIsLabelledAtItsTopInLogLabelInk()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var labels = new Dictionary<string, KeyValuePair<Text, Image>>
+                {
+                    { "Start", new KeyValuePair<Text, Image>(view.StartLogLabel, view.StartLog) },
+                    { "End", new KeyValuePair<Text, Image>(view.EndLogLabel, view.EndLog) },
+                };
+
+                foreach (var entry in labels)
+                {
+                    var label = entry.Value.Key;
+                    var log = entry.Value.Value;
+
+                    Assert.That(label.text, Is.EqualTo(entry.Key), "the log says what it is");
+                    Assert.That(
+                        label.color,
+                        Is.EqualTo(LogLabelInk),
+                        $"the {entry.Key} log's word is `LogLabelInk`. The old mid-brown was "
+                        + "chosen against a pale tan log and is unreadable on this one.");
+                    Assert.That(
+                        label.fontSize,
+                        Is.EqualTo((int)GameBoardScreenView.LogLabelSize));
+
+                    var labelRect = label.rectTransform;
+
+                    Assert.That(
+                        labelRect.parent,
+                        Is.SameAs(log.transform),
+                        "the word belongs to the log, so it travels with it on every screen width");
+
+                    // Pinned to the log's top edge and spanning its width, so
+                    // `UpperCenter` centres it across the log rather than
+                    // across whatever size the text happens to be.
+                    Assert.That(label.alignment, Is.EqualTo(TextAnchor.UpperCenter));
+                    Assert.That(labelRect.anchorMin, Is.EqualTo(new Vector2(0f, 1f)));
+                    Assert.That(labelRect.anchorMax, Is.EqualTo(new Vector2(1f, 1f)));
+                    Assert.That(labelRect.pivot, Is.EqualTo(new Vector2(0.5f, 1f)));
+                    Assert.That(
+                        labelRect.anchoredPosition,
+                        Is.EqualTo(new Vector2(0f, -GameBoardScreenView.LogLabelTopPadding)),
+                        $"the {entry.Key} log's word sits `LogLabelTopPadding` below the top of "
+                        + "the log — not in its middle, which is where the frogs stand");
+                    Assert.That(labelRect.sizeDelta.x, Is.EqualTo(0f).Within(0.001f));
+                }
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        /// <summary>
+        /// The two arithmetic claims that removing `LogEdge` rests on, held to
+        /// the same bar the frogs are held to rather than taken on trust.
+        ///
+        /// The rim used to be what separated a log from the water — the old
+        /// tan log and the water were 1.05 : 1 apart, so the fill could not do
+        /// it. `LogBrown` can, which is the whole reason the rim could go. And
+        /// with the rim gone the word on the log has only the fill behind it,
+        /// so it is measured against the fill.
+        /// </summary>
+        [Test]
+        public void TheLogReadsAgainstTheWater_AndItsLabelAgainstTheLog_WithNoRimToHelp()
+        {
+            var pairs = new Dictionary<string, KeyValuePair<Color, Color>>
+            {
+                { "the log against the water", new KeyValuePair<Color, Color>(LogBrown, PondWater) },
+                { "the log's label against the log", new KeyValuePair<Color, Color>(LogLabelInk, LogBrown) },
+            };
+
+            foreach (var pair in pairs)
+            {
+                Assert.That(
+                    ContrastRatio(pair.Value.Key, pair.Value.Value),
+                    Is.GreaterThanOrEqualTo(MinimumContrastRatio),
+                    $"{pair.Key} is too close in brightness, and there is no rim left to carry it");
+
+                Assert.That(
+                    ColourDistance(pair.Value.Key, pair.Value.Value),
+                    Is.GreaterThanOrEqualTo(MinimumColourDistance),
+                    $"{pair.Key} is too close in colour, and there is no rim left to carry it");
             }
         }
 
@@ -210,14 +320,17 @@ namespace Frogs.Unity.EditModeTests
                         ContrastRatio(piece, surface.Value),
                         Is.GreaterThanOrEqualTo(MinimumContrastRatio),
                         $"the {frog} frog is too close in brightness to {surface.Key}. "
-                        + "Fix the surface, not the frog — the frog colours are the art "
-                        + "decision this issue does not get to move.");
+                        + "Either side may move: Derek reversed \"the surface moves, not the "
+                        + "frog\" on #301, because with the pond he picked no set of four frog "
+                        + "colours existed. Move them together and re-measure — "
+                        + "game-board.md#how-the-ponds-colours-are-constrained.");
 
                     Assert.That(
                         ColourDistance(piece, surface.Value),
                         Is.GreaterThanOrEqualTo(MinimumColourDistance),
                         $"the {frog} frog is too close in colour to {surface.Key}. "
-                        + "Fix the surface, not the frog.");
+                        + "Either side may move, and they move together — "
+                        + "game-board.md#how-the-ponds-colours-are-constrained.");
                 }
             }
         }
