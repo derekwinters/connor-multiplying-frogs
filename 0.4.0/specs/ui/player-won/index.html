@@ -2354,6 +2354,11 @@ frog. Same rule as the board's turn banner: the name and nothing else.</p>
 </tr>
 </tbody>
 </table>
+<p><code>Green</code> is the next player's <strong>name</strong>, under the same rule the headline
+uses — <code>Connor's turn</code> for a renamed frog. The two lines of this dialog
+name two different players, and a screen that called one of them by its
+colour and the other by its name would be naming the same kind of thing two
+ways.</p>
 <p>The second case is the one <code>Game.IsOver</code> has just become true for.</p>
 </li>
 </ul>
@@ -2364,6 +2369,13 @@ frog. Same rule as the board's turn banner: the name and nothing else.</p>
   next player's turn starting. It opens <em>after</em> <a href="../answer-result/">answer result</a>
   has closed and the frog has landed, not instead of it: the answer result
   reports the answer, this reports the arrival.</li>
+<li><strong>What decides it is <code>Game.FrogJustHome</code></strong>, not <code>Game.IsOver</code>. Core answers
+  "which frog did the turn that just played land on its End log, if any" — one
+  turn's fact, replaced by the next turn's result rather than added to, which
+  is what makes one arrival announceable exactly once and never twice. It is
+  deliberately a different question from whether the game is over: the two
+  agree only about the very last arrival, and using the ending to decide would
+  be the bug this dialog exists to fix.</li>
 <li><strong>Exit.</strong> The button closes it. If there is a next player, the board is
   underneath with that player's turn already begun. If there is not, the game
   over screen follows.</li>
