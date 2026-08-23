@@ -4,7 +4,6 @@ using Frogs.Core;
 using Frogs.Unity.Views;
 using BoardColours = Frogs.Unity.UI.BoardColours;
 using Image = UnityEngine.UI.Image;
-using PlayerChip = Frogs.Unity.UI.PlayerChip;
 
 namespace Frogs.Unity.EditModeTests
 {
@@ -265,7 +264,7 @@ namespace Frogs.Unity.EditModeTests
         /// of it is that it stayed centred.
         /// </summary>
         [Test]
-        public void TheGearAndTheTurnChip_FollowTheRealScreenEdge_NotTheReferenceEdge()
+        public void TheGearAndTheTurnBanner_FollowTheRealScreenEdge_NotTheReferenceEdge()
         {
             var canvas = OversizedCanvas();
 
@@ -275,7 +274,7 @@ namespace Frogs.Unity.EditModeTests
 
                 var screen = BoundsOf(canvas, canvas);
                 var gear = BoundsOf(view.SettingsButton.RectTransform, canvas);
-                var chip = BoundsOf(view.TurnBannerChip.RectTransform, canvas);
+                var banner = BoundsOf(view.TurnBannerText.rectTransform, canvas);
                 var roll = BoundsOf(view.RollButton.RectTransform, canvas);
                 var controls = BoundsOf(view.ControlsRect, canvas);
 
@@ -285,9 +284,9 @@ namespace Frogs.Unity.EditModeTests
                     "the gear is a safe margin in from the edge of the screen, not from the edge "
                     + "of the reference rectangle");
                 Assert.That(
-                    chip.xMin,
+                    banner.xMin,
                     Is.EqualTo(screen.xMin + GameBoardScreenView.SafeMargin).Within(Tolerance),
-                    "the turn chip is a safe margin in from the edge of the screen");
+                    "the turn banner's words are a safe margin in from the edge of the screen");
 
                 Assert.That(
                     roll.center.x,
@@ -452,21 +451,11 @@ namespace Frogs.Unity.EditModeTests
                     Rect.MinMaxRect(left, controlsTop - GameBoardScreenView.BoardBandOutline, right, controlsTop),
                     "the controls band's hairline");
 
-                // The header's contents: the chip against the left safe
-                // margin, the gear against the right one, both centred on the
-                // band.
+                // The header's contents: the banner's words against the left
+                // safe margin, the gear against the right one, both centred on
+                // the band. There is no header chip between them any more
+                // (#326).
                 var headerCentre = (top + headerBottom) / 2f;
-                var chipLeft = left + GameBoardScreenView.SafeMargin;
-
-                AssertBounds(
-                    view.TurnBannerChip.RectTransform,
-                    canvas,
-                    Rect.MinMaxRect(
-                        chipLeft,
-                        headerCentre - (PlayerChip.PlayerChipHeight / 2f),
-                        chipLeft + PlayerChip.PlayerChipWidth,
-                        headerCentre + (PlayerChip.PlayerChipHeight / 2f)),
-                    "the turn chip");
 
                 var gear = BoundsOf(view.SettingsButton.RectTransform, canvas);
                 Assert.That(
@@ -475,10 +464,16 @@ namespace Frogs.Unity.EditModeTests
                     "the gear is against the right safe margin");
                 Assert.That(gear.center.y, Is.EqualTo(headerCentre).Within(Tolerance), "the gear is centred on the band");
 
+                var bannerWords = BoundsOf(view.TurnBannerText.rectTransform, canvas);
+
                 Assert.That(
-                    BoundsOf(view.TurnBannerText.rectTransform, canvas).xMin,
-                    Is.EqualTo(chipLeft + PlayerChip.PlayerChipWidth + GameBoardScreenView.TurnBannerGap).Within(Tolerance),
-                    "the banner's words sit a gap past the chip beside them");
+                    bannerWords.xMin,
+                    Is.EqualTo(left + GameBoardScreenView.SafeMargin).Within(Tolerance),
+                    "the banner's words start at the left safe margin");
+                Assert.That(
+                    bannerWords.center.y,
+                    Is.EqualTo(headerCentre).Within(Tolerance),
+                    "the banner is centred on the band");
 
                 // The controls band's contents: `Roll`, oversized and centred.
                 var controlsCentre = (bottom + controlsTop) / 2f;

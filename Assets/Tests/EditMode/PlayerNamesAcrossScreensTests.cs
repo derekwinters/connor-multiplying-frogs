@@ -54,25 +54,6 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TheTurnBannersChip_CarriesTheTypedName()
-        {
-            var board = CreateBoard();
-
-            try
-            {
-                board.Initialize(GameWith(
-                    new RosterEntry(FrogColour.Green).WithName("Connor"),
-                    new RosterEntry(FrogColour.Blue)));
-
-                Assert.That(board.TurnBannerChip.Label.text, Is.EqualTo("Connor"));
-            }
-            finally
-            {
-                Object.DestroyImmediate(board.gameObject);
-            }
-        }
-
-        [Test]
         public void EveryLanesChip_CarriesItsFrogsName_AndFallsBackToTheColourName()
         {
             var board = CreateBoard();

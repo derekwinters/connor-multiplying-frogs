@@ -45,7 +45,7 @@ namespace Frogs.Unity.EditModeTests
         const float CanvasHeight = 1200f;
 
         [Test]
-        public void TurnBanner_NamesWhicheverFrogCoreReportsActive_AndShowsItsChipActive()
+        public void TurnBanner_NamesWhicheverFrogCoreReportsActive()
         {
             var game = new Game(new[] { FrogColour.Blue, FrogColour.Green }, AnySeed);
             var view = CreateView(game);
@@ -54,9 +54,6 @@ namespace Frogs.Unity.EditModeTests
             {
                 // Blue is first in turn order, so Core reports Blue active.
                 Assert.That(view.TurnBannerText.text, Is.EqualTo("Blue's turn"));
-                Assert.That(view.TurnBannerChip.Label.text, Is.EqualTo("Blue"));
-                Assert.That(view.TurnBannerChip.State, Is.EqualTo(PlayerChipState.Active));
-                Assert.That(view.TurnBannerChip.Swatch.color, Is.EqualTo(FrogColours.For(FrogColour.Blue)));
 
                 // Hand the turn on in Core and ask the board again: the
                 // banner has to follow Core, not a value baked in at build.
@@ -64,8 +61,43 @@ namespace Frogs.Unity.EditModeTests
                 view.Refresh();
 
                 Assert.That(view.TurnBannerText.text, Is.EqualTo("Green's turn"));
-                Assert.That(view.TurnBannerChip.Label.text, Is.EqualTo("Green"));
-                Assert.That(view.TurnBannerChip.Swatch.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        /// <summary>
+        /// #326, Derek: <em>"remove the box at the top with bob selected. it's
+        /// already selected in the lanes section too."</em> The header is
+        /// words alone — the active frog's own lane chip, directly below in
+        /// the pond, already carries the name, the colour and the Active ring,
+        /// so a header chip was the screen's third statement of one fact.
+        ///
+        /// Asserted structurally rather than by the absence of a property: a
+        /// future edit that rebuilds a chip in the header under any name has
+        /// to fail this, and one that reads
+        /// <c>view.TurnBannerChip</c> would not compile to be caught.
+        /// The lane chips are the control — they are still there, one per
+        /// frog, so this cannot pass by the board having lost every chip.
+        /// </summary>
+        [Test]
+        public void Header_DrawsNoPlayerChip_TheLaneChipBelowCarriesTheColour()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                Assert.That(
+                    view.HeaderRect.GetComponentsInChildren<PlayerChip>(includeInactive: true),
+                    Is.Empty,
+                    "the header band draws no player chip at all");
+
+                Assert.That(
+                    view.Lanes.Select(lane => lane.Chip).ToArray(),
+                    Has.Length.EqualTo(2).And.None.Null,
+                    "every lane still has its own chip — that is what carries the colour now");
             }
             finally
             {
@@ -89,15 +121,19 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(view.TurnBannerText.fontSize, Is.EqualTo((int)GameBoardScreenView.TurnBannerSize));
 
-                // The chip at the safe margin, and the words TurnBannerGap
-                // past it — the mockup's own 48/256/24, not an approximation
-                // composed out of the lane's gutter constants.
-                Assert.That(
-                    view.TurnBannerChip.RectTransform.anchoredPosition.x,
-                    Is.EqualTo(GameBoardScreenView.SafeMargin).Within(0.001f));
+                // The words themselves at the safe margin. They used to start
+                // SafeMargin + PlayerChipWidth + TurnBannerGap in, past a chip
+                // that is gone (#326); what is anchored to the band's left
+                // edge now is the banner.
                 Assert.That(
                     view.TurnBannerText.rectTransform.anchoredPosition.x,
-                    Is.EqualTo(GameBoardScreenView.SafeMargin + PlayerChip.PlayerChipWidth + GameBoardScreenView.TurnBannerGap).Within(0.001f));
+                    Is.EqualTo(GameBoardScreenView.SafeMargin).Within(0.001f));
+
+                // Vertically centred in the header band, which is what the
+                // 0.5 anchor and the zero offset together mean.
+                Assert.That(view.TurnBannerText.rectTransform.anchorMin.y, Is.EqualTo(0.5f));
+                Assert.That(view.TurnBannerText.rectTransform.anchorMax.y, Is.EqualTo(0.5f));
+                Assert.That(view.TurnBannerText.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
 
                 Assert.That(
                     view.HeaderHairline.rectTransform.rect.height,
@@ -111,7 +147,7 @@ namespace Frogs.Unity.EditModeTests
 
                 // Left of the header, right of the header — measured in world
                 // space so anchoring choices cannot fake it.
-                Assert.That(CenterX(view.TurnBannerChip.RectTransform), Is.LessThan(CenterX(settings)));
+                Assert.That(CenterX(view.TurnBannerText.rectTransform), Is.LessThan(CenterX(settings)));
             }
             finally
             {
@@ -806,7 +842,11 @@ namespace Frogs.Unity.EditModeTests
                 { "BoardControlsHeight", 176f },
                 { "BoardBandOutline", 3f },
                 { "TurnBannerSize", 52f },
-                { "TurnBannerGap", 24f },
+
+                // `TurnBannerGap` is gone rather than renamed (#326). It
+                // measured the gap between the banner's chip and its words,
+                // and words alone need no gap because there is nothing to gap
+                // — game-board.md#the-constant-this-page-used-to-carry.
                 { "SettingsButtonSize", 96f },
 
                 // The gear's glyph, grown into the space its ring and its
