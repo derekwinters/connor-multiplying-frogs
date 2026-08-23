@@ -45,12 +45,16 @@ namespace Frogs.Unity.Views
     ///   <see cref="RequestClose"/> rather than adding a second opinion about
     ///   the key.
     ///
-    /// `How to play` ships present and disabled. That is the answer
-    /// settings-dialog.md's own open question already proposes — "present. A
-    /// disabled button that appears later is less confusing than a button that
-    /// appears from nowhere" — not a decision made here: the screen it would
-    /// open has no wireframe, so under rule 8 it cannot be built, and it is
-    /// wired to nothing at all.
+    /// `How to play` is present and **enabled**. It shipped disabled for as
+    /// long as the screen it opens had no wireframe; #324 designed that screen
+    /// and #414 built it, so the reason the button was disabled has gone. What
+    /// it opens is a **screen, not a dialog** — it replaces this dialog rather
+    /// than covering it, because
+    /// docs/specs/ui/shared-components.md#dialog says a dialog never opens
+    /// over another dialog — and so this view raises
+    /// <see cref="HowToPlayRequested"/> and stops. Which screen that is, and
+    /// that leaving it comes back here open and unchanged, is <c>AppRoot</c>'s
+    /// wiring and the router's: the same line `End the game` already draws.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public sealed class SettingsDialogView : MonoBehaviour
@@ -132,6 +136,15 @@ namespace Frogs.Unity.Views
         public event Action CloseRequested;
 
         /// <summary>
+        /// `How to play` was pressed: replace this dialog with
+        /// docs/specs/ui/how-to-play.md's five-page screen (#414). This view
+        /// does not close itself on the way — navigating to a screen clears
+        /// the dialog layer, and leaving that screen opens this dialog again,
+        /// open and exactly as it was.
+        /// </summary>
+        public event Action HowToPlayRequested;
+
+        /// <summary>
         /// `End the game` was pressed: open
         /// docs/specs/ui/end-game-confirm.md (#226). This is the whole of what
         /// that button does. Nothing here ends a game.
@@ -178,7 +191,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>`How to play` — secondary, <see cref="SettingsActionWidth"/> wide, present and disabled.</summary>
+        /// <summary>`How to play` — secondary, <see cref="SettingsActionWidth"/> wide, present and enabled. Opens the five-page screen.</summary>
         public Button HowToPlayButton
         {
             get
@@ -388,12 +401,10 @@ namespace Frogs.Unity.Views
             // between them.
             _howToPlayButton = CreateActionButton("HowToPlay", ButtonKind.Secondary, HowToPlayLabel, atTop: true);
 
-            // Present, and disabled — settings-dialog.md's own proposed answer
-            // to its open question. Deliberately wired to nothing: the screen
-            // it would open has no wireframe, so there is no destination to
-            // route to and none is invented here. A tap does nothing at all,
-            // silently, per the shared Button's own behaviour.
-            _howToPlayButton.SetDisabled(true);
+            // Live, as of #414. It asks for the screen and does nothing else —
+            // it does not close this dialog, because what replaces this dialog
+            // is a screen transition the router owns.
+            _howToPlayButton.Clicked += HandleHowToPlayClicked;
 
             _endGameButton = CreateActionButton("EndTheGame", ButtonKind.Destructive, EndGameLabel, atTop: false);
             _endGameButton.Clicked += HandleEndGameClicked;
@@ -509,6 +520,15 @@ namespace Frogs.Unity.Views
                 BackToTheGameLabel,
                 RequestClose,
                 isLeastDestructive: true);
+        }
+
+        void HandleHowToPlayClicked()
+        {
+            var handler = HowToPlayRequested;
+            if (handler != null)
+            {
+                handler();
+            }
         }
 
         void HandleEndGameClicked()

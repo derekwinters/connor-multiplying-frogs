@@ -303,35 +303,44 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void HowToPlay_IsPresentAndDisabled_AndATapFiresNothing()
+        public void HowToPlay_IsEnabled_AndAsksForTheScreenWithoutClosingOrEndingAnything()
         {
             var view = CreateView();
 
             try
             {
-                var fired = 0;
-                view.CloseRequested += () => fired++;
-                view.EndGameConfirmRequested += () => fired++;
+                var closed = 0;
+                var ended = 0;
+                var howToPlay = 0;
 
-                // settings-dialog.md's open question proposes "present. A
-                // disabled button that appears later is less confusing than a
-                // button that appears from nowhere." The screen it would open
-                // has no wireframe, so under rule 8 it cannot be built and
-                // there is nothing to route to.
+                view.CloseRequested += () => closed++;
+                view.EndGameConfirmRequested += () => ended++;
+                view.HowToPlayRequested += () => howToPlay++;
+
+                // Enabled since #324 agreed the screen it opens, and built
+                // that way since #414 built it — settings-dialog.md's Elements
+                // section: "Enabled... the screen it opens is now specified,
+                // so the reason this button was disabled has gone."
                 Assert.That(view.HowToPlayButton.IsHidden, Is.False, "present");
-                Assert.That(view.HowToPlayButton.IsDisabled, Is.True, "and disabled");
+                Assert.That(view.HowToPlayButton.IsDisabled, Is.False, "and no longer disabled");
                 Assert.That(view.HowToPlayButton.Kind, Is.EqualTo(ButtonKind.Secondary));
                 Assert.That(
                     view.HowToPlayButton.CanvasGroup.alpha,
-                    Is.EqualTo(Button.ButtonDisabledOpacity).Within(0.001f));
+                    Is.EqualTo(1f).Within(0.001f));
                 Assert.That(
                     view.HowToPlayButton.RectTransform.sizeDelta.x,
                     Is.EqualTo(SettingsDialogView.SettingsActionWidth).Within(0.001f));
 
                 TapButton(view.HowToPlayButton);
 
-                Assert.That(view.HowToPlayButton.IsPressed, Is.False, "no press response");
-                Assert.That(fired, Is.Zero, "a disabled button does nothing at all");
+                Assert.That(howToPlay, Is.EqualTo(1), "it asks for the screen, exactly once");
+
+                // What it opens is a screen, not a second dialog, so this
+                // dialog does not close itself and nothing about the game
+                // moves: replacing it is the router's, and coming back to it
+                // open and unchanged is the whole of what leaving does.
+                Assert.That(closed, Is.Zero, "`How to play` is not `Back to the game`");
+                Assert.That(ended, Is.Zero);
             }
             finally
             {
@@ -683,6 +692,7 @@ namespace Frogs.Unity.EditModeTests
                 // dialog can ask anybody to do.
                 "CloseRequested",
                 "EndGameConfirmRequested",
+                "HowToPlayRequested",
                 nameof(SettingsDialogView.RectTransform),
                 nameof(SettingsDialogView.Dialog),
                 nameof(SettingsDialogView.ActionsRect),

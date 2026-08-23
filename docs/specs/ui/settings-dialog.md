@@ -158,12 +158,10 @@ of this table's numbers at the same time, so the code and this page now agree.
   goes. **Enabled**, as of
   [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324):
   the screen it opens is now specified, so the reason this button was disabled
-  has gone. It is still disabled *in the built dialog*, and will be until the
-  implementation issue lands — the same lag `SettingsDialogHeight` and
-  `SettingsVersionBottomOffset` carried until
-  [#407](https://github.com/derekwinters/connor-multiplying-frogs/issues/407)
-  closed it, and it resolves the same way: this page is authoritative and the
-  code follows it.
+  has gone. It is enabled *in the built dialog* too, as of
+  [#414](https://github.com/derekwinters/connor-multiplying-frogs/issues/414),
+  which built that screen — the lag this row used to describe is closed, the
+  same way `SettingsDialogHeight` and `SettingsVersionBottomOffset`'s was.
 
   Note what it opens is a **screen, not a dialog**. It replaces this dialog
   rather than covering it, because

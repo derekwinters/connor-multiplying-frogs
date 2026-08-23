@@ -110,6 +110,7 @@ namespace Frogs.Unity.EditModeTests
                 AssertViewUnder<GameSetupScreenView>(root.RootFor(CoreScreen.GameSetup));
                 AssertViewUnder<GameBoardScreenView>(root.RootFor(CoreScreen.GameBoard));
                 AssertViewUnder<GameOverScreenView>(root.RootFor(CoreScreen.GameOver));
+                AssertViewUnder<HowToPlayScreenView>(root.RootFor(CoreScreen.HowToPlay));
 
                 AssertViewUnder<RollAndCardDialogView>(root.RootFor(Dialog.RollAndCard));
                 AssertViewUnder<WorkingOutGridView>(root.RootFor(Dialog.WorkingOutGrid));
@@ -449,6 +450,90 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(
                     root.GameOver.RowCount, Is.EqualTo(root.CurrentGame.Standings.Count),
                     "the standings screen was shown the game that ended");
+            }
+            finally
+            {
+                Destroy(root);
+            }
+        }
+
+        [Test]
+        public void HowToPlay_ReplacesTheSettingsDialog_AndLeavingComesBackToItOpen()
+        {
+            var root = CreateRoot();
+
+            try
+            {
+                StartAGame(root);
+
+                TapSettings(root.Board);
+                Assert.That(root.Router.CurrentDialog, Is.EqualTo(Dialog.Settings));
+
+                Tap(root.Settings.HowToPlayButton);
+
+                // A screen, not a second dialog: the settings panel is
+                // replaced rather than covered, which is
+                // shared-components.md#dialog's "a dialog never opens over
+                // another dialog" for a screen opened from inside one.
+                Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.HowToPlay));
+                Assert.That(root.Router.CurrentDialog, Is.Null, "no dialog is left open underneath");
+                Assert.That(ActiveScreenRoots(root), Is.EqualTo(new[] { CoreScreen.HowToPlay }));
+                Assert.That(root.RootFor(Dialog.Settings).activeSelf, Is.False);
+                Assert.That(root.HowToPlay.CurrentPage, Is.EqualTo(1), "entering always starts on page 1");
+
+                // `Back` on page 1 leaves, and what it returns to is the
+                // settings dialog — open, over the board — not the board.
+                Tap(root.HowToPlay.BackButton);
+
+                Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameBoard));
+                Assert.That(root.Router.CurrentDialog, Is.EqualTo(Dialog.Settings));
+                Assert.That(root.Settings.Dialog.IsOpen, Is.True, "open, exactly as it was");
+                Assert.That(root.CurrentGame.IsOver, Is.False);
+            }
+            finally
+            {
+                Destroy(root);
+            }
+        }
+
+        [Test]
+        public void PagingThroughHowToPlayAndPressingDone_ChangesNothingAboutTheGame()
+        {
+            var root = CreateRoot();
+
+            try
+            {
+                StartAGame(root);
+
+                var turnBefore = root.CurrentGame.ActiveFrog;
+                var positionBefore = root.CurrentGame.LaneFor(turnBefore).Position;
+
+                TapSettings(root.Board);
+                Tap(root.Settings.HowToPlayButton);
+
+                for (var page = 1; page < HowToPlayScreenView.HowToPlayPageCount; page++)
+                {
+                    Tap(root.HowToPlay.NextButton);
+                }
+
+                Assert.That(root.HowToPlay.NextButton.Label.text, Is.EqualTo("Done"));
+
+                Tap(root.HowToPlay.NextButton);
+
+                Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameBoard));
+                Assert.That(root.Router.CurrentDialog, Is.EqualTo(Dialog.Settings));
+
+                // how-to-play.md's first invariant: "Opening it, paging
+                // through it, and leaving it return the board exactly as it
+                // was — same turn, same positions, same enabled `Roll`."
+                Assert.That(root.CurrentGame.ActiveFrog, Is.EqualTo(turnBefore));
+                Assert.That(root.CurrentGame.LaneFor(turnBefore).Position, Is.EqualTo(positionBefore));
+                Assert.That(root.Board.RollButton.IsDisabled, Is.False);
+
+                // And opening it again starts at page 1, not where the last
+                // reader left it.
+                Tap(root.Settings.HowToPlayButton);
+                Assert.That(root.HowToPlay.CurrentPage, Is.EqualTo(1));
             }
             finally
             {
