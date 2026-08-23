@@ -64,12 +64,14 @@ namespace Frogs.Core.Tests
             Assert.That(router.CurrentDialog, Is.Null);
         }
 
-        // roll-and-card.md, working-out-grid.md, answer-result.md
-        // #behaviour: "Hardware back does nothing." Not a close — genuinely
-        // inert, per shared-components.md#dialog's now-amended invariant.
+        // roll-and-card.md, working-out-grid.md, answer-result.md,
+        // player-won.md #behaviour: "Hardware back does nothing." Not a
+        // close — genuinely inert, per shared-components.md#dialog's
+        // now-amended invariant, which counts four of them.
         [TestCase(Dialog.RollAndCard)]
         [TestCase(Dialog.WorkingOutGrid)]
         [TestCase(Dialog.AnswerResult)]
+        [TestCase(Dialog.PlayerWon)]
         public void HandleBack_WithAnInertDialogOpen_IsANoOp(Dialog inertDialog)
         {
             var router = new ScreenRouter();
@@ -104,6 +106,7 @@ namespace Frogs.Core.Tests
         [TestCase(Screen.GameBoard, Dialog.RollAndCard)]
         [TestCase(Screen.GameBoard, Dialog.WorkingOutGrid)]
         [TestCase(Screen.GameBoard, Dialog.AnswerResult)]
+        [TestCase(Screen.GameBoard, Dialog.PlayerWon)]
         public void HandleBack_AnywhereOtherThanTheTitleScreen_NeverSignalsAppExit(
             Screen screen, Dialog? dialog)
         {

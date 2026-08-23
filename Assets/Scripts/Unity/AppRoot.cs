@@ -38,7 +38,7 @@ namespace Frogs.Unity
     /// and every field below is deliberately not a <c>[SerializeField]</c>.
     ///
     /// **Every view is asked to build itself here, up front.** Unity does not
-    /// run <c>Awake</c> on a child of an inactive object, and eight of the nine
+    /// run <c>Awake</c> on a child of an inactive object, and nine of the ten
     /// roots are inactive at boot, so each view's own <c>EnsureInitialized</c>
     /// guard is prodded through its public surface rather than left to
     /// lifecycle timing — the same reasoning the views themselves record.
@@ -81,6 +81,7 @@ namespace Frogs.Unity
         RollAndCardDialogView _rollAndCard;
         WorkingOutGridView _workingOutGrid;
         AnswerResultDialogView _answerResult;
+        PlayerWonDialogView _playerWon;
         SettingsDialogView _settings;
         EndGameConfirmView _endGameConfirm;
 
@@ -199,6 +200,16 @@ namespace Frogs.Unity
             {
                 Initialize();
                 return _answerResult;
+            }
+        }
+
+        /// <summary>[A player has won](docs/specs/ui/player-won.md).</summary>
+        public PlayerWonDialogView PlayerWon
+        {
+            get
+            {
+                Initialize();
+                return _playerWon;
             }
         }
 
@@ -444,6 +455,7 @@ namespace Frogs.Unity
             _rollAndCard = AddView<RollAndCardDialogView>(RootFor(Dialog.RollAndCard));
             _workingOutGrid = AddView<WorkingOutGridView>(RootFor(Dialog.WorkingOutGrid));
             _answerResult = AddView<AnswerResultDialogView>(RootFor(Dialog.AnswerResult));
+            _playerWon = AddView<PlayerWonDialogView>(RootFor(Dialog.PlayerWon));
             _settings = AddView<SettingsDialogView>(RootFor(Dialog.Settings));
             _endGameConfirm = AddView<EndGameConfirmView>(RootFor(Dialog.EndGameConfirm));
 
@@ -458,6 +470,7 @@ namespace Frogs.Unity
             PrimeView(_rollAndCard.RectTransform);
             PrimeView(_workingOutGrid.RectTransform);
             PrimeView(_answerResult.RectTransform);
+            PrimeView(_playerWon.RectTransform);
             PrimeView(_settings.RectTransform);
             PrimeView(_endGameConfirm.RectTransform);
         }
@@ -513,6 +526,7 @@ namespace Frogs.Unity
             _rollAndCard.SolveItPressed += OpenWorkingOutGrid;
             _workingOutGrid.AnswerSubmitted += ShowAnswerResult;
             _answerResult.TurnHandedOff += HandOffFinished;
+            _playerWon.HandedOn += PlayerWonAcknowledged;
 
             _settings.CloseRequested += CloseDialog;
             _settings.EndGameConfirmRequested += OpenEndGameConfirm;
@@ -645,16 +659,56 @@ namespace Frogs.Unity
             _answerResult.Initialize(new GameAnswerResultTurn(_game, _turn.Resolution), _board, _router);
         }
 
-        // The frog has landed and the next player's turn has begun. The only
-        // thing left is the ending docs/specs/ui/game-board.md describes: "When
-        // the last frog gets home, the game ends itself... with no input from
-        // anybody."
+        // The frog has landed and the next player's turn has begun. Two things
+        // can be left, and the first of them is new in #329.
+        //
+        // docs/specs/ui/player-won.md#behaviour: the arrival dialog "opens once
+        // the winning hop has finished — the seam AppRoot.HandOffFinished
+        // already sits on". The question it turns on is Core's
+        // Game.FrogJustHome — "did the frog that just moved land on its End
+        // log" — and *not* Game.IsOver, which is a different question with a
+        // different answer for every arrival but the last. Asking the right one
+        // is what makes this fire on the first frog home and on every one
+        // after it.
+        //
+        // When there is no arrival to announce, this falls through to exactly
+        // what it did before: the ending docs/specs/ui/game-board.md describes,
+        // "when the last frog gets home, the game ends itself... with no input
+        // from anybody". That path is still reachable without an arrival — a
+        // game ended deliberately from the settings confirm — so it stays.
         void HandOffFinished()
         {
+            if (_game.FrogJustHome.HasValue)
+            {
+                _playerWon.Initialize(_game);
+                _router.OpenDialog(Dialog.PlayerWon);
+                return;
+            }
+
             if (_game.IsOver)
             {
                 ShowGameOver();
             }
+        }
+
+        // The one button on the arrival dialog. player-won.md#behaviour: "The
+        // button closes it. If there is a next player, the board is underneath
+        // with that player's turn already begun. If there is not, the game over
+        // screen follows." The dialog itself moves no screens; this is the only
+        // place that decides between those two, and it decides it by asking
+        // Core rather than by remembering which headline was drawn.
+        void PlayerWonAcknowledged()
+        {
+            if (_game.IsOver)
+            {
+                // Navigating to a screen clears the dialog layer, so the panel
+                // does not need closing first — and closing it first would run
+                // the router's StateChanged twice for one press.
+                ShowGameOver();
+                return;
+            }
+
+            _router.CloseDialog();
         }
 
         // --- Settings, and the two ways a game ends -------------------------------
@@ -682,7 +736,7 @@ namespace Frogs.Unity
 
         // --- The clock ------------------------------------------------------------
 
-        // Three of the five dialogs have no Update of their own, so their
+        // Four of the six dialogs have no Update of their own, so their
         // shared Dialog's cross-fade in has nothing advancing it and they would
         // open at zero opacity and stay there. The other two run their own
         // entering and hand-off sequences from their own Update and must not be
@@ -700,6 +754,10 @@ namespace Frogs.Unity
             {
                 case Dialog.WorkingOutGrid:
                     _workingOutGrid.Dialog.AdvanceFade(deltaSeconds);
+                    break;
+
+                case Dialog.PlayerWon:
+                    _playerWon.Dialog.AdvanceFade(deltaSeconds);
                     break;
 
                 case Dialog.Settings:

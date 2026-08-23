@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -113,6 +114,7 @@ namespace Frogs.Unity.EditModeTests
                 AssertViewUnder<RollAndCardDialogView>(root.RootFor(Dialog.RollAndCard));
                 AssertViewUnder<WorkingOutGridView>(root.RootFor(Dialog.WorkingOutGrid));
                 AssertViewUnder<AnswerResultDialogView>(root.RootFor(Dialog.AnswerResult));
+                AssertViewUnder<PlayerWonDialogView>(root.RootFor(Dialog.PlayerWon));
                 AssertViewUnder<SettingsDialogView>(root.RootFor(Dialog.Settings));
                 AssertViewUnder<EndGameConfirmView>(root.RootFor(Dialog.EndGameConfirm));
             }
@@ -318,6 +320,107 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        // docs/specs/ui/player-won.md#behaviour, and #329's own acceptance
+        // check: the dialog fires on the first frog home and on every one
+        // after it, never twice for the same frog — and the last frog home
+        // still reaches the standings, which is the path that must not
+        // regress now that something sits in front of it.
+        [Test]
+        public void EveryFrogThatGetsHome_IsAnnouncedOnce_AndTheLastOneStillReachesTheStandings()
+        {
+            var root = CreateRoot();
+
+            try
+            {
+                StartAGame(root);
+                var game = root.CurrentGame;
+                var announced = new List<string>();
+
+                for (var turn = 0; turn < MaxTurns && !game.IsOver; turn++)
+                {
+                    var headline = PlayOneTurnCorrectly(root, game);
+
+                    if (headline != null)
+                    {
+                        announced.Add(headline);
+                    }
+                }
+
+                Assert.That(game.IsOver, Is.True, "the game never ended");
+
+                // Two frogs, two arrivals, in the order they happened — and
+                // only the first one "wins".
+                Assert.That(announced, Is.EqualTo(new[] { "Green wins!", "Blue is home!" }));
+
+                // The ending is exactly the one game-board.md already
+                // described; the arrival dialog delayed it by one tap and
+                // changed nothing else.
+                Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameOver));
+                Assert.That(root.Router.CurrentDialog, Is.Null);
+                Assert.That(root.GameOver.HeadlineText.text, Is.EqualTo("Green wins!"));
+                Assert.That(root.GameOver.RowCount, Is.EqualTo(game.Standings.Count));
+            }
+            finally
+            {
+                Destroy(root);
+            }
+        }
+
+        // The other half of the same rule, and the one that is easiest to get
+        // wrong: an arrival that is not the last one announces itself and then
+        // hands straight back to the board, with the next player's turn
+        // already begun. player-won.md's third invariant — "this dialog
+        // changes nothing about the game" — and game-board.md's rule that a
+        // frog on the End log stays there and play continues.
+        [Test]
+        public void TheFirstFrogHome_IsAnnounced_AndThenPlayCarriesOnOnTheBoard()
+        {
+            var root = CreateRoot();
+
+            try
+            {
+                StartAGame(root);
+                var game = root.CurrentGame;
+
+                for (var turn = 0; turn < MaxTurns && !game.FrogJustHome.HasValue; turn++)
+                {
+                    Tap(root.Board.RollButton);
+                    var card = game.DrawnCard;
+                    Tap(root.RollAndCard.SolveItButton);
+                    TypeAnswer(root.WorkingOutGrid, card.Product);
+                    Tap(root.WorkingOutGrid.CheckItButton);
+                    Tap(root.AnswerResult.NextTurnButton);
+                    root.AnswerResult.Advance(LongEnough);
+                }
+
+                Assert.That(game.FrogJustHome, Is.EqualTo(FrogColour.Green), "Green rolled first");
+                Assert.That(game.IsOver, Is.False, "Blue is still swimming");
+
+                // The dialog is up, over the board, saying so.
+                Assert.That(root.Router.CurrentDialog, Is.EqualTo(Dialog.PlayerWon));
+                Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameBoard));
+                Assert.That(root.PlayerWon.HeadlineText.text, Is.EqualTo("Green wins!"));
+                Assert.That(root.PlayerWon.HandOnButton.Label.text, Is.EqualTo("Blue's turn"));
+
+                // Hardware back does nothing here — a stray press must not
+                // fast-forward past a moment the game stopped to mark.
+                root.HandleBackButton();
+                Assert.That(root.Router.CurrentDialog, Is.EqualTo(Dialog.PlayerWon));
+
+                Tap(root.PlayerWon.HandOnButton);
+
+                Assert.That(root.Router.CurrentDialog, Is.Null, "the dialog layer is clear again");
+                Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameBoard), "play carries on");
+                Assert.That(game.IsOver, Is.False, "announcing a win does not end the game");
+                Assert.That(game.ActiveFrog, Is.EqualTo(FrogColour.Blue));
+                Assert.That(root.Board.RollButton.IsDisabled, Is.False, "the next player can roll");
+            }
+            finally
+            {
+                Destroy(root);
+            }
+        }
+
         [Test]
         public void TheGearOpensSettings_AndEndingTheGameThroughItsConfirm_ReachesGameOver()
         {
@@ -470,8 +573,11 @@ namespace Frogs.Unity.EditModeTests
             Tap(root.GameSetup.StartButton);
         }
 
-        // One turn, answered right, through the same four taps a player makes.
-        static void PlayOneTurnCorrectly(AppRoot root, Game game)
+        // One turn, answered right, through the same four taps a player makes
+        // — and the fifth that only appears on the turns that get a frog home
+        // (#329). Returns the headline that arrival was announced with, or
+        // null if the turn landed nobody home.
+        static string PlayOneTurnCorrectly(AppRoot root, Game game)
         {
             Tap(root.Board.RollButton);
             var card = game.DrawnCard;
@@ -483,6 +589,15 @@ namespace Frogs.Unity.EditModeTests
 
             Tap(root.AnswerResult.NextTurnButton);
             root.AnswerResult.Advance(LongEnough);
+
+            if (root.Router.CurrentDialog != Dialog.PlayerWon)
+            {
+                return null;
+            }
+
+            var headline = root.PlayerWon.HeadlineText.text;
+            Tap(root.PlayerWon.HandOnButton);
+            return headline;
         }
 
         static void TypeAnswer(WorkingOutGridView view, int answer)

@@ -449,6 +449,76 @@ namespace Frogs.Core.Tests
             Assert.That(game.Winner, Is.Null);
         }
 
+        // docs/specs/ui/player-won.md#behaviour: the dialog "opens once the
+        // winning hop has finished", and the question it needs answered is
+        // "did the frog that just moved land on its End log" — not "is the
+        // game over", which is a different question with a different answer
+        // for every arrival but the last. That is this fact, and it is Core's
+        // for the same reason FinishingOrder is: it is decided by the turn,
+        // and the shell cannot reconstruct it afterward from lane positions
+        // that every finisher shares.
+        [Test]
+        public void FrogJustHome_NamesTheFrogThisTurnsAnswerLandedOnItsEndLog()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+            AdvanceTo(game, FrogColour.Green, Lane.LaneWinningPosition - 1);
+
+            game.RollDie();
+            game.BeginAnswering();
+            game.LaneFor(game.ActiveFrog).Resolve(game.DrawnCard.Product, game.DrawnCard);
+            game.ShowResult();
+
+            Assert.That(game.FrogJustHome, Is.EqualTo(FrogColour.Green));
+            Assert.That(game.IsOver, Is.False, "Blue is still swimming; an arrival is not an ending");
+        }
+
+        // The other half: a turn that moved a frog but did not get it home
+        // has nothing to announce.
+        [Test]
+        public void FrogJustHome_IsNull_OnATurnThatLandedNobodyHome()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+
+            game.RollDie();
+            game.BeginAnswering();
+            game.LaneFor(game.ActiveFrog).Resolve(game.DrawnCard.Product, game.DrawnCard);
+            game.ShowResult();
+
+            Assert.That(game.FrogJustHome, Is.Null);
+        }
+
+        // player-won.md: every frog that reaches the End log gets the dialog,
+        // and it "does not fire twice for the same frog" (#329). One arrival
+        // is one turn's fact, so the next turn's result replaces it rather
+        // than adding to it — which is what stops the same frog being
+        // announced again on somebody else's turn.
+        [Test]
+        public void FrogJustHome_IsReplacedByTheNextTurnsResult_SoOneArrivalIsAnnouncedOnce()
+        {
+            var roster = new[] { FrogColour.Green, FrogColour.Blue };
+            var game = new Game(roster, Seed);
+            AdvanceTo(game, FrogColour.Green, Lane.LaneWinningPosition - 1);
+
+            game.RollDie();
+            game.BeginAnswering();
+            game.LaneFor(game.ActiveFrog).Resolve(game.DrawnCard.Product, game.DrawnCard);
+            game.ShowResult();
+            Assert.That(game.FrogJustHome, Is.EqualTo(FrogColour.Green));
+
+            game.BeginHandOff();
+            game.CompleteHandOff();
+
+            game.RollDie();
+            game.BeginAnswering();
+            game.LaneFor(game.ActiveFrog).Resolve(game.DrawnCard.Product, game.DrawnCard);
+            game.ShowResult();
+
+            Assert.That(game.ActiveFrog, Is.EqualTo(FrogColour.Blue));
+            Assert.That(game.FrogJustHome, Is.Null, "Green got home last turn, not this one");
+        }
+
         // docs/specs/ui/game-over.md: "Frogs that did not finish are ranked
         // by how many lily pads they made", and the open question's own
         // wording is the current, still-open-to-change behaviour to build:

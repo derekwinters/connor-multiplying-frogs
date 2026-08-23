@@ -4,7 +4,7 @@ namespace Frogs.Core
 {
     /// <summary>
     /// The traffic cop — issue #213. Owns which one of four
-    /// <see cref="Screen"/>s is current, which one of five <see cref="Dialog"/>s
+    /// <see cref="Screen"/>s is current, which one of six <see cref="Dialog"/>s
     /// (if any) is layered over it, and what the hardware back button does in
     /// every state.
     ///
@@ -146,13 +146,15 @@ namespace Frogs.Core
                     CloseDialog();
                     break;
 
-                // roll-and-card.md, working-out-grid.md, answer-result.md
-                // #behaviour: "Hardware back does nothing." Genuinely inert —
-                // not a close, because none of the three has anything to
-                // dismiss back to without a cost the page itself rules out.
+                // roll-and-card.md, working-out-grid.md, answer-result.md,
+                // player-won.md #behaviour: "Hardware back does nothing."
+                // Genuinely inert — not a close, because all four sit inside a
+                // single turn's own chain, where a stray press should not
+                // fast-forward past something the game stopped to show.
                 case Dialog.RollAndCard:
                 case Dialog.WorkingOutGrid:
                 case Dialog.AnswerResult:
+                case Dialog.PlayerWon:
                     break;
 
                 default:

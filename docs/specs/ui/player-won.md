@@ -109,6 +109,12 @@ renderer.
     | There is a next player | `Green's turn` | the next player's turn on the board |
     | That frog was the **last** one home | `See the results` | [game over](game-over.md) |
 
+    `Green` is the next player's **name**, under the same rule the headline
+    uses — `Connor's turn` for a renamed frog. The two lines of this dialog
+    name two different players, and a screen that called one of them by its
+    colour and the other by its name would be naming the same kind of thing two
+    ways.
+
     The second case is the one `Game.IsOver` has just become true for.
 
 ## Behaviour
@@ -118,6 +124,13 @@ renderer.
   next player's turn starting. It opens *after* [answer result](answer-result.md)
   has closed and the frog has landed, not instead of it: the answer result
   reports the answer, this reports the arrival.
+- **What decides it is `Game.FrogJustHome`**, not `Game.IsOver`. Core answers
+  "which frog did the turn that just played land on its End log, if any" — one
+  turn's fact, replaced by the next turn's result rather than added to, which
+  is what makes one arrival announceable exactly once and never twice. It is
+  deliberately a different question from whether the game is over: the two
+  agree only about the very last arrival, and using the ending to decide would
+  be the bug this dialog exists to fix.
 - **Exit.** The button closes it. If there is a next player, the board is
   underneath with that player's turn already begun. If there is not, the game
   over screen follows.

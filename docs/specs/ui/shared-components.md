@@ -265,7 +265,7 @@ confirms.
 
 Used by: [roll and card](roll-and-card.md),
 [working-out grid](working-out-grid.md), [answer result](answer-result.md),
-[settings dialog](settings-dialog.md),
+[a player has won](player-won.md), [settings dialog](settings-dialog.md),
 [end-game confirm](end-game-confirm.md).
 
 #### 2. Invariants
