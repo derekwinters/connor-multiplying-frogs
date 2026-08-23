@@ -18,7 +18,7 @@
         <link rel="prev" href="../player-won/">
       
       
-        <link rel="next" href="../end-game-confirm/">
+        <link rel="next" href="../how-to-play/">
       
       
         
@@ -827,6 +827,8 @@
       
         
       
+        
+      
     
     
     
@@ -1322,6 +1324,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2483,32 +2513,40 @@ the code still declares it. Deleting it is part of the implementation issue, not
 something to leave behind as a value nothing reads.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong><code>How to play</code></strong> — secondary <a href="../shared-components/#button">button</a>. Opens the
-  rules. Still disabled: the screen it opens is being designed in
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>
-  and until that lands there is nothing to open.</li>
-<li><strong><code>End the game</code></strong> — destructive button. Opens
-  <a href="../end-game-confirm/">end-game confirm</a>. Never ends anything by itself.</li>
-<li><strong><code>Back to the game</code></strong> — primary button. Closes and returns to exactly the
-  board state that was there.</li>
-<li><strong><code>about</code></strong> — three lines, left-aligned, stacked, <code>SettingsAboutLineGap</code>
-  apart. Not a button, not tappable, no state:<ol>
-<li><strong><code>Multiplying Frogs</code></strong> at <code>SettingsAboutNameSize</code>, bold. The same words
-   the title screen already draws — <code>TitleScreenView</code>'s own <code>TitleLabel</code>,
-   at a smaller size. This is the game saying its own name, not a second
-   wordmark. Note that <code>SettingsDialogView</code> has a <code>TitleLabel</code> of its own
-   and it is the string <code>Settings</code>; these two are not the same constant and
-   must not be made to share one.</li>
-<li><strong><code>Designed by Connor</code></strong> at <code>SettingsAboutCreditSize</code>. Derek's wording,
-   and the default answer; see <a href="#open-questions">open question 3</a>, which is
-   Connor's to settle because the line is about him.</li>
-<li><strong>The version</strong> at <code>VersionLabelSize</code>, in the mockup's <code>--line</code> grey,
-   from <code>/VERSION</code> via <code>AppVersion</code>. The same value doing the same job as
-   the title screen's own version readout, under the identical name — not a
-   second constant for the same number.</li>
-</ol>
-</li>
+<li><strong><code>How to play</code></strong> — secondary <a href="../shared-components/#button">button</a>. Opens
+  <a href="../how-to-play/">how to play</a>, the five-page screen that says how a turn
+  goes. <strong>Enabled</strong>, as of
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>:
+  the screen it opens is now specified, so the reason this button was disabled
+  has gone. It is still disabled <em>in the built dialog</em>, and will be until the
+  implementation issue lands — the same lag as
+  <a href="#the-built-dialog-does-not-have-these-numbers-yet"><code>SettingsDialogHeight</code></a>,
+  and resolved the same way: this page is authoritative and the code follows
+  it.</li>
 </ul>
+<p>Note what it opens is a <strong>screen, not a dialog</strong>. It replaces this dialog
+  rather than covering it, because
+  <a href="../shared-components/#dialog">a dialog never opens over another dialog</a>.
+  Leaving it comes back here, to this dialog, open and unchanged.
+- <strong><code>End the game</code></strong> — destructive button. Opens
+  <a href="../end-game-confirm/">end-game confirm</a>. Never ends anything by itself.
+- <strong><code>Back to the game</code></strong> — primary button. Closes and returns to exactly the
+  board state that was there.
+- <strong><code>about</code></strong> — three lines, left-aligned, stacked, <code>SettingsAboutLineGap</code>
+  apart. Not a button, not tappable, no state:
+    1. <strong><code>Multiplying Frogs</code></strong> at <code>SettingsAboutNameSize</code>, bold. The same words
+       the title screen already draws — <code>TitleScreenView</code>'s own <code>TitleLabel</code>,
+       at a smaller size. This is the game saying its own name, not a second
+       wordmark. Note that <code>SettingsDialogView</code> has a <code>TitleLabel</code> of its own
+       and it is the string <code>Settings</code>; these two are not the same constant and
+       must not be made to share one.
+    2. <strong><code>Designed by Connor</code></strong> at <code>SettingsAboutCreditSize</code>. Derek's wording,
+       and the default answer; see <a href="#open-questions">open question 3</a>, which is
+       Connor's to settle because the line is about him.
+    3. <strong>The version</strong> at <code>VersionLabelSize</code>, in the mockup's <code>--line</code> grey,
+       from <code>/VERSION</code> via <code>AppVersion</code>. The same value doing the same job as
+       the title screen's own version readout, under the identical name — not a
+       second constant for the same number.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
 <li>Opened by the gear on the board, or by the hardware back button on the board.</li>
@@ -2614,12 +2652,22 @@ The footprint placement lifted it 260 px to make room for a band underneath.</p>
   screen, and it is not what
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/322">#322</a>
   asked for.</li>
-<li><strong>What does <code>How to play</code> open?</strong> Being answered by
-  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>,
-  which is designing the screen. Until it lands the button stays present and
-  disabled, which is the answer this page already settled: a disabled button
-  that appears later is less confusing than a button that appears from nowhere.</li>
+<li><strong>5. What does <code>How to play</code> open? Settled: a five-page screen.</strong>
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>
+  designed it and it is specified at <a href="../how-to-play/">how to play</a>. Of the two
+  options this page used to weigh — a screen the game draws, or a photograph of
+  the classroom rules card — the drawn screen won, because it is legible at the
+  tablet's size and a photograph that does not exist yet cannot be guaranteed
+  to be. The card is not dropped: it is
+  <a href="../how-to-play/#open-questions">that page's open question 3</a>, for once
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/171">#171</a>
+  has produced the photograph.</li>
 </ul>
+<p>The judgement this page made while the question was open turned out to be the
+  right one and is worth keeping: a disabled button that becomes live later is
+  less confusing than a button that appears from nowhere. The button has been
+  sitting in this layout since the dialog was first drawn, in exactly the place
+  it will work from.</p>
 
 
 

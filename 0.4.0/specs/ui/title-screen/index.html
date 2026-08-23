@@ -827,6 +827,8 @@
       
         
       
+        
+      
     
     
     
@@ -1292,6 +1294,34 @@
     
   
     Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
   
 
     
@@ -2511,17 +2541,27 @@ wireframe is deciding <em>where the art goes</em>, not what it is.</p>
   answer honestly, not as <code>RESUME</code> being removed outright — the <code>Disabled</code> and
   <code>Absent</code> options this question used to weigh are not chosen; <code>RESUME</code> stays
   a real button that is simply always hidden today.</li>
-<li><strong>Is there a <code>How to play</code> button here?</strong> Proposed: no. The rules are one
-  sentence long, Connor already knows them, and
-  <a href="../../future-ideas/">an in-app tutorial is parked</a>. If one is wanted it goes
-  beneath the <code>RESUME</code>/<code>NEW</code> row as a secondary button — and it needs its own
-  wireframe for the screen it opens. Note that it would make three interactive
-  elements, so it is a change to this page's first invariant as well as to its
-  layout.</li>
-<li><strong>Does the title screen come back after a game, or does <code>Play again</code> restart
-  directly?</strong> Both exist on <a href="../game-over/">game over</a>; this screen does not care
-  which is used.</li>
+<li><strong>Is there a <code>How to play</code> button here?</strong> Proposed: still no — but for a
+  different reason than before, because half of the old reason has gone.</li>
 </ul>
+<p>This question used to end <em>"it needs its own wireframe for the screen it
+  opens"</em>. That screen now exists:
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>
+  specified <a href="../how-to-play/">how to play</a>, reachable from the
+  <a href="../settings-dialog/">settings dialog</a>. So there is somewhere for a button
+  here to go, and the argument for putting one here is a real one — somebody
+  who has never played reaches for the title screen, not for a gear inside a
+  game they have not started.</p>
+<p>What is left in the way is this page's own first invariant: <em>"the only
+  interactive elements on this screen are <code>RESUME</code> and <code>NEW</code>. There is never a
+  third."</em> Adding the button is a change to that invariant, and changing it is
+  a decision about what this screen is, not a consequence of the other screen
+  existing. It should be its own issue. If it is taken, the button goes beneath
+  the <code>RESUME</code>/<code>NEW</code> row as a secondary one, and it opens the same screen the
+  gear does.
+- <strong>Does the title screen come back after a game, or does <code>Play again</code> restart
+  directly?</strong> Both exist on <a href="../game-over/">game over</a>; this screen does not care
+  which is used.</p>
 
 
 

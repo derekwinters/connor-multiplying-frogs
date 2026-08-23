@@ -12,13 +12,13 @@
         <meta name="author" content="Derek Winters">
       
       
-        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.4.0/specs/ui/mockups/">
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.4.0/specs/ui/how-to-play/">
       
       
-        <link rel="prev" href="../game-over/">
+        <link rel="prev" href="../settings-dialog/">
       
       
-        <link rel="next" href="../../../adr/">
+        <link rel="next" href="../end-game-confirm/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Mockups - Multiplying Frogs</title>
+        <title>How to play - Multiplying Frogs</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mockups" class="md-skip">
+        <a href="#how-to-play" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Mockups
+              How to play
             
           </span>
         </div>
@@ -1142,10 +1142,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../how-to-play/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1161,6 +1188,159 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-two-numbers-that-are-derived-and-the-sums-that-derive-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two numbers that are derived, and the sums that derive them
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-pond-drawn-smaller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pond, drawn smaller
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-five-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The five pages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mockup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1226,37 +1406,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Mockups
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../mockups/" class="md-nav__link">
         
   
   
@@ -1272,76 +1425,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#committed-mockups" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Committed mockups
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Committed mockups">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#colour-in-these-mockups-is-mostly-a-placeholder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Colour in these mockups is mostly a placeholder
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-a-mockup-is-and-is-not" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What a mockup is, and is not
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conventions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Conventions
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2026,22 +2109,66 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#committed-mockups" class="md-nav__link">
+  <a href="#invariants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Committed mockups
+        Invariants
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Committed mockups">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#named-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Named constants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Named constants">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#colour-in-these-mockups-is-mostly-a-placeholder" class="md-nav__link">
+  <a href="#the-two-numbers-that-are-derived-and-the-sums-that-derive-them" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Colour in these mockups is mostly a placeholder
+        The two numbers that are derived, and the sums that derive them
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-pond-drawn-smaller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pond, drawn smaller
       
     </span>
   </a>
@@ -2054,10 +2181,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-a-mockup-is-and-is-not" class="md-nav__link">
+  <a href="#elements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What a mockup is, and is not
+        Elements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-five-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The five pages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour
       
     </span>
   </a>
@@ -2065,10 +2220,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#conventions" class="md-nav__link">
+  <a href="#mockup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Conventions
+        Mockup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
       
     </span>
   </a>
@@ -2092,7 +2258,7 @@
 
 
   
-    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/mockups/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/specs/ui/how-to-play.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2100,271 +2266,431 @@
   
 
 
-<h1 id="mockups">Mockups<a class="headerlink" href="#mockups" title="Link to this section">&para;</a></h1>
-<p>The committed 1:1 HTML mockups. Each is a static page sized to the target tablet
-viewport — <strong>1920 × 1200, landscape</strong> — showing a screen's real elements at their
-real proportions.</p>
-<p>Open one on the tablet. That is what it is for — a mockup judged on a laptop is
-a mockup judged at the wrong size, and size is most of what a wireframe decides.</p>
-<h2 id="committed-mockups">Committed mockups<a class="headerlink" href="#committed-mockups" title="Link to this section">&para;</a></h2>
+<h1 id="how-to-play">How to play<a class="headerlink" href="#how-to-play" title="Link to this section">&para;</a></h1>
+<p>What the <code>How to play</code> button on the <a href="../settings-dialog/">settings dialog</a>
+opens. Five pages that say how a turn goes, for somebody who has just picked
+the tablet up and has never played.</p>
+<h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
+<p><strong>Invariant:</strong> this screen changes nothing about the game. Opening it, paging
+through it, and leaving it return the board exactly as it was — same turn, same
+positions, same enabled <code>Roll</code>.
+<strong>Invariant:</strong> it is a <strong>screen, not a dialog</strong>. It replaces what is on screen
+rather than covering it. This is not a preference: it is opened from inside the
+settings dialog, and the shared
+<a href="../shared-components/#dialog">dialog</a> component's <code>Stacked</code> state says <em>"does
+not happen. A dialog never opens over another dialog."</em>
+<strong>Invariant:</strong> nothing on this screen scrolls. It is <code>HowToPlayPageCount</code> pages
+reached with <code>Back</code> and <code>Next</code>, and a page that does not fit is a page whose
+copy is too long, not a reason to add a scroll view.
+<strong>Invariant:</strong> nothing here teaches an algorithm. Page 3 says where the answer
+goes and that nothing else is marked; it does not show how to do a long
+multiplication, or lay one out in any particular way. That is
+<a href="../../../adr/0002-structured-working-out-grid/">ADR-0002</a>'s constraint and this
+screen does not get to relax it because it is the page about the grid.
+<strong>Invariant:</strong> the pictures are drawn in the game's own vocabulary and its real
+colours — <a href="../game-board/#colours"><code>PondWater</code>, <code>LilyPadGreen</code>, <code>LogBrown</code></a> and
+the four <a href="../shared-components/#frog-colours">frog colours</a> — at a smaller
+scale. A diagram that does not look like the board is a diagram of a different
+game.
+<strong>Invariant:</strong> every page has both buttons, always, in the same two places.
+Neither is ever hidden or disabled — on the first page <code>Back</code> leaves the
+screen, and on the last <code>Next</code> reads <code>Done</code> and does the same. A control that
+disappears on one page of five is a control a child stops trusting.</p>
+<h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Screen</th>
-<th>Mockup</th>
-<th>Spec page</th>
+<th>Region</th>
+<th>Job</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Title screen</td>
-<td><a href="title-screen.html"><code>title-screen.html</code></a></td>
-<td><a href="../title-screen/">Title screen</a></td>
+<td><code>heading</code></td>
+<td>Which page this is, in two or three words</td>
 </tr>
 <tr>
-<td>Game setup, at rest with names</td>
-<td><a href="game-setup-names-set.html"><code>game-setup-names-set.html</code></a></td>
-<td><a href="../game-setup/">Game setup</a></td>
+<td><code>picture</code></td>
+<td>The drawing — the point of the page</td>
 </tr>
 <tr>
-<td>Game setup, naming a frog</td>
-<td><a href="game-setup-name-edit-inline.html"><code>game-setup-name-edit-inline.html</code></a></td>
-<td><a href="../game-setup/">Game setup</a></td>
+<td><code>words</code></td>
+<td>What the picture means, in a few short paragraphs</td>
 </tr>
 <tr>
-<td>Game setup, naming a frog — the alternative</td>
-<td><a href="game-setup-name-edit-pencil.html"><code>game-setup-name-edit-pencil.html</code></a></td>
-<td><a href="../game-setup/">Game setup</a></td>
+<td><code>progress</code></td>
+<td>Which of the five pages you are on</td>
 </tr>
 <tr>
-<td>Game setup, before names</td>
-<td><a href="game-setup.html"><code>game-setup.html</code></a></td>
-<td><a href="../game-setup/">Game setup</a></td>
-</tr>
-<tr>
-<td>Game board</td>
-<td><a href="game-board.html"><code>game-board.html</code></a></td>
-<td><a href="../game-board/">Game board</a></td>
-</tr>
-<tr>
-<td>Game board, on a wider screen</td>
-<td><a href="game-board-wide.html"><code>game-board-wide.html</code></a></td>
-<td><a href="../game-board/">Game board</a></td>
-</tr>
-<tr>
-<td>Roll and card</td>
-<td><a href="roll-and-card.html"><code>roll-and-card.html</code></a></td>
-<td><a href="../roll-and-card/">Roll and card</a></td>
-</tr>
-<tr>
-<td>Working-out grid, <code>331 × 41</code></td>
-<td><a href="working-out-grid-331x41.html"><code>working-out-grid-331x41.html</code></a></td>
-<td><a href="../working-out-grid/">Working-out grid</a></td>
-</tr>
-<tr>
-<td>Working-out grid, <code>68 × 5</code></td>
-<td><a href="working-out-grid-68x5.html"><code>working-out-grid-68x5.html</code></a></td>
-<td><a href="../working-out-grid/">Working-out grid</a></td>
-</tr>
-<tr>
-<td>Working-out grid, <code>331 × 41</code> grown to the cap</td>
-<td><a href="working-out-grid-331x41-grown.html"><code>working-out-grid-331x41-grown.html</code></a></td>
-<td><a href="../working-out-grid/">Working-out grid</a></td>
-</tr>
-<tr>
-<td>Answer result — right</td>
-<td><a href="answer-result-right.html"><code>answer-result-right.html</code></a></td>
-<td><a href="../answer-result/">Answer result</a></td>
-</tr>
-<tr>
-<td>Answer result — wrong</td>
-<td><a href="answer-result-wrong.html"><code>answer-result-wrong.html</code></a></td>
-<td><a href="../answer-result/">Answer result</a></td>
-</tr>
-<tr>
-<td>A player has won — first frog home</td>
-<td><a href="player-won-first.html"><code>player-won-first.html</code></a></td>
-<td><a href="../player-won/">A player has won</a></td>
-</tr>
-<tr>
-<td>A player has won — last frog home</td>
-<td><a href="player-won-later.html"><code>player-won-later.html</code></a></td>
-<td><a href="../player-won/">A player has won</a></td>
-</tr>
-<tr>
-<td>Settings dialog</td>
-<td><a href="settings-dialog.html"><code>settings-dialog.html</code></a></td>
-<td><a href="../settings-dialog/">Settings dialog</a></td>
-</tr>
-<tr>
-<td>How to play, page 1 — your lane</td>
-<td><a href="how-to-play-1-your-lane.html"><code>how-to-play-1-your-lane.html</code></a></td>
-<td><a href="../how-to-play/">How to play</a></td>
-</tr>
-<tr>
-<td>How to play, page 2 — roll the die</td>
-<td><a href="how-to-play-2-roll-the-die.html"><code>how-to-play-2-roll-the-die.html</code></a></td>
-<td><a href="../how-to-play/">How to play</a></td>
-</tr>
-<tr>
-<td>How to play, page 3 — work it out</td>
-<td><a href="how-to-play-3-work-it-out.html"><code>how-to-play-3-work-it-out.html</code></a></td>
-<td><a href="../how-to-play/">How to play</a></td>
-</tr>
-<tr>
-<td>How to play, page 4 — your frog hops</td>
-<td><a href="how-to-play-4-your-frog-hops.html"><code>how-to-play-4-your-frog-hops.html</code></a></td>
-<td><a href="../how-to-play/">How to play</a></td>
-</tr>
-<tr>
-<td>How to play, page 5 — things people ask</td>
-<td><a href="how-to-play-5-things-people-ask.html"><code>how-to-play-5-things-people-ask.html</code></a></td>
-<td><a href="../how-to-play/">How to play</a></td>
-</tr>
-<tr>
-<td>End-game confirm</td>
-<td><a href="end-game-confirm.html"><code>end-game-confirm.html</code></a></td>
-<td><a href="../end-game-confirm/">End-game confirm</a></td>
-</tr>
-<tr>
-<td>Game over</td>
-<td><a href="game-over.html"><code>game-over.html</code></a></td>
-<td><a href="../game-over/">Game over</a></td>
+<td><code>controls</code></td>
+<td><code>Back</code> and <code>Next</code></td>
 </tr>
 </tbody>
 </table>
-<p>Two screens have more than one mockup, both drawing <strong>a state that only exists
-in contrast</strong> — a state you have to see next to its opposite. The grid is drawn
-at the biggest and the smallest problem the game can deal, and the result
-dialog is drawn right and wrong. Both files in each pair are agreed pictures of
-the same screen.</p>
-<p>The grid's <strong>third</strong> file is the widest card with its addition section grown to
-the cap. It was drawn to find out what the cap costs, and at full-size addition
-rows the answer was that it does not fit — the answer row ended up below the
-bottom of the tablet. That overflowing drawing was the input to
-<a href="../working-out-grid/#open-questions">open question 3 on the spec page</a>, and
-it did its job: it is cheaper to find that in a picture than in a built screen.
-Derek settled the question — smaller cells for the addition rows only — so the
-file now draws the answer instead: the same six rows at
-<code>GridAdditionRowHeight</code>, fitting with 16 px to spare.</p>
-<p>The settings dialog used to have a pair, drawn by
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/322">#322</a> to
-ask where the About block should sit — in the footprint, or under the title.
-Derek picked under the title, so <code>settings-dialog.html</code> is that drawing and the
-footprint file is deleted.</p>
-<p>It is worth recording what that pair established before it was resolved,
-because it is the clearest example on this page of why a mockup is drawn rather
-than reasoned about. The footprint option was expected to be the cheap one: the
-version already lived at the bottom-left, so the block was to share that row
-with <code>Back to the game</code>. Drawn, the button turned out to be 531 px wide and
-landed on top of "Designed by Connor". Given a band of its own instead, it cost
-exactly the same panel height as its rival — so the question the pair was opened
-to ask, which placement is cheaper, turned out to have no answer, and the choice
-was decided on what the block should read as instead.</p>
-<p>The game board's water pair is <strong>resolved</strong>. <code>game-board.html</code> and
-<code>game-board-paler-water.html</code> were the same canvas differing in exactly one
-value — the water's blue — and Derek picked <code>#9FD8F2</code> on
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a>. The
-losing file is deleted, which is what the pair existed for and why it did not
-stay open long.</p>
-<p>Worth recording, because it is not what a colour question usually costs: settling
-the water moved the other two surfaces as well. The log and the lily pad are
-constrained by the frogs that have to sit on them, and the arithmetic left the
-pad only two usable regions with nothing in between — see
-<a href="../game-board/#how-the-ponds-colours-are-constrained">how the pond's colours are constrained</a>.
-The four frog colours moved too, which reverses a rule that page used to carry.</p>
-<p>The board's banner pair is <strong>resolved</strong> as well. <code>game-board-banner-swatch.html</code>
-asked whether the header should keep the frog's colour as a bare swatch once
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a> took
-the player chip out of it. Derek settled it: no swatch, words alone. That file
-is deleted.</p>
-<p>So the board is back to <strong>two</strong> files — the reference canvas and the wide
-drawing — from the four it briefly carried. Both of the extras were live
-questions, and both were answered by looking rather than arguing, which is what
-a comparison file is for and why it should not stay open long.</p>
-<p>The board's <strong>third</strong> file, <code>game-board-wide.html</code>, is a fifth kind that no
-other screen has: the same layout drawn at a second width. It is not a choice
-and there is nothing to pick between — it is the only way to see a rule that
-only exists between two widths. Since
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/325">#325</a> the
-pond spreads to fill whatever screen it is on, so at 1920 the board is what it
-always was and at 2560 the lily pads sit 128 px apart instead of 48. Both
-drawings are generated from the same two CSS variables — the canvas width and
-the derived gap — which is why keeping them in step costs almost nothing
-despite there now being three board files.</p>
-<p>Game setup has <strong>four</strong> files, which is three more than a screen should need,
-and each has a different job. <code>game-setup-names-set.html</code> is the screen at
-rest and the one to build from. The two <code>name-edit-</code> files are the third kind
-of pair — a real choice drawn twice, differing only in which part of a seat
-means <em>edit</em> and which means <em>remove</em> — and Derek picked the inline one, so the
-pencil file stays as the record of the comparison rather than as a live option.
-<code>game-setup.html</code> is the fourth kind: a <strong>superseded</strong> drawing, of the screen
-before frogs had editable names and before the seat grew from 440 px to 480 px.
-It is kept for the same reason
-<a href="../working-out-grid/"><code>working-out-grid.md</code></a> keeps the invariants it used to
-carry — the history of a layout is worth more than the disk it costs — and it
-is marked on its spec page as not to be built from.</p>
-<p>The title screen used to have a pair too — <code>title-screen.html</code> and
-<code>title-screen-resume-primary.html</code>, differing in exactly which of <code>RESUME</code> and
-<code>NEW</code> was primary, per the wireframe loop's own advice that where there is a
-real choice you
-<a href="../../../engineering/ui-design-process/#the-loop">propose two mockups</a>.
-That question is
-<a href="../title-screen/#open-questions">now settled</a> — <code>NEW</code> — so
-<code>title-screen.html</code> is the agreed picture and the losing comparison file is
-deleted, per <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">issue #216</a>.</p>
-<p>Each row arrives with its screen's <code>Wireframe:</code> issue. See
-<a href="../../../engineering/ui-design-process/">UI design process</a>.</p>
-<h3 id="colour-in-these-mockups-is-mostly-a-placeholder">Colour in these mockups is mostly a placeholder<a class="headerlink" href="#colour-in-these-mockups-is-mostly-a-placeholder" title="Link to this section">&para;</a></h3>
-<p>The four frog colours exist so the frogs can be told apart in a picture, and the
-single green accent marks the primary action. Neither is a palette decision —
-that is an <code>area:art</code> call and it lands with the frog sprites. See
-<a href="../shared-components/#frog-colours">frog colours</a>.</p>
-<p>The game board is the first exception. Its water, logs and lily pads are a
-decision Derek made — a pond is blue, its logs brown, its lily pads green — and
-they are written down as
-<a href="../game-board/#colours">a constants table on the spec page</a>, the same as
-every dimension on that screen. The mockup receives them from there rather than
-being the place they live. The exact hues are still Connor's to settle, which
-is what the pair of board files is for.</p>
-<h2 id="what-a-mockup-is-and-is-not">What a mockup is, and is not<a class="headerlink" href="#what-a-mockup-is-and-is-not" title="Link to this section">&para;</a></h2>
-<p><strong>Is:</strong> static HTML and CSS, one file, no build step, no framework, no
-JavaScript beyond nothing at all. A picture that happens to be made of divs —
-and, in one place, of SVG.</p>
-<p><strong>Inline SVG is allowed where a shape cannot be a div.</strong> The game board's lily
-pads are the only current case: since
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/396">#396</a> a
-pad is a notched circle with veins, and a CSS border cannot follow a notch. The
-SVG is inline, static, has no script and fetches nothing, so every reason the
-"is not" list below exists still holds. It is not a licence to reach for SVG
-because it is easier — the test is whether the shape is expressible as a styled
-box at all.</p>
-<p><strong>Is not:</strong> a prototype. No behaviour, no navigation between screens, no
-interactivity. The moment a mockup does something, people start judging what it
-does instead of how it looks, and it stops being cheap to change — which was the
-entire point.</p>
-<h2 id="conventions">Conventions<a class="headerlink" href="#conventions" title="Link to this section">&para;</a></h2>
+<p><code>picture</code> comes first and <code>words</code> second, left to right, because the picture is
+what an eight-year-old reads first and the words are the caption.</p>
+<h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>One file per screen</strong>, named for the screen: <code>pause-screen.html</code>.</li>
-<li><strong>Sized to the target viewport</strong> with a fixed-size container, so it renders at
-  1:1 rather than filling whatever window it opens in. State the device and
-  dimensions in a comment at the top of the file.</li>
-<li><strong>One canvas: 1920 × 1200.</strong> There is exactly one exception in this folder and
-  it is <a href="game-board-wide.html"><code>game-board-wide.html</code></a>, at 2560 × 1200. It earns
-  it: the pond's layout is elastic, so its whole subject is what happens at a
-  width that is not the reference canvas, and no drawing at 1920 can show that.
-  A file that wants this exception has to be about a rule that only exists
-  between two widths — not merely inconvenient to draw at 1920.</li>
-<li><strong>Real proportions, real units.</strong> The numbers in the mockup are the numbers in
-  the spec page's constants table. If they disagree, one of them is a bug.</li>
-<li><strong>Placeholder content is honest</strong> — the longest plausible score, not <code>0</code>; a
-  real-length label, not <code>Text</code>. A layout that only works with short strings is
-  a layout that breaks on the first real one.</li>
-<li><strong>Self-contained.</strong> Inline the CSS; no CDN links, no web fonts fetched at
-  view time. A mockup that needs the network is a mockup that doesn't open on
-  the sofa.</li>
-<li><strong>Committed, not generated.</strong> These are reviewed artifacts and they live in
-  git next to the spec they illustrate.</li>
+<li><code>heading</code> is pinned to the top-left safe area corner, its line box
+  <code>HowToPlayHeadingLineBox</code> tall.</li>
+<li><code>picture</code> and <code>words</code> are a <strong>single row</strong> filling everything between the
+  heading and the controls: <code>picture</code> pinned to the left safe margin,
+  <code>HowToPlayPictureWidth</code> wide; <code>words</code> <code>HowToPlayColumnGap</code> to its right,
+  running to the right safe margin.</li>
+<li><code>words</code> is top-aligned with <code>picture</code>, not centred against it. Pages have
+  different amounts to say, and text that floats to a different height on every
+  page is text that has to be re-found five times.</li>
+<li><code>controls</code> is a single row along the bottom: <code>Back</code> at the left safe margin,
+  <code>Next</code> at the right safe margin, both at the shared <code>ButtonHeight</code>, their
+  bottom edges <code>SafeMargin</code> up from the bottom safe area. This is the shared
+  <a href="../shared-components/#dialog">dialog</a>'s button placement — primary on the
+  right — applied to a screen.</li>
+<li><code>progress</code> is centred horizontally across the full canvas and vertically on
+  the <code>controls</code> row, so the dots sit between the two buttons rather than under
+  them.</li>
+<li>On a screen that is not 16:10, everything keeps its distance from the <strong>safe
+  area</strong> and <code>picture</code> keeps its aspect by losing height, not width. The lane
+  drawings inside it are anchored to its top-left inset.</li>
+</ul>
+<h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Safe margin, every screen edge</td>
+<td><a href="../title-screen/#named-constants"><code>SafeMargin</code></a></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Page heading size</td>
+<td><code>HowToPlayHeadingSize</code></td>
+<td>72 px</td>
+</tr>
+<tr>
+<td>Page heading line box</td>
+<td><code>HowToPlayHeadingLineBox</code></td>
+<td>88 px</td>
+</tr>
+<tr>
+<td>Gap below the heading</td>
+<td><code>HowToPlayHeadingGap</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Picture width</td>
+<td><code>HowToPlayPictureWidth</code></td>
+<td>1104 px</td>
+</tr>
+<tr>
+<td>Picture height</td>
+<td><code>HowToPlayPictureHeight</code></td>
+<td>808 px</td>
+</tr>
+<tr>
+<td>Picture corner radius</td>
+<td><a href="../shared-components/#dialog"><code>DialogRadius</code></a></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Inset inside the picture</td>
+<td><code>HowToPlayPictureInset</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Gap between <code>picture</code> and <code>words</code></td>
+<td><code>HowToPlayColumnGap</code></td>
+<td>64 px</td>
+</tr>
+<tr>
+<td>Words column width</td>
+<td><code>HowToPlayWordsWidth</code></td>
+<td>656 px</td>
+</tr>
+<tr>
+<td>Body text size</td>
+<td><code>HowToPlayBodySize</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td>Body line height, as a ratio</td>
+<td><code>HowToPlayBodyLineHeight</code></td>
+<td>1.35</td>
+</tr>
+<tr>
+<td>Gap between paragraphs</td>
+<td><code>HowToPlayParagraphGap</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Gap above the controls row</td>
+<td><code>HowToPlayControlsGap</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>Page dot diameter</td>
+<td><code>HowToPlayDotSize</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td>Gap between page dots</td>
+<td><code>HowToPlayDotGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>How many pages there are</td>
+<td><code>HowToPlayPageCount</code></td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-two-numbers-that-are-derived-and-the-sums-that-derive-them">The two numbers that are derived, and the sums that derive them<a class="headerlink" href="#the-two-numbers-that-are-derived-and-the-sums-that-derive-them" title="Link to this section">&para;</a></h3>
+<p><code>HowToPlayPictureWidth</code> and <code>HowToPlayPictureHeight</code> are not free. Both are what
+is left over once everything anchored around them has taken its share, and both
+sums land exactly — which is the check that the layout has no slack hiding in
+it.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>width   1920 − 48 − 48 − 64 − 656                  = 1104
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>        canvas   two SafeMargins   ColumnGap   WordsWidth
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>height  1200 − 48 − 88 − 48 − 48 − 112 − 48        =  808
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        canvas   SafeMargin  HeadingLineBox  HeadingGap
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                 ControlsGap  ButtonHeight  SafeMargin
+</code></pre></div>
+<p><code>HowToPlayHeadingLineBox</code> is 88 px — <code>HowToPlayHeadingSize</code> 72 at 1.2, rounded
+up to a whole pixel — for the same reason
+<a href="../settings-dialog/#named-constants">settings-dialog.md</a> writes its title's line
+box down: a gap measured from a font's default line height is 48 px in one
+renderer and 51 px in the next, and here it is load-bearing for the picture's
+height.</p>
+<h3 id="the-pond-drawn-smaller">The pond, drawn smaller<a class="headerlink" href="#the-pond-drawn-smaller" title="Link to this section">&para;</a></h3>
+<p>The pictures draw real lanes, so they need the pond's furniture at a size that
+fits <code>HowToPlayPictureWidth</code> rather than the board's own. These are a <strong>second
+set of numbers for the same shapes</strong>, not a rescaling rule, because a rule that
+says "70 % of the board's" is a rule that produces fractional pixels.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+<th>On the board</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lily pad diameter</td>
+<td><code>HowToPlayPadDiameter</code></td>
+<td>64 px</td>
+<td>112 px</td>
+</tr>
+<tr>
+<td>Log width</td>
+<td><code>HowToPlayLogWidth</code></td>
+<td>100 px</td>
+<td>176 px</td>
+</tr>
+<tr>
+<td>Log height</td>
+<td><code>HowToPlayLogHeight</code></td>
+<td>120 px</td>
+<td>896 px, shared by every lane</td>
+</tr>
+<tr>
+<td>Frog diameter</td>
+<td><code>HowToPlayFrogDiameter</code></td>
+<td>50 px</td>
+<td>88 px</td>
+</tr>
+<tr>
+<td>Gap between positions in a lane</td>
+<td><code>HowToPlayLanePositionGap</code></td>
+<td>43 px</td>
+<td>48 px and elastic</td>
+</tr>
+<tr>
+<td>Gap between stacked lanes</td>
+<td><code>HowToPlayLaneGap</code></td>
+<td>48 px</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Log label size</td>
+<td><code>HowToPlayLogLabelSize</code></td>
+<td>20 px</td>
+<td>26 px</td>
+</tr>
+</tbody>
+</table>
+<p><code>HowToPlayLanePositionGap</code> is derived from the picture's width the same way the
+board's <code>LanePositionGap</code> is derived from the screen's, and the sum is exact:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>(1104 − 2 × 56 − 2 × 100 − 7 × 64) ÷ 8  =  (1104 − 112 − 200 − 448) ÷ 8  =  43
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a> picture   two insets    two logs  seven pads    eight gaps
+</code></pre></div>
+<p><strong>The logs are per-lane here, not shared.</strong> On the board a single Start log and
+a single End log run the full height of the pond
+(<a href="../game-board/">game-board.md</a>); in these pictures each lane carries its own
+pair. That is a deliberate difference and it is the one place the drawing is
+not the board: a picture of a single lane needs the log at the end of <em>that</em>
+lane, and page 4 draws three lanes that are three separate examples rather than
+three lanes of one game. Page 1 and page 5 are the only ones drawing a real
+four-lane board, and there the per-lane logs read as one column anyway because
+they are the same colour and vertically aligned.</p>
+<h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong><code>Back</code></strong> — secondary <a href="../shared-components/#button">button</a>, bottom-left.
+  On pages 2–<code>HowToPlayPageCount</code> it goes back one page. <strong>On page 1 it leaves
+  the screen</strong>, which is what makes it a real button on every page rather than
+  a disabled one on the first.</li>
+<li><strong><code>Next</code></strong> — primary button, bottom-right. On pages
+  1–(<code>HowToPlayPageCount</code> − 1) it advances one page. On the last page its label
+  is <strong><code>Done</code></strong> and it leaves the screen. It is the same button in the same
+  place doing the same thing — finishing with this page — so it is not a second
+  element and the shared Button invariant <em>"exactly one primary button is
+  visible at a time"</em> holds throughout.</li>
+<li><strong><code>progress</code></strong> — <code>HowToPlayPageCount</code> dots, <code>HowToPlayDotSize</code> across,
+  <code>HowToPlayDotGap</code> apart. The current page's dot is the ink colour; the rest
+  are <code>faint</code>. Not tappable — they say where you are, they are not a way to
+  jump. A row of five 20 px dots is well under <code>MinTouchTarget</code> and making them
+  targets would mean making them bigger than they should look.</li>
+<li><strong><code>heading</code></strong> — per page, at <code>HowToPlayHeadingSize</code>. This screen has <strong>no
+  title of its own</strong>: the heading is the page's, not the screen's, because
+  "How to play" is already the words on the button that opened it and repeating
+  it above every page costs a line that a picture wants.</li>
+</ul>
+<h3 id="the-five-pages">The five pages<a class="headerlink" href="#the-five-pages" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Heading</th>
+<th>The picture</th>
+<th>What the words say</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Your lane</code></td>
+<td>Four lanes, every frog on its Start log — a game about to begin</td>
+<td>Every frog has a lane of its own. Start log, seven lily pads, End log. First frog to its End log wins.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Roll the die</code></td>
+<td>A die showing 3, an arrow, three piles with the middle one lit</td>
+<td>You roll one die. It picks your pile and does nothing else. You cannot choose or swap.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>Work it out</code></td>
+<td>The grid on <code>12 × 34</code>, with the carry boxes, the working rows and the answer row called out</td>
+<td>The grid is your paper. The answer goes in the bottom row. Nothing else is marked.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Your frog hops</code></td>
+<td>Three separate lanes: forward one, back one, and a frog staying put on the Start log</td>
+<td>Right hops forward one, wrong hops back one, and on the Start log a wrong answer costs the turn and no more.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>Things people ask</code></td>
+<td>A four-lane board mid-game, one frog home on its End log</td>
+<td>Three questions and their answers: landing on somebody, whether a hard card is worth more, and what happens after somebody wins.</td>
+</tr>
+</tbody>
+</table>
+<p>Pages 1–4 are <strong>onboarding</strong> — what to do, in the order you do it. Page 5 is
+<strong>reference</strong> — the questions somebody mid-game opens this to answer. Both are
+here, in that order, because
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a> is
+right that the button is reachable from two very different situations: a
+first-time player who needs the sequence, and somebody stuck on their turn who
+needs one fact. Putting reference last costs the second reader four presses;
+putting it first costs the first reader the thread of the turn. Four presses is
+the cheaper mistake.</p>
+<p>Every word on these pages is a restatement of
+<a href="../../../intro/how-to-play/">how to play</a> and
+<a href="../../rules/">rules of play</a> for an eight-year-old on a tablet. <strong>No page here
+decides a rule.</strong> Where this screen and those pages disagree, those pages are
+right and this one is corrected — the same relationship
+<a href="../../../intro/how-to-play/">how to play</a> has with
+<a href="../../rules/">rules of play</a>.</p>
+<h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong>Entering:</strong> from <code>How to play</code> on the settings dialog. It always opens on
+  page 1. It does not remember where you got to, because remembering is a mode
+  that arrives at the next player in whatever state the last one left it —
+  which is exactly the objection
+  <a href="../../../adr/0002-structured-working-out-grid/">ADR-0002</a> raises about modes
+  on a shared device.</li>
+<li><strong>Leaving</strong> — by <code>Done</code>, or by <code>Back</code> from page 1 — returns to the
+  <strong>settings dialog, open, exactly as it was</strong>. Not to the board. One rule for
+  both buttons, and the dialog's own <code>Back to the game</code> is a primary button in
+  the bottom-right corner, which is precisely where <code>Done</code> was: the finger does
+  not move.</li>
+<li><strong>Hardware back</strong> does what <code>Back</code> does — one page back, and from page 1 it
+  leaves the screen. It never jumps out of the middle of the sequence, in the
+  spirit of the <a href="../shared-components/#dialog">dialog rule</a> that back does what
+  the least destructive button does.</li>
+<li><strong>Paging:</strong> <code>picture</code> and <code>words</code> cross-fade over
+  <a href="../shared-components/#dialog"><code>DialogFadeDuration</code></a> (0.15 s). Nothing slides.
+  <code>heading</code>, <code>progress</code> and <code>controls</code> do not animate at all — they are the
+  furniture that says where you are, and furniture that moves is furniture a
+  child chases.</li>
+<li>The game underneath is untouched throughout. There is no simulation running
+  and nothing to pause.</li>
+</ul>
+<h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
+<p>All five pages, at 1920 × 1200:</p>
+<ul>
+<li><a href="../mockups/how-to-play-1-your-lane.html"><code>mockups/how-to-play-1-your-lane.html</code></a></li>
+<li><a href="../mockups/how-to-play-2-roll-the-die.html"><code>mockups/how-to-play-2-roll-the-die.html</code></a></li>
+<li><a href="../mockups/how-to-play-3-work-it-out.html"><code>mockups/how-to-play-3-work-it-out.html</code></a></li>
+<li><a href="../mockups/how-to-play-4-your-frog-hops.html"><code>mockups/how-to-play-4-your-frog-hops.html</code></a></li>
+<li><a href="../mockups/how-to-play-5-things-people-ask.html"><code>mockups/how-to-play-5-things-people-ask.html</code></a></li>
+</ul>
+<p>Every page is drawn, rather than one page drawn and the rest described, because
+the thing most likely to be wrong here is whether the copy fits beside the
+picture — and that is not knowable from a sum. It very nearly was not: page 2's
+first drawing had the three piles running straight through the table underneath
+them, and page 4 and page 5 both overflowed the picture's bottom edge until the
+log came down from 160 px to <code>HowToPlayLogHeight</code>. None of those three were
+visible in the arithmetic.</p>
+<p>There are no comparison pairs here. This wireframe is not asking "which of
+these two", it is asking "does this read to Connor" — and the answer to that
+comes from the tablet, not from a second drawing.</p>
+<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
+<ul>
+<li><strong>1. Is <code>How to play</code> reachable from the title screen too? Proposed: no, not
+  in this issue.</strong> <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>
+  makes the real argument for yes: somebody who has never played reaches for
+  the title screen, not for a gear inside a game they have not started. What is
+  in the way is that
+  <a href="../title-screen/#invariants">title-screen.md's first invariant</a> says <em>"the
+  only interactive elements on this screen are <code>RESUME</code> and <code>NEW</code>. There is
+  never a third"</em>, and adding a third is a change to that page rather than a
+  consequence of this one. It is a one-button change and it should be its own
+  issue, decided on its own terms — not folded into the wireframe for the
+  screen it would open. That page's own open question on this is updated to say
+  the screen now exists, which is what used to block it.</li>
+<li><strong>2. Is five pages right, and is the copy right? Connor's call, and it is the
+  question this wireframe exists to ask.</strong> He reads it on the tablet. If he
+  cannot follow it, it is wrong, and he is the only person who can say so —
+  including if the answer is "too many pages" or "page 3 is confusing".</li>
+<li><strong>3. Does the classroom rules card belong here later?</strong> Not now: the
+  photograph does not exist yet
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/171">#171</a>
+  is asking Connor for it), it would be the project's first imported image, and
+  it cannot be guaranteed legible at this size. It is the actual source of the
+  rules and it is charming, so when the photograph exists a sixth page showing
+  it is worth considering — as a picture of where the game came from, not as
+  the page anybody reads the rules off.</li>
 </ul>
 
 
