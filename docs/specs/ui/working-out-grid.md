@@ -537,6 +537,17 @@ past it.
   something odd, so the mockups draw it rather than describe it. On `68 × 5`
   there are two products and the section was dealt two rows, so nothing grows
   and nothing shrinks.
+
+  **On a card with no products, the three steps still run and two of them do
+  nothing.** `68 × 0` makes no products
+  ([what `Core` owns](#what-core-owns-the-product-list)), so the section grows
+  to `max(GridAdditionRowsAtStart, 0)` — the count it was dealt — nothing is
+  printed, and the button goes to `Disabled` anyway, because step three is not
+  conditional on what the first two found. That is this page's rule read
+  literally rather than an answer to what the player *should* see there, which
+  is a taste call nobody has made:
+  [open question 13](#open-questions), and
+  [#433](https://github.com/derekwinters/connor-multiplying-frogs/issues/433).
 - **A row `Help me` grew cannot be backspaced away.** The ordinary shrink rule
   — *"backspacing the last digit out of a grown row removes the row"* — does
   not apply to the rows this button created, for the rest of the turn. A row
@@ -631,8 +642,10 @@ invent a different one:
   its own: `68 × 0` — a card the Easy pile can deal, since
   [`Card.OneDigitMinimum`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/Card.cs)
   is `0` — makes **no products**, and `Help me` on it has nothing to print.
-  What the shell does with an empty list is the shell's
-  ([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)).
+  What the shell does with an empty list is the shell's, and as built
+  ([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416))
+  it prints nothing, grows nothing and disables the button anyway — see
+  [Behaviour](#behaviour) and [open question 13](#open-questions).
 - **The list is never longer than `GridAdditionRowsMax`.** Three multiplicand
   digits by two multiplier digits is six, which is exactly the cap, and
   ADR-0002 bounds the card shapes at `3 × 2`. So the cap holds — and holds
@@ -927,3 +940,18 @@ anyone has said yet.
   the button an eight-year-old presses when he is stuck, so what it should say
   is Connor's call — the same way
   [`Designed by Connor`](settings-dialog.md#open-questions) is.
+
+Question 13 arrived with the built button
+([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)).
+
+- **13. What should `Help me` do on a card with no products?**
+  ([#433](https://github.com/derekwinters/connor-multiplying-frogs/issues/433))
+  `68 × 0` is a card the easy pile can deal and a card this button has nothing
+  to print for. What is built is the three steps above read literally: nothing
+  moves, nothing is printed, and the button greys out — so the press looks like
+  it did nothing, which is the one thing an eight-year-old responds to by
+  pressing again. The alternatives are leaving the button live on such a card,
+  or printing one line of words where the products would go, which would be the
+  only words on this screen that are not a number. Whichever way it goes it
+  changes what the player sees, so it is Connor's or Derek's rather than an
+  agent's.

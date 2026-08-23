@@ -101,6 +101,10 @@ namespace Frogs.Unity.Views
         public const float KeypadWidth = 452f;
         public const float KeypadSubmitGap = 24f;
         public const float CheckButtonHeight = 128f;
+        public const float GridHelpButtonHeight = 96f;
+        public const float GridHelpButtonWidth = 320f;
+        public const float GridHelpItemSize = 32f;
+        public const float GridHelpGap = 32f;
 
         /// <summary>
         /// The carry box inside a carry strip's slot —
@@ -127,6 +131,12 @@ namespace Frogs.Unity.Views
 
         const string PromptLabel = "Work it out";
         const string CheckItLabel = "Check it";
+        const string HelpMeLabel = "Help me";
+
+        // A printed product, as the mockups write it: the multiplier's part,
+        // the multiplication sign, the multiplicand's part — both place-value
+        // expanded by Core, so `30 × 10` rather than `3 × 1`.
+        const string HelpItemFormat = "{0} " + MultiplyGlyph + " {1}";
         const string BackspaceLabel = "⌫";
         const string ClearLabel = "clear";
 
@@ -260,6 +270,22 @@ namespace Frogs.Unity.Views
         readonly List<RectTransform> _rowRects = new List<RectTransform>();
         readonly List<RectTransform> _ruleRects = new List<RectTransform>();
         readonly List<IReadOnlyList<WorkingOutGridCell>> _cells = new List<IReadOnlyList<WorkingOutGridCell>>();
+
+        Button _helpMeButton;
+        RectTransform _helpRect;
+        readonly List<Text> _helpItems = new List<Text>();
+
+        // What `Help me` printed, and the row count it established. Both are
+        // empty until it is pressed and are cleared with the card: "nothing
+        // about it is remembered between turns or between games."
+        //
+        // Named for the printing rather than for what Core calls the list,
+        // because a member of this type with `Product` in its name is exactly
+        // what WorkingOutGridViewTests forbids: `Card.Product` is the graded
+        // true answer, and nothing on this screen is graded. What is held here
+        // is scratch-paper writing, and it is never checked against anything.
+        IReadOnlyList<DigitProduct> _helpPrinted = new DigitProduct[0];
+        int _helpRowsGrownTo;
 
         RectTransform _keypadRect;
         RectTransform _keyGridRect;
@@ -452,6 +478,26 @@ namespace Frogs.Unity.Views
             }
         }
 
+        /// <summary>`Help me` — a secondary button at the right end of the header band.</summary>
+        public Button HelpMeButton
+        {
+            get
+            {
+                EnsureInitialized();
+                return _helpMeButton;
+            }
+        }
+
+        /// <summary>`help` — the printed products, one per addition row. Empty until `Help me` is pressed.</summary>
+        public IReadOnlyList<Text> HelpItems
+        {
+            get
+            {
+                EnsureInitialized();
+                return _helpItems;
+            }
+        }
+
         /// <summary>`submit` — `Check it`, full keypad width, disabled until the answer row has a digit.</summary>
         public Button CheckItButton
         {
@@ -525,6 +571,14 @@ namespace Frogs.Unity.Views
             _answerRow = null;
             _columnCount = 0;
             _nextStamp = 0;
+
+            // "The next card is dealt with `Help me` live, `help` empty and the
+            // section back at GridAdditionRowsAtStart" — which is ADR-0002's
+            // objection answered, so it happens here rather than being left to
+            // whatever the last turn did.
+            _helpPrinted = new DigitProduct[0];
+            _helpRowsGrownTo = 0;
+            _helpMeButton.SetDisabled(false);
 
             Refresh();
 
@@ -600,6 +654,7 @@ namespace Frogs.Unity.Views
 
             BuildHeader();
             BuildGridContainer();
+            BuildHelpRegion();
             BuildKeypad();
         }
 
@@ -673,7 +728,29 @@ namespace Frogs.Unity.Views
             readoutTextRect.offsetMin = Vector2.zero;
             readoutTextRect.offsetMax = Vector2.zero;
 
+            _helpMeButton = BuildHelpMe();
+
             LayoutHeader();
+        }
+
+        Button BuildHelpMe()
+        {
+            var buttonGO = new GameObject(HelpMeLabel, typeof(RectTransform));
+            buttonGO.transform.SetParent(_headerRect, worldPositionStays: false);
+
+            var button = buttonGO.AddComponent<Button>();
+            button.SetKind(ButtonKind.Secondary);
+            button.SetLabelText(HelpMeLabel);
+            button.SetSize(GridHelpButtonWidth, GridHelpButtonHeight);
+            button.Clicked += HandleHelpMeClicked;
+
+            var buttonRect = button.RectTransform;
+            buttonRect.anchorMin = new Vector2(1f, 0.5f);
+            buttonRect.anchorMax = new Vector2(1f, 0.5f);
+            buttonRect.pivot = new Vector2(1f, 0.5f);
+            buttonRect.anchoredPosition = Vector2.zero;
+
+            return button;
         }
 
         // The header is one row: the chip, the prompt, then the card readout,
@@ -763,7 +840,77 @@ namespace Frogs.Unity.Views
                 cursor += GridRuleThickness + GridCellGap;
             }
 
+            RebuildHelpItems();
             RefreshCells();
+        }
+
+        // The `help` column: one item per product, right-aligned to a common
+        // edge GridHelpGap left of the grid's left edge, each vertically
+        // centred on its own addition row. Rebuilt with the grid, because an
+        // item belongs to the row beside it and the rows move.
+        void RebuildHelpItems()
+        {
+            for (var index = _helpRect.childCount - 1; index >= 0; index--)
+            {
+                UnityEngine.Object.DestroyImmediate(_helpRect.GetChild(index).gameObject);
+            }
+
+            _helpItems.Clear();
+
+            for (var index = 0; index < _helpPrinted.Count; index++)
+            {
+                var rowRect = AdditionRowRect(index);
+
+                if (rowRect == null)
+                {
+                    continue;
+                }
+
+                var product = _helpPrinted[index];
+
+                var item = BuildText("HelpItem", _helpRect, GridHelpItemSize, LineColor, TextAnchor.MiddleRight);
+                item.text = string.Format(HelpItemFormat, product.MultiplierPart, product.MultiplicandPart);
+
+                var itemRect = item.rectTransform;
+                itemRect.anchorMin = new Vector2(0f, 1f);
+                itemRect.anchorMax = new Vector2(0f, 1f);
+
+                // Right edge, middle height: the column reads down one edge,
+                // and the item lines up with the row rather than with the text
+                // above it.
+                itemRect.pivot = new Vector2(1f, 0.5f);
+                itemRect.sizeDelta = new Vector2(item.preferredWidth, rowRect.sizeDelta.y);
+                itemRect.anchoredPosition = new Vector2(
+                    _gridRect.anchoredPosition.x - GridHelpGap,
+                    _gridRect.anchoredPosition.y + rowRect.anchoredPosition.y - (rowRect.sizeDelta.y / 2f));
+
+                _helpItems.Add(item);
+            }
+        }
+
+        // The drawn rect of the addition row at <paramref name="ordinal"/>, or
+        // null if the section does not hold one — a product with no row is a
+        // product with nowhere to be printed.
+        RectTransform AdditionRowRect(int ordinal)
+        {
+            var seen = 0;
+
+            for (var index = 0; index < _rowKinds.Count; index++)
+            {
+                if (_rowKinds[index] != GridRowKind.AdditionRow)
+                {
+                    continue;
+                }
+
+                if (seen == ordinal)
+                {
+                    return _rowRects[index];
+                }
+
+                seen++;
+            }
+
+            return null;
         }
 
         // A rule line goes under the multiplier row, and under the bottom row
@@ -1119,6 +1266,23 @@ namespace Frogs.Unity.Views
             return ruleRect;
         }
 
+        // `help` is its own region, not part of `grid` — "nothing in it is a
+        // cell: it is writing in the margin beside the rows". A zero-sized
+        // rect pinned to the panel's top-left corner, so an item's own
+        // anchored position is read in the same panel coordinates the grid's
+        // is, and the two cannot drift apart.
+        void BuildHelpRegion()
+        {
+            var helpGO = new GameObject("Help", typeof(RectTransform));
+            _helpRect = (RectTransform)helpGO.transform;
+            _helpRect.SetParent(_dialog.PanelRect, worldPositionStays: false);
+            _helpRect.anchorMin = new Vector2(0f, 1f);
+            _helpRect.anchorMax = new Vector2(0f, 1f);
+            _helpRect.pivot = new Vector2(0f, 1f);
+            _helpRect.sizeDelta = Vector2.zero;
+            _helpRect.anchoredPosition = Vector2.zero;
+        }
+
         void BuildKeypad()
         {
             var keyGridHeight = (KeypadRows * KeypadKeySize) + ((KeypadRows - 1) * KeypadKeyGap);
@@ -1363,8 +1527,8 @@ namespace Frogs.Unity.Views
 
         // Derek's call on #204, open question 5: backspacing the last digit
         // out of a grown row removes the row. Only the section's *bottom* row
-        // can go, and only a grown one — GridAdditionRowsAtStart is the floor,
-        // because no card is ever dealt fewer.
+        // can go, and only a grown one — the floor being whatever the card was
+        // dealt, or whatever `Help me` grew it to.
         void ShrinkSectionIfEmptiedAtItsBottom()
         {
             if (_caretRowKind != GridRowKind.AdditionRow)
@@ -1372,7 +1536,7 @@ namespace Frogs.Unity.Views
                 return;
             }
 
-            if (_additionRows.Count <= WorkingOutGrid.GridAdditionRowsAtStart)
+            if (_additionRows.Count <= AdditionRowFloor)
             {
                 return;
             }
@@ -1392,6 +1556,20 @@ namespace Frogs.Unity.Views
             MoveCaretTo(GridRowKind.AdditionRow, _additionRows.Count - 1, _caretColumn);
         }
 
+        /// <summary>
+        /// The row count backspace may not take the section below:
+        /// <see cref="WorkingOutGrid.GridAdditionRowsAtStart"/>, because no
+        /// card is ever dealt fewer — or, once `Help me` has been pressed, the
+        /// count it established. "A row with a product printed beside it that
+        /// vanished would leave the product pointing at nothing, and the player
+        /// did not ask for the row in the first place." Rows grown by typing
+        /// afterwards still shrink the ordinary way, down to that floor.
+        /// </summary>
+        int AdditionRowFloor
+        {
+            get { return Math.Max(WorkingOutGrid.GridAdditionRowsAtStart, _helpRowsGrownTo); }
+        }
+
         void ClearBlock()
         {
             var contents = CaretContents();
@@ -1406,6 +1584,49 @@ namespace Frogs.Unity.Views
             // sentence is the row the caret is in — see this issue's PR.
             contents.EraseAll();
             RefreshCells();
+        }
+
+        /// <summary>
+        /// docs/specs/ui/working-out-grid.md: "In one step, and only ever once
+        /// per turn" — the section grows to hold one row per product, each
+        /// product is printed beside its row, and the button goes to
+        /// `Disabled`. **Nothing else changes**: the caret does not move, no
+        /// cell is filled, no cell is marked, and `Check it` still checks
+        /// exactly the answer row.
+        /// </summary>
+        void HandleHelpMeClicked()
+        {
+            // The button is disabled from the moment it is pressed, so this is
+            // belt and braces — but "it cannot be pressed twice" is a rule
+            // rather than a side effect of how the button happens to be drawn.
+            if (_helpMeButton.IsDisabled)
+            {
+                return;
+            }
+
+            // Which products a card makes is game logic, and Core's
+            // (docs/specs/ui/working-out-grid.md#what-core-owns-the-product-list).
+            // Nothing here re-derives them; this formats what it is handed.
+            _helpPrinted = DigitProducts.For(_turn.Card);
+
+            // 1. `max(GridAdditionRowsAtStart, product count)` — a card with
+            //    fewer products than the section holds does not shrink it, and
+            //    nor does one with none at all.
+            _helpRowsGrownTo = Math.Max(WorkingOutGrid.GridAdditionRowsAtStart, _helpPrinted.Count);
+
+            while (_additionRows.Count < _helpRowsGrownTo)
+            {
+                _additionRows.Add(NewRow(_columnCount));
+            }
+
+            // 3. Disabled, until the card is done. It is not a toggle: the rows
+            //    it grew are still there, and a button that removed them would
+            //    be deleting the player's own scratch paper.
+            _helpMeButton.SetDisabled(true);
+
+            // 2. Printed, which RebuildGrid does on its way past — the items
+            //    are laid out against the rows, so they are placed with them.
+            RebuildGrid();
         }
 
         void HandleCheckItClicked()
