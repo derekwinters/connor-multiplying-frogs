@@ -95,9 +95,9 @@ namespace Frogs.Unity.EditModeTests
                     "the header band draws no player chip at all");
 
                 Assert.That(
-                    view.Lanes.Select(lane => lane.Chip).ToArray(),
-                    Has.Length.EqualTo(2).And.None.Null,
-                    "every lane still has its own chip — that is what carries the colour now");
+                    view.PondRect.GetComponentsInChildren<PlayerChip>(includeInactive: true),
+                    Has.Length.EqualTo(2),
+                    "one chip per lane, in the pond — that is what carries the colour now");
             }
             finally
             {
