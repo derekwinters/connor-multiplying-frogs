@@ -15,6 +15,7 @@ using Frogs.Unity.Views;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using FrogColours = Frogs.Unity.UI.FrogColours;
+using Graphic = UnityEngine.UI.Graphic;
 using Image = UnityEngine.UI.Image;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
@@ -124,6 +125,63 @@ namespace Frogs.Unity.EditModeTests
             // SettingsButtonSize (96) already equals MinTouchTarget, so the
             // shared touch-target invariant is met with no extra number.
             Assert.That(GameBoardScreenView.SettingsButtonSize, Is.GreaterThanOrEqualTo(Button.MinTouchTarget));
+        }
+
+        /// <summary>
+        /// #321 — Derek: "make the settings icon a normal gear icon, not
+        /// inside a circle." The ring and the white disc behind the gear are
+        /// gone, so the button draws one thing: the gear.
+        ///
+        /// The tap area is the invariant this could have broken. It is
+        /// `SettingsButtonSize`, which is `MinTouchTarget` exactly, and the
+        /// ring used to be what a finger landed on — so with the ring gone,
+        /// something still has to fill that square and take the touch.
+        /// </summary>
+        [Test]
+        public void Settings_DrawsTheGearAlone_WithNoRingAndNoFillBehindIt()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var gear = view.SettingsButton;
+
+                Assert.That(
+                    gear.GetComponentsInChildren<Image>(includeInactive: true),
+                    Is.Empty,
+                    "no ring, no disc — the gear is drawn straight onto the board, "
+                    + "so the button has no Image of its own at all");
+
+                Assert.That(
+                    gear.GetComponentsInChildren<Graphic>(includeInactive: true),
+                    Is.EqualTo(new Graphic[] { gear.Glyph }),
+                    "the gear glyph is the only thing this control draws");
+
+                Assert.That(
+                    gear.RectTransform.sizeDelta,
+                    Is.EqualTo(new Vector2(
+                        GameBoardScreenView.SettingsButtonSize,
+                        GameBoardScreenView.SettingsButtonSize)),
+                    "the tap area does not move or shrink with the chrome");
+
+                // The glyph is what a finger now lands on, and it fills the
+                // button, so the tappable square is still the whole of it —
+                // uGUI hit-tests a Text over its rect, not over its ink.
+                Assert.That(gear.Glyph.raycastTarget, Is.True, "the gear takes the touch");
+                Assert.That(
+                    gear.Glyph.rectTransform.rect.size,
+                    Is.EqualTo(gear.RectTransform.rect.size),
+                    "and it fills the button, so the tap area is unchanged");
+
+                Assert.That(
+                    gear.Glyph.fontSize,
+                    Is.EqualTo((int)GameBoardScreenView.SettingsGlyphSize),
+                    "grown into the space the ring and the disc gave up");
+            }
+            finally
+            {
+                Destroy(view);
+            }
         }
 
         [TestCase(0)]
@@ -742,8 +800,12 @@ namespace Frogs.Unity.EditModeTests
                 { "TurnBannerSize", 52f },
                 { "TurnBannerGap", 24f },
                 { "SettingsButtonSize", 96f },
-                { "SettingsGlyphSize", 44f },
-                { "SettingsButtonOutline", 4f },
+
+                // The gear's glyph, grown into the space its ring and its
+                // white disc gave up (#321). `SettingsButtonOutline` is gone
+                // from this list rather than renamed: nothing on this control
+                // draws a ring at any width any more.
+                { "SettingsGlyphSize", 96f },
                 { "RollButtonWidth", 480f },
                 { "RollButtonHeight", 144f },
                 { "RollButtonLabelSize", 56f },
@@ -787,14 +849,24 @@ namespace Frogs.Unity.EditModeTests
             AssertPublicConstantsAreExactly(typeof(GameBoardScreenView), boardConstants);
             AssertPublicConstantsAreExactly(typeof(GameBoardLaneView), laneConstants);
 
-            // LogRadius and SettingsGlyphSize hold the same numbers as
-            // shared-components.md's ButtonRadius and ButtonLabelSize today,
-            // and are deliberately not those constants: the Button is free to
-            // restyle its corner and its label without moving the pond's logs
-            // or its gear. Asserted as equal-today so a future divergence is
-            // a visible, deliberate edit here rather than a silent drift.
+            // LogRadius holds the same number as shared-components.md's
+            // ButtonRadius today and is deliberately not that constant: the
+            // Button is free to restyle its corner without moving the pond's
+            // logs. Asserted as equal-today so a future divergence is a
+            // visible, deliberate edit here rather than a silent drift.
             Assert.That(GameBoardScreenView.LogRadius, Is.EqualTo(Button.ButtonRadius));
-            Assert.That(GameBoardScreenView.SettingsGlyphSize, Is.EqualTo(Button.ButtonLabelSize));
+
+            // SettingsGlyphSize used to be the other half of that pair, at
+            // ButtonLabelSize's 44 px. It is not a label size any more — with
+            // the ring and the disc gone the gear is the control, so it is
+            // sized against the tap target it fills rather than against a
+            // pill's label. Still its own constant: the gear may be restyled
+            // smaller one day, and SettingsButtonSize may not, because it is
+            // MinTouchTarget exactly.
+            Assert.That(
+                GameBoardScreenView.SettingsGlyphSize,
+                Is.EqualTo(GameBoardScreenView.SettingsButtonSize),
+                "the gear is set at the size of the square it fills");
 
             // SharedLogHeight is the pond band's own height, not a number
             // typed in beside it — the log fills the band, so if the header or
@@ -909,8 +981,6 @@ namespace Frogs.Unity.EditModeTests
             {
                 Assert.That(view.TurnBannerText.font, Is.Not.Null);
                 Assert.That(view.SettingsButton.Glyph.font, Is.Not.Null);
-                Assert.That(view.SettingsButton.Background.sprite, Is.Not.Null);
-                Assert.That(view.SettingsButton.Outline.sprite, Is.Not.Null);
                 Assert.That(view.SettingsButton.Glyph.fontSize, Is.EqualTo((int)GameBoardScreenView.SettingsGlyphSize));
 
                 var lane = view.LaneFor(FrogColour.Green);
