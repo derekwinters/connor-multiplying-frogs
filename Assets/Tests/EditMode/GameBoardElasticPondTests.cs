@@ -99,12 +99,12 @@ namespace Frogs.Unity.EditModeTests
                 // The two shared logs, filling the pond band top to bottom.
                 // 352 px and 48 px from the mockup's own `left:` and `right:`.
                 AssertBounds(
-                    view.StartLogOutline.rectTransform,
+                    view.StartLog.rectTransform,
                     canvas,
                     Rect.MinMaxRect(-608f, -424f, -432f, 472f),
                     "the Start log");
                 AssertBounds(
-                    view.EndLogOutline.rectTransform,
+                    view.EndLog.rectTransform,
                     canvas,
                     Rect.MinMaxRect(736f, -424f, 912f, 472f),
                     "the End log");
@@ -165,12 +165,12 @@ namespace Frogs.Unity.EditModeTests
                 // fixed — and the End log is still 48 px from the right edge
                 // of the screen, which is 640 px further out than it was.
                 AssertBounds(
-                    view.StartLogOutline.rectTransform,
+                    view.StartLog.rectTransform,
                     canvas,
                     Rect.MinMaxRect(-928f, -424f, -752f, 472f),
                     "the Start log");
                 AssertBounds(
-                    view.EndLogOutline.rectTransform,
+                    view.EndLog.rectTransform,
                     canvas,
                     Rect.MinMaxRect(1056f, -424f, 1232f, 472f),
                     "the End log");

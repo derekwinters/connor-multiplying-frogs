@@ -399,8 +399,8 @@ namespace Frogs.Unity.EditModeTests
 
                 // They belong to the pond, not to a lane — which is the reason
                 // there are two of them rather than two per frog.
-                Assert.That(view.StartLogOutline.transform.parent, Is.SameAs(view.PondRect.transform));
-                Assert.That(view.EndLogOutline.transform.parent, Is.SameAs(view.PondRect.transform));
+                Assert.That(view.StartLog.transform.parent, Is.SameAs(view.PondRect.transform));
+                Assert.That(view.EndLog.transform.parent, Is.SameAs(view.PondRect.transform));
 
                 // And they are drawn before the lanes are, so every frog sits
                 // on top of the log rather than under it.
@@ -408,11 +408,11 @@ namespace Frogs.Unity.EditModeTests
                 {
                     Assert.That(
                         lane.RectTransform.GetSiblingIndex(),
-                        Is.GreaterThan(view.StartLogOutline.rectTransform.GetSiblingIndex()),
+                        Is.GreaterThan(view.StartLog.rectTransform.GetSiblingIndex()),
                         "the lanes, and so the frogs, are drawn over the logs");
                     Assert.That(
                         lane.RectTransform.GetSiblingIndex(),
-                        Is.GreaterThan(view.EndLogOutline.rectTransform.GetSiblingIndex()));
+                        Is.GreaterThan(view.EndLog.rectTransform.GetSiblingIndex()));
                 }
             }
             finally
@@ -438,8 +438,8 @@ namespace Frogs.Unity.EditModeTests
             {
                 var expected = new Vector2(GameBoardScreenView.LogWidth, GameBoardScreenView.SharedLogHeight);
 
-                Assert.That(view.StartLogOutline.rectTransform.sizeDelta, Is.EqualTo(expected));
-                Assert.That(view.EndLogOutline.rectTransform.sizeDelta, Is.EqualTo(expected));
+                Assert.That(view.StartLog.rectTransform.sizeDelta, Is.EqualTo(expected));
+                Assert.That(view.EndLog.rectTransform.sizeDelta, Is.EqualTo(expected));
 
                 Assert.That(
                     GameBoardScreenView.SharedLogHeight,
@@ -452,29 +452,21 @@ namespace Frogs.Unity.EditModeTests
 
                 // Vertically centred on the pond, so it is centred on the lane
                 // stack the pond centres too.
-                Assert.That(view.StartLogOutline.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
-                Assert.That(view.EndLogOutline.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
+                Assert.That(view.StartLog.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
+                Assert.That(view.EndLog.rectTransform.anchoredPosition.y, Is.EqualTo(0f).Within(0.001f));
 
-                // The rim that separates a log from the water it floats on is
-                // drawn inside the log's own bounds, as every outline on this
-                // screen is.
-                var logs = new[]
+                // A log is one drawing at the log's full size. It used to be
+                // two images, an outer rim inset by `TrackOutline` around an
+                // inner fill; `LogEdge` is gone (#301), so the log's own fill
+                // reaches `LogWidth` x `SharedLogHeight` with nothing drawn
+                // over its edge. `TrackOutline` is the lily pad's now, and the
+                // log is no longer one of the elements that draws one.
+                foreach (var log in new[] { view.StartLog, view.EndLog })
                 {
-                    new KeyValuePair<Image, Image>(view.StartLogOutline, view.StartLogFill),
-                    new KeyValuePair<Image, Image>(view.EndLogOutline, view.EndLogFill),
-                };
-
-                foreach (var log in logs)
-                {
-                    var fill = log.Value.rectTransform;
-
-                    Assert.That(fill.parent, Is.SameAs(log.Key.transform), "the fill sits inside its own log");
                     Assert.That(
-                        fill.offsetMin,
-                        Is.EqualTo(new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline)));
-                    Assert.That(
-                        fill.offsetMax,
-                        Is.EqualTo(new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline)));
+                        log.GetComponentsInChildren<Image>(includeInactive: true).Length,
+                        Is.EqualTo(1),
+                        "the log draws one image — no rim layer inside it");
                 }
             }
             finally
@@ -510,7 +502,7 @@ namespace Frogs.Unity.EditModeTests
                 foreach (var colour in roster)
                 {
                     var lane = view.LaneFor(colour);
-                    var log = colour == homeFrog ? view.EndLogOutline : view.StartLogOutline;
+                    var log = colour == homeFrog ? view.EndLog : view.StartLog;
 
                     Assert.That(
                         CenterX(lane.PieceRect),
@@ -1067,10 +1059,10 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(lane.LilyPadFills[0].sprite, Is.Not.Null);
                 Assert.That(lane.LilyPadOutlines[0].sprite, Is.Not.Null);
 
-                Assert.That(view.StartLogFill.sprite, Is.Not.Null);
-                Assert.That(view.StartLogOutline.sprite, Is.Not.Null);
-                Assert.That(view.EndLogFill.sprite, Is.Not.Null);
-                Assert.That(view.EndLogOutline.sprite, Is.Not.Null);
+                Assert.That(view.StartLog.sprite, Is.Not.Null);
+                Assert.That(view.EndLog.sprite, Is.Not.Null);
+                Assert.That(view.StartLogLabel.font, Is.Not.Null);
+                Assert.That(view.EndLogLabel.font, Is.Not.Null);
             }
             finally
             {
