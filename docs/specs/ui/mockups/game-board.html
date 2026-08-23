@@ -152,8 +152,14 @@
   .pip{width:40px;height:40px;border-radius:50%;background:var(--ink);align-self:center;justify-self:center}
   .card{width:560px;height:420px;border-radius:24px;background:#fff;border:4px solid var(--line);
         display:flex;align-items:center;justify-content:center}
-  .gear{width:96px;height:96px;border-radius:50%;border:4px solid var(--line);display:flex;align-items:center;
-        justify-content:center;font-size:44px}
+  /* THE GEAR — a gear and nothing else (#321). It used to be a 44px glyph in a
+     white disc with a 4px ring, and on a pond that disc was the loudest thing
+     in the header. No border, no background: the 96px box is still there, but
+     only as the tap area (SettingsButtonSize, which is MinTouchTarget), and
+     the glyph is set at that same size so the gear fills the square it is
+     tapped on. `SettingsButtonOutline` is gone from game-board.md's table. */
+  .gear{width:96px;height:96px;display:flex;align-items:center;
+        justify-content:center;font-size:96px;color:var(--ink)}
 </style>
 </head>
 <body>

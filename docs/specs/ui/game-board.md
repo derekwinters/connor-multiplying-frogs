@@ -182,8 +182,7 @@ lanes-across** after seeing both drawn.
 | Hairline under `header`, over `controls` | `BoardBandOutline` | 3 px |
 | Turn banner text size | `TurnBannerSize` | 52 px |
 | Settings button, square | `SettingsButtonSize` | 96 px |
-| Settings gear glyph size | `SettingsGlyphSize` | 44 px |
-| Settings button outline | `SettingsButtonOutline` | 4 px |
+| Settings gear glyph size | `SettingsGlyphSize` | 96 px |
 | `Roll` button width | `RollButtonWidth` | 480 px |
 | `Roll` button height | `RollButtonHeight` | 144 px |
 | `Roll` label size | `RollButtonLabelSize` | 56 px |
@@ -376,15 +375,28 @@ Vertically, the pond band is `1200 − BoardHeaderHeight − BoardControlsHeight
 the logs stand 80 px proud of the lane stack at each end; at two frogs, 264 px.
 
 Every outline is drawn **inside** the element's own bounds, so `TrackOutline`,
-`FrogPieceOutline`, `SettingsButtonOutline` and `BoardBandOutline` cost the
-layout nothing and the 1920 px sum above is unaffected by any of them.
+`FrogPieceOutline` and `BoardBandOutline` cost the layout nothing and the
+1920 px sum above is unaffected by any of them.
 
-`LogRadius` is the log's own corner and `SettingsGlyphSize` the gear's own
-glyph. Both happen to equal a constant on
-[shared components](shared-components.md) today — `ButtonRadius` is also 24 px
-and `ButtonLabelSize` also 44 px — and neither is that constant. The Button's
-corner and label are the Button's to restyle; the pond's logs and its gear are
-not, and they must not move when it does.
+`LogRadius` is the log's own corner. It happens to equal a constant on
+[shared components](shared-components.md) today — `ButtonRadius` is also
+24 px — and it is not that constant. The Button's corner is the Button's to
+restyle; the pond's logs are not, and they must not move when it does.
+
+`SettingsGlyphSize` equals `SettingsButtonSize`, and that is the whole of how
+the gear is sized: **the gear is as big as the square it is tapped on.** It
+used to be 44 px, `ButtonLabelSize`'s number, because it was a glyph sitting
+inside a ring and a white disc and had to leave room for them. With those gone
+([#321](https://github.com/derekwinters/connor-multiplying-frogs/issues/321))
+there is nothing left to leave room for, so it is sized against the tap target
+instead — the glyph's own side bearings are what keep the drawn gear clear of
+the square's edges. It stays its own constant rather than becoming
+`SettingsButtonSize` at the call site, because a future restyle may want a
+smaller gear and `SettingsButtonSize` may never shrink: it is
+[`MinTouchTarget`](shared-components.md) exactly.
+
+**`SettingsButtonOutline` is gone**, not renamed. It was the width of the ring
+around the gear, and there is no ring.
 
 ## Colours
 
@@ -583,6 +595,23 @@ than picked and then checked** — see [how the pond's colours are
 constrained](#how-the-ponds-colours-are-constrained) below, which is the part
 worth reading before changing any of these six values.
 
+**The settings gear is held to the same bar**, and it is here rather than with
+the frogs because it is the one piece of ink on this screen with nothing of its
+own behind it. Until
+[#321](https://github.com/derekwinters/connor-multiplying-frogs/issues/321) it
+was drawn on a white disc, which did its legibility work for it; now it is
+`BoardInk` straight onto the board, so it is measured against both surfaces it
+could sit on:
+
+| | Contrast | ΔE\*ab |
+| --- | --- | --- |
+| `BoardInk` on `BandFill` — the header band it sits in | 12.71 : 1 | 77.9 |
+| `BoardInk` on `PondWater` — the water behind that band | 10.20 : 1 | 72.9 |
+
+Both clear 1.9 : 1 and 30 several times over, so which of the two is behind the
+gear decides nothing — which matters, because the band is presentation and
+could be dropped without the gear becoming a legibility question again.
+
 ### The rule this page used to carry
 
 Until [#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301)
@@ -691,10 +720,14 @@ change harder to judge. Whether they now read as a frame or as leftovers is
     banner loses a word, which is
     [#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310)
     question 4, settled by Derek.
-- **Settings button** — top right, `SettingsButtonSize` square, a gear. Opens
-  the [settings dialog](settings-dialog.md). Available on any turn, at any
-  time, including while it is not your turn — it is the way out of a game and
-  hiding it would be worse.
+- **Settings button** — top right, `SettingsButtonSize` square, a gear **and
+  nothing else**: no ring, no disc, no button shape behind it. The gear is
+  drawn in `BoardInk` straight onto the header band, at `SettingsGlyphSize`.
+  The square is still the tap area — it is `MinTouchTarget` exactly and it does
+  not shrink because the chrome did. Opens the
+  [settings dialog](settings-dialog.md). Available on any turn, at any time,
+  including while it is not your turn — it is the way out of a game and hiding
+  it would be worse.
 - **`Roll`** — primary [button](shared-components.md#button), oversized. Opens
   [roll and card](roll-and-card.md). Disabled from the moment it is pressed
   until the turn resolves.

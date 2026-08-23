@@ -66,8 +66,14 @@ namespace Frogs.Unity.Views
         public const float TurnBannerSize = 52f;
         public const float TurnBannerGap = 24f;
         public const float SettingsButtonSize = 96f;
-        public const float SettingsGlyphSize = 44f;
-        public const float SettingsButtonOutline = 4f;
+
+        // The gear fills the square it is tapped on. It used to be 44 px —
+        // ButtonLabelSize's number, a label sized to sit inside a ring and a
+        // white disc that #321 deleted. With no chrome left to leave room
+        // for, the glyph is sized against the tap target instead, and
+        // `SettingsButtonOutline` is gone rather than renamed: nothing on
+        // this control draws a ring at any width any more.
+        public const float SettingsGlyphSize = 96f;
         public const float RollButtonWidth = 480f;
         public const float RollButtonHeight = 144f;
         public const float RollButtonLabelSize = 56f;
