@@ -1826,16 +1826,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#pr-build-a-debug-apk-for-every-pr" class="md-nav__link">
+  <a href="#pr-build-two-debug-apks-for-every-pr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        pr-build — a debug APK for every PR
+        pr-build — two debug APKs for every PR
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="pr-build — a debug APK for every PR">
+    <nav class="md-nav" aria-label="pr-build — two debug APKs for every PR">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#both-build-profiles-so-a-change-can-be-opened-without-the-tablet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both build profiles, so a change can be opened without the tablet
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#a-missing-licence-warns-and-skips-here" class="md-nav__link">
@@ -2699,16 +2710,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#pr-build-a-debug-apk-for-every-pr" class="md-nav__link">
+  <a href="#pr-build-two-debug-apks-for-every-pr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        pr-build — a debug APK for every PR
+        pr-build — two debug APKs for every PR
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="pr-build — a debug APK for every PR">
+    <nav class="md-nav" aria-label="pr-build — two debug APKs for every PR">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#both-build-profiles-so-a-change-can-be-opened-without-the-tablet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both build profiles, so a change can be opened without the tablet
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#a-missing-licence-warns-and-skips-here" class="md-nav__link">
@@ -3283,7 +3305,7 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.</p>
 <td><code>pr-build</code></td>
 <td>PR</td>
 <td>no</td>
-<td>the app still compiles into an installable APK</td>
+<td>the app still compiles into two installable APKs, one per build profile</td>
 </tr>
 <tr>
 <td><code>rc-build</code></td>
@@ -3513,8 +3535,8 @@ upstream release notes, don't merge on autopilot — but do not let them sit. A
 year of ignored Dependabot PRs is worse than no pinning at all, because it looks
 deliberate.</p>
 <h2 id="build-workflows">Build workflows<a class="headerlink" href="#build-workflows" title="Link to this section">&para;</a></h2>
-<h3 id="pr-build-a-debug-apk-for-every-pr"><code>pr-build</code> — a debug APK for every PR<a class="headerlink" href="#pr-build-a-debug-apk-for-every-pr" title="Link to this section">&para;</a></h3>
-<p>Every PR produces an installable debug APK, so "does it still build" is answered
+<h3 id="pr-build-two-debug-apks-for-every-pr"><code>pr-build</code> — two debug APKs for every PR<a class="headerlink" href="#pr-build-two-debug-apks-for-every-pr" title="Link to this section">&para;</a></h3>
+<p>Every PR produces installable debug APKs, so "does it still build" is answered
 by a build rather than by hope, and so Connor can try a change before it merges.</p>
 <ul>
 <li><strong>Debug signing</strong>, with the Android debug keystore. No secrets, so the
@@ -3525,11 +3547,58 @@ by a build rather than by hope, and so Connor can try a change before it merges.
 <li><strong><code>.debug</code> applicationId suffix</strong>, so a debug build installs <em>alongside</em> the
   release build instead of replacing it. Connor keeps the game he plays and the
   build being tested at the same time.</li>
-<li><strong>Artifact-only distribution.</strong> The APK is a workflow artifact on the PR.
+<li><strong>Artifact-only distribution.</strong> The APKs are workflow artifacts on the PR.
   Nothing is uploaded anywhere, no store, no distribution service, no link that
   outlives the PR. Artifacts expire and that is correct — a stale test build is
   worse than none.</li>
 </ul>
+<h4 id="both-build-profiles-so-a-change-can-be-opened-without-the-tablet">Both build profiles, so a change can be opened without the tablet<a class="headerlink" href="#both-build-profiles-so-a-change-can-be-opened-without-the-tablet" title="Link to this section">&para;</a></h4>
+<p>Two APKs per PR, the same <a href="#two-apks-in-two-build-paths">pair <code>release-build</code> produces</a>:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>File</th>
+<th>Profile</th>
+<th>For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>debug-apk-0.2.3-abc1234</code></td>
+<td><code>multiplying-frogs-0.2.3-abc1234.apk</code></td>
+<td>ARM64, IL2CPP</td>
+<td>the tablet</td>
+</tr>
+<tr>
+<td><code>debug-apk-0.2.3-abc1234-emulator</code></td>
+<td><code>multiplying-frogs-0.2.3-abc1234-emulator.apk</code></td>
+<td>x86_64, IL2CPP</td>
+<td>a desktop emulator</td>
+</tr>
+</tbody>
+</table>
+<p>The emulator one is the point of the pair. The only place the real screens are
+ever seen <em>running</em> is a build somebody installs and opens, and an APK that
+needs the tablet in hand is one most PRs never get looked at on. This one opens
+on a desktop, before the merge rather than after the ship.</p>
+<p>Each profile builds into its own <code>buildsPath</code>, under its own <code>buildName</code>, and
+uploads as its own artifact. The two builds are the same commit and differ only
+in architecture — which no filename, artifact name, or download shows — so the
+workflow is the only place the difference can be guaranteed, and it has to be
+guaranteed rather than noticed later. <code>v0.1.0</code> shipped an "emulator" APK that
+was really the ARM64 build (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/252">#252</a>),
+and it failed at install time on someone else's machine with no build log
+anywhere near it. <code>.github/scripts/tests/test_pr_build_profiles.py</code> asserts the
+shape that makes it impossible: both builds name a profile, the two profiles
+differ, the paths and names are distinct, and an artifact whose name says a
+profile is fed by the build that asked Unity for it.</p>
+<p>The device APK is uploaded <strong>before</strong> the emulator build starts, so a failed
+second build cannot cost the PR a good first one. Neither build carries
+<code>continue-on-error</code>, unlike <code>release-build</code>: nothing downstream here is waiting
+to be rescued, and a PR whose app did not build for one of its two targets
+should say so in red. The job summary names both APKs, or says which one is
+missing.</p>
 <h4 id="a-missing-licence-warns-and-skips-here">A missing licence warns and skips here<a class="headerlink" href="#a-missing-licence-warns-and-skips-here" title="Link to this section">&para;</a></h4>
 <p>The opposite of <a href="#ci-tests-the-two-suites"><code>ci-tests</code></a>, deliberately.</p>
 <p><code>ci-tests</code> is a <strong>correctness gate</strong>: a green tick claiming the tests ran when
@@ -3781,12 +3850,12 @@ anything reading them must include that segment:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>pr-build</code>, <code>rc-build</code></td>
+<td><code>rc-build</code></td>
 <td>default (<code>build</code>)</td>
 <td><code>build/Android/</code></td>
 </tr>
 <tr>
-<td><code>release-build</code></td>
+<td><code>pr-build</code>, <code>release-build</code></td>
 <td><code>build/device</code>, <code>build/emulator</code></td>
 <td><code>build/device/Android/</code>, <code>build/emulator/Android/</code></td>
 </tr>
