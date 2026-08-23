@@ -2688,8 +2688,12 @@ is <a href="#the-horizontal-arithmetic">worked through there</a>.</p>
 <code>LanePositionGap</code>'s typed value before this change. That is not a coincidence to
 be grateful for — it is the condition this rule was chosen to satisfy, so that
 the reference canvas keeps being a picture of the game. It is checked rather
-than assumed: <a href="#mockup">the mockup renders byte-identical</a> at 1920 before and
-after.</p>
+than assumed, in both drawings and in the build: <a href="#mockup">the mockup renders
+byte-identical</a> at 1920 before and after, and since
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/408">#408</a> the
+built board is held to the same picture — an EditMode test asserts where every
+one of a lane's nine positions lands, at 1920 and at 2560, against the numbers
+the two mockups draw them at rather than against the formula above.</p>
 <p>The floor is what a <em>narrower</em> screen gets. Below 1920 px the formula would
 start closing the pads up, so it stops: the board keeps its reference width and
 is centred, exactly as it always was. <strong>The pond spreads on screens wider than
