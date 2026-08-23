@@ -27,11 +27,12 @@ namespace Frogs.Unity.EditModeTests
     ///   fix cannot pass by stretching the layout instead. Every constant on
     ///   every spec page means what it meant before.
     ///
-    /// The game board's three full-width bands are the one exception to the
-    /// second half, and issue #303 is where that was decided: a band that
-    /// reads as the top or the bottom of the screen reaches the screen's
-    /// edges, and what it *contains* is what stays in reference pixels. The
-    /// board's case below asserts both halves of that.
+    /// The game board is the one exception to the second half, in two steps.
+    /// Issue #303: a band that reads as the top or the bottom of the screen
+    /// reaches the screen's edges. Issue #408: the `pond`'s row reaches them
+    /// too, because it is a track rather than a panel — what stays in
+    /// reference pixels is what `header` and `controls` contain. The board's
+    /// case below asserts both halves of that.
     ///
     /// The canvas used here is bigger in *both* directions than the reference,
     /// which is not a shape any real device has — it is the shape that makes a
@@ -63,14 +64,16 @@ namespace Frogs.Unity.EditModeTests
         /// on the pond, so they are measured against the canvas exactly as the
         /// water behind them is.
         ///
-        /// What that does *not* license is stretching the layout: everything
-        /// the bands contain that the spec places by geometry is still in
-        /// reference pixels. Both halves are asserted here, and the split is
-        /// pinned down in full by
-        /// <see cref="GameBoardBandsToTheEdgeTests"/>.
+        /// What that does *not* license is stretching everything: `header` and
+        /// `controls` contain anchored controls, not a track, and they keep
+        /// their reference sizes. The `pond`'s row is the one part that
+        /// spreads with its band (#408). Both halves are asserted here, and
+        /// the split is pinned down in full by
+        /// <see cref="GameBoardBandsToTheEdgeTests"/> and
+        /// <see cref="GameBoardElasticPondTests"/>.
         /// </summary>
         [Test]
-        public void GameBoard_PaintsItsBackgroundToEveryEdge_AndLeavesItsContentsAtReferenceSize()
+        public void GameBoard_PaintsItsBackgroundToEveryEdge_AndSpreadsItsPondToTheDevicesSafeArea()
         {
             var canvas = OversizedCanvas();
 
@@ -117,16 +120,18 @@ namespace Frogs.Unity.EditModeTests
                     "the pond band paints its own water to the device's edges rather than "
                     + "relying on the background showing through");
 
-                // And the layout inside them is untouched. If a lane reads
-                // 2400 the fix stretched the board instead of its bands, and
-                // every constant on docs/specs/ui/game-board.md has quietly
-                // stopped meaning what it says.
+                // And the pond's row inside them spreads with the band, to the
+                // device's own safe area — #408. It is the one thing on this
+                // screen that a wider device stretches: the row is a track
+                // whose job is to show how far along a lane a frog has got,
+                // and a track that stopped at 1920 left the chips floating
+                // 300 px in from an edge they are pinned to.
                 foreach (var lane in view.Lanes)
                 {
                     Assert.That(
                         lane.RectTransform.rect.width,
-                        Is.EqualTo(ReferenceWidth - (2f * GameBoardScreenView.SafeMargin)).Within(Tolerance),
-                        "a lane is still the reference canvas's safe area wide, not the device's");
+                        Is.EqualTo(OversizedCanvasWidth - (2f * GameBoardScreenView.SafeMargin)).Within(Tolerance),
+                        "a lane is the device's safe area wide, not the reference canvas's");
                 }
 
                 Assert.That(

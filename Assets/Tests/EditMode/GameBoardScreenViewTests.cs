@@ -216,7 +216,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void Track_IsSevenLilyPadsBetweenTheTwoSharedLogColumns_AndTheLaneArithmeticLandsOn1920()
+        public void Track_IsSevenLilyPadsBetweenTheTwoSharedLogColumns_AndTheLaneArithmeticLandsOnTheScreen()
         {
             var view = CreateView(TwoFrogGame());
 
@@ -251,7 +251,15 @@ namespace Frogs.Unity.EditModeTests
                     Assert.That(positions[index].sizeDelta, Is.EqualTo(padSize), $"lily pad {index}");
                 }
 
-                // Every neighbouring pair is exactly LanePositionGap apart.
+                // Every neighbouring pair is exactly one derived gap apart.
+                // The gap is the screen's to decide since #408, so it is asked
+                // of the lane that was laid out on this canvas rather than
+                // read off a constant that no longer exists.
+                Assert.That(
+                    lane.LanePositionGap,
+                    Is.EqualTo(GameBoardLaneView.LanePositionGapMin).Within(0.001f),
+                    "at the reference canvas the derived gap is the 48 px it used to be typed as");
+
                 for (var index = 1; index < positions.Count; index++)
                 {
                     var previousRightEdge = positions[index - 1].anchoredPosition.x + (positions[index - 1].sizeDelta.x / 2f);
@@ -259,24 +267,24 @@ namespace Frogs.Unity.EditModeTests
 
                     Assert.That(
                         leftEdge - previousRightEdge,
-                        Is.EqualTo(GameBoardLaneView.LanePositionGap).Within(0.001f),
+                        Is.EqualTo(lane.LanePositionGap).Within(0.001f),
                         $"gap before position {index}");
                 }
 
                 // The spec's own arithmetic, carried into the code as a check
                 // rather than trusted: two logs, seven pads and eight gaps is
-                // 1520 px of track; plus the chip gutter, one gutter gap and
-                // two safe margins, 1920 px on the nose.
+                // 1520 px of track on this canvas; plus the chip gutter, one
+                // gutter gap and two safe margins, 1920 px on the nose.
                 var expectedTrackWidth = (2f * GameBoardScreenView.LogWidth)
                     + ((Lane.LanePositionCount - 2) * GameBoardLaneView.LilyPadDiameter)
-                    + ((Lane.LanePositionCount - 1) * GameBoardLaneView.LanePositionGap);
+                    + ((Lane.LanePositionCount - 1) * lane.LanePositionGap);
 
-                Assert.That(GameBoardLaneView.TrackWidth, Is.EqualTo(expectedTrackWidth).Within(0.001f));
+                Assert.That(lane.TrackWidth, Is.EqualTo(expectedTrackWidth).Within(0.001f));
                 Assert.That(lane.TrackRect.sizeDelta.x, Is.EqualTo(expectedTrackWidth).Within(0.001f));
 
                 var laneWidth = GameBoardLaneView.LaneGutterWidth
                     + GameBoardLaneView.LaneGutterGap
-                    + GameBoardLaneView.TrackWidth
+                    + lane.TrackWidth
                     + (2f * GameBoardScreenView.SafeMargin);
 
                 Assert.That(laneWidth, Is.EqualTo(CanvasWidth).Within(0.001f), "the spec's 1920 px on the nose");
@@ -841,7 +849,18 @@ namespace Frogs.Unity.EditModeTests
                 { "FrogPieceDiameter", 88f },
                 { "FrogPieceOutline", 4f },
                 { "TrackOutline", 3f },
-                { "LanePositionGap", 48f },
+
+                // `LanePositionGap` is **not** in this list, and its absence
+                // is the whole of #408: it is the one number on
+                // game-board.md that the screen decides, so it is derived from
+                // the width the lane was laid out at rather than typed here.
+                // What is typed here is the three constants the formula is
+                // built from — the floor it never drops below, everything on
+                // the row that does not stretch, and the number of gaps the
+                // rest is divided between.
+                { "LanePositionGapMin", 48f },
+                { "LaneFixedWidth", 1536f },
+                { "LanePositionGapCount", 8f },
                 { "LaneGutterWidth", 256f },
                 { "LaneGutterGap", 48f }
             };
@@ -877,6 +896,25 @@ namespace Frogs.Unity.EditModeTests
                 Is.EqualTo(CanvasHeight
                     - GameBoardScreenView.BoardHeaderHeight
                     - GameBoardScreenView.BoardControlsHeight).Within(0.001f));
+
+            // LaneFixedWidth is everything on the row that does not stretch,
+            // written as that sum rather than as the bare 1536 — it is
+            // load-bearing now, because the elastic gap is computed against
+            // it, so a change to LaneGutterWidth, LogWidth, LilyPadDiameter,
+            // LaneGutterGap or SafeMargin has to move it.
+            Assert.That(
+                GameBoardLaneView.LaneFixedWidth,
+                Is.EqualTo((2f * GameBoardScreenView.SafeMargin)
+                    + GameBoardLaneView.LaneGutterWidth
+                    + GameBoardLaneView.LaneGutterGap
+                    + (2f * GameBoardScreenView.LogWidth)
+                    + ((Lane.LanePositionCount - 2) * GameBoardLaneView.LilyPadDiameter)).Within(0.001f));
+
+            // And there are as many gaps as there are spaces between the nine
+            // positions: one either side of the seven pads, six among them.
+            Assert.That(
+                GameBoardLaneView.LanePositionGapCount,
+                Is.EqualTo(Lane.LanePositionCount - 1).Within(0.001f));
 
             // The remaining two of game-board.md's constants are Lane's own,
             // reused under the same name rather than redeclared here.

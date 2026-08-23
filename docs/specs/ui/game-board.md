@@ -124,8 +124,12 @@ is [worked through there](#the-horizontal-arithmetic).
 `LanePositionGap`'s typed value before this change. That is not a coincidence to
 be grateful for — it is the condition this rule was chosen to satisfy, so that
 the reference canvas keeps being a picture of the game. It is checked rather
-than assumed: [the mockup renders byte-identical](#mockup) at 1920 before and
-after.
+than assumed, in both drawings and in the build: [the mockup renders
+byte-identical](#mockup) at 1920 before and after, and since
+[#408](https://github.com/derekwinters/connor-multiplying-frogs/issues/408) the
+built board is held to the same picture — an EditMode test asserts where every
+one of a lane's nine positions lands, at 1920 and at 2560, against the numbers
+the two mockups draw them at rather than against the formula above.
 
 The floor is what a *narrower* screen gets. Below 1920 px the formula would
 start closing the pads up, so it stops: the board keeps its reference width and

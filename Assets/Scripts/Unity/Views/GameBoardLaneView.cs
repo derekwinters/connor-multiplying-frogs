@@ -51,9 +51,43 @@ namespace Frogs.Unity.Views
         public const float FrogPieceDiameter = 88f;
         public const float FrogPieceOutline = 4f;
         public const float TrackOutline = 3f;
-        public const float LanePositionGap = 48f;
         public const float LaneGutterWidth = 256f;
         public const float LaneGutterGap = 48f;
+
+        // `LanePositionGap` is not here, and that is the point of #408: it is
+        // the one number on game-board.md that the screen decides, so it is
+        // derived — see LanePositionGapFor. These three are what it is derived
+        // from, and all three are that page's own rows.
+
+        /// <summary>The smallest the gap between two positions may be — the floor a screen narrower than the reference canvas gets.</summary>
+        public const float LanePositionGapMin = 48f;
+
+        /// <summary>
+        /// Everything on the row that does not stretch: two safe margins, the
+        /// chip gutter and the gap after it, the two logs' columns and the
+        /// seven lily pads.
+        ///
+        /// Written as that sum rather than as the bare 1536 px, because it is
+        /// load-bearing — the elastic gap is computed against it, so a change
+        /// to <see cref="LaneGutterWidth"/>,
+        /// <see cref="GameBoardScreenView.LogWidth"/>,
+        /// <see cref="LilyPadDiameter"/>, <see cref="LaneGutterGap"/> or
+        /// <see cref="GameBoardScreenView.SafeMargin"/> has to move it, and
+        /// nothing else has to move at all: the gap absorbs the difference by
+        /// construction.
+        /// </summary>
+        public const float LaneFixedWidth = (2f * GameBoardScreenView.SafeMargin)
+            + LaneGutterWidth
+            + LaneGutterGap
+            + (2f * GameBoardScreenView.LogWidth)
+            + ((Lane.LanePositionCount - 2) * LilyPadDiameter);
+
+        /// <summary>
+        /// How many gaps the width left over from <see cref="LaneFixedWidth"/>
+        /// is divided between: one either side of the seven pads, six among
+        /// them — which is the spaces between the lane's nine positions.
+        /// </summary>
+        public const float LanePositionGapCount = Lane.LanePositionCount - 1;
 
         // `LanePositionCount` (9) and `LaneWinningPosition` (8) are the other
         // two rows of that same table, and they are not this screen's to
@@ -149,29 +183,53 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// The track's width, fixed by its nine positions rather than by the
-        /// space available — game-board.md's Anchors section. Two log columns,
-        /// seven lily pads and eight gaps: the page's own arithmetic, written
-        /// out rather than trusted as the literal 1520. Sharing the logs did
-        /// not disturb it, because a shared log stands in the same column its
+        /// The gap between two positions on a lane drawn on a screen this
+        /// wide — game-board.md's Anchors section, and the one number on that
+        /// page a screen is allowed to decide:
+        ///
+        /// <code>
+        /// LanePositionGap = max( LanePositionGapMin, (screen width - LaneFixedWidth) / LanePositionGapCount )
+        /// </code>
+        ///
+        /// **At exactly 1920 px this gives exactly 48 px**, which is what
+        /// `LanePositionGap` was typed as before #408. That is not a
+        /// coincidence to be grateful for — it is the condition the rule was
+        /// chosen to satisfy, so that the reference canvas keeps being a
+        /// picture of the game.
+        ///
+        /// The floor is what a *narrower* screen gets: below the reference
+        /// width the formula would start closing the pads up, so it stops and
+        /// the board keeps its reference row.
+        /// </summary>
+        public static float LanePositionGapFor(float screenWidth)
+        {
+            return Mathf.Max(
+                LanePositionGapMin,
+                (screenWidth - LaneFixedWidth) / LanePositionGapCount);
+        }
+
+        /// <summary>
+        /// The track's width on a screen this wide: two log columns, seven
+        /// lily pads and eight gaps — the page's own arithmetic, written out
+        /// rather than trusted as a literal. Only the gaps move with the
+        /// screen; sharing the logs did not disturb this and neither does
+        /// spreading it, because a shared log stands in the same column its
         /// per-lane predecessor did.
         /// </summary>
-        public static float TrackWidth
+        public static float TrackWidthFor(float screenWidth)
         {
-            get
-            {
-                return (2f * GameBoardScreenView.LogWidth)
-                    + ((Lane.LanePositionCount - 2) * LilyPadDiameter)
-                    + ((Lane.LanePositionCount - 1) * LanePositionGap);
-            }
+            return (2f * GameBoardScreenView.LogWidth)
+                + ((Lane.LanePositionCount - 2) * LilyPadDiameter)
+                + ((Lane.LanePositionCount - 1) * LanePositionGapFor(screenWidth));
         }
 
         /// <summary>
         /// The centre of one track position, measured from the track's left
-        /// edge. The Start log's column at index 0, seven lily pads, the End
-        /// log's column at <see cref="Lane.LaneWinningPosition"/>.
+        /// edge, on a screen this wide. The Start log's column at index 0,
+        /// seven lily pads, the End log's column at
+        /// <see cref="Lane.LaneWinningPosition"/>.
         /// </summary>
-        public static float PositionCenterX(int position)
+        public static float PositionCenterXFor(int position, float screenWidth)
         {
             if (position <= 0)
             {
@@ -180,12 +238,14 @@ namespace Frogs.Unity.Views
 
             if (position >= Lane.LaneWinningPosition)
             {
-                return TrackWidth - (GameBoardScreenView.LogWidth / 2f);
+                return TrackWidthFor(screenWidth) - (GameBoardScreenView.LogWidth / 2f);
             }
 
+            var gap = LanePositionGapFor(screenWidth);
+
             return GameBoardScreenView.LogWidth
-                + LanePositionGap
-                + ((position - 1) * (LilyPadDiameter + LanePositionGap))
+                + gap
+                + ((position - 1) * (LilyPadDiameter + gap))
                 + (LilyPadDiameter / 2f);
         }
 
@@ -202,6 +262,53 @@ namespace Frogs.Unity.Views
         bool _initialized;
         FrogColour _colour;
         int _renderedPosition;
+        float _screenWidth;
+
+        /// <summary>
+        /// The screen this lane was laid out for, and so the width its nine
+        /// positions are spread across.
+        ///
+        /// It is read off the lane's own rect rather than passed in, because
+        /// in play mode a lane builds itself the moment the component is
+        /// added and there is no call between those two points to hand it a
+        /// number. A lane spans the safe area — the chip against the real left
+        /// margin, the End log against the real right one — so the screen is
+        /// the lane's own width plus the two margins.
+        /// </summary>
+        public float ScreenWidth
+        {
+            get
+            {
+                EnsureInitialized();
+                return _screenWidth;
+            }
+        }
+
+        /// <summary>
+        /// The gap between two of this lane's positions —
+        /// <see cref="LanePositionGapFor"/> at the width this lane was laid
+        /// out for. 48 px on the reference canvas, 128 px at 2560.
+        /// </summary>
+        public float LanePositionGap
+        {
+            get { return LanePositionGapFor(ScreenWidth); }
+        }
+
+        /// <summary>This lane's track width — <see cref="TrackWidthFor"/> at the width it was laid out for.</summary>
+        public float TrackWidth
+        {
+            get { return TrackWidthFor(ScreenWidth); }
+        }
+
+        /// <summary>
+        /// The centre of one of this lane's track positions, measured from the
+        /// track's left edge — <see cref="PositionCenterXFor"/> at the width
+        /// this lane was laid out for.
+        /// </summary>
+        public float PositionCenterX(int position)
+        {
+            return PositionCenterXFor(position, ScreenWidth);
+        }
 
         /// <summary>Which frog's lane this is.</summary>
         public FrogColour Colour
@@ -233,7 +340,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>`track` — pinned to the right, <see cref="TrackWidth"/> wide.</summary>
+        /// <summary>`track` — pinned to the right, <see cref="TrackWidth"/> wide at the screen this lane was laid out for.</summary>
         public RectTransform TrackRect
         {
             get
@@ -469,6 +576,13 @@ namespace Frogs.Unity.Views
             {
                 _rect = gameObject.AddComponent<RectTransform>();
             }
+
+            // The width everything below is spread across — see ScreenWidth.
+            // A lane built with no width to speak of (one standing on its own
+            // in a test, rather than in a pond) falls through the formula's
+            // own floor and draws the reference row, which is the same answer
+            // a screen narrower than the reference gets.
+            _screenWidth = _rect.rect.width + (2f * GameBoardScreenView.SafeMargin);
 
             BuildChip();
             BuildTrack();

@@ -123,6 +123,12 @@ namespace Frogs.Unity.Views
 
         // The one canvas every screen is measured in —
         // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
+        //
+        // The height is what the pond band's own height, and so the logs', is
+        // measured from. The width is no longer a layout number: the three
+        // bands are the screen's (#303) and, since #408, so is the pond's row
+        // — it is the floor the row falls back to on a screen narrower than
+        // the canvas every mockup is drawn at, and nothing else.
         const float CanvasWidth = 1920f;
         const float CanvasHeight = 1200f;
 
@@ -531,10 +537,10 @@ namespace Frogs.Unity.Views
             // The background and the three bands hang off it, because all four
             // are paint that reaches the screen's edges: the bands are the top
             // and the bottom *of the screen*, not panels laid on the pond
-            // (#303). What is laid out in reference pixels is what the bands
-            // contain — the lanes and the two shared logs, which are placed by
-            // game-board.md's own arithmetic and so are measured from the
-            // pond's centre rather than from its edges.
+            // (#303). The pond's row reaches them too, since #408 — the lanes
+            // and the two shared logs are laid out across the screen's own
+            // width. What stays in reference pixels is what `header` and
+            // `controls` contain: anchored controls, not a track.
             StretchToFill(_rect);
 
             BuildBackground();
@@ -691,19 +697,39 @@ namespace Frogs.Unity.Views
             // after it. The End log is pinned to the right of the safe area,
             // where every lane's track ends. Neither is placed by a number of
             // its own.
-            //
-            // Both are measured from the **centre** of the pond outwards, by
-            // the reference canvas's own half-width, rather than from the
-            // band's edges. The band reaches the screen's edges now (#303) and
-            // a lane does not: a log anchored to the band would slide out from
-            // under the lane whose position 0 and position 8 it is.
-            _startLogOutline = BuildSharedLog(
-                "StartLog",
-                0f,
-                -(CanvasWidth / 2f) + SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
-                out _startLogFill);
+            _startLogOutline = BuildSharedLog("StartLog", 0f, out _startLogFill);
+            _endLogOutline = BuildSharedLog("EndLog", 1f, out _endLogFill);
 
-            _endLogOutline = BuildSharedLog("EndLog", 1f, (CanvasWidth / 2f) - SafeMargin, out _endLogFill);
+            PlaceSharedLogs(PondRowWidth);
+        }
+
+        /// <summary>
+        /// The width the pond's row is laid out across: the screen's own
+        /// width — the row spreads to it, since #408 — or the reference
+        /// canvas if the screen is somehow narrower than the one every mockup
+        /// is drawn at, in which case the board keeps its reference row and is
+        /// centred, exactly as it always was.
+        /// </summary>
+        float PondRowWidth
+        {
+            get { return Mathf.Max(CanvasWidth, _rect.rect.width); }
+        }
+
+        // Both logs, against the two ends of the row. This is asked for again
+        // when the lanes are built, rather than only when the logs are: a
+        // board builds itself as soon as its component is added, which can be
+        // before the CanvasScaler has given the canvas its real size, and the
+        // logs have to agree with the lanes about where the row's two ends
+        // are on every screen.
+        void PlaceSharedLogs(float rowWidth)
+        {
+            var half = rowWidth / 2f;
+
+            _startLogOutline.rectTransform.anchoredPosition = new Vector2(
+                -half + SafeMargin + GameBoardLaneView.LaneGutterWidth + GameBoardLaneView.LaneGutterGap,
+                0f);
+
+            _endLogOutline.rectTransform.anchoredPosition = new Vector2(half - SafeMargin, 0f);
         }
 
         // One shared log — LogWidth across, SharedLogHeight tall, vertically
@@ -711,10 +737,10 @@ namespace Frogs.Unity.Views
         // Every lane's centre line crosses it, which is what lets a frog on a
         // log still sit on its own lane's line.
         //
-        // `edge` is which of the log's own sides <paramref name="offsetX"/>
-        // places — its left (0) or its right (1) — and offsetX is measured
-        // from the pond's centre, in reference pixels.
-        Image BuildSharedLog(string logName, float edge, float offsetX, out Image fill)
+        // `edge` is which of the log's own sides is the one placed against the
+        // row's end — its left (0) or its right (1). Where that end is, is
+        // PlaceSharedLogs'.
+        Image BuildSharedLog(string logName, float edge, out Image fill)
         {
             var logGO = new GameObject(logName, typeof(RectTransform), typeof(Image));
             var outline = logGO.GetComponent<Image>();
@@ -729,7 +755,6 @@ namespace Frogs.Unity.Views
             logRect.anchorMax = new Vector2(0.5f, 0.5f);
             logRect.pivot = new Vector2(edge, 0.5f);
             logRect.sizeDelta = new Vector2(LogWidth, SharedLogHeight);
-            logRect.anchoredPosition = new Vector2(offsetX, 0f);
 
             var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
             fill = fillGO.GetComponent<Image>();
@@ -808,13 +833,24 @@ namespace Frogs.Unity.Views
             // four. Every frog is visible at once, with no scrolling, paging
             // or zooming, and an absent frog gets no placeholder lane.
             //
-            // A lane is the reference canvas's safe area wide and centred on
-            // the pond, on every screen. The band around it reaches the
-            // screen's edges; the nine positions on it are game-board.md's
-            // arithmetic and do not stretch (#303).
+            // A lane is the **screen's** safe area wide, and centred on the
+            // pond, which is the same thing as its chip being against the real
+            // left margin and its End log against the real right one. The row
+            // is a track whose job is to show how far along a lane a frog has
+            // got, so it spreads to whatever width it is given and
+            // LanePositionGap takes up the difference (#408). What does not
+            // spread is what `header` and `controls` contain — those are
+            // anchored controls, not a track.
+            //
+            // The logs are placed again from the same width, so the two ends
+            // of the row and the two logs standing on them can never be
+            // computed from different numbers.
             var turnOrder = _game.TurnOrder;
-            var laneWidth = CanvasWidth - (2f * SafeMargin);
+            var rowWidth = PondRowWidth;
+            var laneWidth = rowWidth - (2f * SafeMargin);
             var groupTop = (turnOrder.Count * GameBoardLaneView.LaneHeight) / 2f;
+
+            PlaceSharedLogs(rowWidth);
 
             for (var index = 0; index < turnOrder.Count; index++)
             {
