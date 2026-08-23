@@ -117,16 +117,17 @@ there, and reusing the name would imply a safety rule that is not being applied.
 It is also not `DialogTitleGap`: that one separates a title from its body, and
 `about` is not this dialog's body — the actions are.
 
-### The built dialog does not have these numbers yet
-
-`SettingsDialogView` carries `SettingsDialogHeight = 760f` and
-`SettingsVersionBottomOffset = 60f`, which is what this page said before this
-wireframe. That divergence is deliberate and is the normal state of a screen
-between its wireframe and its implementation: **this page is authoritative and
-the code follows it**, per
-[wireframe before UI code](../../engineering/ui-design-process.md). Bringing the
-two back into agreement is the implementation issue's job, and that issue is
-blocked by this wireframe.
+It is a **floor, not an equality**, and the built dialog is why that has to be
+said. The two halves of this panel are measured from opposite ends, so the gap
+between them is whatever is left over — and the mockup's 970 px panel is a CSS
+border box with a 3 px border where the Unity panel rect has no border at all,
+which leaves everything measured up from the bottom of the built panel sitting
+6 px lower than the drawing has it. The leftover is 78 px in the build against
+the drawing's 72. That is the same border-box convention
+[player-won.md](player-won.md#named-constants) describes as "a 634 px padding
+box", it predates this wireframe, and it is not a mismatch to report. What this
+constant holds down is that `about` never crowds the actions column, and that
+is what the EditMode test asserts.
 
 ### The constants this page used to carry
 
@@ -145,8 +146,10 @@ version is inside `about`, at the top, positioned by `SettingsAboutTopOffset`
 and its two siblings.
 
 A constant that is deleted rather than renamed is worth saying out loud, because
-the code still declares it. Deleting it is part of the implementation issue, not
-something to leave behind as a value nothing reads.
+the code went on declaring it after this page stopped describing it.
+[#407](https://github.com/derekwinters/connor-multiplying-frogs/issues/407)
+deleted it rather than leaving a value nothing reads behind, and built the rest
+of this table's numbers at the same time, so the code and this page now agree.
 
 ## Elements
 
@@ -156,10 +159,11 @@ something to leave behind as a value nothing reads.
   [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324):
   the screen it opens is now specified, so the reason this button was disabled
   has gone. It is still disabled *in the built dialog*, and will be until the
-  implementation issue lands — the same lag as
-  [`SettingsDialogHeight`](#the-built-dialog-does-not-have-these-numbers-yet),
-  and resolved the same way: this page is authoritative and the code follows
-  it.
+  implementation issue lands — the same lag `SettingsDialogHeight` and
+  `SettingsVersionBottomOffset` carried until
+  [#407](https://github.com/derekwinters/connor-multiplying-frogs/issues/407)
+  closed it, and it resolves the same way: this page is authoritative and the
+  code follows it.
 
   Note what it opens is a **screen, not a dialog**. It replaces this dialog
   rather than covering it, because
