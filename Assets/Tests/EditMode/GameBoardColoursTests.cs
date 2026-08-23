@@ -42,6 +42,7 @@ namespace Frogs.Unity.EditModeTests
         static readonly Color LogBrown = new Color32(0xE2, 0xC7, 0x9C, 0xFF);
         static readonly Color LogEdge = new Color32(0xA9, 0x7F, 0x4F, 0xFF);
         static readonly Color BandFill = new Color32(0xE2, 0xE8, 0xE5, 0xFF);
+        static readonly Color BoardInk = new Color32(0x1E, 0x24, 0x22, 0xFF);
 
         // The bar the spec page sets for "clearly separable", and the reason
         // this issue could change the board's fills at all —
@@ -218,6 +219,58 @@ namespace Frogs.Unity.EditModeTests
                         $"the {frog} frog is too close in colour to {surface.Key}. "
                         + "Fix the surface, not the frog.");
                 }
+            }
+        }
+
+        /// <summary>
+        /// #321 — the gear lost the white disc it used to be drawn on, so it
+        /// is now ink straight onto the board. The disc was doing legibility
+        /// work for free; with it gone the gear has to clear the same
+        /// separability bar every frog clears, against every surface it can
+        /// sit on.
+        ///
+        /// Two surfaces, because the gear sits in the header band and the
+        /// header band sits on the water — `BandFill` is what is behind it
+        /// today, and `PondWater` is what would be behind it if the band were
+        /// ever dropped. It clears the bar against both, so which one is
+        /// behind it does not decide anything.
+        /// </summary>
+        [Test]
+        public void TheSettingsGearStaysSeparableFromWhateverIsBehindIt()
+        {
+            var view = CreateView(TwoFrogGame());
+
+            try
+            {
+                var gear = view.SettingsButton.Glyph.color;
+
+                Assert.That(
+                    gear,
+                    Is.EqualTo(BoardInk),
+                    "the gear is drawn in the board's own ink — game-board.md's `BoardInk`");
+
+                var surfaces = new Dictionary<string, Color>
+                {
+                    { "the header band", BandFill },
+                    { "the water", PondWater },
+                };
+
+                foreach (var surface in surfaces)
+                {
+                    Assert.That(
+                        ContrastRatio(gear, surface.Value),
+                        Is.GreaterThanOrEqualTo(MinimumContrastRatio),
+                        $"the gear is too close in brightness to {surface.Key}");
+
+                    Assert.That(
+                        ColourDistance(gear, surface.Value),
+                        Is.GreaterThanOrEqualTo(MinimumColourDistance),
+                        $"the gear is too close in colour to {surface.Key}");
+                }
+            }
+            finally
+            {
+                Destroy(view);
             }
         }
 
