@@ -1222,17 +1222,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-built-dialog-does-not-have-these-numbers-yet" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The built dialog does not have these numbers yet
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#the-constants-this-page-used-to-carry" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2165,17 +2154,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-built-dialog-does-not-have-these-numbers-yet" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The built dialog does not have these numbers yet
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#the-constants-this-page-used-to-carry" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2466,15 +2444,17 @@ button. Nothing in <code>about</code> is a button, so the destructive gap has no
 there, and reusing the name would imply a safety rule that is not being applied.
 It is also not <code>DialogTitleGap</code>: that one separates a title from its body, and
 <code>about</code> is not this dialog's body — the actions are.</p>
-<h3 id="the-built-dialog-does-not-have-these-numbers-yet">The built dialog does not have these numbers yet<a class="headerlink" href="#the-built-dialog-does-not-have-these-numbers-yet" title="Link to this section">&para;</a></h3>
-<p><code>SettingsDialogView</code> carries <code>SettingsDialogHeight = 760f</code> and
-<code>SettingsVersionBottomOffset = 60f</code>, which is what this page said before this
-wireframe. That divergence is deliberate and is the normal state of a screen
-between its wireframe and its implementation: <strong>this page is authoritative and
-the code follows it</strong>, per
-<a href="../../../engineering/ui-design-process/">wireframe before UI code</a>. Bringing the
-two back into agreement is the implementation issue's job, and that issue is
-blocked by this wireframe.</p>
+<p>It is a <strong>floor, not an equality</strong>, and the built dialog is why that has to be
+said. The two halves of this panel are measured from opposite ends, so the gap
+between them is whatever is left over — and the mockup's 970 px panel is a CSS
+border box with a 3 px border where the Unity panel rect has no border at all,
+which leaves everything measured up from the bottom of the built panel sitting
+6 px lower than the drawing has it. The leftover is 78 px in the build against
+the drawing's 72. That is the same border-box convention
+<a href="../player-won/#named-constants">player-won.md</a> describes as "a 634 px padding
+box", it predates this wireframe, and it is not a mismatch to report. What this
+constant holds down is that <code>about</code> never crowds the actions column, and that
+is what the EditMode test asserts.</p>
 <h3 id="the-constants-this-page-used-to-carry">The constants this page used to carry<a class="headerlink" href="#the-constants-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <table>
 <thead>
@@ -2509,8 +2489,10 @@ and after this change nothing sits at the panel's bottom-left at all. The
 version is inside <code>about</code>, at the top, positioned by <code>SettingsAboutTopOffset</code>
 and its two siblings.</p>
 <p>A constant that is deleted rather than renamed is worth saying out loud, because
-the code still declares it. Deleting it is part of the implementation issue, not
-something to leave behind as a value nothing reads.</p>
+the code went on declaring it after this page stopped describing it.
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/407">#407</a>
+deleted it rather than leaving a value nothing reads behind, and built the rest
+of this table's numbers at the same time, so the code and this page now agree.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong><code>How to play</code></strong> — secondary <a href="../shared-components/#button">button</a>. Opens
@@ -2519,10 +2501,11 @@ something to leave behind as a value nothing reads.</p>
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>:
   the screen it opens is now specified, so the reason this button was disabled
   has gone. It is still disabled <em>in the built dialog</em>, and will be until the
-  implementation issue lands — the same lag as
-  <a href="#the-built-dialog-does-not-have-these-numbers-yet"><code>SettingsDialogHeight</code></a>,
-  and resolved the same way: this page is authoritative and the code follows
-  it.</li>
+  implementation issue lands — the same lag <code>SettingsDialogHeight</code> and
+  <code>SettingsVersionBottomOffset</code> carried until
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/407">#407</a>
+  closed it, and it resolves the same way: this page is authoritative and the
+  code follows it.</li>
 </ul>
 <p>Note what it opens is a <strong>screen, not a dialog</strong>. It replaces this dialog
   rather than covering it, because
