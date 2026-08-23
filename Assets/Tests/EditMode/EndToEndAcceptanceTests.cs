@@ -265,6 +265,7 @@ namespace Frogs.Unity.EditModeTests
             AssertScreenBuildsItself<RollAndCardDialogView>(view => view.RectTransform);
             AssertScreenBuildsItself<WorkingOutGridView>(view => view.RectTransform);
             AssertScreenBuildsItself<AnswerResultDialogView>(view => view.RectTransform);
+            AssertScreenBuildsItself<PlayerWonDialogView>(view => view.RectTransform);
             AssertScreenBuildsItself<SettingsDialogView>(view => view.RectTransform);
             AssertScreenBuildsItself<EndGameConfirmView>(view => view.RectTransform);
             AssertScreenBuildsItself<GameOverScreenView>(view => view.RectTransform);

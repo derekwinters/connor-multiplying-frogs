@@ -23,7 +23,10 @@ namespace Frogs.Core
     /// lane position on every call; a deliberate end and finishing order are
     /// the two facts nothing about lane position can reconstruct, so they are
     /// the ones this type remembers, via <see cref="EndGame"/> and
-    /// <see cref="RecordFinish"/>.
+    /// <see cref="RecordFinish"/>. <see cref="FrogJustHome"/> is the third:
+    /// which frog the turn that just played got home, if any — the question
+    /// docs/specs/ui/player-won.md's dialog asks, and not the same question as
+    /// <see cref="IsOver"/>.
     /// </summary>
     public sealed class Game
     {
@@ -53,6 +56,7 @@ namespace Frogs.Core
         Roll _drawnRoll;
         Card _drawnCard;
         bool _endedDeliberately;
+        FrogColour? _frogJustHome;
         readonly List<FrogColour> _finishingOrder = new List<FrogColour>();
 
         /// <summary>
@@ -287,6 +291,29 @@ namespace Frogs.Core
         }
 
         /// <summary>
+        /// The frog the most recent <see cref="ShowResult"/> landed on its
+        /// End log, or null if that turn landed nobody home.
+        ///
+        /// This is the question docs/specs/ui/player-won.md asks — "did the
+        /// frog that just moved land on its End log" — and it is deliberately
+        /// **not** <see cref="IsOver"/>: every arrival but the last happens in
+        /// a game that is still running, and the last arrival is the only one
+        /// the two questions agree about.
+        ///
+        /// It is one turn's fact, replaced by the next turn's result rather
+        /// than added to, which is what makes one arrival announceable exactly
+        /// once. A frog already in <see cref="FinishingOrder"/> can never set
+        /// it again, because <see cref="RecordFinish"/> records nobody twice.
+        /// It survives <see cref="CompleteHandOff"/> on purpose: the dialog
+        /// that reads it opens after the hop, once the next player's turn has
+        /// already begun.
+        /// </summary>
+        public FrogColour? FrogJustHome
+        {
+            get { return _frogJustHome; }
+        }
+
+        /// <summary>
         /// The order frogs got home, first to last. Not roster order, and
         /// not recomputed from position — every finisher sits on the same
         /// <see cref="Lane.LaneWinningPosition"/>, so position cannot tell
@@ -440,8 +467,15 @@ namespace Frogs.Core
             _phase = TurnPhase.ResultShown;
 
             // A no-op unless this turn's answer actually put the active frog
-            // on the End log — see RecordFinish.
+            // on the End log — see RecordFinish. Whether it was a no-op is
+            // itself the answer to "did the frog that just moved land on its
+            // End log", so FrogJustHome is read off the list growing rather
+            // than from a second look at the lane: a frog that was already
+            // home before this turn cannot make it grow, and so cannot be
+            // announced a second time.
+            var finishersBefore = _finishingOrder.Count;
             RecordFinish(ActiveFrog);
+            _frogJustHome = _finishingOrder.Count > finishersBefore ? ActiveFrog : (FrogColour?)null;
         }
 
         /// <summary>
