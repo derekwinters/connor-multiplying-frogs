@@ -26,10 +26,15 @@ namespace Frogs.Unity.EditModeTests
     /// - the three bands' **fills** are measured against the canvas, so they
     ///   reach its edges on any aspect ratio, and an edge-anchored control
     ///   inside a band follows the real edge with it;
-    /// - everything the bands **contain** that is placed by the spec's
-    ///   geometry — the lanes, the two shared logs — is still measured in
-    ///   reference pixels, so a frog on a log is still on its own lane's
-    ///   position 0 whatever shape the screen is.
+    /// - what `header` and `controls` **contain** is still measured in the
+    ///   reference canvas, because the turn banner, the gear and `Roll` are
+    ///   anchored controls rather than a track and there is nothing about them
+    ///   a wider screen should stretch.
+    ///
+    /// The `pond`'s row is the exception, and #408 is where it became one: its
+    /// row is a track whose job is to show how far along a lane a frog has
+    /// got, so it spreads to whatever width it is given —
+    /// <see cref="GameBoardElasticPondTests"/> holds it to the two drawings.
     ///
     /// And the test that makes the whole thing safe: at exactly 1920 x 1200
     /// nothing moved at all. This fix is invisible on the tablet it was
@@ -307,14 +312,24 @@ namespace Frogs.Unity.EditModeTests
         }
 
         /// <summary>
-        /// The other half of the split. A band grows; what a band *contains*
-        /// that the spec places by geometry does not, because the two shared
-        /// logs are position 0 and position 8 of every lane and a log that
-        /// slid out to the real edge would no longer be under the lane it
-        /// belongs to.
+        /// The other half of the split, and the half #408 turned over. A band
+        /// grows, and the **pond's row grows with it**: the chips and the
+        /// Start log against the real left safe margin, the End log against
+        /// the real right one, and `LanePositionGap` taking up the difference.
+        ///
+        /// This test used to assert the opposite — that the logs and the lanes
+        /// kept the reference canvas's geometry inside a widened band — which
+        /// is what left the board a 1920 px picture centred in a wider one. It
+        /// is the same test in the same place rather than a new one beside it,
+        /// because the old rule is gone rather than joined; game-board.md
+        /// keeps its wording under "the invariant this page used to carry".
+        ///
+        /// What is *not* elastic is asserted right below it: a log is still
+        /// the pond band's reference height, and the header and the controls
+        /// still contain nothing that stretches.
         /// </summary>
         [Test]
-        public void TheLogsAndTheLanes_StayAtReferenceGeometry_WhileTheirBandGrows()
+        public void TheLogsAndTheLanes_SpreadWithTheirBand_ToTheRealSafeMarginsAtBothEnds()
         {
             var canvas = OversizedCanvas();
 
@@ -322,23 +337,27 @@ namespace Frogs.Unity.EditModeTests
             {
                 var view = BoardOn(canvas);
 
-                var pond = BoundsOf(view.PondRect, canvas);
+                var screen = BoundsOf(canvas, canvas);
                 var startLog = BoundsOf(view.StartLogOutline.rectTransform, canvas);
                 var endLog = BoundsOf(view.EndLogOutline.rectTransform, canvas);
 
+                // Everything to the left of the Start log's right-hand edge is
+                // fixed — a safe margin, the chip gutter and the gap after
+                // it — so the Start log sits at the same x on every screen,
+                // measured from the screen's own left edge.
                 Assert.That(
                     startLog.xMin,
-                    Is.EqualTo(pond.center.x - (ReferenceWidth / 2f)
+                    Is.EqualTo(screen.xMin
                         + GameBoardScreenView.SafeMargin
                         + GameBoardLaneView.LaneGutterWidth
                         + GameBoardLaneView.LaneGutterGap).Within(Tolerance),
-                    "the Start log has followed the widened band away from the lanes whose "
-                    + "position 0 it is");
+                    "the Start log has stayed at the reference canvas's geometry instead of "
+                    + "following the chips to the real left margin");
                 Assert.That(
                     endLog.xMax,
-                    Is.EqualTo(pond.center.x + (ReferenceWidth / 2f) - GameBoardScreenView.SafeMargin).Within(Tolerance),
-                    "the End log has followed the widened band away from the lanes whose "
-                    + "position 8 it is");
+                    Is.EqualTo(screen.xMax - GameBoardScreenView.SafeMargin).Within(Tolerance),
+                    "the End log is pinned to the right of the real safe area, which is what "
+                    + "the pads spread towards");
 
                 Assert.That(
                     startLog.height,
@@ -351,14 +370,29 @@ namespace Frogs.Unity.EditModeTests
 
                 foreach (var lane in view.Lanes)
                 {
+                    var bounds = BoundsOf(lane.RectTransform, canvas);
+
                     Assert.That(
-                        lane.RectTransform.rect.width,
-                        Is.EqualTo(ReferenceWidth - (2f * GameBoardScreenView.SafeMargin)).Within(Tolerance),
-                        "a lane is the reference canvas's safe area wide, on every screen");
+                        bounds.xMin,
+                        Is.EqualTo(screen.xMin + GameBoardScreenView.SafeMargin).Within(Tolerance),
+                        "a lane's chip is against the real left safe margin, not floating in "
+                        + "from an edge nobody can see");
                     Assert.That(
-                        BoundsOf(lane.RectTransform, canvas).center.x,
-                        Is.EqualTo(pond.center.x).Within(Tolerance),
-                        "and centred, so it still crosses both of the logs");
+                        bounds.xMax,
+                        Is.EqualTo(screen.xMax - GameBoardScreenView.SafeMargin).Within(Tolerance),
+                        "and its track runs out to the real right one");
+
+                    // Position 0 is still on the Start log and position 8
+                    // still on the End log — at every width, which is the
+                    // invariant the spreading had to keep true.
+                    Assert.That(
+                        BoundsOf(lane.PositionRects[0], canvas).center.x,
+                        Is.EqualTo(startLog.center.x).Within(Tolerance),
+                        "position 0 has come off the Start log");
+                    Assert.That(
+                        BoundsOf(lane.PositionRects[Lane.LaneWinningPosition], canvas).center.x,
+                        Is.EqualTo(endLog.center.x).Within(Tolerance),
+                        "position 8 has come off the End log");
                 }
             }
             finally
