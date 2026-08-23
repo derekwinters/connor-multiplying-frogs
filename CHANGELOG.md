@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.5.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.4.0...v0.5.0) (2026-08-23)
+
+
+### Features
+
+* **ai-sdlc:** adopt ai-sdlc at v0.4.2, starting with hygiene ([#349](https://github.com/derekwinters/connor-multiplying-frogs/issues/349)) ([5dce4ab](https://github.com/derekwinters/connor-multiplying-frogs/commit/5dce4aba057a5ac74fc7a0158b37334f241a32d7)), closes [#340](https://github.com/derekwinters/connor-multiplying-frogs/issues/340)
+* **ai-sdlc:** adopt the shared docs reconciliation gate ([#352](https://github.com/derekwinters/connor-multiplying-frogs/issues/352)) ([6383ef6](https://github.com/derekwinters/connor-multiplying-frogs/commit/6383ef68433da60ca7da01852b6c66590a3bfc37)), closes [#343](https://github.com/derekwinters/connor-multiplying-frogs/issues/343)
+* **ai-sdlc:** fire triage from the label event ([#370](https://github.com/derekwinters/connor-multiplying-frogs/issues/370)) ([f60c16e](https://github.com/derekwinters/connor-multiplying-frogs/commit/f60c16ece0ae429c06bd126ce0d212084d68e081)), closes [#369](https://github.com/derekwinters/connor-multiplying-frogs/issues/369)
+* **ai-sdlc:** run the whole issue pipeline from ai-sdlc ([#355](https://github.com/derekwinters/connor-multiplying-frogs/issues/355)) ([f894aa7](https://github.com/derekwinters/connor-multiplying-frogs/commit/f894aa781d2435a62da2febfb10a3f571442ec96)), closes [#344](https://github.com/derekwinters/connor-multiplying-frogs/issues/344)
+* **ai-sdlc:** split the label taxonomy and adopt the shared sync ([#351](https://github.com/derekwinters/connor-multiplying-frogs/issues/351)) ([2e170f0](https://github.com/derekwinters/connor-multiplying-frogs/commit/2e170f07351378311fa379ba34fe6bd9884af550)), closes [#342](https://github.com/derekwinters/connor-multiplying-frogs/issues/342)
+* **board:** build the notched, veined lily pad with per-pad variation ([#429](https://github.com/derekwinters/connor-multiplying-frogs/issues/429)) ([94c2925](https://github.com/derekwinters/connor-multiplying-frogs/commit/94c29257384b6674e5e73bef7210833c52890689)), closes [#411](https://github.com/derekwinters/connor-multiplying-frogs/issues/411)
+* **board:** drop the player chip from the turn banner ([#427](https://github.com/derekwinters/connor-multiplying-frogs/issues/427)) ([a7d4341](https://github.com/derekwinters/connor-multiplying-frogs/commit/a7d4341586a31740182947972205115b0e5990e9)), closes [#409](https://github.com/derekwinters/connor-multiplying-frogs/issues/409)
+* **board:** repaint the pond and the frogs to the agreed colours ([#428](https://github.com/derekwinters/connor-multiplying-frogs/issues/428)) ([d641951](https://github.com/derekwinters/connor-multiplying-frogs/commit/d6419517e73a9de1d006c45674e8514ad4ca1829)), closes [#410](https://github.com/derekwinters/connor-multiplying-frogs/issues/410)
+* **board:** spread the pond to the full width of the screen ([#426](https://github.com/derekwinters/connor-multiplying-frogs/issues/426)) ([c864652](https://github.com/derekwinters/connor-multiplying-frogs/commit/c8646525a880560424cf2a4cf604a3cc6cfab4ea)), closes [#408](https://github.com/derekwinters/connor-multiplying-frogs/issues/408)
+* **grid:** build the `Help me` button and the products it prints ([#435](https://github.com/derekwinters/connor-multiplying-frogs/issues/435)) ([1c6ca59](https://github.com/derekwinters/connor-multiplying-frogs/commit/1c6ca59856624e6e5e09ce6a203b6eaa09b6e62b)), closes [#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)
+* **grid:** compute a card's digit products in Core ([#432](https://github.com/derekwinters/connor-multiplying-frogs/issues/432)) ([7da3097](https://github.com/derekwinters/connor-multiplying-frogs/commit/7da3097ab6f45c7c0b2c6449a9ea9dab47d7c44f)), closes [#415](https://github.com/derekwinters/connor-multiplying-frogs/issues/415)
+* **ui:** build the About section on the settings dialog ([#425](https://github.com/derekwinters/connor-multiplying-frogs/issues/425)) ([638de63](https://github.com/derekwinters/connor-multiplying-frogs/commit/638de6358aff77f8422d18caec1c34796eaecc58)), closes [#407](https://github.com/derekwinters/connor-multiplying-frogs/issues/407)
+* **ui:** build the How to play screen the settings button opens ([#431](https://github.com/derekwinters/connor-multiplying-frogs/issues/431)) ([78ca1cc](https://github.com/derekwinters/connor-multiplying-frogs/commit/78ca1cc7533dc497c8c3d9e8a12c249f508dcc55)), closes [#414](https://github.com/derekwinters/connor-multiplying-frogs/issues/414)
+* **ui:** mark the moment a frog gets home ([#424](https://github.com/derekwinters/connor-multiplying-frogs/issues/424)) ([0b9a951](https://github.com/derekwinters/connor-multiplying-frogs/commit/0b9a951478a8de6ab9b8fa1aa64897a0b851347d)), closes [#329](https://github.com/derekwinters/connor-multiplying-frogs/issues/329)
+
+
+### Bug Fixes
+
+* **ai-sdlc:** move the pin to v0.4.8 so the gatekeeper can run ([#357](https://github.com/derekwinters/connor-multiplying-frogs/issues/357)) ([4d3dc7f](https://github.com/derekwinters/connor-multiplying-frogs/commit/4d3dc7f433ae72eca80b9c977ea3a44810c8da46)), closes [#346](https://github.com/derekwinters/connor-multiplying-frogs/issues/346)
+* **ai-sdlc:** wire the analysis routine's secrets to the gatekeeper ([#368](https://github.com/derekwinters/connor-multiplying-frogs/issues/368)) ([34607da](https://github.com/derekwinters/connor-multiplying-frogs/commit/34607da4504d20022d381fc5fb22290688bed7d6)), closes [#367](https://github.com/derekwinters/connor-multiplying-frogs/issues/367)
+* **board:** draw the settings gear without its circle ([#418](https://github.com/derekwinters/connor-multiplying-frogs/issues/418)) ([8df2c14](https://github.com/derekwinters/connor-multiplying-frogs/commit/8df2c1431d8f511c289e83fe9ba18359ff10c5d5)), closes [#321](https://github.com/derekwinters/connor-multiplying-frogs/issues/321)
+* **ui:** draw outline buttons as rings and widen buttons to their labels ([#420](https://github.com/derekwinters/connor-multiplying-frogs/issues/420)) ([7fe036a](https://github.com/derekwinters/connor-multiplying-frogs/commit/7fe036ad9b22521952de70f7e5a3a16eb67a25ed)), closes [#323](https://github.com/derekwinters/connor-multiplying-frogs/issues/323)
+
 ## [0.4.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.3.0...v0.4.0) (2026-08-13)
 
 
