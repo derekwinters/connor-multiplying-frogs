@@ -131,10 +131,25 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(view.BackToTheGameButton.Kind, Is.EqualTo(ButtonKind.Primary));
 
                 // "nothing about it is widened the way the two action buttons
-                // are" — the shared component's own default footprint.
+                // are" — the shared component's own default footprint, not
+                // this screen's SettingsActionWidth.
+                //
+                // Since #323 that footprint is a floor rather than a fixed
+                // width: `Back to the game` needs more than the 224 px
+                // ButtonMinWidth leaves between the two ButtonPaddingX, so the
+                // shared Button gives it the room instead of letting the words
+                // overhang. That is the width the mockup draws, and it is
+                // still nowhere near the action column's.
                 Assert.That(
-                    view.BackToTheGameButton.RectTransform.sizeDelta,
-                    Is.EqualTo(new Vector2(Button.ButtonMinWidth, Button.ButtonHeight)));
+                    view.BackToTheGameButton.RectTransform.sizeDelta.y,
+                    Is.EqualTo(Button.ButtonHeight).Within(0.001f));
+                Assert.That(
+                    view.BackToTheGameButton.RectTransform.sizeDelta.x,
+                    Is.GreaterThanOrEqualTo(Button.ButtonMinWidth));
+                Assert.That(
+                    view.BackToTheGameButton.RectTransform.sizeDelta.x,
+                    Is.LessThan(SettingsDialogView.SettingsActionWidth),
+                    "it is not widened the way the two action buttons are");
 
                 TapButton(view.BackToTheGameButton);
 

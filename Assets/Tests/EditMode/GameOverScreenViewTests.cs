@@ -320,10 +320,25 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(view.PlayAgainButton.Kind, Is.EqualTo(Frogs.Unity.UI.ButtonKind.Primary));
 
                 // The shared component at its own unmodified size — this
-                // screen overrides neither.
-                var sharedSize = new Vector2(Button.ButtonMinWidth, Button.ButtonHeight);
-                Assert.That(view.BackToTheTitleButton.RectTransform.sizeDelta, Is.EqualTo(sharedSize));
-                Assert.That(view.PlayAgainButton.RectTransform.sizeDelta, Is.EqualTo(sharedSize));
+                // screen overrides neither. Since #323 that size is a floor
+                // rather than a fixed width: `Back to the title` needs more
+                // than the 224 px ButtonMinWidth leaves between the two
+                // ButtonPaddingX, and the shared Button widens to hold it
+                // instead of letting the label overhang, exactly as
+                // game-over.html draws it.
+                foreach (var button in new[] { view.BackToTheTitleButton, view.PlayAgainButton })
+                {
+                    Assert.That(
+                        button.RectTransform.sizeDelta.y,
+                        Is.EqualTo(Button.ButtonHeight).Within(0.001f));
+                    Assert.That(
+                        button.RectTransform.sizeDelta.x,
+                        Is.GreaterThanOrEqualTo(Button.ButtonMinWidth));
+                    Assert.That(
+                        button.Label.preferredWidth,
+                        Is.LessThanOrEqualTo(button.RectTransform.sizeDelta.x - (Button.ButtonPaddingX * 2f)),
+                        $"`{button.Label.text}` does not fit inside its own button");
+                }
                 Assert.That(view.BackToTheTitleButton.Label.fontSize, Is.EqualTo((int)Button.ButtonLabelSize));
 
                 // Bottom safe-area line, one at each edge.

@@ -258,13 +258,25 @@ namespace Frogs.Unity.EditModeTests
                     Is.EqualTo(DialogPanel.DialogPadding).Within(0.001f));
 
                 // Both at the shared Button's own default footprint — nothing
-                // about this dialog widens either one.
-                Assert.That(
-                    view.EndTheGameButton.RectTransform.sizeDelta,
-                    Is.EqualTo(new Vector2(Button.ButtonMinWidth, Button.ButtonHeight)));
-                Assert.That(
-                    view.KeepPlayingButton.RectTransform.sizeDelta,
-                    Is.EqualTo(new Vector2(Button.ButtonMinWidth, Button.ButtonHeight)));
+                // about this dialog widens either one, and since #323 that
+                // footprint is a floor: `End the game` and `Keep playing` are
+                // both wider than the 224 px ButtonMinWidth leaves between the
+                // two ButtonPaddingX, so the shared Button holds its own words
+                // rather than letting them hang over the edge. This dialog's
+                // mockup draws them shrink-to-fit for the same reason.
+                foreach (var button in new[] { view.EndTheGameButton, view.KeepPlayingButton })
+                {
+                    Assert.That(
+                        button.RectTransform.sizeDelta.y,
+                        Is.EqualTo(Button.ButtonHeight).Within(0.001f));
+                    Assert.That(
+                        button.RectTransform.sizeDelta.x,
+                        Is.GreaterThanOrEqualTo(Button.ButtonMinWidth));
+                    Assert.That(
+                        button.Label.preferredWidth,
+                        Is.LessThanOrEqualTo(button.RectTransform.sizeDelta.x - (Button.ButtonPaddingX * 2f)),
+                        $"`{button.Label.text}` does not fit inside its own button");
+                }
             }
             finally
             {

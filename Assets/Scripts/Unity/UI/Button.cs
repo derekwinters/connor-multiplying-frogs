@@ -72,6 +72,10 @@ namespace Frogs.Unity.UI
         const string BuiltinLabelFontName = "LegacyRuntime.ttf";
 
         static Sprite s_buttonSprite;
+        static Sprite s_buttonRingSprite;
+
+        // Asking CreateRoundedRectSprite for no ring at all — a solid shape.
+        const float NoRing = 0f;
 
         static Sprite ButtonSprite
         {
@@ -79,10 +83,34 @@ namespace Frogs.Unity.UI
             {
                 if (s_buttonSprite == null)
                 {
-                    s_buttonSprite = CreateRoundedRectSprite(Mathf.RoundToInt(ButtonRadius));
+                    s_buttonSprite = CreateRoundedRectSprite(Mathf.RoundToInt(ButtonRadius), NoRing);
                 }
 
                 return s_buttonSprite;
+            }
+        }
+
+        /// <summary>
+        /// The same rounded rect with its middle punched out, `ButtonBorderWidth`
+        /// thick — what an outline kind's border is drawn with (#323).
+        ///
+        /// The two outlined kinds set a fully transparent fill, so there is
+        /// nothing stacked over the border image to cover its middle: drawn
+        /// with the solid shape, the whole button read as a block of the
+        /// border colour, and `Destructive`'s warning-red label sat invisibly
+        /// on warning-red. A ring is see-through in the middle, which is what
+        /// "no fill" means and what every mockup's `border:4px solid` draws.
+        /// </summary>
+        static Sprite ButtonRingSprite
+        {
+            get
+            {
+                if (s_buttonRingSprite == null)
+                {
+                    s_buttonRingSprite = CreateRoundedRectSprite(Mathf.RoundToInt(ButtonRadius), ButtonBorderWidth);
+                }
+
+                return s_buttonRingSprite;
             }
         }
 
@@ -95,7 +123,7 @@ namespace Frogs.Unity.UI
         // `radius` texture pixels regardless of how large the button's
         // RectTransform is — the same guarantee a hand-drawn 9-slice asset
         // would give, without importing one.
-        static Sprite CreateRoundedRectSprite(int radius)
+        static Sprite CreateRoundedRectSprite(int radius, float ringThickness)
         {
             radius = Mathf.Max(radius, 1);
             var size = radius * 2 + 1;
@@ -118,13 +146,26 @@ namespace Frogs.Unity.UI
                     // A soft one-pixel edge instead of a hard cutoff, so the
                     // curve doesn't alias at the sizes this renders at.
                     var alpha = Mathf.Clamp01(0.5f - distance);
+
+                    // A ring, when one is asked for: the same shape again,
+                    // inset by `ringThickness`, taken back out of the middle.
+                    // Adding t to a rounded box's signed distance *is* the same
+                    // box inset by t with its corner radius reduced by t, so
+                    // the hole's corners come out concentric with the outside's
+                    // for free, and both edges keep the soft one-pixel falloff
+                    // above.
+                    if (ringThickness > 0f)
+                    {
+                        alpha = Mathf.Clamp01(alpha - Mathf.Clamp01(0.5f - (distance + ringThickness)));
+                    }
+
                     pixels[(y * size) + x] = new Color32(255, 255, 255, (byte)(alpha * FullyOpaqueByte));
                 }
             }
 
             var texture = new Texture2D(size, size, TextureFormat.RGBA32, mipChain: false)
             {
-                name = "Frogs Button Rounded Rect (procedural)",
+                name = ringThickness > 0f ? "Frogs Button Ring (procedural)" : "Frogs Button Rounded Rect (procedural)",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Bilinear
             };
@@ -156,6 +197,12 @@ namespace Frogs.Unity.UI
         bool _initialized;
         bool _isPressed;
         bool _isDisabled;
+
+        // What the caller asked for, kept rather than written straight to the
+        // RectTransform: the width the button ends up at is the largest of
+        // this, MinTouchTarget, and what the label needs — see ApplySize.
+        float _requestedWidth = ButtonMinWidth;
+        float _requestedHeight = ButtonHeight;
 
         Color _defaultBorderColor;
         Color _defaultFillColor;
@@ -279,6 +326,10 @@ namespace Frogs.Unity.UI
         {
             EnsureInitialized();
             _label.text = text;
+
+            // The words are part of the width — a longer label widens the
+            // button rather than hanging over its edge (#323).
+            ApplySize();
         }
 
         /// <summary>
@@ -295,18 +346,31 @@ namespace Frogs.Unity.UI
         {
             EnsureInitialized();
             _label.fontSize = Mathf.RoundToInt(size);
+            ApplySize();
         }
 
         /// <summary>
         /// Overrides the button's default size. Never smaller than
         /// <see cref="MinTouchTarget"/> in either direction, at any
         /// caller-supplied size — docs/specs/ui/shared-components.md#button's
-        /// first invariant.
+        /// first invariant — and never narrower than the label it is holding,
+        /// which is that page's widening invariant.
+        ///
+        /// The width a caller passes is therefore a floor and not a ceiling,
+        /// the same way <see cref="ButtonMinWidth"/> is. A screen that asks for
+        /// 788 px and hands the button 800 px of words gets 800 px of button:
+        /// a label that overflows is the bug this rule exists to make
+        /// unreachable, and it is worse than a button 12 px wider than its
+        /// screen page's table says.
         /// </summary>
         public void SetSize(float width, float height)
         {
             EnsureInitialized();
-            _rect.sizeDelta = new Vector2(Mathf.Max(width, MinTouchTarget), Mathf.Max(height, MinTouchTarget));
+
+            _requestedWidth = width;
+            _requestedHeight = height;
+
+            ApplySize();
         }
 
         /// <summary>Disabled does nothing at all and does not explain itself.</summary>
@@ -410,8 +474,6 @@ namespace Frogs.Unity.UI
                 _rect = gameObject.AddComponent<RectTransform>();
             }
 
-            _rect.sizeDelta = new Vector2(ButtonMinWidth, ButtonHeight);
-
             _canvasGroup = GetComponent<CanvasGroup>();
             if (_canvasGroup == null)
             {
@@ -429,7 +491,11 @@ namespace Frogs.Unity.UI
 
             var borderGO = new GameObject("Border", typeof(RectTransform), typeof(Image));
             _border = borderGO.GetComponent<Image>();
-            _border.sprite = ButtonSprite;
+
+            // Its sprite belongs to the kind, not to the hierarchy: a filled
+            // kind draws the solid shape here and covers the middle with the
+            // fill; an outlined one draws a ring and leaves the middle alone.
+            // ApplyKindColours picks, and runs immediately after this.
             _border.type = Image.Type.Sliced;
             _border.raycastTarget = true;
             var borderRect = _border.rectTransform;
@@ -462,6 +528,29 @@ namespace Frogs.Unity.UI
             labelRect.anchorMax = Vector2.one;
             labelRect.offsetMin = new Vector2(ButtonPaddingX, 0f);
             labelRect.offsetMax = new Vector2(-ButtonPaddingX, 0f);
+
+            // Last, because the width depends on the label that has just been
+            // built. Until now the RectTransform is whatever Unity gave it.
+            ApplySize();
+        }
+
+        // docs/specs/ui/shared-components.md#button: ButtonMinWidth is the
+        // minimum button width, and ButtonPaddingX is the padding *inside* a
+        // button — so the width is whichever is larger, the footprint asked
+        // for or the words plus their padding. That is exactly what every
+        // committed mockup draws: `.btn` is `min-width:320px; padding:0 48px`
+        // on a shrink-to-fit box, and settings-dialog.html's own comment
+        // measures `Back to the game` at 531 px on the strength of it.
+        //
+        // Whole pixels, because the button is drawn on a pixel grid and a
+        // fractional width buys nothing but a soft edge.
+        void ApplySize()
+        {
+            var labelWidth = Mathf.Ceil(_label.preferredWidth) + (ButtonPaddingX * 2f);
+
+            _rect.sizeDelta = new Vector2(
+                Mathf.Max(Mathf.Max(_requestedWidth, labelWidth), MinTouchTarget),
+                Mathf.Max(_requestedHeight, MinTouchTarget));
         }
 
         static void StretchToFill(RectTransform rect)
@@ -497,6 +586,13 @@ namespace Frogs.Unity.UI
                 default:
                     throw new ArgumentOutOfRangeException(nameof(_kind), _kind, null);
             }
+
+            // A fill that covers the middle is what made the border read as a
+            // ring; without one, the border has to *be* a ring (#323). Asked
+            // of the fill colour rather than listed against the two kinds, so
+            // a fourth kind cannot be added with no fill and no ring and look
+            // right by accident.
+            _border.sprite = _defaultFillColor.a > 0f ? ButtonSprite : ButtonRingSprite;
         }
 
         void RefreshVisual()

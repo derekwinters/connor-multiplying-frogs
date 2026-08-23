@@ -572,11 +572,18 @@ namespace Frogs.Unity.EditModeTests
                     Is.EqualTo(new Vector2(AnswerResultDialogView.ResultTextLeft, -AnswerResultDialogView.ResultConsequenceTop)));
 
                 // The button is the shared Button at its own size — nothing
-                // here overrides ButtonHeight or ButtonMinWidth.
+                // here overrides ButtonHeight or ButtonMinWidth. Since #323
+                // the width is a floor and the label may raise it, which
+                // matters more on this button than on any other: its words are
+                // a player's own name (`{0}'s turn`), so no fixed width could
+                // be right for every game.
                 Assert.That(view.NextTurnButton.RectTransform.rect.height,
                     Is.EqualTo(Button.ButtonHeight).Within(0.001f));
                 Assert.That(view.NextTurnButton.RectTransform.rect.width,
-                    Is.EqualTo(Button.ButtonMinWidth).Within(0.001f));
+                    Is.GreaterThanOrEqualTo(Button.ButtonMinWidth));
+                Assert.That(view.NextTurnButton.Label.preferredWidth,
+                    Is.LessThanOrEqualTo(view.NextTurnButton.RectTransform.rect.width - (Button.ButtonPaddingX * 2f)),
+                    "a player's name never hangs over the edge of the button offering their turn");
             }
             finally
             {

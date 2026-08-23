@@ -160,6 +160,12 @@ direction.
 is a screen that has not decided what it wants the player to do.
 **Invariant:** a destructive button never sits within `ButtonGap` of the button
 a player is most likely to be reaching for.
+**Invariant:** a button is never narrower than the label it is holding plus
+`ButtonPaddingX` either side. A label is never clipped, never shrunk to fit,
+and never allowed past the button's own edge.
+**Invariant:** an outline kind is a ring. Whatever is behind the button — the
+panel, the screen — shows through the middle of it, because *no fill* means no
+fill.
 
 #### 3. Named constants
 
@@ -177,6 +183,33 @@ a player is most likely to be reaching for.
 | Border width, outlined kinds | `ButtonBorderWidth` | 4 px |
 | Opacity while disabled | `ButtonDisabledOpacity` | 0.40 |
 
+**`ButtonMinWidth` is a floor, not a fit.** A button is `ButtonMinWidth` wide,
+or as wide as its label plus `ButtonPaddingX` either side, whichever is more —
+which is what every committed mockup draws, `min-width:320px` with
+`padding:0 48px` on a box that shrinks to its contents. A short label does not
+shrink the button below the floor; a long one raises it above.
+
+The widths a screen page states are floors in the same way. When a page gives a
+button its own width — [game setup](game-setup.md)'s controls, the
+[settings dialog](settings-dialog.md)'s `SettingsActionWidth`,
+[title screen](title-screen.md)'s `TitleButtonWidth` — that is the width the
+button has unless its own words need more, in which case they win. A screen 12 px
+wider than its table says is a smaller problem than a label hanging over the
+edge of the button it belongs to, and the second one is what
+[#323](https://github.com/derekwinters/connor-multiplying-frogs/issues/323)
+found on a tablet: `Back to the game` at 16 characters, in a 320 px button with
+224 px between its paddings.
+
+Two consequences worth stating, because they are the reason this is a rule
+rather than a fix. The width of a button whose label is composed at runtime —
+[answer result](answer-result.md)'s `{0}'s turn`, holding a name a child typed —
+cannot be a constant at all, and nothing on a page can name it. And a mockup
+draws this rule already, so the numbers a mockup measures assume it: this page's
+own [settings dialog](settings-dialog.md#what-drawing-the-pair-changed) decided
+where the About block goes partly on `Back to the game` rendering 531 px wide,
+which is 211 px more than `ButtonMinWidth` and only true of a button that widens
+to its words.
+
 #### 4. States
 
 | State | Appearance |
@@ -187,6 +220,17 @@ a player is most likely to be reaching for.
 | Pressed | Moves down by `ButtonPressOffset`; fill darkens |
 | Disabled | `ButtonDisabledOpacity` opacity, no press response |
 | Hidden | Not laid out at all — buttons do not leave gaps behind |
+
+**Outlined means see-through, and it has to be drawn as a ring.** The three
+kinds are two images stacked — a border shape, and a fill inset by
+`ButtonBorderWidth` — and while the border was drawn as a solid rounded rect the
+outlined kinds had nothing over its middle to hide it, so both read as blocks of
+their border colour. `Destructive`'s warning-red label on a warning-red block
+was invisible, which is
+[#323](https://github.com/derekwinters/connor-multiplying-frogs/issues/323)'s
+first bug: a button with nothing written on it. This table always said "no
+fill"; the drawing is what disagreed, and the border is now a ring with the
+middle taken out of it.
 
 `ButtonBorderWidth` and `ButtonDisabledOpacity` were always on this page — both
 appeared in the States row above with a value and no name — and are named here
