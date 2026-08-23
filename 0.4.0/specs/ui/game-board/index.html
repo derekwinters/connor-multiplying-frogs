@@ -1290,17 +1290,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#open-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open questions
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2494,17 +2483,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#open-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open questions
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2924,7 +2902,7 @@ band whatever it is.</p>
 <td>4 px</td>
 </tr>
 <tr>
-<td>Lily pad and log outline</td>
+<td>Lily pad outline</td>
 <td><code>TrackOutline</code></td>
 <td>3 px</td>
 </tr>
@@ -3098,8 +3076,28 @@ of the pad it sits on, so the veins and most of the notch are visible on
 <td><code>LogRadius</code></td>
 <td>24 px</td>
 </tr>
+<tr>
+<td><code>Start</code> / <code>End</code> text size</td>
+<td><code>LogLabelSize</code></td>
+<td>26 px</td>
+</tr>
+<tr>
+<td>How far below the log's top edge that word starts</td>
+<td><code>LogLabelTopPadding</code></td>
+<td>28 px</td>
+</tr>
 </tbody>
 </table>
+<p><code>TrackOutline</code> is <strong>not</strong> in this table, and that is the change rather than an
+omission: the log has no rim, so it draws no outline at any width. It is the
+lily pad's constant now. The two label rows are the mockup's <code>.log</code> rule read
+back as named values — the log was drawing no word at all before
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a>
+moved it to the top, so neither number had anywhere to live.</p>
+<p><code>LogLabelTopPadding</code> is measured from the log's own top edge, not from the pond
+band's. The two are the same line at the reference canvas and would stop being
+so the moment a log were ever inset in its band, and it is the log the word
+belongs to.</p>
 <p><code>LogHeight</code> (120 px) is <strong>gone</strong>, not renamed to something with the same
 meaning. It was the height of a log sized to sit inside one 184 px lane, and
 there is no such thing on this board any more.</p>
@@ -3548,11 +3546,17 @@ allows once four colours have to share it. <strong>The invariant is not currentl
 satisfied by any set that also clears the separability bar</strong>, and that is worth
 knowing rather than discovering later: it is a genuine tension between two rules
 this project holds, not an oversight in the values.</p>
-<p>One number in that palette is deliberately low and is not about frogs: the log
-and the water are almost the same brightness (1.05 : 1) and a long way apart in
-hue (ΔE 46.3). What makes a log read as a log floating on water is its
-<code>LogEdge</code> rim, which is 2.33 : 1 against the water. That is what <code>TrackOutline</code>
-is for.</p>
+<p>One number in the palette this replaced was deliberately low and was not about
+frogs: the old tan log and the water were almost the same brightness (1.05 : 1)
+and a long way apart in hue (ΔE 46.3), so the fill could not separate them and
+what made a log read as a log floating on water was its <code>LogEdge</code> rim, at
+2.33 : 1 against the water.</p>
+<p><strong>Neither is true of <code>#4A2E1A</code>.</strong> The log clears the water by <strong>8.0 : 1</strong> and
+ΔE <strong>75.0</strong> on its own, which is the whole reason <a href="#colours">the rim could
+go</a> — and it is why <code>TrackOutline</code> is now the lily pad's constant
+alone. The word written on the log is held to the bar in its place:
+<code>LogLabelInk</code> measures <strong>6.1 : 1</strong> and ΔE <strong>53.0</strong> against the fill, and with no
+rim behind it the fill is the only thing it has to clear.</p>
 <h3 id="the-bands-are-unchanged-deliberately">The bands are unchanged, deliberately<a class="headerlink" href="#the-bands-are-unchanged-deliberately" title="Link to this section">&para;</a></h3>
 <p><code>BandFill</code> and <code>BandEdge</code> are the pale grey-green they have always been. They
 were chosen to sit against a pale board and they now sit against blue water,
@@ -3603,9 +3607,14 @@ question 4, settled by Derek.
   has to itself. The pad a frog is on is drawn no differently from the others;
   the frog on it is the marker.
 - <strong>Start log × 1, End log × 1</strong> — one of each for the whole board, however many
-  frogs are playing, each filling the pond band top to bottom. They are the ends
-  of every lane at once. The Start log is a real position a frog occupies, and a
-  wrong answer there leaves the frog where it is; see
+  frogs are playing, each filling the pond band top to bottom, in <code>LogBrown</code>
+  with <strong>no rim</strong>. Each says what it is — <code>Start</code> and <code>End</code>, at
+  <code>LogLabelSize</code>, in <code>LogLabelInk</code>, centred across the log and
+  <code>LogLabelTopPadding</code> below its <strong>top</strong> edge. Top rather than middle because
+  the middle of a log is where the frogs stand: every lane's centre line
+  crosses both logs, so a centred word is a word with a frog on it. They are the
+  ends of every lane at once. The Start log is a real position a frog occupies,
+  and a wrong answer there leaves the frog where it is; see
   <a href="../../reference/#the-start-log-is-a-floor-not-a-special-space">the Start log is a floor</a>.
   Two to four frogs sit on the Start log at the beginning of every game and
   gather on the End log as they finish — that is a shared drawing, not a shared
@@ -3684,10 +3693,15 @@ the End log — so <a href="#keeping-the-frogs-visible">the contrast question</a
 visible in the picture rather than only asserted in a table.</p>
 <p>It draws the three questions #289 left open as Derek answered them on #296: the
 logs fill the pond band top to bottom rather than stopping at the lanes in play,
-each frog sits on its own lane's centre line, and the corner and outline are the
-<code>LogRadius</code> and <code>TrackOutline</code> they always were. Only the first of the three
-moved — the mockup originally drew a 736 px log spanning the four lanes, and was
-redrawn to 896 px when the answer arrived.</p>
+each frog sits on its own lane's centre line, and the corner is the <code>LogRadius</code>
+it always was. Only the first of the three moved — the mockup originally drew a
+736 px log spanning the four lanes, and was redrawn to 896 px when the answer
+arrived.</p>
+<p>The third of those answers was <em>"the corner and outline are the <code>LogRadius</code> and
+<code>TrackOutline</code> they always were"</em>, and <strong>half of it has since been overtaken</strong>:</p>
+<h1 id="301-deleted-logedge-so-the-log-draws-no-outline-at-all-the-corner-is">301 deleted <code>LogEdge</code>, so the log draws no outline at all. The corner is<a class="headerlink" href="#301-deleted-logedge-so-the-log-draws-no-outline-at-all-the-corner-is" title="Link to this section">&para;</a></h1>
+<p>untouched. Said here rather than quietly reworded, because #296 settled that
+question and it is worth knowing which later change reopened it and why.</p>
 <p>The rejected lanes-up variant is not committed. It was drawn, compared, and
 decided against; keeping a mockup of a layout nobody is building is how a
 <code>mockups/</code> folder stops being trustworthy.</p>
@@ -3746,7 +3760,10 @@ Derek on
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/296">issue #296</a>,
 and are recorded above rather than here: the log spans the full pond whatever
 the player count, a frog on a log sits on its own lane's centre line, and the
-log keeps <code>LogRadius</code> and <code>TrackOutline</code> as they are.</p>
+log keeps <code>LogRadius</code> as it is. The last of those three was later overtaken in
+part — <code>LogEdge</code> is gone and the log has no rim, per
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a> and
+<a href="#mockup">the mockup note above</a>.</p>
 </li>
 </ul>
 
