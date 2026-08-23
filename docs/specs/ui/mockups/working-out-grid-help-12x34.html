@@ -1,0 +1,114 @@
+<!doctype html>
+<!--
+  Multiplying Frogs — Working-out grid, Help me on 12 x 34, items beside the grid
+  Device: kids' Android tablet, held landscape.
+  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+
+  The state AFTER `Help me` has been pressed. The button is drawn disabled
+  because pressing it is one-way for the turn — see working-out-grid.md.
+
+  Numbers are working-out-grid.md's constants table. The grid is placed by the
+  page's own rule — centred in the space left over, in both directions — not
+  hand-placed the way the three older grid mockups were.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multiplying Frogs — Help me on 12 x 34, items beside the grid</title>
+<style>
+  :root{
+    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
+    /* the cell the caret is in — working-out-grid.md's `GridFocusFill` */
+    --focus:#8CB89E;
+    --green:#3E933E; --blue:#37609A; --orange:#D38231; --pink:#D41C78;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+         background:var(--bg);color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .abs{position:absolute}
+  .row{display:flex;align-items:center}
+  .col{display:flex;flex-direction:column}
+  .mid{display:flex;align-items:center;justify-content:center}
+  .band{position:absolute;left:0;right:0}
+  .note{font-size:26px;color:#7A8783}
+  .hatch{background:repeating-linear-gradient(45deg,#DCE3E0 0 14px,#E8EDEB 14px 28px)}
+  .panel{background:var(--paper);border:3px solid var(--line);border-radius:32px}
+  .btn{height:112px;min-width:320px;padding:0 48px;border-radius:24px;display:flex;align-items:center;
+       justify-content:center;font-size:44px;font-weight:700}
+  .btn.p{background:var(--accent);color:#fff}
+  .btn.s{border:4px solid var(--line);color:var(--ink)}
+  .btn.d{border:4px solid var(--warn);color:var(--warn)}
+  .btn.off{background:#C9D2CE;color:#8C9793}
+  .chip{width:256px;height:96px;border-radius:20px;border:3px solid var(--faint);display:flex;
+        align-items:center;gap:24px;padding:0 20px;font-size:32px;background:#fff;flex:none}
+  .chip.act{border:6px solid var(--ink);font-weight:700}
+  .chip b{display:block;font-size:32px;font-weight:700;line-height:1.1}
+  .chip s{display:block;font-size:24px;color:#6C7873;text-decoration:none;line-height:1.2}
+  .sw{width:64px;height:64px;border-radius:50%;flex:none}
+  .pad{width:112px;height:112px;border-radius:50%;background:#CFE0D2;border:3px solid #9FB8A5;flex:none;position:relative}
+  .log{width:176px;height:120px;border-radius:24px;background:#E0D4C3;border:3px solid #B9A78E;flex:none;
+       display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A7A63}
+  .frog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;
+        border:4px solid rgba(0,0,0,.35)}
+  .scrim{position:absolute;inset:0;background:rgba(20,26,24,.66)}
+  .cell{width:104px;height:104px;border:3px solid var(--line);border-radius:10px;background:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:56px}
+  .cell.fix{border:none;background:transparent;font-weight:700}
+  .carry{width:104px;height:56px;display:flex;align-items:center;justify-content:center}
+  .carry i{display:block;width:56px;height:52px;border:3px dashed var(--faint);border-radius:8px}
+  .key{width:140px;height:140px;border:3px solid var(--line);border-radius:20px;background:#fff;
+       display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:700}
+  .dice{width:240px;height:240px;border-radius:40px;background:#fff;border:4px solid var(--line);
+        display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:34px}
+  .pip{width:40px;height:40px;border-radius:50%;background:var(--ink);align-self:center;justify-self:center}
+  .card{width:560px;height:420px;border-radius:24px;background:#fff;border:4px solid var(--line);
+        display:flex;align-items:center;justify-content:center}
+  .gear{width:96px;height:96px;border-radius:50%;border:4px solid var(--line);display:flex;align-items:center;
+        justify-content:center;font-size:44px}
+
+  /* shared-components.md#button: disabled is ButtonDisabledOpacity (0.40) of
+     the kind's own appearance, not the flat grey the older grid mockups use. */
+  .btn.off{background:transparent;color:var(--ink);opacity:.40}
+  /* GridHelpItemSize 32 px, right-aligned to a common edge GridHelpGap (32 px)
+     left of the grid, each vertically centred on its own addition row. */
+  .helpitem{display:flex;align-items:center;justify-content:flex-end;
+            font-size:32px;color:#6C7873;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="frame">
+    <div class="abs" style="inset:0;background:#E2E8E5"></div>
+    <div class="scrim"></div>
+    <div class="abs panel" style="left:48px;top:48px;width:1824px;height:1104px">
+      <div class="abs row" style="left:56px;top:44px;gap:32px">
+        <div class="chip act"><span class="sw" style="background:var(--green)"></span><span>Green</span></div>
+        <div style="font-size:44px;color:#6C7873">Work it out</div>
+        <div class="row" style="height:96px;padding:0 32px;border-radius:20px;border:3px solid var(--faint);font-size:40px;font-weight:700">12 &times; 34 &middot; middle pile</div>
+      </div>
+
+      <!-- `Help me`: GridHelpButtonHeight 96, matching the card readout pill it
+           shares the header band with. Disabled here — already pressed. -->
+      <div class="abs btn s off" style="right:56px;top:44px;height:96px;font-size:44px">Help me</div>
+
+      <div class="abs col" style="left:408px;top:212px;gap:8px">
+        <div class="row" style="gap:8px"><div class="carry" style="width:104px"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">1</div><div class="cell fix">2</div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px">&times;</div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">3</div><div class="cell fix">4</div></div><div style="height:6px;background:var(--ink);width:552px"></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px">+</div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div style="height:6px;background:var(--ink);width:552px"></div><div class="row" style="gap:8px"><div class="carry" style="width:104px"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;font-size:28px;color:#6C7873">=</div><div class="cell" style="height:128px;border-width:6px;background:var(--focus);border-color:var(--accent)"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div></div>
+      </div>
+      <div class="abs helpitem" style="right:1445px;top:514px;height:56px">4 &times; 2</div><div class="abs helpitem" style="right:1445px;top:578px;height:56px">4 &times; 10</div><div class="abs helpitem" style="right:1445px;top:642px;height:56px">30 &times; 2</div><div class="abs helpitem" style="right:1445px;top:706px;height:56px">30 &times; 10</div>
+      <div class="abs col" style="left:64px;top:200px;width:260px;gap:10px"><div style="font-size:26px;font-weight:700;color:#6C7873">the four products</div><div style="font-size:24px;color:#6C7873;line-height:1.3">One per addition row, outside the grid, in the space the grid is centred in. The grid is untouched.</div></div>
+
+      <div class="abs col" style="right:56px;top:216px;gap:24px">
+        <div style="display:grid;grid-template-columns:repeat(3,140px);gap:16px">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key" style="font-size:40px">&#9003;</div><div class="key">0</div><div class="key" style="font-size:32px">clear</div>
+        </div>
+        <div class="btn p" style="width:452px;min-width:0;height:128px">Check it</div>
+      </div>
+    </div>
+</div>
+</body>
+</html>

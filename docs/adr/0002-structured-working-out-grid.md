@@ -55,6 +55,39 @@ through the partial products. No toggle, no "show working" button, nothing to
 discover — which matters on a shared device, where every mode arrives at the next
 player in whatever state the last one left it.
 
+> **This second constraint was deliberately reversed by Derek**, in
+> [#327](https://github.com/derekwinters/connor-multiplying-frogs/issues/327).
+> The working-out grid now has a `Help me` button that prints the digit
+> products beside the addition rows — which is a toggle, is discoverable, and
+> picks partial products as the layout it writes out. It is exactly the thing
+> the paragraph above says not to build.
+>
+> This note records the change rather than editing the paragraph away. An ADR
+> is a record of what was decided and when, so a constraint that stopped
+> applying is struck through in place, not deleted — otherwise the next reader
+> cannot tell the difference between a rule that never existed and one that was
+> weighed and overturned.
+>
+> **What was traded, and what was kept.** The specific worry above is that a
+> mode *"arrives at the next player in whatever state the last one left it"*,
+> and that one is answered rather than accepted:
+> [working-out-grid.md](../specs/ui/working-out-grid.md#invariants) makes
+> `Help me` reset with the card, one-way within a turn and unpressed on every
+> deal, as an invariant a test can assert. What is genuinely given up is the
+> *"nothing to discover"* half: there is now a button on the screen that a
+> player can find, and a player who finds it sees partial products written out.
+>
+> **The first constraint is untouched.** Nothing `Help me` prints is graded,
+> nothing it prints is entered for the player, and only the answer row still
+> decides whether the frog moves. Picking partial products as the algorithm to
+> *write beside the rows* is not the same as picking one to *grade against*,
+> and the difference is the whole of why this reversal was affordable. The
+> grid still takes any layout the player wants, and marks none of them.
+>
+> Two things soften it further, and they were the argument for accepting it:
+> nothing printed is graded, so the addition section is still scratch paper;
+> and it is opt-in and per-turn, so nobody who does not press it ever sees it.
+
 ## Consequences
 
 - The grid must be **sized to the card**, not to the largest possible problem, or
