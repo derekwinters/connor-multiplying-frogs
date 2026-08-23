@@ -22,6 +22,9 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `331 × 41` grown to the cap | [`working-out-grid-331x41-grown.html`](working-out-grid-331x41-grown.html) | [Working-out grid](../working-out-grid.md) |
+| Working-out grid, `Help me` on `12 × 34` | [`working-out-grid-help-12x34.html`](working-out-grid-help-12x34.html) | [Working-out grid](../working-out-grid.md) |
+| Working-out grid, `Help me` on `12 × 34` — the comparison | [`working-out-grid-help-12x34-operator-column.html`](working-out-grid-help-12x34-operator-column.html) | [Working-out grid](../working-out-grid.md) |
+| Working-out grid, `Help me` on `331 × 41` | [`working-out-grid-help-331x41.html`](working-out-grid-help-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Answer result — right | [`answer-result-right.html`](answer-result-right.html) | [Answer result](../answer-result.md) |
 | Answer result — wrong | [`answer-result-wrong.html`](answer-result-wrong.html) | [Answer result](../answer-result.md) |
 | A player has won — first frog home | [`player-won-first.html`](player-won-first.html) | [A player has won](../player-won.md) |
