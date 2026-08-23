@@ -913,6 +913,445 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+
+        // ---------------------------------------------------------------
+        // `Help me` and the products it prints (#416), built to
+        // docs/specs/ui/working-out-grid.md and its three `help` mockups.
+        // ---------------------------------------------------------------
+
+        [Test]
+        public void HelpMe_IsASecondaryButtonAtTheRightEndOfTheHeaderBand_OnEveryCardIncludingTheEasiest()
+        {
+            // "Present on **every** card, including `68 × 5`, and quiet: a
+            // button that appears from nowhere on the third card is worse than
+            // one that has always been there and never had to be pressed."
+            foreach (var pile in new[] { Pile.Easy, Pile.Medium, Pile.Hard })
+            {
+                var view = CreateView(Turn(pile));
+
+                try
+                {
+                    var button = view.HelpMeButton;
+
+                    Assert.That(button, Is.Not.Null, pile + " deals no `Help me`");
+                    Assert.That(button.IsHidden, Is.False, pile + " hides `Help me`");
+                    Assert.That(button.Kind, Is.EqualTo(ButtonKind.Secondary));
+                    Assert.That(button.IsDisabled, Is.False, "a card is dealt with `Help me` live");
+
+                    // GridHelpButtonWidth x GridHelpButtonHeight, which is the
+                    // one geometry override this button has: 96 px rather than
+                    // the shared ButtonHeight, so it sits inside the
+                    // GridHeaderHeight band beside the card readout pill.
+                    Assert.That(
+                        button.RectTransform.rect.size,
+                        Is.EqualTo(new Vector2(
+                            WorkingOutGridView.GridHelpButtonWidth,
+                            WorkingOutGridView.GridHelpButtonHeight)));
+                    Assert.That(
+                        WorkingOutGridView.GridHelpButtonHeight,
+                        Is.Not.EqualTo(Button.ButtonHeight),
+                        "the header band is 96 px tall; a 112 px button overhangs it by 16");
+
+                    var panel = view.Dialog.PanelRect;
+
+                    // The header band's right end, pinned to the panel's inner
+                    // right edge — which is the keypad column's right edge.
+                    Assert.That(
+                        RightEdge(panel) - RightEdge(button.RectTransform),
+                        Is.EqualTo(DialogPanel.DialogPadding).Within(0.001f));
+                    Assert.That(
+                        RightEdge(button.RectTransform),
+                        Is.EqualTo(RightEdge(view.KeypadRect)).Within(0.001f));
+
+                    // Inside the header band: GridHeaderTop down from the
+                    // panel's top edge, and GridHeaderHeight is where it ends.
+                    Assert.That(
+                        TopEdge(panel) - TopEdge(button.RectTransform),
+                        Is.EqualTo(WorkingOutGridView.GridHeaderTop).Within(0.001f));
+                    Assert.That(
+                        TopEdge(panel) - BottomEdge(button.RectTransform),
+                        Is.EqualTo(WorkingOutGridView.GridHeaderHeight).Within(0.001f));
+
+                    // Not under `Check it`: the far end of the panel from the
+                    // hand that is typing, because pressing it is one-way for
+                    // the turn.
+                    Assert.That(
+                        button.transform.IsChildOf(view.KeypadRect),
+                        Is.False,
+                        "`Help me` is in the header band, not the keypad column");
+                    Assert.That(
+                        BottomEdge(button.RectTransform),
+                        Is.GreaterThan(TopEdge(view.CheckItButton.RectTransform)),
+                        "`Help me` is above the keypad column, not under `Check it`");
+                }
+                finally
+                {
+                    Destroy(view);
+                }
+            }
+        }
+
+        [Test]
+        public void HelpMe_PrintsOneProductPerAdditionRow_RightAlignedBesideTheGrid_AndCentredOnItsOwnRow()
+        {
+            // The agreed picture: mockups/working-out-grid-help-12x34.html.
+            var turn = Turn(Pile.Medium, 12, 34);
+            var view = CreateView(turn);
+
+            try
+            {
+                Assert.That(view.HelpItems, Is.Empty, "`help` is drawn but empty until the button is pressed");
+
+                PressHelpMe(view);
+
+                // Core's list, formatted the way the mockups write it —
+                // `multiplier part × multiplicand part`, place value expanded.
+                Assert.That(
+                    view.HelpItems.Select(item => item.text).ToArray(),
+                    Is.EqualTo(new[] { "4 × 2", "4 × 10", "30 × 2", "30 × 10" }));
+                Assert.That(
+                    view.HelpItems.Count,
+                    Is.EqualTo(DigitProducts.For(turn.Card).Count),
+                    "one item per product Core reports");
+
+                for (var index = 0; index < view.HelpItems.Count; index++)
+                {
+                    var item = view.HelpItems[index];
+                    var row = view.RowRects[RowIndexOf(view, GridRowKind.AdditionRow, index)];
+
+                    // A common right edge, GridHelpGap left of the grid's left
+                    // edge — right-aligned so the `×` in every item lines up.
+                    Assert.That(
+                        LeftEdge(view.GridRect) - RightEdge(item.rectTransform),
+                        Is.EqualTo(WorkingOutGridView.GridHelpGap).Within(0.001f),
+                        "item " + index + " sits GridHelpGap left of the grid");
+                    Assert.That(
+                        RightEdge(item.rectTransform),
+                        Is.EqualTo(RightEdge(view.HelpItems[0].rectTransform)).Within(0.001f),
+                        "every item shares one right edge");
+
+                    // Vertically centred on the addition row it belongs to.
+                    Assert.That(
+                        Centre(item.rectTransform),
+                        Is.EqualTo(Centre(row)).Within(0.001f),
+                        "item " + index + " is centred on its own row");
+
+                    Assert.That(item.fontSize, Is.EqualTo((int)WorkingOutGridView.GridHelpItemSize));
+                    Assert.That(item.color, Is.EqualTo(HelpItemColour), "the mockups' `line` grey");
+                    Assert.That(item.raycastTarget, Is.False, "a printed product is not tappable");
+                }
+
+                // The whole column clears the panel's own left padding, which
+                // is the space working-out-grid.md says `help` comes out of.
+                Assert.That(
+                    view.HelpItems.Min(item => LeftEdge(item.rectTransform)) - LeftEdge(view.Dialog.PanelRect),
+                    Is.GreaterThanOrEqualTo(DialogPanel.DialogPadding - 0.001f),
+                    "`help` fits in space that already existed");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void HelpMe_PrintsAndDoesNothingElse_NoCellFilled_NoCaretMoved_NoRowMarked_AndCheckItStillChecksTheAnswerRow()
+        {
+            var turn = Turn(Pile.Medium, 12, 34);
+            var view = CreateView(turn);
+
+            try
+            {
+                var caret = view.CaretCell;
+                var caretRow = caret.RowKind;
+                var caretOrdinal = caret.RowOrdinal;
+                var caretColumn = caret.Column;
+
+                PressHelpMe(view);
+
+                Assert.That(view.HelpItems, Is.Not.Empty, "it printed");
+
+                // Nothing is entered for the player: "writing each one out, and
+                // adding them up, is still entirely the player's job."
+                Assert.That(EditableTexts(view), Is.All.Empty, "no cell was filled in");
+                Assert.That(view.AnswerText, Is.Empty);
+
+                // The caret has not moved.
+                Assert.That(view.CaretCell.RowKind, Is.EqualTo(caretRow));
+                Assert.That(view.CaretCell.RowOrdinal, Is.EqualTo(caretOrdinal));
+                Assert.That(view.CaretCell.Column, Is.EqualTo(caretColumn));
+
+                // Nothing is marked: the only tinted cell is still the one the
+                // next digit lands in.
+                AssertOnlyTheCaretIsTinted(view, "after `Help me`");
+                Assert.That(view.CheckItButton.IsDisabled, Is.True, "an empty answer still cannot be submitted");
+
+                // And `Check it` still checks exactly the answer row, with the
+                // addition section written in and the products beside it.
+                Tap(CellAt(view, GridRowKind.AdditionRow, 0, FirstDigitColumn));
+                Type(view, 9);
+                Type(view, 9);
+
+                Tap(CellAt(view, GridRowKind.AnswerRow, 0, FirstDigitColumn));
+                Type(view, 4);
+                Type(view, 0);
+                Type(view, 8);
+
+                Tap(view.CheckItButton);
+
+                Assert.That(turn.Submitted, Is.EqualTo(new[] { 408 }));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void HelpMe_CannotBePressedTwice_AndIsDisabledFromTheMomentItIsPressed()
+        {
+            // "It is not a toggle that can be turned back off, because the rows
+            // it grew are still there and a button that removed them would be
+            // deleting the player's own scratch paper."
+            var view = CreateView(Turn(Pile.Medium, 12, 34));
+
+            try
+            {
+                PressHelpMe(view);
+
+                Assert.That(view.HelpMeButton.IsDisabled, Is.True);
+
+                var printed = view.HelpItems.Select(item => item.text).ToArray();
+                var rows = view.AdditionRowCount;
+
+                Tap(view.HelpMeButton);
+                Tap(view.HelpMeButton);
+
+                Assert.That(view.HelpItems.Select(item => item.text).ToArray(), Is.EqualTo(printed), "nothing is printed twice");
+                Assert.That(view.AdditionRowCount, Is.EqualTo(rows), "no second helping of rows");
+                Assert.That(view.HelpMeButton.IsDisabled, Is.True);
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void HelpMe_ResetsWithTheCard_LiveAgain_HelpEmpty_AndTheSectionBackAtItsDealtCount()
+        {
+            // "Nothing about it is remembered between turns or between games."
+            // The app hands the same view the next turn — AppRoot.OpenWorkingOutGrid
+            // calls Initialize again — so that is what this presses on.
+            var view = CreateView(Turn(Pile.Medium, 12, 34));
+
+            try
+            {
+                PressHelpMe(view);
+                Assert.That(view.AdditionRowCount, Is.GreaterThan(WorkingOutGrid.GridAdditionRowsAtStart));
+
+                view.Initialize(Turn(Pile.Medium, 12, 34, FrogColour.Blue));
+
+                Assert.That(view.HelpMeButton.IsDisabled, Is.False, "the next card is dealt with `Help me` live");
+                Assert.That(view.HelpItems, Is.Empty, "`help` is empty again");
+                Assert.That(view.AdditionRowCount, Is.EqualTo(WorkingOutGrid.GridAdditionRowsAtStart));
+                Assert.That(EditableTexts(view), Is.All.Empty);
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void ARowHelpMeGrew_SurvivesABackspace_ButRowsGrownByTypingAfterwardsStillShrinkTheOrdinaryWay()
+        {
+            var view = CreateView(Turn(Pile.Medium, 12, 34));
+
+            try
+            {
+                PressHelpMe(view);
+
+                var floor = view.AdditionRowCount;
+                Assert.That(floor, Is.EqualTo(4), "`12 × 34` makes four products");
+                Assert.That(floor, Is.GreaterThan(WorkingOutGrid.GridAdditionRowsAtStart));
+
+                // Typing still grows the section, exactly as it did before the
+                // button existed — up to the cap, where the last digit lands in
+                // the bottom row without appending another.
+                GrowSectionBy(view, WorkingOutGrid.GridAdditionRowsMax);
+                Assert.That(view.AdditionRowCount, Is.EqualTo(WorkingOutGrid.GridAdditionRowsMax));
+
+                // Rows grown by typing, after the button was pressed, shrink
+                // the ordinary way.
+                while (view.AdditionRowCount > floor)
+                {
+                    var before = view.AdditionRowCount;
+
+                    Tap(CellAt(view, GridRowKind.AdditionRow, before - 1, FirstDigitColumn));
+                    Backspace(view);
+
+                    Assert.That(view.AdditionRowCount, Is.EqualTo(before - 1), "a typed row backspaces away");
+                }
+
+                // And this one `Help me` grew. Under the ordinary rule — the
+                // floor being GridAdditionRowsAtStart — emptying the section's
+                // bottom row would take it away.
+                Tap(CellAt(view, GridRowKind.AdditionRow, floor - 1, FirstDigitColumn));
+                Backspace(view);
+
+                Assert.That(view.AdditionRowCount, Is.EqualTo(floor), "a row `Help me` grew cannot be backspaced away");
+                Assert.That(
+                    view.HelpItems.Count,
+                    Is.EqualTo(floor),
+                    "no product is left pointing at a row that is gone");
+
+                // Backspacing again in the same row still takes nothing away.
+                Backspace(view);
+                Assert.That(view.AdditionRowCount, Is.EqualTo(floor));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void HelpMe_On68x5_LeavesTheSectionAlone_AndOn12x34_DropsItToTheGrownRowHeight()
+        {
+            // The one thing about this button that will look like a bug, and
+            // the reason the mockups draw it: on a card with more products than
+            // the section was dealt, the whole section takes
+            // GridAdditionRowHeight and the grid visibly re-lays-out.
+            var easy = CreateView(Turn(Pile.Easy, 68, 5));
+
+            try
+            {
+                var height = easy.GridRect.rect.height;
+
+                PressHelpMe(easy);
+
+                Assert.That(easy.HelpItems.Count, Is.EqualTo(2), "`68 × 5` makes two products");
+                Assert.That(
+                    easy.AdditionRowCount,
+                    Is.EqualTo(WorkingOutGrid.GridAdditionRowsAtStart),
+                    "two products and two dealt rows: nothing grows and nothing shrinks");
+                Assert.That(
+                    easy.RowRects[RowIndexOf(easy, GridRowKind.AdditionRow)].rect.height,
+                    Is.EqualTo(WorkingOutGridView.GridCellSize).Within(0.001f),
+                    "the section keeps its full-size rows");
+                Assert.That(easy.GridRect.rect.height, Is.EqualTo(height).Within(0.001f), "the grid does not move");
+            }
+            finally
+            {
+                Destroy(easy);
+            }
+
+            var medium = CreateView(Turn(Pile.Medium, 12, 34));
+
+            try
+            {
+                var height = medium.GridRect.rect.height;
+
+                PressHelpMe(medium);
+
+                Assert.That(medium.AdditionRowCount, Is.EqualTo(4));
+                Assert.That(
+                    medium.RowRects[RowIndexOf(medium, GridRowKind.AdditionRow)].rect.height,
+                    Is.EqualTo(WorkingOutGridView.GridAdditionRowHeight).Within(0.001f),
+                    "the whole section drops to GridAdditionRowHeight");
+                Assert.That(medium.GridRect.rect.height, Is.Not.EqualTo(height), "the grid re-lays-out");
+
+                // Every other row keeps its size, at every count.
+                foreach (var kind in new[] { GridRowKind.CarryStrip, GridRowKind.Multiplicand, GridRowKind.Multiplier, GridRowKind.AnswerRow })
+                {
+                    Assert.That(
+                        medium.RowRects[RowIndexOf(medium, kind)].rect.height,
+                        Is.EqualTo(medium.RowHeightFor(kind)).Within(0.001f));
+                }
+            }
+            finally
+            {
+                Destroy(medium);
+            }
+        }
+
+        [Test]
+        public void HelpMe_PrintsNoCell_AndLeavesTheGridsColumnsCellKindsAndGeometryExactlyAsTheyWere()
+        {
+            // "`help` is a region rather than part of `grid` because nothing in
+            // it is a cell." Drawn on the easy card, where the section neither
+            // grows nor shrinks, so *nothing* about the grid may differ.
+            var view = CreateView(Turn(Pile.Easy, 68, 5));
+
+            try
+            {
+                var kinds = view.RowKinds.ToArray();
+                var cellKinds = view.Cells.Select(row => row.Select(cell => cell.Kind).ToArray()).ToArray();
+                var sizes = view.Cells.Select(row => row.Select(cell => cell.RectTransform.rect.size).ToArray()).ToArray();
+                var gridSize = view.GridRect.rect.size;
+
+                PressHelpMe(view);
+
+                Assert.That(view.RowKinds, Is.EqualTo(kinds));
+                Assert.That(view.Cells.Count, Is.EqualTo(cellKinds.Length));
+                Assert.That(view.GridRect.rect.size, Is.EqualTo(gridSize));
+
+                for (var row = 0; row < view.Cells.Count; row++)
+                {
+                    Assert.That(view.Cells[row].Select(cell => cell.Kind), Is.EqualTo(cellKinds[row]));
+                    Assert.That(view.Cells[row].Select(cell => cell.RectTransform.rect.size), Is.EqualTo(sizes[row]));
+                }
+
+                // The items are not cells, and are not inside the grid.
+                foreach (var item in view.HelpItems)
+                {
+                    Assert.That(item.GetComponent<WorkingOutGridCell>(), Is.Null);
+                    Assert.That(item.transform.IsChildOf(view.GridRect), Is.False);
+                }
+
+                Assert.That(view.HelpItems.Count, Is.GreaterThan(0));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void HelpMe_OnACardWithNoProducts_PrintsNothing_GrowsNothing_AndStillGoesDisabled()
+        {
+            // `68 × 0` — a card the Easy pile can deal, since
+            // Card.OneDigitMinimum is 0, and a card DigitProducts reports no
+            // products for. What the player *should* see is a taste call
+            // nobody has made (#433); until then this is the page's own rule
+            // read literally, and it neither crashes nor draws anything.
+            var turn = Turn(Pile.Easy, 68, 0);
+            var view = CreateView(turn);
+
+            try
+            {
+                Assert.That(DigitProducts.For(turn.Card), Is.Empty, "an operand of `0` has no parts at all");
+
+                var height = view.GridRect.rect.height;
+
+                PressHelpMe(view);
+
+                Assert.That(view.HelpItems, Is.Empty, "nothing to print, so nothing is printed");
+                Assert.That(
+                    view.AdditionRowCount,
+                    Is.EqualTo(WorkingOutGrid.GridAdditionRowsAtStart),
+                    "max(GridAdditionRowsAtStart, 0) is the count the card was dealt");
+                Assert.That(view.GridRect.rect.height, Is.EqualTo(height).Within(0.001f));
+                Assert.That(EditableTexts(view), Is.All.Empty);
+                Assert.That(view.HelpMeButton.IsDisabled, Is.True, "step three happens whatever steps one and two found");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
         [Test]
         public void Panel_LaysOutHeaderGridAndKeypad_AtTheMockupsOwnGeometry()
         {
@@ -1134,7 +1573,11 @@ namespace Frogs.Unity.EditModeTests
                 { "KeypadClearLabelSize", 32f },
                 { "KeypadWidth", 452f },
                 { "KeypadSubmitGap", 24f },
-                { "CheckButtonHeight", 128f }
+                { "CheckButtonHeight", 128f },
+                { "GridHelpButtonHeight", 96f },
+                { "GridHelpButtonWidth", 320f },
+                { "GridHelpItemSize", 32f },
+                { "GridHelpGap", 32f }
             };
 
             var constants = typeof(WorkingOutGridView)
@@ -1955,6 +2398,13 @@ namespace Frogs.Unity.EditModeTests
             return view.Cells[RowIndexOf(view, kind, ordinal)][column];
         }
 
+        // What has been typed: the cells the player can fill, without the
+        // card's own printed digits or the operator column's glyphs.
+        static string[] EditableTexts(WorkingOutGridView view)
+        {
+            return view.Cells.SelectMany(row => row).Where(cell => cell.IsEditable).Select(cell => cell.Content).ToArray();
+        }
+
         static string[] CellTexts(WorkingOutGridView view)
         {
             return view.Cells.SelectMany(row => row).Select(cell => cell.Content).ToArray();
@@ -2157,6 +2607,58 @@ namespace Frogs.Unity.EditModeTests
                 Pile = pile,
                 Card = Card.Draw(pile, Rng.FromSeed(Seed))
             };
+        }
+
+        /// <summary>
+        /// A turn on one named card — the worked examples the spec page and the
+        /// mockups are written in: `12 x 34`, `68 x 5`, `68 x 0`.
+        ///
+        /// <see cref="Card"/> only builds through <see cref="Card.Draw"/>, and
+        /// <c>Card.Of</c> is internal to <c>Frogs.Core</c>, so the card is
+        /// *found* rather than constructed: the first seed whose draw for the
+        /// pile is this card. Deterministic, and a few thousand draws.
+        /// </summary>
+        static StubTurn Turn(Pile pile, int multiplicand, int multiplier, FrogColour frog = FrogColour.Green)
+        {
+            var turn = Turn(pile, frog);
+            turn.Card = CardFrom(pile, multiplicand, multiplier);
+            return turn;
+        }
+
+        static Card CardFrom(Pile pile, int multiplicand, int multiplier)
+        {
+            const ulong SeedsToTry = 1000000UL;
+
+            for (var seed = 1UL; seed < SeedsToTry; seed++)
+            {
+                var card = Card.Draw(pile, Rng.FromSeed(seed));
+
+                if (card.Multiplicand == multiplicand && card.Multiplier == multiplier)
+                {
+                    return card;
+                }
+            }
+
+            throw new AssertionException(
+                "no seed under " + SeedsToTry + " deals " + multiplicand + " x " + multiplier + " from the " + pile + " pile");
+        }
+
+        // docs/specs/ui/working-out-grid.md: the printed products are "in the
+        // same `line` grey the mockups use for everything that is not a digit"
+        // — copied here by hand rather than read from the view, so the items
+        // cannot be repainted without a test moving too.
+        static readonly Color HelpItemColour = new Color32(0x6C, 0x78, 0x73, 0xFF);
+
+        static void PressHelpMe(WorkingOutGridView view)
+        {
+            Tap(view.HelpMeButton);
+        }
+
+        // A rect's vertical middle, in world space — what "centred on its own
+        // row" is measured with.
+        static float Centre(RectTransform rect)
+        {
+            return (TopEdge(rect) + BottomEdge(rect)) / 2f;
         }
 
         /// <summary>
