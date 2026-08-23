@@ -3,7 +3,7 @@ using System;
 namespace Frogs.Core
 {
     /// <summary>
-    /// The traffic cop — issue #213. Owns which one of four
+    /// The traffic cop — issue #213. Owns which one of five
     /// <see cref="Screen"/>s is current, which one of six <see cref="Dialog"/>s
     /// (if any) is layered over it, and what the hardware back button does in
     /// every state.
@@ -186,6 +186,17 @@ namespace Frogs.Core
                 // does not quit, and it never quits without the confirm."
                 case Screen.GameBoard:
                     OpenDialog(Dialog.Settings);
+                    break;
+
+                // how-to-play.md#behaviour: "Hardware back does what `Back`
+                // does — one page back, and from page 1 it leaves the
+                // screen." Which page that screen is on is the screen's own
+                // and nothing this type can see, so this is the one screen
+                // where the router holds no opinion and the view runs the
+                // rule — the same shape as the four dialogs a turn opens.
+                // Inert rather than "leaves": a press in the middle of five
+                // pages must not jump out of the sequence.
+                case Screen.HowToPlay:
                     break;
 
                 default:

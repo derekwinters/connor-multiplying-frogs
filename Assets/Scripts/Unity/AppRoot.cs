@@ -38,7 +38,7 @@ namespace Frogs.Unity
     /// and every field below is deliberately not a <c>[SerializeField]</c>.
     ///
     /// **Every view is asked to build itself here, up front.** Unity does not
-    /// run <c>Awake</c> on a child of an inactive object, and nine of the ten
+    /// run <c>Awake</c> on a child of an inactive object, and ten of the eleven
     /// roots are inactive at boot, so each view's own <c>EnsureInitialized</c>
     /// guard is prodded through its public surface rather than left to
     /// lifecycle timing — the same reasoning the views themselves record.
@@ -78,6 +78,7 @@ namespace Frogs.Unity
         GameSetupScreenView _gameSetup;
         GameBoardScreenView _board;
         GameOverScreenView _gameOver;
+        HowToPlayScreenView _howToPlay;
         RollAndCardDialogView _rollAndCard;
         WorkingOutGridView _workingOutGrid;
         AnswerResultDialogView _answerResult;
@@ -87,6 +88,13 @@ namespace Frogs.Unity
 
         Game _game;
         GameWorkingOutTurn _turn;
+
+        // Which screen `How to play` was opened over, so that leaving it puts
+        // the settings dialog back where it was rather than assuming the
+        // board. Today the gear is only on the board; the title screen is
+        // how-to-play.md's own open question 1, and this is what stops that
+        // being a second decision.
+        CoreScreen _howToPlayReturnsTo = CoreScreen.GameBoard;
 
         CoreScreen _shownScreen;
         Dialog? _shownDialog;
@@ -190,6 +198,16 @@ namespace Frogs.Unity
             {
                 Initialize();
                 return _workingOutGrid;
+            }
+        }
+
+        /// <summary>[How to play](docs/specs/ui/how-to-play.md) — a screen, opened from the settings dialog, that replaces it.</summary>
+        public HowToPlayScreenView HowToPlay
+        {
+            get
+            {
+                Initialize();
+                return _howToPlay;
             }
         }
 
@@ -451,6 +469,7 @@ namespace Frogs.Unity
             _gameSetup = AddView<GameSetupScreenView>(RootFor(CoreScreen.GameSetup));
             _board = AddView<GameBoardScreenView>(RootFor(CoreScreen.GameBoard));
             _gameOver = AddView<GameOverScreenView>(RootFor(CoreScreen.GameOver));
+            _howToPlay = AddView<HowToPlayScreenView>(RootFor(CoreScreen.HowToPlay));
 
             _rollAndCard = AddView<RollAndCardDialogView>(RootFor(Dialog.RollAndCard));
             _workingOutGrid = AddView<WorkingOutGridView>(RootFor(Dialog.WorkingOutGrid));
@@ -467,6 +486,7 @@ namespace Frogs.Unity
             PrimeView(_gameSetup.RectTransform);
             PrimeView(_board.RectTransform);
             PrimeView(_gameOver.RectTransform);
+            PrimeView(_howToPlay.RectTransform);
             PrimeView(_rollAndCard.RectTransform);
             PrimeView(_workingOutGrid.RectTransform);
             PrimeView(_answerResult.RectTransform);
@@ -530,6 +550,9 @@ namespace Frogs.Unity
 
             _settings.CloseRequested += CloseDialog;
             _settings.EndGameConfirmRequested += OpenEndGameConfirm;
+            _settings.HowToPlayRequested += OpenHowToPlay;
+
+            _howToPlay.LeaveRequested += LeaveHowToPlay;
 
             _endGameConfirm.GameEnded += ShowGameOver;
             _endGameConfirm.KeepPlayingRequested += CloseDialog;
@@ -572,6 +595,14 @@ namespace Frogs.Unity
 
                 case CoreScreen.GameBoard:
                     AdoptNewlyStartedGame();
+                    break;
+
+                case CoreScreen.HowToPlay:
+                    // how-to-play.md#behaviour: "It always opens on page 1. It
+                    // does not remember where you got to." Said here, on
+                    // entering, rather than left to the view's own build:
+                    // the view is built once and visited many times.
+                    _howToPlay.Open();
                     break;
             }
         }
@@ -721,6 +752,27 @@ namespace Frogs.Unity
         void OpenEndGameConfirm()
         {
             _router.OpenDialog(Dialog.EndGameConfirm);
+        }
+
+        // `How to play` on the settings dialog. Navigating to a screen clears
+        // the dialog layer, so this is what "it replaces this dialog rather
+        // than covering it" *is* — there is no CloseDialog call to forget,
+        // and no moment where two dialogs are open.
+        void OpenHowToPlay()
+        {
+            _howToPlayReturnsTo = _router.CurrentScreen;
+            _router.NavigateToScreen(CoreScreen.HowToPlay);
+        }
+
+        // Leaving — by `Done`, by `Back` from page 1, or by hardware back
+        // from page 1. how-to-play.md#behaviour: it "returns to the settings
+        // dialog, open, exactly as it was. Not to the board." So the screen it
+        // was opened over comes back first, and the dialog opens on top of it,
+        // which is the state that was there when `How to play` was pressed.
+        void LeaveHowToPlay()
+        {
+            _router.NavigateToScreen(_howToPlayReturnsTo);
+            _router.OpenDialog(Dialog.Settings);
         }
 
         void CloseDialog()

@@ -148,6 +148,99 @@ three lanes of one game. Page 1 and page 5 are the only ones drawing a real
 four-lane board, and there the per-lane logs read as one column anyway because
 they are the same colour and vertically aligned.
 
+**Every drawn lane repeats the same seven pad shapes.** The lily pad is the
+board's own — notched and veined, from
+[game-board.md](game-board.md)'s twelve-row variation table, at
+`HowToPlayPadDiameter` instead of the board's diameter — but which row a pad
+draws depends only on its *position*, so lane 2 draws the same seven as lane 1.
+That is what all five mockups draw, and it is deliberate: the board's `× 5`
+stagger exists so four lanes of one game do not line up into visible columns,
+and page 4's three lanes are three separate examples rather than one game.
+
+## What the pictures are drawn from
+
+The table above stops at the frame. The numbers *inside* the five pictures —
+the die, the piles, the grid, the boxes a log's word and a frog sit in — were
+agreed in the mockups and lived only in their CSS, which meant the layout was
+agreed but not distilled. They are written down here so the code receives them
+rather than re-guessing them, which is
+[the direction of travel](../../engineering/ui-design-process.md#the-named-constants-are-the-origin-not-an-afterthought)
+the rest of this page already follows. **No value here is new**: every one is a
+rule in a committed mockup, transcribed by
+[#414](https://github.com/derekwinters/connor-multiplying-frogs/issues/414).
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| A drawn log's corner radius | `HowToPlayLogRadius` | 20 px |
+| `Start` / `End` down from the log's top | `HowToPlayLogLabelTopPadding` | 16 px |
+| Gap between that word and a frog on the same log | `HowToPlayLogLabelGap` | 12 px |
+| A drawn frog's outline | `HowToPlayFrogOutline` | 3 px |
+| The paper picture's hairline | `HowToPlayPaperOutline` | 3 px |
+| Small print inside a picture | `HowToPlayNoteSize` | 34 px |
+| Its line box, as a ratio | `HowToPlayNoteLineHeight` | 1.4 |
+| Page 4's caption line box | `HowToPlayCaptionLineBox` | 52 px |
+| Gap between page 4's examples | `HowToPlayExampleGap` | 56 px |
+
+The two paper pages are drawn from their own top-left inside corner, which is
+where their offsets below are measured from.
+
+| Page 2 — roll the die | Constant | Value |
+| --- | --- | --- |
+| The die, from the picture's left | `HowToPlayDieLeft` | 96 px |
+| The die, from its top | `HowToPlayDieTop` | 164 px |
+| The die's side | `HowToPlayDieSize` | 200 px |
+| Its corner radius | `HowToPlayDieRadius` | 32 px |
+| Its outline | `HowToPlayDieOutline` | 4 px |
+| Its inside padding | `HowToPlayDiePadding` | 28 px |
+| A pip | `HowToPlayDiePipSize` | 34 px |
+| The arrow, from the picture's left | `HowToPlayArrowLeft` | 336 px |
+| The arrow's size | `HowToPlayArrowSize` | 56 px |
+| The pile stack, from the picture's left | `HowToPlayPileLeft` | 452 px |
+| A pile | `HowToPlayPileWidth` × `HowToPlayPileHeight` | 200 × 120 px |
+| Its corner radius | `HowToPlayPileRadius` | 16 px |
+| Its outline | `HowToPlayPileOutline` | 4 px |
+| Gap between piles | `HowToPlayPileGap` | 24 px |
+| A pile's label | `HowToPlayPileLabelSize` | 36 px |
+| How far the two unpicked piles are dimmed | `HowToPlayPileDimOpacity` | 0.4 |
+| The table, from the picture's left | `HowToPlayRollTableLeft` | 96 px |
+| The table, from its top | `HowToPlayRollTableTop` | 520 px |
+| Its first column | `HowToPlayRollTableColumnWidth` | 220 px |
+| Gap between its columns | `HowToPlayRollTableColumnGap` | 32 px |
+| Gap under its header row | `HowToPlayRollTableHeaderGap` | 20 px |
+
+The arrow and the pile stack are **centred on the die's own centre line** rather
+than carrying a top of their own, which is what the mockup's numbers already
+work out to and what keeps the row a row if the die ever changes size.
+
+| Page 3 — work it out | Constant | Value |
+| --- | --- | --- |
+| The grid, from the picture's left | `HowToPlayGridLeft` | 120 px |
+| The grid, from its top | `HowToPlayGridTop` | 96 px |
+| A cell | `HowToPlayCellSize` | 88 px |
+| Gap between cells | `HowToPlayCellGap` | 8 px |
+| A cell's corner radius | `HowToPlayCellRadius` | 8 px |
+| A cell's outline | `HowToPlayCellOutline` | 3 px |
+| A digit in a cell | `HowToPlayCellDigitSize` | 48 px |
+| The carry row's height | `HowToPlayCarryRowHeight` | 56 px |
+| A carry box | `HowToPlayCarryBoxWidth` × `HowToPlayCarryBoxHeight` | 48 × 44 px |
+| Its corner radius | `HowToPlayCarryBoxRadius` | 6 px |
+| The answer row's outline | `HowToPlayAnswerOutline` | 4 px |
+| The call-outs, from the picture's left | `HowToPlayCalloutLeft` | 560 px |
+| The call-outs, from its top | `HowToPlayCalloutTop` | 208 px |
+| Their column | `HowToPlayCalloutWidth` | 440 px |
+| Gap between them | `HowToPlayCalloutGap` | 40 px |
+| Their line box, as a ratio | `HowToPlayCalloutLineHeight` | 1.5 |
+
+The lane stacks on pages 1, 4 and 5 carry no offsets of their own: each is
+`HowToPlayPictureInset` from the picture's left, and as far down from its top as
+half of what `HowToPlayPictureHeight` has left once the stack has taken its
+share — 92 px on a four-lane page, which is exactly where the mockups draw it.
+Written as that sum rather than as 92, and as a distance from the top rather
+than as a centring, because the lane drawings are
+[anchored to the picture's top-left inset](#anchors): a picture that is taller
+than 808 px on a screen that is not 16:10 grows below its lanes instead of
+moving them.
+
 ## Elements
 
 - **`Back`** — secondary [button](shared-components.md#button), bottom-left.

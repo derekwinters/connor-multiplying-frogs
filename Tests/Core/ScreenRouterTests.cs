@@ -5,8 +5,8 @@ using Frogs.Core;
 namespace Frogs.Core.Tests
 {
     /// <summary>
-    /// The traffic cop — issue #213. Owns which one of four screens is
-    /// current, which one of five dialogs (if any) is layered over it, and
+    /// The traffic cop — issue #213. Owns which one of five screens is
+    /// current, which one of six dialogs (if any) is layered over it, and
     /// what the hardware back button does in every state, per the
     /// back-button table on the issue and each screen page's own
     /// `## Behaviour` section.
@@ -84,6 +84,44 @@ namespace Frogs.Core.Tests
             Assert.That(router.CurrentDialog, Is.EqualTo(inertDialog));
         }
 
+        // how-to-play.md#invariants: it "replaces what is on screen rather
+        // than covering it", and it is opened from inside the settings
+        // dialog. Navigating to it therefore leaves no dialog behind — the
+        // dialog it was opened from is closed, not covered, which is
+        // shared-components.md#dialog's "a dialog never opens over another
+        // dialog" holding for a screen that is opened from one.
+        [Test]
+        public void NavigatingToHowToPlay_FromTheSettingsDialog_ReplacesItRatherThanCoveringIt()
+        {
+            var router = new ScreenRouter();
+            router.NavigateToScreen(Screen.GameBoard);
+            router.OpenDialog(Dialog.Settings);
+
+            router.NavigateToScreen(Screen.HowToPlay);
+
+            Assert.That(router.CurrentScreen, Is.EqualTo(Screen.HowToPlay));
+            Assert.That(router.CurrentDialog, Is.Null, "the settings dialog is replaced, not layered under");
+        }
+
+        // how-to-play.md#behaviour: "Hardware back does what `Back` does —
+        // one page back, and from page 1 it leaves the screen." Which page
+        // the screen is on is the screen's own, so this is the one state
+        // where the router holds no opinion: it is inert here, exactly as it
+        // is for the four dialogs a turn opens, and the view runs the rule.
+        // Inert is not "leaves" — a press in the middle of the sequence must
+        // not jump out of it.
+        [Test]
+        public void HandleBack_OnHowToPlay_IsInert_BecauseThePageIsTheScreensOwn()
+        {
+            var router = new ScreenRouter();
+            router.NavigateToScreen(Screen.HowToPlay);
+
+            router.HandleBack();
+
+            Assert.That(router.CurrentScreen, Is.EqualTo(Screen.HowToPlay));
+            Assert.That(router.CurrentDialog, Is.Null);
+        }
+
         // title-screen.md#behaviour: "The hardware back button on this
         // screen exits the app. It is the only screen where back exits."
         [Test]
@@ -101,6 +139,7 @@ namespace Frogs.Core.Tests
         [TestCase(Screen.GameSetup, null)]
         [TestCase(Screen.GameBoard, null)]
         [TestCase(Screen.GameOver, null)]
+        [TestCase(Screen.HowToPlay, null)]
         [TestCase(Screen.GameBoard, Dialog.Settings)]
         [TestCase(Screen.GameBoard, Dialog.EndGameConfirm)]
         [TestCase(Screen.GameBoard, Dialog.RollAndCard)]
