@@ -1243,6 +1243,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#what-core-owns-the-product-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Core owns: the product list
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1256,6 +1267,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Mockup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-help-me-pair-established" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Help me pair established
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2304,6 +2332,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#what-core-owns-the-product-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Core owns: the product list
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2317,6 +2356,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Mockup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-help-me-pair-established" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Help me pair established
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2376,9 +2432,18 @@ scratch paper is never checked
 card, whether or not the player uses the addition section. The two ways of
 carrying are not alternatives the game chooses between — both are drawn, and the
 player uses whichever one they were taught.
-<strong>Invariant:</strong> there is no mode and no toggle. The answer box <em>is</em> the grid's
-bottom row. A player who can do <code>68 × 5</code> in their head fills one row and
-presses <code>Check it</code>.
+<strong>Invariant:</strong> the answer box <em>is</em> the grid's bottom row. A player who can do
+<code>68 × 5</code> in their head fills one row and presses <code>Check it</code>. Nothing has to be
+switched on before the grid works.
+<strong>Invariant:</strong> <code>Help me</code> does not survive the turn. It cannot be un-pressed and
+it cannot be pressed twice, and every card is dealt with it unpressed — so it
+never arrives at the next player in the state the last one left it.
+<strong>Invariant:</strong> nothing <code>Help me</code> prints is graded, and nothing it prints is
+entered for the player. It writes the products beside the rows; working each
+one out, and adding them up, is still entirely the player's job.
+<strong>Invariant:</strong> <code>Help me</code> prints, and does nothing else. It never fills a cell,
+never moves the caret, never marks a row right or wrong, and never changes what
+<code>Check it</code> checks.
 <strong>Invariant:</strong> the grid is sized to the card in its <strong>columns</strong>. <code>68 × 5</code> gets
 three digit columns and <code>331 × 41</code> gets five, so an easy card still does not
 look like homework.
@@ -2420,6 +2485,33 @@ true of the <strong>rendered row count</strong>, which the player extends. <code
 widest grid but not the tallest one — the tallest is any card whose addition
 section has been grown to <code>GridAdditionRowsMax</code>, and that grid is the same
 height whichever card it came from.</p>
+<p>A third was made false by <code>Help me</code>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/327">#327</a>):</p>
+<blockquote>
+<p><strong>Invariant:</strong> there is no mode and no toggle. The answer box <em>is</em> the grid's
+bottom row. A player who can do <code>68 × 5</code> in their head fills one row and
+presses <code>Check it</code>.</p>
+</blockquote>
+<p><strong>Half of that is still true and half of it is not, and the half that is not
+was reversed on purpose.</strong> The answer box is still the grid's bottom row, and
+nothing has to be switched on before the grid works — the sentence that
+mattered survives intact as the first invariant above. What is gone is <em>"no
+mode and no toggle"</em>: <code>Help me</code> is a toggle, it is discoverable, and pressing
+it changes what the grid shows for the rest of the turn.</p>
+<p>This is not drift. Derek asked for it in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/327">#327</a>,
+the constraint it breaks is
+<a href="../../../adr/0002-structured-working-out-grid/#two-constraints-that-keep-it-from-becoming-a-tutor">ADR-0002</a>'s
+second one, and per <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md">CLAUDE.md</a>
+Derek's instruction beats the docs. The ADR is <strong>amended to record the
+reversal</strong> rather than quietly contradicted; see
+<a href="../../../adr/0002-structured-working-out-grid/#two-constraints-that-keep-it-from-becoming-a-tutor">what the ADR says now</a>.</p>
+<p>The ADR's specific worry was <em>"every mode arrives at the next player in
+whatever state the last one left it"</em>, and that worry is answered rather than
+ignored: <code>Help me</code> resets with the card, which is what the third and fourth
+invariants above are for. Its <strong>other</strong> constraint — nothing in the grid is
+marked — is untouched, and the fifth invariant above is there to keep it that
+way.</p>
 <h2 id="regions">Regions<a class="headerlink" href="#regions" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2445,8 +2537,17 @@ height whichever card it came from.</p>
 <td><code>submit</code></td>
 <td><code>Check it</code></td>
 </tr>
+<tr>
+<td><code>help</code></td>
+<td>The digit products <code>Help me</code> has printed, one per addition row</td>
+</tr>
 </tbody>
 </table>
+<p><code>help</code> is drawn but empty until <code>Help me</code> is pressed, and empty for the whole
+turn if it never is. It is a region rather than part of <code>grid</code> because nothing
+in it is a cell: it is writing in the margin beside the rows, and the grid's
+own column count, cell kinds and geometry are exactly what they were before the
+button existed.</p>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <p>A full-bleed <a href="../shared-components/#dialog">dialog</a> — <code>DialogMaxWidth</code> by
 <code>DialogMaxHeight</code>, which is the canvas inset by <code>SafeMargin</code> on every side.</p>
@@ -2458,7 +2559,16 @@ height whichever card it came from.</p>
   keypad you have to look at.</li>
 <li><code>grid</code> is centred in the space left over. It is the part that changes size
   with the problem, so it is the part that is allowed to move.</li>
-<li><code>header</code> runs along the top, left-aligned.</li>
+<li><code>header</code> runs along the top, left-aligned — and now carries <code>Help me</code> at its
+  <strong>right</strong> end, pinned to the panel's inner right edge, which is the keypad
+  column's right edge. It is <code>GridHelpButtonHeight</code> tall, not the shared
+  <code>ButtonHeight</code>, so that it sits exactly inside the <code>GridHeaderHeight</code> band
+  alongside the <code>GridCardReadoutHeight</code> pill it shares that band with.</li>
+<li><code>help</code> is a <strong>right-aligned column</strong>, its right edge <code>GridHelpGap</code> left of
+  the grid's left edge, each item vertically centred on its own addition row.
+  It moves with the grid, because an item belongs to the row beside it. The
+  column is right-aligned rather than left, so the <code>×</code> in every item lines up
+  and the eye reads down one edge.</li>
 </ul>
 <p>This split is what landscape buys. In portrait the grid and the keypad have to
 share a single column, and <code>331 × 41</code> was
@@ -2474,6 +2584,15 @@ into a panel whose last usable pixel is 1048 px — about 100 px of slack agains
 <code>GridAdditionRowHeight</code> once the section grows, and the grid fits at every
 count up to the cap. The numbers are worked through under <a href="#mockup">Mockup</a>,
 and the third mockup is the picture of them.</p>
+<p><strong><code>help</code> fits in space that already existed, and this is where it comes
+from.</strong> The grid is centred in the 1257 px between <code>DialogPadding</code> and the
+keypad column, and no card fills it: the widest, <code>331 × 41</code>, is 664 px, so
+there are 296 px spare on each side. <code>help</code> uses the left half of that spare
+and needs no new space at all. The tightest case is the widest card, because
+that is the one where the grid is widest <em>and</em> the items are longest —
+<code>40 × 300</code> at <code>GridHelpItemSize</code> renders 149 px into 264 px of room, so it
+clears with 115 px to spare. That margin is worth knowing because it is what a
+wider grid would eat.</p>
 <p><strong>"Centred in the space left over" is the rule, in both directions.</strong>
 Horizontally that space runs from <code>DialogPadding</code> to the keypad column's left
 edge; vertically from the bottom of the header band (<code>GridHeaderHeight</code>) to the
@@ -2684,6 +2803,26 @@ the screen is built to.</p>
 <td><code>CheckButtonHeight</code></td>
 <td>128 px</td>
 </tr>
+<tr>
+<td><code>Help me</code> height</td>
+<td><code>GridHelpButtonHeight</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td><code>Help me</code> width</td>
+<td><code>GridHelpButtonWidth</code></td>
+<td>320 px</td>
+</tr>
+<tr>
+<td>A printed product's text size</td>
+<td><code>GridHelpItemSize</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Gap between the <code>help</code> column and the grid</td>
+<td><code>GridHelpGap</code></td>
+<td>32 px</td>
+</tr>
 </tbody>
 </table>
 <p><code>GridAdditionRowsAtStart</code> and <code>GridAdditionRowsMax</code> are counts, not pixels. They
@@ -2693,6 +2832,21 @@ and stops at is exactly the kind of number that otherwise ends up as an unnamed
 gets changed. They are the two rows on this table <code>Core</code> owns
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>),
 and the shell references them rather than keeping a copy.</p>
+<p><strong><code>GridHelpButtonHeight</code> is 96 px rather than the shared <code>ButtonHeight</code> of
+112 px</strong>, and it is the same 96 px as <code>GridCardReadoutHeight</code> and as the shared
+<code>MinTouchTarget</code>. All three coincide on purpose: the button has to fit inside
+the <code>GridHeaderHeight</code> (140 px) band that starts <code>GridHeaderTop</code> (44 px) down —
+which leaves exactly 96 px — it sits directly beside the card readout pill and
+would look wrong at a different height, and 96 px is the floor a touch target
+may not go below. A 112 px button there would overhang the band by 16 px. This
+is the same kind of screen-local override as the title screen's
+<a href="../title-screen/#named-constants"><code>TitleButtonHeight</code></a>, in the opposite
+direction.</p>
+<p><code>GridHelpItemSize</code> is 32 px, not <code>GridSmallDigitSize</code> (28 px). The items are
+not digits in boxes — they are labels in the margin, read at arm's length,
+and they are the one thing on this screen a stuck player is looking <em>for</em>.
+28 px is what a digit shrinks to in order to fit a 56 px box; nothing here has
+to fit a box.</p>
 <p><strong>Every value above is a number a drawing already fixed</strong>, except three:
 <code>GridFocusFill</code>, which is
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/304">#304</a>'s
@@ -2898,7 +3052,26 @@ past it.</p>
   every answer in this game is a positive whole number.</li>
 <li><strong><code>Check it</code></strong> — primary <a href="../shared-components/#button">button</a>, full keypad
   width. Goes to <a href="../answer-result/">answer result</a>.</li>
+<li><strong><code>Help me</code></strong> — secondary button, in the <code>header</code> band at its right end,
+  <code>GridHelpButtonWidth</code> × <code>GridHelpButtonHeight</code>. Present on <strong>every</strong> card,
+  including <code>68 × 5</code>, and quiet: a button that appears from nowhere on the
+  third card is worse than one that has always been there and never had to be
+  pressed. Two states only:</li>
+<li><strong>Default</strong> — the ordinary secondary button. Pressing it fills <code>help</code>.</li>
+<li><strong>Disabled</strong> — <code>ButtonDisabledOpacity</code>, from the moment it is pressed until
+    the turn ends. It is not a toggle that can be turned back off, because the
+    rows it grew are still there and a button that removed them would be
+    deleting the player's own scratch paper.</li>
 </ul>
+<p>It is deliberately at the opposite end of the panel from the keypad. Pressing
+  it is one-way for the turn, and a one-way control under the hand that is
+  typing is a control that gets pressed by accident.
+- <strong>The printed products</strong> — the contents of <code>help</code>. One line per addition row,
+  at <code>GridHelpItemSize</code>, in the same <code>line</code> grey the mockups use for
+  everything that is not a digit. <strong>Not cells, not editable, not tappable, and
+  never graded.</strong> Written <code>multiplier part × multiplicand part</code> with the place
+  value expanded — <code>30 × 10</code>, not <code>3 × 1</code> — which is Derek's own form and the
+  form the rows are written in on paper.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
 <li>Entering from <a href="../roll-and-card/">roll and card</a>. The answer row's <strong>leftmost</strong>
@@ -2955,8 +3128,40 @@ past it.</p>
   Typing more digits than the grid has columns overwrites the final box. The
   caret does not wrap to another row, leave the row it is in, or reach the
   operator column.</li>
-<li>Hardware back does nothing.</li>
+<li><strong>Pressing <code>Help me</code>.</strong> In one step, and only ever once per turn:<ol>
+<li>The addition section grows to hold one row per product — to
+   <code>max(GridAdditionRowsAtStart, product count)</code>, so a card with fewer
+   products than the section was dealt does not shrink it.</li>
+<li>Each product is printed in <code>help</code> beside its row, in order.</li>
+<li>The button goes to <code>Disabled</code> and stays there until the card is done.</li>
+</ol>
+</li>
 </ul>
+<p>Nothing else changes. The caret does not move, no cell is filled, no cell is
+  marked, and <code>Check it</code> still checks exactly the answer row.</p>
+<p>On a <code>2 × 2</code> or <code>3 × 2</code> card this grows the section past
+  <code>GridAdditionRowsAtStart</code>, so <strong>the whole section drops to
+  <code>GridAdditionRowHeight</code> the instant the button is pressed</strong> and the grid
+  visibly re-lays-out. That is the existing rule for a grown section, not a new
+  one — but it is the one thing about this button that will look like it did
+  something odd, so the mockups draw it rather than describe it. On <code>68 × 5</code>
+  there are two products and the section was dealt two rows, so nothing grows
+  and nothing shrinks.
+- <strong>A row <code>Help me</code> grew cannot be backspaced away.</strong> The ordinary shrink rule
+  — <em>"backspacing the last digit out of a grown row removes the row"</em> — does
+  not apply to the rows this button created, for the rest of the turn. A row
+  with a product printed beside it that vanished would leave the product
+  pointing at nothing, and the player did not ask for the row in the first
+  place. Rows grown <strong>by typing</strong>, after the button was pressed, shrink the
+  ordinary way; the floor is whatever count <code>Help me</code> established.
+- <strong>It resets with the card.</strong> The next card is dealt with <code>Help me</code> live,
+  <code>help</code> empty and the section back at <code>GridAdditionRowsAtStart</code>. Nothing
+  about it is remembered between turns or between games — which is the direct
+  answer to
+  <a href="../../../adr/0002-structured-working-out-grid/#two-constraints-that-keep-it-from-becoming-a-tutor">ADR-0002</a>'s
+  objection that <em>"every mode arrives at the next player in whatever state the
+  last one left it."</em>
+- Hardware back does nothing.</p>
 <h3 id="the-fill-direction-this-page-used-to-carry">The fill direction this page used to carry<a class="headerlink" href="#the-fill-direction-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/305">#305</a>
 two of the bullets above — the first one, and the one about where the caret
@@ -3002,12 +3207,48 @@ and <code>_36</code> both read <code>36</code> and both grade correct — see th
 that only the answer row's <em>value</em> is checked. A future change that rejects or
 re-grades a correctly-typed but left-aligned answer would be a new rule about
 place value being marked, and it needs its own decision.</p>
+<h3 id="what-core-owns-the-product-list">What <code>Core</code> owns: the product list<a class="headerlink" href="#what-core-owns-the-product-list" title="Link to this section">&para;</a></h3>
+<p>Working out which products a card makes is <strong>game logic</strong>, not drawing, and it
+belongs in the engine-free <code>Core</code> assembly beside
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>.
+It is named here so the implementation does not invent a different shape:</p>
+<ul>
+<li><strong><code>DigitProducts.For(Card card)</code></strong> — a <strong>pure function</strong> from a card to an
+  ordered, read-only list of <code>DigitProduct</code>. Same card, same list, every time;
+  no state, no <code>Rng</code>, nothing to reset.</li>
+<li><strong><code>DigitProduct</code></strong> — a readonly struct of two ints, <code>MultiplierPart</code> and
+  <code>MultiplicandPart</code>. Both are <strong>place-value expanded</strong>: the tens digit <code>3</code> of
+  a multiplier <code>34</code> is the part <code>30</code>. Formatting it as <code>30 × 10</code> is the shell's
+  job; <code>Core</code> returns numbers, not strings.</li>
+<li><strong>The order</strong> is Derek's: every part of the <strong>multiplier</strong>, units first; and
+  within each, every part of the <strong>multiplicand</strong>, units first. <code>12 × 34</code> gives
+  <code>(4,2) (4,10) (30,2) (30,10)</code>.</li>
+<li><strong>A zero part contributes nothing and is skipped.</strong> <code>102 × 40</code> gives
+  <code>(40,2) (40,100)</code> — two products, not six — because <code>40 × 0</code> is a row that
+  adds nothing and a line of writing that teaches nothing.</li>
+<li><strong>The list is never longer than <code>GridAdditionRowsMax</code>.</strong> Three multiplicand
+  digits by two multiplier digits is six, which is exactly the cap, and
+  ADR-0002 bounds the card shapes at <code>3 × 2</code>. So the cap holds — and holds
+  exactly, with nothing to spare. Skipping zeros only ever makes the list
+  shorter, so it cannot be what breaks that; the bound is the same either way.</li>
+</ul>
+<p>This is testable in the fast <code>Core</code> suite with no editor, which is the point of
+putting it there.</p>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
 <p>Three, all at 1920 × 1200.</p>
 <ul>
 <li><strong>The widest card, as dealt:</strong> <a href="../mockups/working-out-grid-331x41.html"><code>mockups/working-out-grid-331x41.html</code></a></li>
 <li><strong>The easy pile, as dealt:</strong> <a href="../mockups/working-out-grid-68x5.html"><code>mockups/working-out-grid-68x5.html</code></a></li>
 <li><strong>The widest card, grown to the cap:</strong> <a href="../mockups/working-out-grid-331x41-grown.html"><code>mockups/working-out-grid-331x41-grown.html</code></a></li>
+</ul>
+<p>Three more, drawn for <code>Help me</code>, all showing the state <strong>after</strong> it is pressed:</p>
+<ul>
+<li><strong><code>12 × 34</code>, items beside the grid — the agreed picture:</strong>
+  <a href="../mockups/working-out-grid-help-12x34.html"><code>mockups/working-out-grid-help-12x34.html</code></a></li>
+<li><strong><code>12 × 34</code>, items inside a widened operator column — the comparison:</strong>
+  <a href="../mockups/working-out-grid-help-12x34-operator-column.html"><code>mockups/working-out-grid-help-12x34-operator-column.html</code></a></li>
+<li><strong><code>331 × 41</code>, six products at the cap:</strong>
+  <a href="../mockups/working-out-grid-help-331x41.html"><code>mockups/working-out-grid-help-331x41.html</code></a></li>
 </ul>
 <p><strong>All three draw the focused cell</strong>, filled with <code>GridFocusFill</code>. They always
 drew one — an answer cell with the accent outline — and until
@@ -3106,6 +3347,42 @@ grid from 732 px to 700 px, and it only passes its as-dealt height at the fifth
 row. That is the cost of one shrunk height for the whole section rather than a
 different height at every count, and it is a visible jump the first time a
 player grows a row.</p>
+<h3 id="what-the-help-me-pair-established">What the <code>Help me</code> pair established<a class="headerlink" href="#what-the-help-me-pair-established" title="Link to this section">&para;</a></h3>
+<p>The two <code>12 × 34</code> drawings are a pair asking
+<a href="#open-questions">open question 8</a>: whether the products sit inside a widened
+operator column, or outside the grid altogether. Both are drawn because the
+issue was right that this is what a mockup is for.</p>
+<p>The comparison did not go the way the arithmetic suggested. The issue expected
+the operator column to be the expensive option because the grid <em>"is already
+16 px from not fitting at six rows"</em> — but that 16 px is <strong>vertical</strong> and
+widening a column is <strong>horizontal</strong>, where there is 296 px spare on each side.
+Drawn, the widened column fits fine and looks tidier than expected: the
+products sit inside the grid's own left column, right-aligned, and read as part
+of the working rather than as marginalia.</p>
+<p>What decided it was two things a sum does not show:</p>
+<ul>
+<li><strong>The bottom row reads <code>+  30 × 10</code>.</strong> The operator column already holds the
+  <code>+</code> glyph on the section's bottom row, and a product printed in the same cell
+  shares it. <code>+ 30 × 10</code> looks like an instruction to add thirty tens.</li>
+<li><strong><code>×</code>, <code>+</code> and <code>=</code> go adrift.</strong> Doubling the column to 208 px leaves the
+  three glyphs floating in twice the space they need, on every card, whether or
+  not <code>Help me</code> was ever pressed. That is a permanent cost paid by a feature
+  nobody has to use.</li>
+</ul>
+<p>Underneath both is the structural point: the operator column is part of the
+grid, and <code>Core</code>'s
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>
+reports the grid's columns and cell kinds. Widening one of them for one feature
+changes the grid's geometry contract for every card. Printing outside it
+changes nothing at all.</p>
+<p><strong>These three are placed by this page's rule, not by hand.</strong> The three older
+grid mockups hand-place the grid — 370 where centring puts 352 — and
+<a href="#anchors">Anchors</a> already says the rule wins. These were generated from the
+rule, so the two sets are about 18 px apart horizontally and that difference is
+the older drawings', not these. They also draw the disabled button as
+<code>ButtonDisabledOpacity</code>, which is what
+<a href="../shared-components/#button">shared-components.md</a> asks for and what the older
+grid mockups' flat grey still gets wrong.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <p>Questions 2 to 5 arrived with the growable addition section
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/234">#234</a>).
@@ -3200,6 +3477,76 @@ empty row exactly where it is, and <code>clear</code> never removes a row at all
 <p><strong>6. Should the keypad have an <code>=</code>?</strong> No, currently: <code>Check it</code> is the commit,
   and two ways to submit is one too many.</p>
 </li>
+</ul>
+<p>Questions 7 to 12 arrived with <code>Help me</code>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/327">#327</a>).
+7, 8 and 9 are settled by drawing; 10, 11 and 12 are not settled by anything
+anyone has said yet.</p>
+<ul>
+<li>
+<p><strong>7. Where does <code>Help me</code> live? Settled: the header band, at its right end.</strong>
+  The issue offered three places and the measurement removed one of them
+  outright. <strong>Under <code>Check it</code> does not fit</strong>: the keypad runs to 827 px into
+  the panel, <code>KeypadSubmitGap</code> and <code>CheckButtonHeight</code> take it to 979, and the
+  last usable pixel is 1048 — 69 px, where the shared <code>ButtonHeight</code> is 112.
+  There is no room in that column and there is no way to make room without
+  moving the digit keys, which
+  <a href="#anchors">Anchors</a> forbids. <em>"Floating beside the grid"</em> was ruled out for a
+  different reason: it puts a one-way control on the side
+  <a href="../shared-components/#dialog">the dialog rule</a> says <em>"is where a thumb
+  rests"</em>. The header band is where it fits and where it cannot be pressed by
+  the hand that is typing.</p>
+</li>
+<li>
+<p><strong>8. What do the printed items look like? Settled: outside the grid,
+  right-aligned in the space the grid is centred in.</strong> The reasoning, and what
+  the losing drawing turned out to cost, are in
+  <a href="#what-the-help-me-pair-established">what the <code>Help me</code> pair established</a>
+  above. The comparison file is kept for now rather than deleted, because
+  unlike this page's earlier pairs the losing option here is genuinely
+  attractive and the argument against it is worth being able to look at. If
+  Derek agrees with the call, it goes the way of
+  <a href="../title-screen/#mockup">the title screen's <code>RESUME</code>-primary drawing</a>.</p>
+</li>
+<li>
+<p><strong>9. What happens to the section's growth rule? Settled: it grows to the
+  product count, and those rows do not shrink back.</strong> <code>Help me</code> grows the
+  section to <code>max(GridAdditionRowsAtStart, product count)</code> in one step. The
+  rows it created are exempt from the backspace-removes-a-grown-row rule for
+  the rest of the turn — the issue's own recommendation, and taken because a
+  row vanishing out from under a printed product leaves the product pointing at
+  nothing. See <a href="#behaviour">Behaviour</a>.</p>
+</li>
+<li>
+<p><strong>10. Is the product order right?</strong> <code>12 × 34</code> gives <code>4 × 2</code>, <code>4 × 10</code>,
+  <code>30 × 2</code>, <code>30 × 10</code> — units of the multiplier first, and within each, units
+  of the multiplicand first, with place value expanded. That is Derek's own
+  list from the issue, so it is the default and the drawings use it. It is
+  still worth <strong>asking Connor whether it is the order his class writes them
+  in</strong>, because being the order on the board is the entire point of the
+  feature. If it is not, the change is one line in <code>DigitProducts.For</code> and
+  nothing else on this page moves.</p>
+</li>
+<li>
+<p><strong>11. Should a zero part be printed at all?</strong> <code>102 × 40</code> expands to parts
+  <code>2</code>, <code>0</code>, <code>100</code> and <code>0</code>, <code>40</code>. Printing every combination gives six products,
+  three of which are <code>40 × 0</code> and none of which teach anything, so
+  <a href="#what-core-owns-the-product-list"><code>DigitProducts.For</code></a> <strong>skips zero parts</strong>
+  and that card gets two. This is a decision made in order to be able to draw
+  anything at all, not one anybody asked for, and it is reversible: it changes
+  what is printed and nothing about the layout, because both readings are
+  bounded by the same six rows. If Connor's class writes the zero rows out, the
+  skip comes off.</p>
+</li>
+</ul>
+<p>Worth noticing while it is open: on <code>331 × 41</code> the first product prints as
+  <code>1 × 1</code>, which is correct, useless, and slightly odd-looking. That is what
+  expanded place value does to a leading <code>1</code> and it is not a bug.</p>
+<ul>
+<li><strong>12. Is <code>Help me</code> the right words?</strong> Derek's phrase, and the default. It is
+  the button an eight-year-old presses when he is stuck, so what it should say
+  is Connor's call — the same way
+  <a href="../settings-dialog/#open-questions"><code>Designed by Connor</code></a> is.</li>
 </ul>
 
 

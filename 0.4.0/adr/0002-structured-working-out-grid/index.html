@@ -2131,6 +2131,36 @@ do <code>68 × 5</code> in their head fills one row; a player facing <code>331 �
 through the partial products. No toggle, no "show working" button, nothing to
 discover — which matters on a shared device, where every mode arrives at the next
 player in whatever state the last one left it.</p>
+<blockquote>
+<p><strong>This second constraint was deliberately reversed by Derek</strong>, in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/327">#327</a>.
+The working-out grid now has a <code>Help me</code> button that prints the digit
+products beside the addition rows — which is a toggle, is discoverable, and
+picks partial products as the layout it writes out. It is exactly the thing
+the paragraph above says not to build.</p>
+<p>This note records the change rather than editing the paragraph away. An ADR
+is a record of what was decided and when, so a constraint that stopped
+applying is struck through in place, not deleted — otherwise the next reader
+cannot tell the difference between a rule that never existed and one that was
+weighed and overturned.</p>
+<p><strong>What was traded, and what was kept.</strong> The specific worry above is that a
+mode <em>"arrives at the next player in whatever state the last one left it"</em>,
+and that one is answered rather than accepted:
+<a href="../../specs/ui/working-out-grid/#invariants">working-out-grid.md</a> makes
+<code>Help me</code> reset with the card, one-way within a turn and unpressed on every
+deal, as an invariant a test can assert. What is genuinely given up is the
+<em>"nothing to discover"</em> half: there is now a button on the screen that a
+player can find, and a player who finds it sees partial products written out.</p>
+<p><strong>The first constraint is untouched.</strong> Nothing <code>Help me</code> prints is graded,
+nothing it prints is entered for the player, and only the answer row still
+decides whether the frog moves. Picking partial products as the algorithm to
+<em>write beside the rows</em> is not the same as picking one to <em>grade against</em>,
+and the difference is the whole of why this reversal was affordable. The
+grid still takes any layout the player wants, and marks none of them.</p>
+<p>Two things soften it further, and they were the argument for accepting it:
+nothing printed is graded, so the addition section is still scratch paper;
+and it is opt-in and per-turn, so nobody who does not press it ever sees it.</p>
+</blockquote>
 <h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Link to this section">&para;</a></h2>
 <ul>
 <li>The grid must be <strong>sized to the card</strong>, not to the largest possible problem, or
