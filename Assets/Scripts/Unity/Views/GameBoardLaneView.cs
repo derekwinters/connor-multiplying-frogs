@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using BoardColours = Frogs.Unity.UI.BoardColours;
 using FrogColours = Frogs.Unity.UI.FrogColours;
+using LilyPadSprite = Frogs.Unity.UI.LilyPadSprite;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
 using RoundedRectSprite = Frogs.Unity.UI.RoundedRectSprite;
@@ -29,6 +30,12 @@ namespace Frogs.Unity.Views
     /// on its own lane's centre line on a log it shares with nobody's position
     /// but its own.
     ///
+    /// Its seven pads are **not seven identical discs**. Each is notched and
+    /// veined, and which notch it gets is a pure function of the pad's own
+    /// coordinates — <see cref="LilyPadVariationFor"/>, and the twelve-entry
+    /// table on that page. Nothing about it is stored and nothing is saved, so
+    /// a pad cannot come back a different shape.
+    ///
     /// It reads, and never computes. Where the frog sits and whether it is
     /// home come straight off the <see cref="Lane"/> it is handed on every
     /// <see cref="Render"/>: this type places the piece **onto the track
@@ -48,6 +55,30 @@ namespace Frogs.Unity.Views
         // docs/specs/ui/game-board.md#named-constants — the lane's table.
         public const float LaneHeight = 184f;
         public const float LilyPadDiameter = 112f;
+
+        // The pad's own shape — game-board.md's "The lily pad is notched,
+        // veined, and varies per pad" (#411). A pad is a circle with a wedge
+        // cut from it and five veins across it, and both the notch's width and
+        // the direction it points vary from pad to pad.
+
+        /// <summary>Where the wedge's apex sits, as a fraction of the radius out from the pad's centre — so the cut crosses most of the pad and stops short of the middle.</summary>
+        public const float LilyPadNotchDepth = 0.15f;
+
+        /// <summary>How many veins are drawn across a pad.</summary>
+        public const int LilyPadVeinCount = 5;
+
+        /// <summary>The gap the veins leave at the centre, as a fraction of the radius, so the five do not converge into a dark hub.</summary>
+        public const float LilyPadVeinInset = 0.20f;
+
+        /// <summary>The gap they leave at the rim, as a fraction of the radius.</summary>
+        public const float LilyPadVeinOutset = 0.12f;
+
+        /// <summary>A vein's stroke.</summary>
+        public const float LilyPadVeinWidth = 2.5f;
+
+        /// <summary>How strongly a vein reads against the surface, drawn in `LilyPadEdge`.</summary>
+        public const float LilyPadVeinOpacity = 0.5f;
+
         public const float FrogPieceDiameter = 88f;
         public const float FrogPieceOutline = 4f;
         public const float TrackOutline = 3f;
@@ -97,6 +128,16 @@ namespace Frogs.Unity.Views
         // redeclared — see Lane.LanePositionCount / Lane.LaneWinningPosition
         // throughout this file.
 
+        // The variation table's own arithmetic — game-board.md's
+        // `index = (lane x 5 + position) mod 12`. The twelve is the table's
+        // own length rather than a second copy of it; this is the stride.
+        const int LilyPadVariationLaneStride = 5;
+
+        // Whole turns, so that the vein fan's arithmetic reads as the
+        // geometry it is rather than as two bare numbers.
+        const float FullTurnDegrees = 360f;
+        const float HalfTurnDegrees = 180f;
+
         // The chip's progress line — docs/specs/ui/game-board.md's Elements
         // section: "Pad count — on the chip: `3 of 8`". The numerator is
         // whatever Lane reports; the denominator is Lane.LaneWinningPosition.
@@ -115,44 +156,148 @@ namespace Frogs.Unity.Views
         // them a home on the spec page and this file the same relationship to
         // them it already had to every other number on this screen.
 
-        static Sprite s_lilyPadSprite;
-        static Sprite s_lilyPadFillSprite;
+        // docs/specs/ui/game-board.md's twelve-entry variation table, as its
+        // own two columns and in its own order: row `i` is the pad whose
+        // coordinates give `i`. Each column is one line, and deliberately, so
+        // that every number in it sits in a named declaration rather than
+        // behind an opening brace — see .github/scripts/check_geometry_literals.py,
+        // and Degrees, below.
+        static readonly float[] s_notchWidthByRow = Degrees(20f, 10f, 25f, 15f, 20f, 25f, 10f, 15f, 25f, 15f, 20f, 10f);
+        static readonly float[] s_pointsAtByRow = Degrees(14f, 212f, 96f, 308f, 175f, 47f, 260f, 131f, 341f, 78f, 238f, 158f);
+
+        // `LilyPadNotchAngles` is the page's own name for the four notch
+        // **widths** that table uses — the only values on it that cost an
+        // asset, because what a notch points at is a rotation.
+        static readonly float[] s_lilyPadNotchAngles = Degrees(10f, 15f, 20f, 25f);
+
+        // One sprite per notch width, built the first time a pad asks for it.
+        // Four, not twelve: the table's rotations are free. Declared after the
+        // column it is sized from, because static fields initialise in the
+        // order they are written.
+        static readonly Sprite[] s_lilyPadSprites = new Sprite[s_lilyPadNotchAngles.Length];
+
         static Sprite s_pieceSprite;
         static Sprite s_pieceFillSprite;
 
-        // Every outline is the element's own image with its fill inset inside
-        // it — the same two-image shape PlayerChip uses for its active ring.
-        // Each rounded shape gets a sprite generated at its own radius rather
-        // than one sprite stretched to two sizes, so the inset one keeps its
-        // curve instead of squaring off.
-        static Sprite LilyPadSprite
+        /// <summary>
+        /// The four notch widths in the variation table — game-board.md's
+        /// `LilyPadNotchAngles`, 10, 15, 20 and 25 degrees.
+        /// </summary>
+        public static IReadOnlyList<float> LilyPadNotchAngles
         {
-            get
-            {
-                if (s_lilyPadSprite == null)
-                {
-                    // A rounded rect whose radius is half its own size is a
-                    // circle — the same shape the Player chip's swatch uses,
-                    // rather than a second way of drawing one.
-                    s_lilyPadSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(LilyPadDiameter / 2f));
-                }
-
-                return s_lilyPadSprite;
-            }
+            get { return s_lilyPadNotchAngles; }
         }
 
-        static Sprite LilyPadFillSprite
+        /// <summary>
+        /// Which row of the variation table a pad at these coordinates draws:
+        /// <c>(lane x 5 + position) mod 12</c>, game-board.md's own formula.
+        ///
+        /// **It is a pure function of where the pad is, and that is the whole
+        /// design.** Nothing about a pad's shape is stored, so nothing about
+        /// it is saved — the save format is Core's under ADR-0004, and a
+        /// random-per-game variation would be a schema change and a migration
+        /// for a cosmetic detail. A pad therefore never changes shape when the
+        /// board redraws, when a frog hops, or between runs and devices.
+        ///
+        /// The `x 5` is why the four lanes do not line up into visible
+        /// columns.
+        /// </summary>
+        public static int LilyPadVariationFor(int lane, int position)
         {
-            get
-            {
-                if (s_lilyPadFillSprite == null)
-                {
-                    s_lilyPadFillSprite = RoundedRectSprite.CreateRoundedRect(
-                        Mathf.RoundToInt((LilyPadDiameter - (2f * TrackOutline)) / 2f));
-                }
+            var row = ((lane * LilyPadVariationLaneStride) + position) % s_notchWidthByRow.Length;
 
-                return s_lilyPadFillSprite;
+            return row < 0 ? row + s_notchWidthByRow.Length : row;
+        }
+
+        /// <summary>How wide the wedge cut from this pad is, in degrees — the table's `Notch` column.</summary>
+        public static float LilyPadNotchWidthFor(int lane, int position)
+        {
+            return s_notchWidthByRow[LilyPadVariationFor(lane, position)];
+        }
+
+        /// <summary>
+        /// Which way this pad's notch points, in degrees — the table's `Points
+        /// at` column. Measured the way the mockup's SVG measures them: 0
+        /// points right along the lane, 90 points down.
+        /// </summary>
+        public static float LilyPadNotchAngleFor(int lane, int position)
+        {
+            return s_pointsAtByRow[LilyPadVariationFor(lane, position)];
+        }
+
+        /// <summary>
+        /// Where a pad's five veins lie, in degrees from the notch's own axis.
+        ///
+        /// They are symmetric about it — one vein runs straight out opposite
+        /// the notch and two pairs sit either side — and the five of them and
+        /// the notch divide the circle into six equal parts, so consecutive
+        /// veins are <c>(360 - notch) / 6</c> apart and the outermost on each
+        /// side clears the notch's edge by that same angle. An even count
+        /// would straddle the notch's line and read less like a leaf.
+        /// </summary>
+        public static IReadOnlyList<float> LilyPadVeinAnglesFor(float notchWidth)
+        {
+            var spacing = (FullTurnDegrees - notchWidth) / (LilyPadVeinCount + 1);
+            var middle = LilyPadVeinCount / 2;
+            var angles = new float[LilyPadVeinCount];
+
+            for (var vein = 0; vein < angles.Length; vein++)
+            {
+                angles[vein] = HalfTurnDegrees + ((vein - middle) * spacing);
             }
+
+            return angles;
+        }
+
+        // One column of the variation table, in degrees. A `params` list
+        // rather than an array initialiser so that the whole column is a
+        // single named declaration: `{ 20f, 10f, ... }` is a dozen bare
+        // literals as far as the geometry-literal check is concerned, and it
+        // is right to say so about braces in general.
+        static float[] Degrees(params float[] values)
+        {
+            return values;
+        }
+
+        // The pad drawn for one of the four notch widths, built once and
+        // shared by every pad on the board that wants it.
+        static Sprite LilyPadSpriteFor(float notchWidth)
+        {
+            var width = IndexOfNotchWidth(notchWidth);
+
+            if (s_lilyPadSprites[width] == null)
+            {
+                s_lilyPadSprites[width] = LilyPadSprite.Create(
+                    Mathf.RoundToInt(LilyPadDiameter),
+                    TrackOutline,
+                    s_lilyPadNotchAngles[width],
+                    LilyPadNotchDepth,
+                    LilyPadVeinAnglesFor(s_lilyPadNotchAngles[width]),
+                    LilyPadVeinInset,
+                    LilyPadVeinOutset,
+                    LilyPadVeinWidth,
+                    LilyPadVeinOpacity,
+                    BoardColours.LilyPadGreen,
+                    BoardColours.LilyPadEdge);
+            }
+
+            return s_lilyPadSprites[width];
+        }
+
+        static int IndexOfNotchWidth(float notchWidth)
+        {
+            for (var width = 0; width < s_lilyPadNotchAngles.Length; width++)
+            {
+                if (Mathf.Approximately(s_lilyPadNotchAngles[width], notchWidth))
+                {
+                    return width;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(
+                nameof(notchWidth),
+                notchWidth,
+                "a lily pad's notch is one of game-board.md's `LilyPadNotchAngles`.");
         }
 
         static Sprite PieceSprite
@@ -253,13 +398,13 @@ namespace Frogs.Unity.Views
         PlayerChip _chip;
         RectTransform _trackRect;
         readonly List<RectTransform> _positionRects = new List<RectTransform>();
-        readonly List<Image> _lilyPadFills = new List<Image>();
-        readonly List<Image> _lilyPadOutlines = new List<Image>();
+        readonly List<Image> _lilyPads = new List<Image>();
         RectTransform _pieceRect;
         Image _pieceOutline;
         Image _piece;
 
         bool _initialized;
+        int _laneIndex;
         FrogColour _colour;
         int _renderedPosition;
         float _screenWidth;
@@ -366,31 +511,36 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// The seven lily pads' fills — positions 1 to 7, in order, and the
-        /// whole of what this lane draws for itself. Every one is drawn
-        /// identically: "the pad a frog is on is drawn no differently from the
-        /// others; the frog on it is the marker."
+        /// The seven lily pads — positions 1 to 7, in order, and the whole of
+        /// what this lane draws for itself. Each is one image: its surface,
+        /// its <see cref="TrackOutline"/> rim and its veins are one drawing,
+        /// generated by <see cref="LilyPadSprite"/> and turned to point its
+        /// notch where <see cref="LilyPadNotchAngleFor"/> says.
+        ///
+        /// Every one is drawn from its own coordinates and from nothing else:
+        /// "the pad a frog is on is drawn no differently from the others; the
+        /// frog on it is the marker."
         /// </summary>
-        public IReadOnlyList<Image> LilyPadFills
+        public IReadOnlyList<Image> LilyPads
         {
             get
             {
                 EnsureInitialized();
-                return _lilyPadFills;
+                return _lilyPads;
             }
         }
 
         /// <summary>
-        /// The seven lily pads' outlines — <see cref="TrackOutline"/> thick,
-        /// drawn inside each pad's own bounds so the track's width is exactly
-        /// the sum the spec's arithmetic gives.
+        /// Which lane down the pond this is — 0 at the top. It is what the
+        /// pads' variation is indexed by, along with each pad's position, and
+        /// nothing else on this lane depends on it.
         /// </summary>
-        public IReadOnlyList<Image> LilyPadOutlines
+        public int LaneIndex
         {
             get
             {
                 EnsureInitialized();
-                return _lilyPadOutlines;
+                return _laneIndex;
             }
         }
 
@@ -444,14 +594,28 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// Sets which frog this lane belongs to and what its player is
-        /// called, and paints it. The name comes in rather than being
-        /// derived from the colour, because a renamed frog's lane has to
-        /// say the typed name.
+        /// Sets which lane down the pond this is, which frog it belongs to and
+        /// what its player is called, and paints it. The name comes in rather
+        /// than being derived from the colour, because a renamed frog's lane
+        /// has to say the typed name.
+        ///
+        /// <paramref name="laneIndex"/> is what the lily pads' variation is
+        /// indexed by. A lane builds itself the moment the component is added,
+        /// before anything has told it which lane it is, so its seven pads are
+        /// drawn again here — from their coordinates, exactly as they were
+        /// drawn the first time, because that is all their shape ever depends
+        /// on.
         /// </summary>
-        public void Initialize(FrogColour colour, string name = null)
+        public void Initialize(int laneIndex, FrogColour colour, string name = null)
         {
             EnsureInitialized();
+
+            _laneIndex = laneIndex;
+
+            for (var position = 1; position < Lane.LaneWinningPosition; position++)
+            {
+                ShapeLilyPad(position);
+            }
 
             _colour = colour;
             _chip.SetFrog(FrogColours.For(colour), name ?? PlayerName.DefaultFor(colour));
@@ -660,34 +824,58 @@ namespace Frogs.Unity.Views
 
         RectTransform BuildLilyPad(int position)
         {
-            var padGO = new GameObject("LilyPad" + position, typeof(RectTransform), typeof(Image));
-            var outline = padGO.GetComponent<Image>();
-            outline.sprite = LilyPadSprite;
-            outline.type = Image.Type.Sliced;
-            outline.color = BoardColours.LilyPadEdge;
-            outline.raycastTarget = false;
-
-            var padRect = outline.rectTransform;
+            // The pad's place on the lane, which is square to the board and
+            // stays that way: it is what the frog is parented onto and what
+            // the row's whole arithmetic is measured against.
+            var padGO = new GameObject("LilyPad" + position, typeof(RectTransform));
+            var padRect = (RectTransform)padGO.transform;
             padRect.sizeDelta = new Vector2(LilyPadDiameter, LilyPadDiameter);
 
-            var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
-            var fill = fillGO.GetComponent<Image>();
-            fill.sprite = LilyPadFillSprite;
-            fill.type = Image.Type.Sliced;
-            fill.color = BoardColours.LilyPadGreen;
-            fill.raycastTarget = false;
+            // The pad's drawing, which turns. Its surface, its rim and its
+            // veins are one image rather than three, because they are one
+            // shape: a rim cannot be an inset copy of a notched circle — an
+            // inset copy has the notch's own edges in the same place, and so
+            // draws no rim along them at all.
+            var artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
+            var art = artGO.GetComponent<Image>();
+            art.type = Image.Type.Simple;
 
-            var fillRect = fill.rectTransform;
-            fillRect.SetParent(padRect, worldPositionStays: false);
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
-            fillRect.offsetMin = new Vector2(TrackOutline, TrackOutline);
-            fillRect.offsetMax = new Vector2(-TrackOutline, -TrackOutline);
+            // Untinted: the pad's three colours are in the sprite, which is
+            // how an imported PNG would carry them too.
+            art.color = Color.white;
+            art.raycastTarget = false;
 
-            _lilyPadOutlines.Add(outline);
-            _lilyPadFills.Add(fill);
+            var artRect = art.rectTransform;
+            artRect.SetParent(padRect, worldPositionStays: false);
+            artRect.anchorMin = Vector2.zero;
+            artRect.anchorMax = Vector2.one;
+            artRect.offsetMin = Vector2.zero;
+            artRect.offsetMax = Vector2.zero;
+
+            _lilyPads.Add(art);
+
+            ShapeLilyPad(position);
 
             return padRect;
+        }
+
+        // Draws the pad at `position` as the variation table says a pad at
+        // these coordinates is drawn: the sprite for its notch's width, turned
+        // to point that notch where the table says.
+        void ShapeLilyPad(int position)
+        {
+            var art = _lilyPads[position - 1];
+
+            art.sprite = LilyPadSpriteFor(LilyPadNotchWidthFor(_laneIndex, position));
+
+            // game-board.md measures its angles the way the mockup's SVG does
+            // — 0 right along the lane, 90 down — and a uGUI z-rotation turns
+            // the other way about, so the pad is turned by minus the table's
+            // angle.
+            art.rectTransform.localRotation = Quaternion.Euler(
+                0f,
+                0f,
+                -LilyPadNotchAngleFor(_laneIndex, position));
         }
 
         void BuildPiece()

@@ -337,27 +337,32 @@ namespace Frogs.Unity.EditModeTests
                 // pond's now, so there is no eighth or ninth element here to
                 // walk.
                 Assert.That(
-                    lane.LilyPadFills.Count,
+                    lane.LilyPads.Count,
                     Is.EqualTo(Lane.LanePositionCount - 2),
                     "seven lily pads — everything else on this lane's track is somebody else's drawing");
-                Assert.That(lane.LilyPadOutlines.Count, Is.EqualTo(Lane.LanePositionCount - 2));
 
-                // Outlines are drawn inside each element's own bounds, so
-                // they cost the 1520 px track nothing.
-                for (var index = 0; index < lane.LilyPadFills.Count; index++)
+                // A pad is one drawing — surface, rim and veins together
+                // (#411) — filling the position it sits on exactly, so the
+                // rim is inside the element's own bounds and costs the
+                // 1520 px track nothing.
+                for (var index = 0; index < lane.LilyPads.Count; index++)
                 {
                     var position = index + 1;
-                    var fill = lane.LilyPadFills[index].rectTransform;
+                    var pad = lane.LilyPads[index].rectTransform;
 
-                    Assert.That(lane.LilyPadOutlines[index].rectTransform, Is.SameAs(positions[position]));
-                    Assert.That(fill.parent, Is.SameAs(positions[position].transform));
+                    Assert.That(pad.parent, Is.SameAs(positions[position].transform));
                     Assert.That(
-                        fill.offsetMin,
-                        Is.EqualTo(new Vector2(GameBoardLaneView.TrackOutline, GameBoardLaneView.TrackOutline)),
-                        $"position {position}'s fill is inset by TrackOutline");
+                        pad.rect.size,
+                        Is.EqualTo(new Vector2(
+                            GameBoardLaneView.LilyPadDiameter,
+                            GameBoardLaneView.LilyPadDiameter)),
+                        $"position {position}'s pad is LilyPadDiameter across");
                     Assert.That(
-                        fill.offsetMax,
-                        Is.EqualTo(new Vector2(-GameBoardLaneView.TrackOutline, -GameBoardLaneView.TrackOutline)));
+                        positions[position].rect.size,
+                        Is.EqualTo(new Vector2(
+                            GameBoardLaneView.LilyPadDiameter,
+                            GameBoardLaneView.LilyPadDiameter)),
+                        $"position {position}'s own rect is too");
                 }
 
                 Assert.That(
@@ -890,6 +895,19 @@ namespace Frogs.Unity.EditModeTests
             {
                 { "LaneHeight", 184f },
                 { "LilyPadDiameter", 112f },
+
+                // The pad's own shape (#411) — the six rows game-board.md's
+                // lane table carries for "the lily pad is notched, veined, and
+                // varies per pad". `LilyPadNotchAngles` is that section's
+                // seventh row and is not in this list, because a list of four
+                // widths cannot be a `const`; it is asserted below instead.
+                { "LilyPadNotchDepth", 0.15f },
+                { "LilyPadVeinCount", 5f },
+                { "LilyPadVeinInset", 0.20f },
+                { "LilyPadVeinOutset", 0.12f },
+                { "LilyPadVeinWidth", 2.5f },
+                { "LilyPadVeinOpacity", 0.5f },
+
                 { "FrogPieceDiameter", 88f },
                 { "FrogPieceOutline", 4f },
                 { "TrackOutline", 3f },
@@ -959,6 +977,13 @@ namespace Frogs.Unity.EditModeTests
             Assert.That(
                 GameBoardLaneView.LanePositionGapCount,
                 Is.EqualTo(Lane.LanePositionCount - 1).Within(0.001f));
+
+            // `LilyPadNotchAngles` — the four notch widths in the variation
+            // table, and the only values on it that cost a sprite.
+            Assert.That(
+                GameBoardLaneView.LilyPadNotchAngles.ToArray(),
+                Is.EqualTo(new[] { 10f, 15f, 20f, 25f }),
+                "the four notch widths game-board.md's lane table names");
 
             // The remaining two of game-board.md's constants are Lane's own,
             // reused under the same name rather than redeclared here.
@@ -1068,8 +1093,7 @@ namespace Frogs.Unity.EditModeTests
                 var lane = view.LaneFor(FrogColour.Green);
                 Assert.That(lane.Piece.sprite, Is.Not.Null);
                 Assert.That(lane.PieceOutline.sprite, Is.Not.Null);
-                Assert.That(lane.LilyPadFills[0].sprite, Is.Not.Null);
-                Assert.That(lane.LilyPadOutlines[0].sprite, Is.Not.Null);
+                Assert.That(lane.LilyPads[0].sprite, Is.Not.Null);
 
                 Assert.That(view.StartLog.sprite, Is.Not.Null);
                 Assert.That(view.EndLog.sprite, Is.Not.Null);

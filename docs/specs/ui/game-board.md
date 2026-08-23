@@ -256,7 +256,11 @@ index = (lane × 5 + position) mod 12
 | 5 | 25° | 47° | | 11 | 10° | 158° |
 
 Angles are measured the way the mockup's SVG measures them: 0° points right
-along the lane, 90° points down. The `× 5` offset exists so the four lanes do
+along the lane, 90° points down. **The `Notch` column is the wedge's angular
+width**, so its two ends sit half of it either side of the direction the pad
+points at; `LilyPadNotchDepth` is where the wedge's apex is, measured **out
+from the centre** — 0.15 of the radius, so the cut crosses most of the pad and
+stops just short of the middle. The `× 5` offset exists so the four lanes do
 not line up into visible columns; the rotations span the whole circle rather
 than clustering, because an earlier draft confined them to the bottom
 semicircle and read as "all the notches point down at slightly different
@@ -288,6 +292,15 @@ out opposite the notch and two pairs sit either side of it. An even count
 straddles that line and reads less like a leaf. Each vein stops short at both
 ends — `LilyPadVeinInset` at the centre so the five do not converge into a dark
 hub, and `LilyPadVeinOutset` at the rim.
+
+**The five veins and the notch divide the circle into six equal parts.**
+Consecutive veins are `(360° − notch) ÷ 6` apart, and the outermost vein on
+each side clears the notch's edge by that same angle — so a pad reads as evenly
+leafed whichever of the four notch widths it has. This is what the mockup
+draws; it is written down here because it is the one thing about the fan that
+"five, symmetric, one opposite the notch" does not already fix, and an
+implementation that spaced them any other way would satisfy every sentence
+above it and still be a different drawing.
 
 **None of this changes `LilyPadDiameter`.** 112 px is the number that
 [decided lanes-across over lanes-up](#why-the-lanes-run-across); only the

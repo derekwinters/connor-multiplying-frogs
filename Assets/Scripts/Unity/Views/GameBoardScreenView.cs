@@ -889,7 +889,11 @@ namespace Frogs.Unity.Views
                     groupTop - ((index + 0.5f) * GameBoardLaneView.LaneHeight));
 
                 var lane = laneGO.AddComponent<GameBoardLaneView>();
-                lane.Initialize(colour, _game.NameFor(colour));
+
+                // The lane's index down the pond, which is what its lily pads'
+                // variation is indexed by (#411) — game-board.md's
+                // `index = (lane x 5 + position) mod 12`.
+                lane.Initialize(index, colour, _game.NameFor(colour));
 
                 _lanes.Add(lane);
                 _lanesByColour[colour] = lane;
