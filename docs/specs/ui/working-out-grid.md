@@ -605,10 +605,14 @@ place value being marked, and it needs its own decision.
 
 ### What `Core` owns: the product list
 
-Working out which products a card makes is **game logic**, not drawing, and it
-belongs in the engine-free `Core` assembly beside
-[`WorkingOutGrid`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs).
-It is named here so the implementation does not invent a different shape:
+Working out which products a card makes is **game logic**, not drawing, so it
+lives in the engine-free `Core` assembly beside
+[`WorkingOutGrid`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs),
+in
+[`DigitProducts`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/DigitProducts.cs)
+([#415](https://github.com/derekwinters/connor-multiplying-frogs/issues/415)).
+The shape was named here before it was built, so the implementation could not
+invent a different one:
 
 - **`DigitProducts.For(Card card)`** — a **pure function** from a card to an
   ordered, read-only list of `DigitProduct`. Same card, same list, every time;
@@ -622,15 +626,26 @@ It is named here so the implementation does not invent a different shape:
   `(4,2) (4,10) (30,2) (30,10)`.
 - **A zero part contributes nothing and is skipped.** `102 × 40` gives
   `(40,2) (40,100)` — two products, not six — because `40 × 0` is a row that
-  adds nothing and a line of writing that teaches nothing.
+  adds nothing and a line of writing that teaches nothing. An operand of `0`
+  therefore has no parts at all, which is the same rule rather than a case of
+  its own: `68 × 0` — a card the Easy pile can deal, since
+  [`Card.OneDigitMinimum`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/Card.cs)
+  is `0` — makes **no products**, and `Help me` on it has nothing to print.
+  What the shell does with an empty list is the shell's
+  ([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)).
 - **The list is never longer than `GridAdditionRowsMax`.** Three multiplicand
   digits by two multiplier digits is six, which is exactly the cap, and
   ADR-0002 bounds the card shapes at `3 × 2`. So the cap holds — and holds
   exactly, with nothing to spare. Skipping zeros only ever makes the list
   shorter, so it cannot be what breaks that; the bound is the same either way.
 
-This is testable in the fast `Core` suite with no editor, which is the point of
-putting it there.
+This is tested in the fast `Core` suite with no editor, which is the point of
+putting it there —
+[`Tests/Core/DigitProductsTests.cs`](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Tests/Core/DigitProductsTests.cs)
+holds the worked examples above, and it holds the `GridAdditionRowsMax` bound
+over **every card the three piles can deal** — all 90,000 of them — rather than
+over one example, because the card that would break a bound is the one nobody
+thought to write down.
 
 ## Mockup
 
