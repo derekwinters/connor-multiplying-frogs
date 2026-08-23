@@ -150,10 +150,21 @@ something to leave behind as a value nothing reads.
 
 ## Elements
 
-- **`How to play`** — secondary [button](shared-components.md#button). Opens the
-  rules. Still disabled: the screen it opens is being designed in
-  [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324)
-  and until that lands there is nothing to open.
+- **`How to play`** — secondary [button](shared-components.md#button). Opens
+  [how to play](how-to-play.md), the five-page screen that says how a turn
+  goes. **Enabled**, as of
+  [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324):
+  the screen it opens is now specified, so the reason this button was disabled
+  has gone. It is still disabled *in the built dialog*, and will be until the
+  implementation issue lands — the same lag as
+  [`SettingsDialogHeight`](#the-built-dialog-does-not-have-these-numbers-yet),
+  and resolved the same way: this page is authoritative and the code follows
+  it.
+
+  Note what it opens is a **screen, not a dialog**. It replaces this dialog
+  rather than covering it, because
+  [a dialog never opens over another dialog](shared-components.md#dialog).
+  Leaving it comes back here, to this dialog, open and unchanged.
 - **`End the game`** — destructive button. Opens
   [end-game confirm](end-game-confirm.md). Never ends anything by itself.
 - **`Back to the game`** — primary button. Closes and returns to exactly the
@@ -290,8 +301,19 @@ The footprint placement lifted it 260 px to make room for a band underneath.
   screen, and it is not what
   [#322](https://github.com/derekwinters/connor-multiplying-frogs/issues/322)
   asked for.
-- **What does `How to play` open?** Being answered by
-  [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324),
-  which is designing the screen. Until it lands the button stays present and
-  disabled, which is the answer this page already settled: a disabled button
-  that appears later is less confusing than a button that appears from nowhere.
+- **5. What does `How to play` open? Settled: a five-page screen.**
+  [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324)
+  designed it and it is specified at [how to play](how-to-play.md). Of the two
+  options this page used to weigh — a screen the game draws, or a photograph of
+  the classroom rules card — the drawn screen won, because it is legible at the
+  tablet's size and a photograph that does not exist yet cannot be guaranteed
+  to be. The card is not dropped: it is
+  [that page's open question 3](how-to-play.md#open-questions), for once
+  [#171](https://github.com/derekwinters/connor-multiplying-frogs/issues/171)
+  has produced the photograph.
+
+  The judgement this page made while the question was open turned out to be the
+  right one and is worth keeping: a disabled button that becomes live later is
+  less confusing than a button that appears from nowhere. The button has been
+  sitting in this layout since the dialog was first drawn, in exactly the place
+  it will work from.

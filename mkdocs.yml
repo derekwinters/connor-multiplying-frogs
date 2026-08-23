@@ -104,6 +104,7 @@ nav:
           - Answer result: specs/ui/answer-result.md
           - A player has won: specs/ui/player-won.md
           - Settings dialog: specs/ui/settings-dialog.md
+          - How to play: specs/ui/how-to-play.md
           - End-game confirm: specs/ui/end-game-confirm.md
           - Game over: specs/ui/game-over.md
           - Mockups: specs/ui/mockups/index.md

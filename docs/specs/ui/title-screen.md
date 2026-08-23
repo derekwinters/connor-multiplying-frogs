@@ -219,13 +219,25 @@ wireframe is deciding *where the art goes*, not what it is.
   answer honestly, not as `RESUME` being removed outright — the `Disabled` and
   `Absent` options this question used to weigh are not chosen; `RESUME` stays
   a real button that is simply always hidden today.
-- **Is there a `How to play` button here?** Proposed: no. The rules are one
-  sentence long, Connor already knows them, and
-  [an in-app tutorial is parked](../future-ideas.md). If one is wanted it goes
-  beneath the `RESUME`/`NEW` row as a secondary button — and it needs its own
-  wireframe for the screen it opens. Note that it would make three interactive
-  elements, so it is a change to this page's first invariant as well as to its
-  layout.
+- **Is there a `How to play` button here?** Proposed: still no — but for a
+  different reason than before, because half of the old reason has gone.
+
+  This question used to end *"it needs its own wireframe for the screen it
+  opens"*. That screen now exists:
+  [#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324)
+  specified [how to play](how-to-play.md), reachable from the
+  [settings dialog](settings-dialog.md). So there is somewhere for a button
+  here to go, and the argument for putting one here is a real one — somebody
+  who has never played reaches for the title screen, not for a gear inside a
+  game they have not started.
+
+  What is left in the way is this page's own first invariant: *"the only
+  interactive elements on this screen are `RESUME` and `NEW`. There is never a
+  third."* Adding the button is a change to that invariant, and changing it is
+  a decision about what this screen is, not a consequence of the other screen
+  existing. It should be its own issue. If it is taken, the button goes beneath
+  the `RESUME`/`NEW` row as a secondary one, and it opens the same screen the
+  gear does.
 - **Does the title screen come back after a game, or does `Play again` restart
   directly?** Both exist on [game over](game-over.md); this screen does not care
   which is used.

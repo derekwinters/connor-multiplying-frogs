@@ -23,6 +23,7 @@ Every screen and every dialog in v1, in the order a game meets them.
 | [Answer result](answer-result.md) | Right or wrong, and what your frog does |
 | [A player has won](player-won.md) | The moment a frog gets home |
 | [Settings dialog](settings-dialog.md) | The rules, the exit, the version |
+| [How to play](how-to-play.md) | Five pages saying how a turn goes |
 | [End-game confirm](end-game-confirm.md) | The one dialog that can end everybody's game |
 | [Game over](game-over.md) | Who won, and where everybody got to |
 
