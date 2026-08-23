@@ -241,16 +241,16 @@ namespace Frogs.Unity.EditModeTests
                     gear.height,
                     Is.EqualTo(GameBoardScreenView.SettingsButtonSize).Within(Tolerance));
 
-                var chip = BoundsOf(view.TurnBannerChip.RectTransform, canvas);
+                var banner = BoundsOf(view.TurnBannerText.rectTransform, canvas);
 
                 Assert.That(
-                    chip.xMin,
+                    banner.xMin,
                     Is.EqualTo((-WideWidth / 2f) + GameBoardScreenView.SafeMargin).Within(Tolerance),
                     "the turn banner is a safe margin in from the real left edge");
                 Assert.That(
-                    chip.width,
-                    Is.EqualTo(PlayerChip.PlayerChipWidth).Within(Tolerance),
-                    "the header's chip is the shared component's own width on every screen");
+                    view.TurnBannerText.fontSize,
+                    Is.EqualTo((int)GameBoardScreenView.TurnBannerSize),
+                    "the banner's words are their own size on every screen, not a share of it");
 
                 // Centred, and its own size: `Roll` is the control the spec
                 // says a wider screen has nothing to do to.

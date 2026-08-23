@@ -6,14 +6,14 @@ using UnityEngine.UI;
 // UnityEngine.UI also declares a Button type — the same collision
 // ButtonTests.cs, TitleScreenView.cs and GameSetupScreenView.cs work around —
 // so these are pulled in by explicit alias rather than a wildcard
-// `using Frogs.Unity.UI;`, and a bare `Button`, `ButtonKind`, `FrogColours`
-// or `PlayerChip` in this file always means the shared component's.
+// `using Frogs.Unity.UI;`, and a bare `Button` or `ButtonKind` in this file
+// always means the shared component's. `FrogColours`, `PlayerChip` and
+// `PlayerChipState` were three more of these until #326 took the header's
+// chip away — this screen now names a frog's colour only through the lane
+// views, which alias them for themselves.
 using BoardColours = Frogs.Unity.UI.BoardColours;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
-using FrogColours = Frogs.Unity.UI.FrogColours;
-using PlayerChip = Frogs.Unity.UI.PlayerChip;
-using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
 using RoundedRectSprite = Frogs.Unity.UI.RoundedRectSprite;
 
 namespace Frogs.Unity.Views
@@ -64,7 +64,14 @@ namespace Frogs.Unity.Views
         public const float BoardControlsHeight = 176f;
         public const float BoardBandOutline = 3f;
         public const float TurnBannerSize = 52f;
-        public const float TurnBannerGap = 24f;
+
+        // `TurnBannerGap` used to live here, at 24 px. It is gone rather than
+        // renamed (#326): it measured the gap between the banner's chip and
+        // its words, and there is no chip. Words alone need no gap, because
+        // there is nothing to gap —
+        // docs/specs/ui/game-board.md#the-constant-this-page-used-to-carry.
+        // `PlayerChip.PlayerChipWidth` is untouched: the lane chips, roll and
+        // card and the working-out grid all still draw one.
         public const float SettingsButtonSize = 96f;
 
         // The gear fills the square it is tapped on. It used to be 44 px —
@@ -133,8 +140,9 @@ namespace Frogs.Unity.Views
         const float CanvasHeight = 1200f;
 
         // "Whose turn it is is stated in words in the header, not only shown
-        // by a highlight." The wording is the frog's colour name, because
-        // frogs have no other name.
+        // by a highlight." The wording is the frog's **name and nothing
+        // else** — its colour by default, or the name typed on game setup, so
+        // `Connor's turn` for a renamed frog.
         // docs/specs/ui/game-setup.md#behaviour and
         // docs/specs/ui/shared-components.md#player-chip: nothing appends
         // anything to a name. This format used to staple `frog` onto a
@@ -166,7 +174,6 @@ namespace Frogs.Unity.Views
 
         RectTransform _headerRect;
         Image _headerHairline;
-        PlayerChip _turnBannerChip;
         Text _turnBannerText;
         GameBoardSettingsButton _settingsButton;
 
@@ -285,16 +292,6 @@ namespace Frogs.Unity.Views
             {
                 EnsureInitialized();
                 return _controlsHairline;
-            }
-        }
-
-        /// <summary>The active frog's chip, left of the turn banner.</summary>
-        public PlayerChip TurnBannerChip
-        {
-            get
-            {
-                EnsureInitialized();
-                return _turnBannerChip;
             }
         }
 
@@ -458,8 +455,6 @@ namespace Frogs.Unity.Views
             var activeName = _game.NameFor(active);
 
             _turnBannerText.text = string.Format(TurnBannerFormat, activeName);
-            _turnBannerChip.SetFrog(FrogColours.For(active), activeName);
-            _turnBannerChip.SetState(PlayerChipState.Active);
 
             foreach (var lane in _lanes)
             {
@@ -567,7 +562,7 @@ namespace Frogs.Unity.Views
         void BuildHeader()
         {
             // header — pinned to the top of the *screen*, as wide as the
-            // screen, not shrinking on a shorter one. The chip and the gear
+            // screen, not shrinking on a shorter one. The banner and the gear
             // inside it are anchored to its own left and right edges, so they
             // follow the real edge with it: SafeMargin is a margin from the
             // screen, not from a virtual rectangle (#303).
@@ -583,16 +578,6 @@ namespace Frogs.Unity.Views
             _headerRect.pivot = new Vector2(0.5f, 1f);
             _headerRect.sizeDelta = new Vector2(0f, BoardHeaderHeight);
             _headerRect.anchoredPosition = Vector2.zero;
-
-            var chipGO = new GameObject("TurnBannerChip", typeof(RectTransform));
-            var chipRect = (RectTransform)chipGO.transform;
-            chipRect.SetParent(_headerRect, worldPositionStays: false);
-            chipRect.anchorMin = new Vector2(0f, 0.5f);
-            chipRect.anchorMax = new Vector2(0f, 0.5f);
-            chipRect.pivot = new Vector2(0f, 0.5f);
-            chipRect.anchoredPosition = new Vector2(SafeMargin, 0f);
-            _turnBannerChip = chipGO.AddComponent<PlayerChip>();
-            chipRect.sizeDelta = new Vector2(PlayerChip.PlayerChipWidth, PlayerChip.PlayerChipHeight);
 
             var bannerGO = new GameObject("TurnBanner", typeof(RectTransform), typeof(Text));
             _turnBannerText = bannerGO.GetComponent<Text>();
@@ -612,12 +597,11 @@ namespace Frogs.Unity.Views
             bannerRect.pivot = new Vector2(0f, 0.5f);
             bannerRect.sizeDelta = Vector2.zero;
 
-            // The banner's words sit TurnBannerGap past the chip beside them —
-            // the chip is the shared Player chip, so its width is that
-            // component's own constant.
-            bannerRect.anchoredPosition = new Vector2(
-                SafeMargin + PlayerChip.PlayerChipWidth + TurnBannerGap,
-                0f);
+            // The words are what is anchored to the band's left edge now:
+            // SafeMargin in, vertically centred. They used to start
+            // SafeMargin + PlayerChipWidth + TurnBannerGap in, past a chip
+            // that said what the active frog's own lane chip says already.
+            bannerRect.anchoredPosition = new Vector2(SafeMargin, 0f);
 
             var settingsGO = new GameObject("SettingsButton", typeof(RectTransform));
             var settingsRect = (RectTransform)settingsGO.transform;
