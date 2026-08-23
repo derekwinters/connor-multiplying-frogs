@@ -75,6 +75,14 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        /// <summary>
+        /// Read out of the pad's own pixels rather than off an
+        /// <c>Image.color</c>, because since #411 a pad is one drawing rather
+        /// than a green disc inside a darker one: its surface, its rim and its
+        /// veins are three colours in one sprite. That is a stronger check
+        /// than the tint was — it is what ends up on the screen — and it is
+        /// still this page's two named colours it is checked against.
+        /// </summary>
         [Test]
         public void EveryLilyPadIsGreen()
         {
@@ -87,19 +95,28 @@ namespace Frogs.Unity.EditModeTests
                     // The seven lily pads — positions 1 to 7, and the whole of
                     // what a lane draws for itself. Position 0 and position 8
                     // are on the two logs the pond shares (#296).
-                    Assert.That(lane.LilyPadFills.Count, Is.EqualTo(Lane.LanePositionCount - 2));
+                    Assert.That(lane.LilyPads.Count, Is.EqualTo(Lane.LanePositionCount - 2));
 
-                    for (var index = 0; index < lane.LilyPadFills.Count; index++)
+                    for (var index = 0; index < lane.LilyPads.Count; index++)
                     {
                         var position = index + 1;
+                        var pad = lane.LilyPads[index].sprite;
 
-                        Assert.That(
-                            lane.LilyPadFills[index].color,
-                            Is.EqualTo(LilyPadGreen),
+                        // The pad is drawn with its notch pointing at 0 and
+                        // turned into place, so both samples are taken well
+                        // away from it: on the surface between two veins, and
+                        // half way through the rim directly opposite.
+                        AssertPixel(
+                            pad,
+                            SurfaceDegrees,
+                            SurfaceRadius,
+                            LilyPadGreen,
                             $"{lane.Colour}'s lily pad at position {position} is `LilyPadGreen`");
-                        Assert.That(
-                            lane.LilyPadOutlines[index].color,
-                            Is.EqualTo(LilyPadEdge),
+                        AssertPixel(
+                            pad,
+                            RimDegrees,
+                            RimRadius,
+                            LilyPadEdge,
                             $"{lane.Colour}'s lily pad at position {position} has the `LilyPadEdge` rim");
                     }
                 }
@@ -108,6 +125,40 @@ namespace Frogs.Unity.EditModeTests
             {
                 Destroy(view);
             }
+        }
+
+        // Where a pad is sampled, in degrees from its own notch and as a
+        // fraction of its radius: a patch of surface between two veins, and
+        // the middle of the rim opposite the notch, where no vein reaches
+        // (they stop `LilyPadVeinOutset` short of it).
+        const float SurfaceDegrees = 210f;
+        const float SurfaceRadius = 0.35f;
+        const float RimDegrees = 180f;
+
+        static readonly float RimRadius =
+            1f - (GameBoardLaneView.TrackOutline / GameBoardLaneView.LilyPadDiameter);
+
+        // A byte of slack: the pad is composited in floats and stored as
+        // Color32.
+        const float ColourTolerance = 2f / 255f;
+
+        static void AssertPixel(Sprite sprite, float degrees, float radiusFraction, Color expected, string what)
+        {
+            var size = sprite.texture.width;
+            var radius = size / 2f;
+            var radians = degrees * Mathf.Deg2Rad;
+
+            // game-board.md measures angles the way the mockup's SVG does — 0
+            // right, 90 down — and a texture's rows run the other way.
+            var x = Mathf.FloorToInt(radius + (radiusFraction * radius * Mathf.Cos(radians)));
+            var y = Mathf.FloorToInt(radius - (radiusFraction * radius * Mathf.Sin(radians)));
+
+            var actual = (Color)sprite.texture.GetPixels32()[(y * size) + x];
+
+            Assert.That(actual.r, Is.EqualTo(expected.r).Within(ColourTolerance), $"{what}: red");
+            Assert.That(actual.g, Is.EqualTo(expected.g).Within(ColourTolerance), $"{what}: green");
+            Assert.That(actual.b, Is.EqualTo(expected.b).Within(ColourTolerance), $"{what}: blue");
+            Assert.That(actual.a, Is.EqualTo(1f).Within(ColourTolerance), $"{what}: opaque");
         }
 
         /// <summary>
