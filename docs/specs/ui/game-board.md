@@ -768,8 +768,8 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   `LogLabelTopPadding` below its **top** edge. Top rather than middle because
   the middle of a log is where the frogs stand: every lane's centre line
   crosses both logs, so a centred word is a word with a frog on it. They are the
-  ends of every lane at once. The Start log is a real position a frog occupies, and a
-  wrong answer there leaves the frog where it is; see
+  ends of every lane at once. The Start log is a real position a frog occupies,
+  and a wrong answer there leaves the frog where it is; see
   [the Start log is a floor](../reference/index.md#the-start-log-is-a-floor-not-a-special-space).
   Two to four frogs sit on the Start log at the beginning of every game and
   gather on the End log as they finish — that is a shared drawing, not a shared

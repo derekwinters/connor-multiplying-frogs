@@ -871,7 +871,19 @@ namespace Frogs.Unity.EditModeTests
                 // open question, on #296 — not `LaneCount x LaneHeight`.
                 { "LogWidth", 176f },
                 { "SharedLogHeight", 896f },
-                { "LogRadius", 24f }
+                { "LogRadius", 24f },
+
+                // The word on each log — `Start` and `End`, which this view
+                // was drawing nowhere at all until #301 put them at the top
+                // of the log in `LogLabelInk`. Both numbers were living in
+                // the committed mockup's `.log` rule and nowhere else, so
+                // they were added to game-board.md's log table by the same
+                // issue: this list is that table, not a second opinion about
+                // it. `TrackOutline` is **not** here and never was — it is
+                // the lane's — and the log no longer draws one either, since
+                // `LogEdge` is gone.
+                { "LogLabelSize", 26f },
+                { "LogLabelTopPadding", 28f }
             };
 
             var laneConstants = new Dictionary<string, float>
