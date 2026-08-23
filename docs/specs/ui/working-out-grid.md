@@ -677,6 +677,14 @@ Three more, drawn for `Help me`, all showing the state **after** it is pressed:
 - **`331 × 41`, six products at the cap:**
   [`mockups/working-out-grid-help-331x41.html`](mockups/working-out-grid-help-331x41.html)
 
+**The two `12 × 34` drawings said `middle pile` and now say `medium pile`.**
+Every other page of `/docs` — [the rules](../rules.md) and
+[roll and card](roll-and-card.md) — calls it the *medium* pile, and so does the
+shell's own readout, so the word in those two drawings was a slip rather than a
+second name for the pile. It is corrected here rather than left to be found by
+whoever compares a screenshot against the drawing
+([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)).
+
 **All three draw the focused cell**, filled with `GridFocusFill`. They always
 drew one — an answer cell with the accent outline — and until
 [#304](https://github.com/derekwinters/connor-multiplying-frogs/issues/304) that
