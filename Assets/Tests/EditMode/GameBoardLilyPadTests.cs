@@ -246,17 +246,30 @@ namespace Frogs.Unity.EditModeTests
 
                         foreach (var vein in veins)
                         {
-                            AssertPixel(
-                                pixels,
-                                size,
-                                vein,
-                                expectedVein,
-                                $"lane {lane}, position {position}: the vein at {vein} degrees");
+                            var what = $"lane {lane}, position {position}: the vein at {vein} degrees";
+
+                            // Along the vein's own ray, at three radii. That
+                            // one ray is inked the whole way along is what says
+                            // the fan radiates from the circle's geometric
+                            // centre rather than from the notch's apex: drawn
+                            // from the apex it would sit off-centre and leave
+                            // this ray at two of the three.
+                            foreach (var radius in AlongTheVein)
+                            {
+                                AssertPixel(pixels, size, vein, radius, expectedVein, $"{what}, {radius:0.00} out");
+                            }
+
+                            // And it stops short at both ends —
+                            // `LilyPadVeinInset` at the centre so the five do
+                            // not converge into a dark hub, `LilyPadVeinOutset`
+                            // at the rim.
+                            AssertTheVeinsEnds(pixels, size, vein, expectedVein, what);
 
                             AssertPixel(
                                 pixels,
                                 size,
                                 vein + (spacing / 2f),
+                                VeinSampleRadius,
                                 BoardColours.LilyPadGreen,
                                 $"lane {lane}, position {position}: clean green between veins");
                         }
@@ -438,29 +451,105 @@ namespace Frogs.Unity.EditModeTests
             return GameBoardLaneView.LilyPadNotchWidthFor(lane.LaneIndex, position);
         }
 
-        // Where on the pad the veins are sampled: far enough out to be well
-        // clear of `LilyPadVeinInset`, far enough in to be well clear of the
-        // rim and of `LilyPadVeinOutset`.
+        // The middle of a vein, and three points along one: just outside
+        // `LilyPadVeinInset` (0.20), the middle, and just inside where
+        // `LilyPadVeinOutset` (0.12) ends it.
         const float VeinSampleRadius = 0.6f;
 
-        // One pixel of a pad's own texture, at an angle measured from the
-        // notch's axis, `VeinSampleRadius` of the way out from its centre.
-        // The page measures angles the way the mockup's SVG does — 0 right,
-        // 90 down — and a texture's rows run the other way, so y is flipped.
-        static void AssertPixel(Color32[] pixels, int size, float degrees, Color expected, string what)
+        static readonly float[] AlongTheVein = { 0.25f, VeinSampleRadius, 0.85f };
+
+        // How far either end of a drawn vein may be from the constant that
+        // puts it there: a sample lands on a whole pixel, and a vein is
+        // stroked with a round cap whose last fraction of a pixel is fainter
+        // than the vein itself.
+        const float VeinEndTolerance = 2f;
+
+        /// <summary>
+        /// Where the vein at this angle starts and stops, walked a pixel at a
+        /// time along its own ray, against the two constants that put its ends
+        /// there.
+        ///
+        /// What is looked for is the **fully inked** stretch — the pixels that
+        /// are exactly `LilyPadEdge` over `LilyPadGreen` at
+        /// `LilyPadVeinOpacity` — and only the first unbroken run of them.
+        /// Further out the ray crosses the rim, whose inner edge is
+        /// antialiased from the surface to `LilyPadEdge` and so passes through
+        /// that very colour on its way. A vein is the run that starts first;
+        /// the rim is a pad's own business.
+        /// </summary>
+        static void AssertTheVeinsEnds(Color32[] pixels, int size, float degrees, Color inked, string what)
         {
             var radius = size / 2f;
-            var radians = degrees * Mathf.Deg2Rad;
+            var nearest = 0f;
+            var furthest = 0f;
 
-            var x = Mathf.FloorToInt(radius + (VeinSampleRadius * radius * Mathf.Cos(radians)));
-            var y = Mathf.FloorToInt(radius - (VeinSampleRadius * radius * Mathf.Sin(radians)));
+            for (var along = 1f; along < radius; along += 1f)
+            {
+                if (IsColour(pixels, size, degrees, along / radius, inked))
+                {
+                    if (nearest == 0f)
+                    {
+                        nearest = along;
+                    }
 
-            var actual = (Color)pixels[(y * size) + x];
+                    furthest = along;
+                    continue;
+                }
+
+                if (nearest != 0f)
+                {
+                    break;
+                }
+            }
+
+            Assert.That(
+                nearest,
+                Is.EqualTo(GameBoardLaneView.LilyPadVeinInset * radius).Within(VeinEndTolerance),
+                $"{what} starts `LilyPadVeinInset` out from the centre");
+            Assert.That(
+                furthest,
+                Is.EqualTo((1f - GameBoardLaneView.LilyPadVeinOutset) * radius).Within(VeinEndTolerance),
+                $"{what} stops `LilyPadVeinOutset` short of the rim");
+        }
+
+        static bool IsColour(Color32[] pixels, int size, float degrees, float radiusFraction, Color expected)
+        {
+            var pixel = (Color)pixels[IndexOf(size, degrees, radiusFraction)];
+
+            return Mathf.Abs(pixel.r - expected.r) <= ColourTolerance
+                && Mathf.Abs(pixel.g - expected.g) <= ColourTolerance
+                && Mathf.Abs(pixel.b - expected.b) <= ColourTolerance;
+        }
+
+        // One pixel of a pad's own texture, at an angle measured from the
+        // notch's axis and that fraction of the way out from its centre.
+        static void AssertPixel(
+            Color32[] pixels,
+            int size,
+            float degrees,
+            float radiusFraction,
+            Color expected,
+            string what)
+        {
+            var actual = (Color)pixels[IndexOf(size, degrees, radiusFraction)];
 
             Assert.That(actual.r, Is.EqualTo(expected.r).Within(ColourTolerance), $"{what}: red");
             Assert.That(actual.g, Is.EqualTo(expected.g).Within(ColourTolerance), $"{what}: green");
             Assert.That(actual.b, Is.EqualTo(expected.b).Within(ColourTolerance), $"{what}: blue");
             Assert.That(actual.a, Is.EqualTo(1f).Within(ColourTolerance), $"{what}: opaque");
+        }
+
+        // The page measures angles the way the mockup's SVG does — 0 right, 90
+        // down — and a texture's rows run the other way, so y is flipped.
+        static int IndexOf(int size, float degrees, float radiusFraction)
+        {
+            var radius = size / 2f;
+            var radians = degrees * Mathf.Deg2Rad;
+
+            var x = Mathf.FloorToInt(radius + (radiusFraction * radius * Mathf.Cos(radians)));
+            var y = Mathf.FloorToInt(radius - (radiusFraction * radius * Mathf.Sin(radians)));
+
+            return (y * size) + x;
         }
 
         static Game FourFrogGame()
