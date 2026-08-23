@@ -1,8 +1,9 @@
 name: pr-build
 
-# A debug APK for every PR, so "does it still build" is answered by a build
-# rather than by hope, and so Connor can try a change on his phone before it
-# merges.
+# Two debug APKs for every PR — the device profile and the emulator profile —
+# so "does it still build" is answered by a build rather than by hope, so
+# Connor can try a change on his tablet before it merges, and so anyone without
+# the tablet can still open it on a desktop emulator.
 #
 # Distribution is the workflow artifact and nothing else — no store, no
 # distribution service, no link that outlives the PR. Artifacts expiring is
@@ -27,7 +28,7 @@ concurrency:
 
 jobs:
   build:
-    name: Debug APK
+    name: Debug APKs
     runs-on: ubuntu-latest
 
     steps:
@@ -90,6 +91,19 @@ jobs:
           key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
           restore-keys: Library-android-
 
+      # Two profiles, the same pair release-build produces: `device` for the
+      # tablet and `emulator` for a desktop emulator. The emulator one is what
+      # makes a change openable before it merges by anyone who does not have
+      # the tablet in their hands.
+      #
+      # Each build gets its own buildsPath and its own buildName, and each is
+      # uploaded as its own artifact. The two differ only in architecture,
+      # which is invisible in a filename sitting next to another filename — so
+      # an "emulator" download that is really the ARM64 build is a mistake
+      # nothing downstream can catch, and it has been made (#252, #218). The
+      # shape here is asserted by
+      # .github/scripts/tests/test_pr_build_profiles.py.
+      #
       # The version name, versionCode, and .debug suffix are applied by
       # BuildStampPreprocessor from these values — a build pre-processor, so no
       # build can be produced without them. See docs/engineering/versioning.md.
@@ -97,7 +111,8 @@ jobs:
       # They go in `customParameters`, which unity-builder appends to the
       # `unity-editor` command line, and not in `env:`, which stops at the
       # container the editor runs inside (#218).
-      - name: Build the debug APK
+      - name: Build the device APK
+        id: device
         if: steps.licence.outputs.present == 'true'
         uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
         env:
@@ -111,26 +126,90 @@ jobs:
           # No keystore inputs, so Unity signs with the Android debug key. That
           # is deliberate: the release keystore is a secret this workflow should
           # not be able to reach from a PR branch.
+          buildsPath: build/device
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}
           allowDirtyBuild: true
-          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsBuildSha ${{ steps.stamp.outputs.build_sha }} -frogsApplicationIdSuffix .debug
+          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsBuildSha ${{ steps.stamp.outputs.build_sha }} -frogsApplicationIdSuffix .debug -frogsAndroidProfile device
 
-      - name: Upload the APK
+      # Uploaded before the emulator build starts, not after it finishes. The
+      # device APK is the one that answers "does it still build", and a later
+      # step failing must not take a good build down with it — that is what
+      # cost v0.2.0 its assets in release-build (#282). Here it is free: the
+      # artifact is already stored by the time the second build runs.
+      - name: Upload the device APK
         if: steps.licence.outputs.present == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: debug-apk-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}
-          path: build/Android/*.apk
+          path: build/device/Android/*.apk
           if-no-files-found: error
           retention-days: 14
 
+      # x86_64 rather than ARM64, so it installs on a desktop emulator. Same
+      # version name, same .debug suffix, same debug signing — the only thing
+      # that differs is the profile, and therefore the architecture.
+      #
+      # No `continue-on-error`: unlike release-build, nothing here is waiting
+      # downstream to be rescued, and a PR whose app did not build for one of
+      # its two targets is a PR that should say so in red.
+      - name: Build the emulator APK
+        id: emulator
+        if: steps.licence.outputs.present == 'true'
+        uses: game-ci/unity-builder@d829bfc901f2347c8fe18898f06712b66916ef42 # v5.0.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: 6000.0.81f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildsPath: build/emulator
+          buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}-emulator
+          allowDirtyBuild: true
+          customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsBuildSha ${{ steps.stamp.outputs.build_sha }} -frogsApplicationIdSuffix .debug -frogsAndroidProfile emulator
+
+      - name: Upload the emulator APK
+        if: steps.licence.outputs.present == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: debug-apk-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}-emulator
+          path: build/emulator/Android/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      # Both APKs by name, because the artifacts list is the one place nobody
+      # thinks to open — and, when a build did not finish, that its APK is
+      # missing rather than quietly claiming two.
       - name: Summarise
         if: always()
         run: |
           if [ "${{ steps.licence.outputs.present }}" != "true" ]; then
             echo "No debug APK: the UNITY_LICENSE secret is not set (#82)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "Debug APKs for \`${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}\`" \
+               "(versionCode ${{ steps.stamp.outputs.version_code }}). Each installs alongside" \
+               "the release build as \`.debug\`." >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+
+          # Each line is what that build's step actually did, not what the job
+          # set out to do. A summary naming an APK nobody built sends the next
+          # person to an empty artifacts list, which reads as a broken download
+          # rather than as the failed build it is.
+          if [ "${{ steps.device.outcome }}" = "success" ]; then
+            echo "- \`multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}.apk\`" \
+                 "— ARM64, for the tablet." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Debug APK \`${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}\`" \
-                 "(versionCode ${{ steps.stamp.outputs.version_code }}), installs alongside the" \
-                 "release build as \`.debug\`." >> "$GITHUB_STEP_SUMMARY"
+            echo "- No device APK: that build did not finish, which is why this run" \
+                 "is red." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ steps.emulator.outcome }}" = "success" ]; then
+            echo "- \`multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}-emulator.apk\`" \
+                 "— x86_64, for a desktop emulator." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- No emulator APK: that build did not finish, which is why this run" \
+                 "is red." >> "$GITHUB_STEP_SUMMARY"
           fi

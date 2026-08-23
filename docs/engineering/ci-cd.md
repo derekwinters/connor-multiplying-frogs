@@ -14,7 +14,7 @@ be blocking; if you can, the fix is to satisfy it, not to route around it.
 | `ci-tests` | PR, push to `main` | yes | game logic and scene wiring |
 | `docs-test` | PR, push to `main` | yes | the docs site builds, and the CI scripts' own tests pass |
 | `docs-gate` | PR | yes | the docs match the change — [ai-sdlc](ai-sdlc.md)'s shared gate |
-| `pr-build` | PR | no | the app still compiles into an installable APK |
+| `pr-build` | PR | no | the app still compiles into two installable APKs, one per build profile |
 | `rc-build` | manual, tag | no | a release candidate someone can actually play |
 | `release-please` | push to `main` | no | the version, changelog, tag, release, and release APK |
 | `labels-sync` | push to `main` touching either labels manifest | no | the label taxonomy matches the manifests |
@@ -174,9 +174,9 @@ deliberate.
 
 ## Build workflows
 
-### `pr-build` — a debug APK for every PR
+### `pr-build` — two debug APKs for every PR
 
-Every PR produces an installable debug APK, so "does it still build" is answered
+Every PR produces installable debug APKs, so "does it still build" is answered
 by a build rather than by hope, and so Connor can try a change before it merges.
 
 - **Debug signing**, with the Android debug keystore. No secrets, so the
@@ -187,10 +187,43 @@ by a build rather than by hope, and so Connor can try a change before it merges.
 - **`.debug` applicationId suffix**, so a debug build installs *alongside* the
   release build instead of replacing it. Connor keeps the game he plays and the
   build being tested at the same time.
-- **Artifact-only distribution.** The APK is a workflow artifact on the PR.
+- **Artifact-only distribution.** The APKs are workflow artifacts on the PR.
   Nothing is uploaded anywhere, no store, no distribution service, no link that
   outlives the PR. Artifacts expire and that is correct — a stale test build is
   worse than none.
+
+#### Both build profiles, so a change can be opened without the tablet
+
+Two APKs per PR, the same [pair `release-build` produces](#two-apks-in-two-build-paths):
+
+| Artifact | File | Profile | For |
+| --- | --- | --- | --- |
+| `debug-apk-0.2.3-abc1234` | `multiplying-frogs-0.2.3-abc1234.apk` | ARM64, IL2CPP | the tablet |
+| `debug-apk-0.2.3-abc1234-emulator` | `multiplying-frogs-0.2.3-abc1234-emulator.apk` | x86_64, IL2CPP | a desktop emulator |
+
+The emulator one is the point of the pair. The only place the real screens are
+ever seen *running* is a build somebody installs and opens, and an APK that
+needs the tablet in hand is one most PRs never get looked at on. This one opens
+on a desktop, before the merge rather than after the ship.
+
+Each profile builds into its own `buildsPath`, under its own `buildName`, and
+uploads as its own artifact. The two builds are the same commit and differ only
+in architecture — which no filename, artifact name, or download shows — so the
+workflow is the only place the difference can be guaranteed, and it has to be
+guaranteed rather than noticed later. `v0.1.0` shipped an "emulator" APK that
+was really the ARM64 build ([#252](https://github.com/derekwinters/connor-multiplying-frogs/issues/252)),
+and it failed at install time on someone else's machine with no build log
+anywhere near it. `.github/scripts/tests/test_pr_build_profiles.py` asserts the
+shape that makes it impossible: both builds name a profile, the two profiles
+differ, the paths and names are distinct, and an artifact whose name says a
+profile is fed by the build that asked Unity for it.
+
+The device APK is uploaded **before** the emulator build starts, so a failed
+second build cannot cost the PR a good first one. Neither build carries
+`continue-on-error`, unlike `release-build`: nothing downstream here is waiting
+to be rescued, and a PR whose app did not build for one of its two targets
+should say so in red. The job summary names both APKs, or says which one is
+missing.
 
 #### A missing licence warns and skips here
 
@@ -402,8 +435,8 @@ anything reading them must include that segment:
 
 | Workflow | `buildsPath` | Where the APK actually lands |
 | --- | --- | --- |
-| `pr-build`, `rc-build` | default (`build`) | `build/Android/` |
-| `release-build` | `build/device`, `build/emulator` | `build/device/Android/`, `build/emulator/Android/` |
+| `rc-build` | default (`build`) | `build/Android/` |
+| `pr-build`, `release-build` | `build/device`, `build/emulator` | `build/device/Android/`, `build/emulator/Android/` |
 
 Getting this wrong is quiet rather than loud. The attach step runs under
 `shopt -s nullglob`, so a pattern that matches nothing simply disappears — both
