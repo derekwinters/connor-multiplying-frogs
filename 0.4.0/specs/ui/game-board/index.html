@@ -2802,12 +2802,7 @@ lanes-across</strong> after seeing both drawn.</p>
 <tr>
 <td>Settings gear glyph size</td>
 <td><code>SettingsGlyphSize</code></td>
-<td>44 px</td>
-</tr>
-<tr>
-<td>Settings button outline</td>
-<td><code>SettingsButtonOutline</code></td>
-<td>4 px</td>
+<td>96 px</td>
 </tr>
 <tr>
 <td><code>Roll</code> button width</td>
@@ -3181,14 +3176,25 @@ That is a separate change and it wants its own issue.</p>
 184 px is 736 px, centred with 80 px of water above and below, so at four frogs
 the logs stand 80 px proud of the lane stack at each end; at two frogs, 264 px.</p>
 <p>Every outline is drawn <strong>inside</strong> the element's own bounds, so <code>TrackOutline</code>,
-<code>FrogPieceOutline</code>, <code>SettingsButtonOutline</code> and <code>BoardBandOutline</code> cost the
-layout nothing and the 1920 px sum above is unaffected by any of them.</p>
-<p><code>LogRadius</code> is the log's own corner and <code>SettingsGlyphSize</code> the gear's own
-glyph. Both happen to equal a constant on
-<a href="../shared-components/">shared components</a> today — <code>ButtonRadius</code> is also 24 px
-and <code>ButtonLabelSize</code> also 44 px — and neither is that constant. The Button's
-corner and label are the Button's to restyle; the pond's logs and its gear are
-not, and they must not move when it does.</p>
+<code>FrogPieceOutline</code> and <code>BoardBandOutline</code> cost the layout nothing and the
+1920 px sum above is unaffected by any of them.</p>
+<p><code>LogRadius</code> is the log's own corner. It happens to equal a constant on
+<a href="../shared-components/">shared components</a> today — <code>ButtonRadius</code> is also
+24 px — and it is not that constant. The Button's corner is the Button's to
+restyle; the pond's logs are not, and they must not move when it does.</p>
+<p><code>SettingsGlyphSize</code> equals <code>SettingsButtonSize</code>, and that is the whole of how
+the gear is sized: <strong>the gear is as big as the square it is tapped on.</strong> It
+used to be 44 px, <code>ButtonLabelSize</code>'s number, because it was a glyph sitting
+inside a ring and a white disc and had to leave room for them. With those gone
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/321">#321</a>)
+there is nothing left to leave room for, so it is sized against the tap target
+instead — the glyph's own side bearings are what keep the drawn gear clear of
+the square's edges. It stays its own constant rather than becoming
+<code>SettingsButtonSize</code> at the call site, because a future restyle may want a
+smaller gear and <code>SettingsButtonSize</code> may never shrink: it is
+<a href="../shared-components/"><code>MinTouchTarget</code></a> exactly.</p>
+<p><strong><code>SettingsButtonOutline</code> is gone</strong>, not renamed. It was the width of the ring
+around the gear, and there is no ring.</p>
 <h2 id="colours">Colours<a class="headerlink" href="#colours" title="Link to this section">&para;</a></h2>
 <p>The board is a pond. <strong>Blue water, brown logs, green lily pads</strong> — Derek's
 decision, in his words, on
@@ -3439,6 +3445,37 @@ outline is separation on top of this, never instead of it.</p>
 than picked and then checked</strong> — see <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are
 constrained</a> below, which is the part
 worth reading before changing any of these six values.</p>
+<p><strong>The settings gear is held to the same bar</strong>, and it is here rather than with
+the frogs because it is the one piece of ink on this screen with nothing of its
+own behind it. Until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/321">#321</a> it
+was drawn on a white disc, which did its legibility work for it; now it is
+<code>BoardInk</code> straight onto the board, so it is measured against both surfaces it
+could sit on:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Contrast</th>
+<th>ΔE*ab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BoardInk</code> on <code>BandFill</code> — the header band it sits in</td>
+<td>12.71 : 1</td>
+<td>77.9</td>
+</tr>
+<tr>
+<td><code>BoardInk</code> on <code>PondWater</code> — the water behind that band</td>
+<td>10.20 : 1</td>
+<td>72.9</td>
+</tr>
+</tbody>
+</table>
+<p>Both clear 1.9 : 1 and 30 several times over, so which of the two is behind the
+gear decides nothing — which matters, because the band is presentation and
+could be dropped without the gear becoming a legibility question again.</p>
 <h3 id="the-rule-this-page-used-to-carry">The rule this page used to carry<a class="headerlink" href="#the-rule-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a>
 this section ended:</p>
@@ -3545,10 +3582,14 @@ appends anything to a name, ever. The cost is that an un-renamed frog's
 banner loses a word, which is
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/310">#310</a>
 question 4, settled by Derek.
-- <strong>Settings button</strong> — top right, <code>SettingsButtonSize</code> square, a gear. Opens
-  the <a href="../settings-dialog/">settings dialog</a>. Available on any turn, at any
-  time, including while it is not your turn — it is the way out of a game and
-  hiding it would be worse.
+- <strong>Settings button</strong> — top right, <code>SettingsButtonSize</code> square, a gear <strong>and
+  nothing else</strong>: no ring, no disc, no button shape behind it. The gear is
+  drawn in <code>BoardInk</code> straight onto the header band, at <code>SettingsGlyphSize</code>.
+  The square is still the tap area — it is <code>MinTouchTarget</code> exactly and it does
+  not shrink because the chrome did. Opens the
+  <a href="../settings-dialog/">settings dialog</a>. Available on any turn, at any time,
+  including while it is not your turn — it is the way out of a game and hiding
+  it would be worse.
 - <strong><code>Roll</code></strong> — primary <a href="../shared-components/#button">button</a>, oversized. Opens
   <a href="../roll-and-card/">roll and card</a>. Disabled from the moment it is pressed
   until the turn resolves.
