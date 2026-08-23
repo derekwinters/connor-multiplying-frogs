@@ -3208,10 +3208,14 @@ that only the answer row's <em>value</em> is checked. A future change that rejec
 re-grades a correctly-typed but left-aligned answer would be a new rule about
 place value being marked, and it needs its own decision.</p>
 <h3 id="what-core-owns-the-product-list">What <code>Core</code> owns: the product list<a class="headerlink" href="#what-core-owns-the-product-list" title="Link to this section">&para;</a></h3>
-<p>Working out which products a card makes is <strong>game logic</strong>, not drawing, and it
-belongs in the engine-free <code>Core</code> assembly beside
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>.
-It is named here so the implementation does not invent a different shape:</p>
+<p>Working out which products a card makes is <strong>game logic</strong>, not drawing, so it
+lives in the engine-free <code>Core</code> assembly beside
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/WorkingOutGrid.cs"><code>WorkingOutGrid</code></a>,
+in
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/DigitProducts.cs"><code>DigitProducts</code></a>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/415">#415</a>).
+The shape was named here before it was built, so the implementation could not
+invent a different one:</p>
 <ul>
 <li><strong><code>DigitProducts.For(Card card)</code></strong> — a <strong>pure function</strong> from a card to an
   ordered, read-only list of <code>DigitProduct</code>. Same card, same list, every time;
@@ -3225,15 +3229,26 @@ It is named here so the implementation does not invent a different shape:</p>
   <code>(4,2) (4,10) (30,2) (30,10)</code>.</li>
 <li><strong>A zero part contributes nothing and is skipped.</strong> <code>102 × 40</code> gives
   <code>(40,2) (40,100)</code> — two products, not six — because <code>40 × 0</code> is a row that
-  adds nothing and a line of writing that teaches nothing.</li>
+  adds nothing and a line of writing that teaches nothing. An operand of <code>0</code>
+  therefore has no parts at all, which is the same rule rather than a case of
+  its own: <code>68 × 0</code> — a card the Easy pile can deal, since
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/Card.cs"><code>Card.OneDigitMinimum</code></a>
+  is <code>0</code> — makes <strong>no products</strong>, and <code>Help me</code> on it has nothing to print.
+  What the shell does with an empty list is the shell's
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/416">#416</a>).</li>
 <li><strong>The list is never longer than <code>GridAdditionRowsMax</code>.</strong> Three multiplicand
   digits by two multiplier digits is six, which is exactly the cap, and
   ADR-0002 bounds the card shapes at <code>3 × 2</code>. So the cap holds — and holds
   exactly, with nothing to spare. Skipping zeros only ever makes the list
   shorter, so it cannot be what breaks that; the bound is the same either way.</li>
 </ul>
-<p>This is testable in the fast <code>Core</code> suite with no editor, which is the point of
-putting it there.</p>
+<p>This is tested in the fast <code>Core</code> suite with no editor, which is the point of
+putting it there —
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Tests/Core/DigitProductsTests.cs"><code>Tests/Core/DigitProductsTests.cs</code></a>
+holds the worked examples above, and it holds the <code>GridAdditionRowsMax</code> bound
+over <strong>every card the three piles can deal</strong> — all 90,000 of them — rather than
+over one example, because the card that would break a bound is the one nobody
+thought to write down.</p>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
 <p>Three, all at 1920 × 1200.</p>
 <ul>
