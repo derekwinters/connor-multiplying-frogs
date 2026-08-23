@@ -3146,7 +3146,17 @@ past it.</p>
   one — but it is the one thing about this button that will look like it did
   something odd, so the mockups draw it rather than describe it. On <code>68 × 5</code>
   there are two products and the section was dealt two rows, so nothing grows
-  and nothing shrinks.
+  and nothing shrinks.</p>
+<p><strong>On a card with no products, the three steps still run and two of them do
+  nothing.</strong> <code>68 × 0</code> makes no products
+  (<a href="#what-core-owns-the-product-list">what <code>Core</code> owns</a>), so the section grows
+  to <code>max(GridAdditionRowsAtStart, 0)</code> — the count it was dealt — nothing is
+  printed, and the button goes to <code>Disabled</code> anyway, because step three is not
+  conditional on what the first two found. That is this page's rule read
+  literally rather than an answer to what the player <em>should</em> see there, which
+  is a taste call nobody has made:
+  <a href="#open-questions">open question 13</a>, and
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/433">#433</a>.
 - <strong>A row <code>Help me</code> grew cannot be backspaced away.</strong> The ordinary shrink rule
   — <em>"backspacing the last digit out of a grown row removes the row"</em> — does
   not apply to the rows this button created, for the rest of the turn. A row
@@ -3234,8 +3244,10 @@ invent a different one:</p>
   its own: <code>68 × 0</code> — a card the Easy pile can deal, since
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/Assets/Scripts/Core/Card.cs"><code>Card.OneDigitMinimum</code></a>
   is <code>0</code> — makes <strong>no products</strong>, and <code>Help me</code> on it has nothing to print.
-  What the shell does with an empty list is the shell's
-  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/416">#416</a>).</li>
+  What the shell does with an empty list is the shell's, and as built
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/416">#416</a>)
+  it prints nothing, grows nothing and disables the button anyway — see
+  <a href="#behaviour">Behaviour</a> and <a href="#open-questions">open question 13</a>.</li>
 <li><strong>The list is never longer than <code>GridAdditionRowsMax</code>.</strong> Three multiplicand
   digits by two multiplier digits is six, which is exactly the cap, and
   ADR-0002 bounds the card shapes at <code>3 × 2</code>. So the cap holds — and holds
@@ -3265,6 +3277,13 @@ thought to write down.</p>
 <li><strong><code>331 × 41</code>, six products at the cap:</strong>
   <a href="../mockups/working-out-grid-help-331x41.html"><code>mockups/working-out-grid-help-331x41.html</code></a></li>
 </ul>
+<p><strong>The two <code>12 × 34</code> drawings said <code>middle pile</code> and now say <code>medium pile</code>.</strong>
+Every other page of <code>/docs</code> — <a href="../../rules/">the rules</a> and
+<a href="../roll-and-card/">roll and card</a> — calls it the <em>medium</em> pile, and so does the
+shell's own readout, so the word in those two drawings was a slip rather than a
+second name for the pile. It is corrected here rather than left to be found by
+whoever compares a screenshot against the drawing
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/416">#416</a>).</p>
 <p><strong>All three draw the focused cell</strong>, filled with <code>GridFocusFill</code>. They always
 drew one — an answer cell with the accent outline — and until
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/304">#304</a> that
@@ -3562,6 +3581,21 @@ anyone has said yet.</p>
   the button an eight-year-old presses when he is stuck, so what it should say
   is Connor's call — the same way
   <a href="../settings-dialog/#open-questions"><code>Designed by Connor</code></a> is.</li>
+</ul>
+<p>Question 13 arrived with the built button
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/416">#416</a>).</p>
+<ul>
+<li><strong>13. What should <code>Help me</code> do on a card with no products?</strong>
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/433">#433</a>)
+  <code>68 × 0</code> is a card the easy pile can deal and a card this button has nothing
+  to print for. What is built is the three steps above read literally: nothing
+  moves, nothing is printed, and the button greys out — so the press looks like
+  it did nothing, which is the one thing an eight-year-old responds to by
+  pressing again. The alternatives are leaving the button live on such a card,
+  or printing one line of words where the products would go, which would be the
+  only words on this screen that are not a number. Whichever way it goes it
+  changes what the player sees, so it is Connor's or Derek's rather than an
+  agent's.</li>
 </ul>
 
 
