@@ -61,6 +61,25 @@ namespace Frogs.Core
             Multiplier = multiplier;
         }
 
+        /// <summary>
+        /// A card with exactly these operands, built without a
+        /// <see cref="Rng"/>.
+        ///
+        /// A real card only ever comes from <see cref="Draw"/>, which is why
+        /// the constructor is private and this is <c>internal</c>: nothing
+        /// outside the <c>Frogs.Core</c> assembly can reach it, so no shell
+        /// code can conjure a card that no pile could deal. It exists so the
+        /// fast suite can state the worked examples the specs are written in —
+        /// `12 x 34`, `331 x 41` — instead of hunting for a seed that happens
+        /// to draw them, and it applies no shape rule of its own, because a
+        /// test asserting a bound across every shape ADR-0002 allows has to be
+        /// able to build every one of them.
+        /// </summary>
+        internal static Card Of(int multiplicand, int multiplier)
+        {
+            return new Card(multiplicand, multiplier);
+        }
+
         /// <summary>The first operand — printed first on the card, e.g. the `68` in `68 × 5`.</summary>
         public int Multiplicand { get; }
 
