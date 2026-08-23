@@ -1277,6 +1277,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-the-pictures-are-drawn-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the pictures are drawn from
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#elements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2181,6 +2192,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-the-pictures-are-drawn-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the pictures are drawn from
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#elements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2540,6 +2562,301 @@ lane, and page 4 draws three lanes that are three separate examples rather than
 three lanes of one game. Page 1 and page 5 are the only ones drawing a real
 four-lane board, and there the per-lane logs read as one column anyway because
 they are the same colour and vertically aligned.</p>
+<p><strong>Every drawn lane repeats the same seven pad shapes.</strong> The lily pad is the
+board's own — notched and veined, from
+<a href="../game-board/">game-board.md</a>'s twelve-row variation table, at
+<code>HowToPlayPadDiameter</code> instead of the board's diameter — but which row a pad
+draws depends only on its <em>position</em>, so lane 2 draws the same seven as lane 1.
+That is what all five mockups draw, and it is deliberate: the board's <code>× 5</code>
+stagger exists so four lanes of one game do not line up into visible columns,
+and page 4's three lanes are three separate examples rather than one game.</p>
+<h2 id="what-the-pictures-are-drawn-from">What the pictures are drawn from<a class="headerlink" href="#what-the-pictures-are-drawn-from" title="Link to this section">&para;</a></h2>
+<p>The table above stops at the frame. The numbers <em>inside</em> the five pictures —
+the die, the piles, the grid, the boxes a log's word and a frog sit in — were
+agreed in the mockups and lived only in their CSS, which meant the layout was
+agreed but not distilled. They are written down here so the code receives them
+rather than re-guessing them, which is
+<a href="../../../engineering/ui-design-process/#the-named-constants-are-the-origin-not-an-afterthought">the direction of travel</a>
+the rest of this page already follows. <strong>No value here is new</strong>: every one is a
+rule in a committed mockup, transcribed by
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/414">#414</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A drawn log's corner radius</td>
+<td><code>HowToPlayLogRadius</code></td>
+<td>20 px</td>
+</tr>
+<tr>
+<td><code>Start</code> / <code>End</code> down from the log's top</td>
+<td><code>HowToPlayLogLabelTopPadding</code></td>
+<td>16 px</td>
+</tr>
+<tr>
+<td>Gap between that word and a frog on the same log</td>
+<td><code>HowToPlayLogLabelGap</code></td>
+<td>12 px</td>
+</tr>
+<tr>
+<td>A drawn frog's outline</td>
+<td><code>HowToPlayFrogOutline</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>The paper picture's hairline</td>
+<td><code>HowToPlayPaperOutline</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>Small print inside a picture</td>
+<td><code>HowToPlayNoteSize</code></td>
+<td>34 px</td>
+</tr>
+<tr>
+<td>Its line box, as a ratio</td>
+<td><code>HowToPlayNoteLineHeight</code></td>
+<td>1.4</td>
+</tr>
+<tr>
+<td>Page 4's caption line box</td>
+<td><code>HowToPlayCaptionLineBox</code></td>
+<td>52 px</td>
+</tr>
+<tr>
+<td>Gap between page 4's examples</td>
+<td><code>HowToPlayExampleGap</code></td>
+<td>56 px</td>
+</tr>
+</tbody>
+</table>
+<p>The two paper pages are drawn from their own top-left inside corner, which is
+where their offsets below are measured from.</p>
+<table>
+<thead>
+<tr>
+<th>Page 2 — roll the die</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The die, from the picture's left</td>
+<td><code>HowToPlayDieLeft</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td>The die, from its top</td>
+<td><code>HowToPlayDieTop</code></td>
+<td>164 px</td>
+</tr>
+<tr>
+<td>The die's side</td>
+<td><code>HowToPlayDieSize</code></td>
+<td>200 px</td>
+</tr>
+<tr>
+<td>Its corner radius</td>
+<td><code>HowToPlayDieRadius</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Its outline</td>
+<td><code>HowToPlayDieOutline</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td>Its inside padding</td>
+<td><code>HowToPlayDiePadding</code></td>
+<td>28 px</td>
+</tr>
+<tr>
+<td>A pip</td>
+<td><code>HowToPlayDiePipSize</code></td>
+<td>34 px</td>
+</tr>
+<tr>
+<td>The arrow, from the picture's left</td>
+<td><code>HowToPlayArrowLeft</code></td>
+<td>336 px</td>
+</tr>
+<tr>
+<td>The arrow's size</td>
+<td><code>HowToPlayArrowSize</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>The pile stack, from the picture's left</td>
+<td><code>HowToPlayPileLeft</code></td>
+<td>452 px</td>
+</tr>
+<tr>
+<td>A pile</td>
+<td><code>HowToPlayPileWidth</code> × <code>HowToPlayPileHeight</code></td>
+<td>200 × 120 px</td>
+</tr>
+<tr>
+<td>Its corner radius</td>
+<td><code>HowToPlayPileRadius</code></td>
+<td>16 px</td>
+</tr>
+<tr>
+<td>Its outline</td>
+<td><code>HowToPlayPileOutline</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td>Gap between piles</td>
+<td><code>HowToPlayPileGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>A pile's label</td>
+<td><code>HowToPlayPileLabelSize</code></td>
+<td>36 px</td>
+</tr>
+<tr>
+<td>How far the two unpicked piles are dimmed</td>
+<td><code>HowToPlayPileDimOpacity</code></td>
+<td>0.4</td>
+</tr>
+<tr>
+<td>The table, from the picture's left</td>
+<td><code>HowToPlayRollTableLeft</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td>The table, from its top</td>
+<td><code>HowToPlayRollTableTop</code></td>
+<td>520 px</td>
+</tr>
+<tr>
+<td>Its first column</td>
+<td><code>HowToPlayRollTableColumnWidth</code></td>
+<td>220 px</td>
+</tr>
+<tr>
+<td>Gap between its columns</td>
+<td><code>HowToPlayRollTableColumnGap</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Gap under its header row</td>
+<td><code>HowToPlayRollTableHeaderGap</code></td>
+<td>20 px</td>
+</tr>
+</tbody>
+</table>
+<p>The arrow and the pile stack are <strong>centred on the die's own centre line</strong> rather
+than carrying a top of their own, which is what the mockup's numbers already
+work out to and what keeps the row a row if the die ever changes size.</p>
+<table>
+<thead>
+<tr>
+<th>Page 3 — work it out</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The grid, from the picture's left</td>
+<td><code>HowToPlayGridLeft</code></td>
+<td>120 px</td>
+</tr>
+<tr>
+<td>The grid, from its top</td>
+<td><code>HowToPlayGridTop</code></td>
+<td>96 px</td>
+</tr>
+<tr>
+<td>A cell</td>
+<td><code>HowToPlayCellSize</code></td>
+<td>88 px</td>
+</tr>
+<tr>
+<td>Gap between cells</td>
+<td><code>HowToPlayCellGap</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>A cell's corner radius</td>
+<td><code>HowToPlayCellRadius</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>A cell's outline</td>
+<td><code>HowToPlayCellOutline</code></td>
+<td>3 px</td>
+</tr>
+<tr>
+<td>A digit in a cell</td>
+<td><code>HowToPlayCellDigitSize</code></td>
+<td>48 px</td>
+</tr>
+<tr>
+<td>The carry row's height</td>
+<td><code>HowToPlayCarryRowHeight</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>A carry box</td>
+<td><code>HowToPlayCarryBoxWidth</code> × <code>HowToPlayCarryBoxHeight</code></td>
+<td>48 × 44 px</td>
+</tr>
+<tr>
+<td>Its corner radius</td>
+<td><code>HowToPlayCarryBoxRadius</code></td>
+<td>6 px</td>
+</tr>
+<tr>
+<td>The answer row's outline</td>
+<td><code>HowToPlayAnswerOutline</code></td>
+<td>4 px</td>
+</tr>
+<tr>
+<td>The call-outs, from the picture's left</td>
+<td><code>HowToPlayCalloutLeft</code></td>
+<td>560 px</td>
+</tr>
+<tr>
+<td>The call-outs, from its top</td>
+<td><code>HowToPlayCalloutTop</code></td>
+<td>208 px</td>
+</tr>
+<tr>
+<td>Their column</td>
+<td><code>HowToPlayCalloutWidth</code></td>
+<td>440 px</td>
+</tr>
+<tr>
+<td>Gap between them</td>
+<td><code>HowToPlayCalloutGap</code></td>
+<td>40 px</td>
+</tr>
+<tr>
+<td>Their line box, as a ratio</td>
+<td><code>HowToPlayCalloutLineHeight</code></td>
+<td>1.5</td>
+</tr>
+</tbody>
+</table>
+<p>The lane stacks on pages 1, 4 and 5 carry no offsets of their own: each is
+<code>HowToPlayPictureInset</code> from the picture's left, and as far down from its top as
+half of what <code>HowToPlayPictureHeight</code> has left once the stack has taken its
+share — 92 px on a four-lane page, which is exactly where the mockups draw it.
+Written as that sum rather than as 92, and as a distance from the top rather
+than as a centring, because the lane drawings are
+<a href="#anchors">anchored to the picture's top-left inset</a>: a picture that is taller
+than 808 px on a screen that is not 16:10 grows below its lanes instead of
+moving them.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong><code>Back</code></strong> — secondary <a href="../shared-components/#button">button</a>, bottom-left.
