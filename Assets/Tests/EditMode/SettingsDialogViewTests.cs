@@ -15,6 +15,7 @@ using Frogs.Unity.Views;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using DialogPanel = Frogs.Unity.UI.DialogPanel;
+using UnityImage = UnityEngine.UI.Image;
 
 namespace Frogs.Unity.EditModeTests
 {
@@ -139,6 +140,63 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(closes, Is.EqualTo(1));
                 Assert.That(confirms, Is.Zero, "the least destructive button never opens the confirm");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void EveryButtonOnTheDialog_HoldsItsOwnLabel_AndIsNotASolidBlock()
+        {
+            // #323, and the whole of what Derek could see on the tablet: the
+            // red button was a solid red rectangle with nothing written on it,
+            // and `Back to the game`'s label ran past its own right-hand edge.
+            //
+            // Both are the shared Button's (docs/specs/ui/shared-components.md#button),
+            // so ButtonTests holds the component's own rules down. This is the
+            // screen the screenshot was taken of, asserted against
+            // docs/specs/ui/mockups/settings-dialog.html: three buttons, each
+            // holding its own words, and the two outline ones showing the
+            // white panel through their middles.
+            var view = CreateView();
+
+            try
+            {
+                var buttons = new[]
+                {
+                    view.HowToPlayButton,
+                    view.EndGameButton,
+                    view.BackToTheGameButton
+                };
+
+                foreach (var button in buttons)
+                {
+                    var inner = button.RectTransform.sizeDelta.x - (Button.ButtonPaddingX * 2f);
+
+                    Assert.That(
+                        button.Label.preferredWidth,
+                        Is.LessThanOrEqualTo(inner),
+                        $"`{button.Label.text}` does not fit between its own button's two ButtonPaddingX");
+                }
+
+                // The two action buttons are still exactly the width the
+                // mockup draws them at. Holding the label is a floor, and
+                // neither of these two is anywhere near it.
+                Assert.That(
+                    view.HowToPlayButton.RectTransform.sizeDelta.x,
+                    Is.EqualTo(SettingsDialogView.SettingsActionWidth).Within(0.001f));
+                Assert.That(
+                    view.EndGameButton.RectTransform.sizeDelta.x,
+                    Is.EqualTo(SettingsDialogView.SettingsActionWidth).Within(0.001f));
+
+                // And `End the game` reads as an outlined button rather than a
+                // block, which is the difference between a label nobody can
+                // read and a label anybody can.
+                Assert.That(view.EndGameButton.Kind, Is.EqualTo(ButtonKind.Destructive));
+                Assert.That(CentrePaintedAlpha(view.EndGameButton), Is.EqualTo(0f).Within(0.001f));
+                Assert.That(CentrePaintedAlpha(view.HowToPlayButton), Is.EqualTo(0f).Within(0.001f));
             }
             finally
             {
@@ -496,6 +554,24 @@ namespace Frogs.Unity.EditModeTests
                     Is.Empty,
                     $"nothing on this dialog reaches {word}");
             }
+        }
+
+        // What a button paints at its own centre, as an alpha — the same
+        // reading ButtonTests takes, for the same reason: an EditMode test has
+        // no rendered frame to sample, and the sprites are generated readable.
+        static float CentrePaintedAlpha(Button button)
+        {
+            var border = button.RectTransform.Find("Visual/Border").GetComponent<UnityImage>();
+            var fill = button.RectTransform.Find("Visual/Fill").GetComponent<UnityImage>();
+
+            return Mathf.Max(CentrePaintedAlpha(border), CentrePaintedAlpha(fill));
+        }
+
+        static float CentrePaintedAlpha(UnityImage image)
+        {
+            var texture = image.sprite.texture;
+
+            return texture.GetPixel(texture.width / 2, texture.height / 2).a * image.color.a;
         }
 
         static SettingsDialogView CreateView()

@@ -149,6 +149,113 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
+        public void OutlineKinds_LeaveTheirCentreUnpainted_RatherThanDrawingASolidBlock()
+        {
+            // #323. Secondary and Destructive both set a fully transparent
+            // fill, so whatever is painted in the middle of the button is
+            // painted by the *border* image. While that border was a filled
+            // rounded rect, the middle was the border colour: the button read
+            // as a solid block, and Destructive's warning-red label sat
+            // invisibly on a warning-red block.
+            //
+            // docs/specs/ui/shared-components.md#button's States table says
+            // "no fill", and every mockup draws these two as `border:4px solid`
+            // with nothing behind it.
+            foreach (var kind in new[] { ButtonKind.Secondary, ButtonKind.Destructive })
+            {
+                var button = CreateButton(kind);
+
+                try
+                {
+                    Assert.That(
+                        CentrePaintedAlpha(button),
+                        Is.EqualTo(0f).Within(0.001f),
+                        $"{kind} is an outline kind — whatever is behind the button must show through its middle");
+                }
+                finally
+                {
+                    Destroy(button);
+                }
+            }
+
+            // The other half, so the rule cannot be satisfied by painting
+            // nothing anywhere: a filled kind still fills.
+            var primary = CreateButton(ButtonKind.Primary);
+
+            try
+            {
+                Assert.That(
+                    CentrePaintedAlpha(primary),
+                    Is.EqualTo(1f).Within(0.001f),
+                    "Primary is 'filled accent' — its middle is painted");
+            }
+            finally
+            {
+                Destroy(primary);
+            }
+        }
+
+        [Test]
+        public void AButtonWidensToHoldItsLabel_RatherThanLettingItOverflow()
+        {
+            // #323. `Back to the game` is sixteen characters at
+            // ButtonLabelSize, and ButtonMinWidth leaves only 224 px between
+            // the two ButtonPaddingX. The label carries
+            // HorizontalWrapMode.Overflow, so it did not wrap and did not
+            // shrink — it hung out past the button's right-hand edge, which is
+            // what the screenshot on #323 shows.
+            //
+            // Every committed mockup draws a button the way CSS does —
+            // `min-width:320px` with `padding:0 48px` on a shrink-to-fit box —
+            // so ButtonMinWidth is a floor and the label is what sets the
+            // width when it needs more. settings-dialog.html's own comment
+            // measures `Back to the game` at 531 px.
+            var button = CreateButton(ButtonKind.Primary);
+
+            try
+            {
+                button.SetLabelText("Back to the game");
+
+                var inner = button.RectTransform.sizeDelta.x - (Button.ButtonPaddingX * 2f);
+
+                Assert.That(
+                    button.Label.preferredWidth,
+                    Is.LessThanOrEqualTo(inner),
+                    "the label must fit between the two ButtonPaddingX rather than hang over the edge");
+                Assert.That(
+                    button.RectTransform.sizeDelta.x,
+                    Is.GreaterThan(Button.ButtonMinWidth),
+                    "and this is a label that does not fit at ButtonMinWidth");
+            }
+            finally
+            {
+                Destroy(button);
+            }
+        }
+
+        [Test]
+        public void AShortLabel_LeavesTheButtonAtButtonMinWidth_BecauseItIsAFloorNotAFit()
+        {
+            // The other side of the widening rule: a button does not
+            // shrink-wrap its words. `Roll` gets the same footprint every
+            // other button has.
+            var button = CreateButton(ButtonKind.Primary);
+
+            try
+            {
+                button.SetLabelText("Roll");
+
+                Assert.That(
+                    button.RectTransform.sizeDelta.x,
+                    Is.EqualTo(Button.ButtonMinWidth).Within(0.001f));
+            }
+            finally
+            {
+                Destroy(button);
+            }
+        }
+
+        [Test]
         public void Pressed_MovesTheVisualDownByButtonPressOffset_AndDarkensTheFill()
         {
             var button = CreateButton(ButtonKind.Primary);
@@ -264,6 +371,30 @@ namespace Frogs.Unity.EditModeTests
             {
                 Destroy(button);
             }
+        }
+
+        // What the button paints at its own centre, as an alpha: the more
+        // opaque of the two stacked images that meet there. This reads the
+        // sprite's own texture rather than a rendered frame, because an
+        // EditMode test has no frame to sample — the sprites are generated
+        // readable, so the pixel that lands in the middle of the button can
+        // simply be asked for.
+        static float CentrePaintedAlpha(Button button)
+        {
+            var border = button.RectTransform.Find("Visual/Border").GetComponent<UnityImage>();
+            var fill = button.RectTransform.Find("Visual/Fill").GetComponent<UnityImage>();
+
+            return Mathf.Max(CentrePaintedAlpha(border), CentrePaintedAlpha(fill));
+        }
+
+        static float CentrePaintedAlpha(UnityImage image)
+        {
+            var texture = image.sprite.texture;
+
+            // A sliced sprite stretches only its middle band, so the texture's
+            // own centre pixel is the pixel that lands in the middle of the
+            // button at whatever size it is drawn.
+            return texture.GetPixel(texture.width / 2, texture.height / 2).a * image.color.a;
         }
 
         static Button CreateButton(ButtonKind kind)
