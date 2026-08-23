@@ -184,10 +184,10 @@ class PrBuildProfileTests(unittest.TestCase):
         Which is the device profile by another name — so two builds that both
         say nothing are two device builds, one of them mislabelled (#218).
         """
+        asked = [profile_of(block) for block in self.builds]
         self.assertEqual(
-            sorted(profile_of(block) for block in self.builds), sorted(PROFILES),
-            f"pr-build.yml's builds ask for profiles "
-            f"{[profile_of(block) for block in self.builds]}. Each must pass "
+            sorted(asked, key=str), sorted(PROFILES),
+            f"pr-build.yml's builds ask for profiles {asked}. Each must pass "
             f"`{PROFILE_FLAG} <profile>` in customParameters — that is the "
             f"only thing that reaches the editor inside the build container "
             f"(#218), and the two must not ask for the same thing.")
@@ -216,8 +216,9 @@ class PrBuildProfileTests(unittest.TestCase):
         for block in self.uploads:
             path = scalar(block, "path")
             with self.subTest(artifact=scalar(block, "name")):
+                under = [root for root in roots if path.startswith(f"{root}/")]
                 self.assertEqual(
-                    [root for root in roots if path.startswith(f"{root}/")].__len__(), 1,
+                    len(under), 1,
                     f"The upload reading {path!r} does not sit under exactly "
                     f"one of {roots}. unity-builder appends the targetPlatform "
                     f"directory itself, so a path missing that segment matches "
