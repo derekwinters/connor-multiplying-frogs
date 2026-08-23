@@ -3015,7 +3015,13 @@ direction.
 <strong>Invariant:</strong> exactly one primary button is visible at a time. Two primaries
 is a screen that has not decided what it wants the player to do.
 <strong>Invariant:</strong> a destructive button never sits within <code>ButtonGap</code> of the button
-a player is most likely to be reaching for.</p>
+a player is most likely to be reaching for.
+<strong>Invariant:</strong> a button is never narrower than the label it is holding plus
+<code>ButtonPaddingX</code> either side. A label is never clipped, never shrunk to fit,
+and never allowed past the button's own edge.
+<strong>Invariant:</strong> an outline kind is a ring. Whatever is behind the button — the
+panel, the screen — shows through the middle of it, because <em>no fill</em> means no
+fill.</p>
 <h4 id="3-named-constants_1">3. Named constants<a class="headerlink" href="#3-named-constants_1" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3083,6 +3089,30 @@ a player is most likely to be reaching for.</p>
 </tr>
 </tbody>
 </table>
+<p><strong><code>ButtonMinWidth</code> is a floor, not a fit.</strong> A button is <code>ButtonMinWidth</code> wide,
+or as wide as its label plus <code>ButtonPaddingX</code> either side, whichever is more —
+which is what every committed mockup draws, <code>min-width:320px</code> with
+<code>padding:0 48px</code> on a box that shrinks to its contents. A short label does not
+shrink the button below the floor; a long one raises it above.</p>
+<p>The widths a screen page states are floors in the same way. When a page gives a
+button its own width — <a href="../game-setup/">game setup</a>'s controls, the
+<a href="../settings-dialog/">settings dialog</a>'s <code>SettingsActionWidth</code>,
+<a href="../title-screen/">title screen</a>'s <code>TitleButtonWidth</code> — that is the width the
+button has unless its own words need more, in which case they win. A screen 12 px
+wider than its table says is a smaller problem than a label hanging over the
+edge of the button it belongs to, and the second one is what
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/323">#323</a>
+found on a tablet: <code>Back to the game</code> at 16 characters, in a 320 px button with
+224 px between its paddings.</p>
+<p>Two consequences worth stating, because they are the reason this is a rule
+rather than a fix. The width of a button whose label is composed at runtime —
+<a href="../answer-result/">answer result</a>'s <code>{0}'s turn</code>, holding a name a child typed —
+cannot be a constant at all, and nothing on a page can name it. And a mockup
+draws this rule already, so the numbers a mockup measures assume it: this page's
+own <a href="../settings-dialog/#what-drawing-the-pair-changed">settings dialog</a> decided
+where the About block goes partly on <code>Back to the game</code> rendering 531 px wide,
+which is 211 px more than <code>ButtonMinWidth</code> and only true of a button that widens
+to its words.</p>
 <h4 id="4-states_1">4. States<a class="headerlink" href="#4-states_1" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3118,6 +3148,16 @@ a player is most likely to be reaching for.</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Outlined means see-through, and it has to be drawn as a ring.</strong> The three
+kinds are two images stacked — a border shape, and a fill inset by
+<code>ButtonBorderWidth</code> — and while the border was drawn as a solid rounded rect the
+outlined kinds had nothing over its middle to hide it, so both read as blocks of
+their border colour. <code>Destructive</code>'s warning-red label on a warning-red block
+was invisible, which is
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/323">#323</a>'s
+first bug: a button with nothing written on it. This table always said "no
+fill"; the drawing is what disagreed, and the border is now a ring with the
+middle taken out of it.</p>
 <p><code>ButtonBorderWidth</code> and <code>ButtonDisabledOpacity</code> were always on this page — both
 appeared in the States row above with a value and no name — and are named here
 so the code has a name to declare, per
