@@ -57,10 +57,16 @@ namespace Frogs.Unity.Views
     {
         // docs/specs/ui/settings-dialog.md#named-constants.
         public const float SettingsDialogWidth = 900f;
-        public const float SettingsDialogHeight = 760f;
+        public const float SettingsDialogHeight = 970f;
         public const float SettingsActionWidth = 788f;
         public const float SettingsActionGap = 96f;
-        public const float SettingsVersionBottomOffset = 60f;
+        public const float SettingsAboutNameSize = 40f;
+        public const float SettingsAboutCreditSize = 32f;
+        public const float SettingsAboutLineHeight = 1.2f;
+        public const float SettingsAboutLineGap = 12f;
+        public const float SettingsAboutBlockHeight = 144f;
+        public const float SettingsAboutTopOffset = 164f;
+        public const float SettingsAboutSectionGap = 72f;
 
         // The rest of that table is other pages' rows, referenced under the
         // identical name rather than redeclared here — the same line #220 drew
@@ -72,9 +78,18 @@ namespace Frogs.Unity.Views
         // - the panel's padding, corner radius, title metrics, scrim and fade
         //   are the shared Dialog's (shared-components.md#dialog).
         // - `VersionLabelSize` is title-screen.md's — the same value doing the
-        //   same job, a quiet version readout bottom-left.
+        //   same job, a quiet version readout, now the last line of `about`.
 
         const string TitleLabel = "Settings";
+
+        // `about`'s first line, and deliberately not TitleLabel: this dialog's
+        // title is the string `Settings` and the game's name is
+        // `Multiplying Frogs`. settings-dialog.md says so out loud — "these two
+        // are not the same constant and must not be made to share one" —
+        // because they sit four lines apart on the same panel and a reader who
+        // saw one constant used twice would collapse them.
+        const string GameNameLabel = "Multiplying Frogs";
+        const string CreditLabel = "Designed by Connor";
         const string HowToPlayLabel = "How to play";
         const string EndGameLabel = "End the game";
         const string BackToTheGameLabel = "Back to the game";
@@ -85,11 +100,12 @@ namespace Frogs.Unity.Views
         // choice, for the same reason (no external assets).
         const string BuiltinLabelFontName = "LegacyRuntime.ttf";
 
-        // Chrome colour copied verbatim from the committed mockup's CSS custom
+        // Chrome colours copied verbatim from the committed mockup's CSS custom
         // properties, the same line Button.cs and TitleScreenView.cs both draw:
-        // not a geometry constant on any spec page's table, so not declared as
-        // a named spec constant.
+        // not geometry constants on any spec page's table, so not declared as
+        // named spec constants.
         static readonly Color VersionColor = new Color32(0x6C, 0x78, 0x73, 0xFF); // mockup's --line
+        static readonly Color AboutTextColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockup's --ink
 
         RectTransform _rect;
         DialogPanel _dialog;
@@ -98,7 +114,9 @@ namespace Frogs.Unity.Views
         Button _howToPlayButton;
         Button _endGameButton;
 
-        RectTransform _footprintRect;
+        RectTransform _aboutRect;
+        Text _aboutNameText;
+        Text _aboutCreditText;
         Text _versionText;
 
         Button _backToTheGameButton;
@@ -150,13 +168,13 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>`footprint` — the region the version readout sits in, bottom-left.</summary>
-        public RectTransform FootprintRect
+        /// <summary>`about` — the three-line block under the title: the game's name, the credit, and the version.</summary>
+        public RectTransform AboutRect
         {
             get
             {
                 EnsureInitialized();
-                return _footprintRect;
+                return _aboutRect;
             }
         }
 
@@ -190,7 +208,27 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The version readout — read from <see cref="AppVersion"/>, never typed.</summary>
+        /// <summary>`about`'s first line — the game saying its own name, at <see cref="SettingsAboutNameSize"/>.</summary>
+        public Text AboutNameText
+        {
+            get
+            {
+                EnsureInitialized();
+                return _aboutNameText;
+            }
+        }
+
+        /// <summary>`about`'s second line — the credit, at <see cref="SettingsAboutCreditSize"/>.</summary>
+        public Text AboutCreditText
+        {
+            get
+            {
+                EnsureInitialized();
+                return _aboutCreditText;
+            }
+        }
+
+        /// <summary>`about`'s last line — the version, read from <see cref="AppVersion"/>, never typed.</summary>
         public Text VersionText
         {
             get
@@ -239,7 +277,7 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// The line `footprint` shows — asserted the same way
+        /// The line `about` ends on — asserted the same way
         /// <c>HelloWorldProbeTests</c> asserts <c>HelloWorldProbe.Describe</c>:
         /// against this static, total formatting method taking the build-name
         /// string as a parameter, not against a live <c>Application.version</c>
@@ -305,7 +343,7 @@ namespace Frogs.Unity.Views
 
             BuildDialog();
             BuildActions();
-            BuildFootprint();
+            BuildAbout();
             BuildControls();
         }
 
@@ -383,34 +421,82 @@ namespace Frogs.Unity.Views
             return button;
         }
 
-        void BuildFootprint()
+        // `about` is measured from the *top* of the panel down, which is the
+        // opposite of the actions column above — and deliberately so. It is a
+        // header: it belongs to the `Settings` title above it, not to the
+        // buttons below it, so it must not move when a button label or the
+        // panel's height changes. The two directions meet in the middle of
+        // this panel and the space between them is what is left over, which
+        // SettingsAboutSectionGap is the floor for.
+        void BuildAbout()
         {
-            var footprintGO = new GameObject("Footprint", typeof(RectTransform));
-            _footprintRect = (RectTransform)footprintGO.transform;
-            _footprintRect.SetParent(_dialog.PanelRect, worldPositionStays: false);
-            StretchToFill(_footprintRect);
+            var aboutGO = new GameObject("About", typeof(RectTransform));
+            _aboutRect = (RectTransform)aboutGO.transform;
+            _aboutRect.SetParent(_dialog.PanelRect, worldPositionStays: false);
+            _aboutRect.anchorMin = new Vector2(0f, 1f);
+            _aboutRect.anchorMax = new Vector2(0f, 1f);
+            _aboutRect.pivot = new Vector2(0f, 1f);
+            _aboutRect.sizeDelta = new Vector2(InnerWidth, SettingsAboutBlockHeight);
+            _aboutRect.anchoredPosition = new Vector2(DialogPanel.DialogPadding, -SettingsAboutTopOffset);
 
-            var versionGO = new GameObject("Version", typeof(RectTransform), typeof(Text));
-            _versionText = versionGO.GetComponent<Text>();
-            _versionText.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
-            _versionText.fontSize = (int)TitleScreenView.VersionLabelSize;
-            _versionText.alignment = TextAnchor.LowerLeft;
-            _versionText.color = VersionColor;
-            _versionText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            _versionText.verticalOverflow = VerticalWrapMode.Overflow;
-            _versionText.raycastTarget = false;
+            // Three stacked lines, each in a box of its own size at
+            // SettingsAboutLineHeight, SettingsAboutLineGap apart. The three
+            // boxes and the two gaps come to exactly SettingsAboutBlockHeight:
+            // 48 + 12 + 38.4 + 12 + 33.6 = 144.
+            var cursor = 0f;
+
+            _aboutNameText = CreateAboutLine(
+                "Name", GameNameLabel, SettingsAboutNameSize, FontStyle.Bold, AboutTextColor, ref cursor);
+
+            _aboutCreditText = CreateAboutLine(
+                "Credit", CreditLabel, SettingsAboutCreditSize, FontStyle.Normal, AboutTextColor, ref cursor);
 
             // What the build stamped, parsed by Core. Nothing here composes,
-            // stores, or hard-codes a version literal.
-            _versionText.text = FormatVersionLabel(Application.version);
+            // stores, or hard-codes a version literal — the line moved into
+            // `about`, where it is read from did not.
+            _versionText = CreateAboutLine(
+                "Version",
+                FormatVersionLabel(Application.version),
+                TitleScreenView.VersionLabelSize,
+                FontStyle.Normal,
+                VersionColor,
+                ref cursor);
+        }
 
-            var versionRect = _versionText.rectTransform;
-            versionRect.SetParent(_footprintRect, worldPositionStays: false);
-            versionRect.anchorMin = Vector2.zero;
-            versionRect.anchorMax = Vector2.zero;
-            versionRect.pivot = Vector2.zero;
-            versionRect.sizeDelta = Vector2.zero;
-            versionRect.anchoredPosition = new Vector2(DialogPanel.DialogPadding, SettingsVersionBottomOffset);
+        Text CreateAboutLine(string name, string label, float size, FontStyle style, Color color, ref float cursor)
+        {
+            var lineGO = new GameObject(name, typeof(RectTransform), typeof(Text));
+
+            var text = lineGO.GetComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
+            text.fontSize = (int)size;
+            text.fontStyle = style;
+            text.alignment = TextAnchor.UpperLeft;
+            text.color = color;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+
+            // Nothing in `about` responds to a touch, including a long one —
+            // this is that invariant, structurally: the block has no Button in
+            // it and its text does not take the raycast, so a tap here reaches
+            // the panel underneath and stops.
+            text.raycastTarget = false;
+
+            text.text = label;
+
+            var lineBox = size * SettingsAboutLineHeight;
+
+            var rect = text.rectTransform;
+            rect.SetParent(_aboutRect, worldPositionStays: false);
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.sizeDelta = new Vector2(InnerWidth, lineBox);
+            rect.anchoredPosition = new Vector2(0f, -cursor);
+
+            cursor += lineBox + SettingsAboutLineGap;
+
+            return text;
         }
 
         void BuildControls()
@@ -433,6 +519,14 @@ namespace Frogs.Unity.Views
             {
                 handler();
             }
+        }
+
+        // The panel inset by DialogPadding on both sides — the width the
+        // actions column already runs at, expressed as the relationship
+        // rather than as a second copy of SettingsActionWidth's 788.
+        static float InnerWidth
+        {
+            get { return SettingsDialogWidth - (DialogPanel.DialogPadding * 2f); }
         }
 
         static void StretchToFill(RectTransform rect)

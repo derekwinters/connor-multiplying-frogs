@@ -16,6 +16,8 @@ using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
 using DialogPanel = Frogs.Unity.UI.DialogPanel;
 using UnityImage = UnityEngine.UI.Image;
+using Graphic = UnityEngine.UI.Graphic;
+using Selectable = UnityEngine.UI.Selectable;
 
 namespace Frogs.Unity.EditModeTests
 {
@@ -73,15 +75,27 @@ namespace Frogs.Unity.EditModeTests
                     Is.GreaterThan(TopEdge(view.EndGameButton.RectTransform)),
                     "`How to play`, then `End the game`");
 
-                // footprint — bottom-left.
-                Assert.That(view.VersionText, Is.Not.Null);
-                Assert.That(view.VersionText.alignment, Is.EqualTo(TextAnchor.LowerLeft));
+                // about — under the title, left-aligned at the panel's inner
+                // left edge, SettingsAboutTopOffset down from the panel's top.
+                // Measured top-down, unlike the actions column: it is a header
+                // and belongs to `Settings` above it, not to the buttons below.
+                Assert.That(view.AboutRect, Is.Not.Null);
                 Assert.That(
-                    LeftEdge(view.VersionText.rectTransform) - LeftEdge(view.Dialog.PanelRect),
+                    LeftEdge(view.AboutRect) - LeftEdge(view.Dialog.PanelRect),
                     Is.EqualTo(DialogPanel.DialogPadding).Within(0.001f));
                 Assert.That(
+                    TopEdge(view.Dialog.PanelRect) - TopEdge(view.AboutRect),
+                    Is.EqualTo(SettingsDialogView.SettingsAboutTopOffset).Within(0.001f));
+                Assert.That(
+                    view.AboutRect.rect.height,
+                    Is.EqualTo(SettingsDialogView.SettingsAboutBlockHeight).Within(0.001f));
+
+                // And nothing is anchored to the panel's bottom-left any more
+                // — the version moved into `about`, it did not gain a twin.
+                Assert.That(
                     BottomEdge(view.VersionText.rectTransform) - BottomEdge(view.Dialog.PanelRect),
-                    Is.EqualTo(SettingsDialogView.SettingsVersionBottomOffset).Within(0.001f));
+                    Is.GreaterThan(SettingsDialogView.SettingsAboutSectionGap),
+                    "the version is in the header, not the footprint");
 
                 // controls — the primary button, bottom-right, per the shared
                 // Dialog's primary-on-the-right rule.
@@ -109,10 +123,16 @@ namespace Frogs.Unity.EditModeTests
             AssertPublicConstantsAreExactly(typeof(SettingsDialogView), new Dictionary<string, float>
             {
                 { nameof(SettingsDialogView.SettingsDialogWidth), 900f },
-                { nameof(SettingsDialogView.SettingsDialogHeight), 760f },
+                { nameof(SettingsDialogView.SettingsDialogHeight), 970f },
                 { nameof(SettingsDialogView.SettingsActionWidth), 788f },
                 { nameof(SettingsDialogView.SettingsActionGap), 96f },
-                { nameof(SettingsDialogView.SettingsVersionBottomOffset), 60f }
+                { nameof(SettingsDialogView.SettingsAboutNameSize), 40f },
+                { nameof(SettingsDialogView.SettingsAboutCreditSize), 32f },
+                { nameof(SettingsDialogView.SettingsAboutLineHeight), 1.2f },
+                { nameof(SettingsDialogView.SettingsAboutLineGap), 12f },
+                { nameof(SettingsDialogView.SettingsAboutBlockHeight), 144f },
+                { nameof(SettingsDialogView.SettingsAboutTopOffset), 164f },
+                { nameof(SettingsDialogView.SettingsAboutSectionGap), 72f }
             });
         }
 
@@ -444,6 +464,138 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
+        public void About_IsTheGamesNameTheCreditAndTheVersion_StackedOneLineGapApart()
+        {
+            var view = CreateView();
+
+            try
+            {
+                // "three lines, left-aligned, stacked, SettingsAboutLineGap
+                // apart". The game saying its own name, who designed it, and
+                // which build this is.
+                Assert.That(view.AboutNameText.text, Is.EqualTo("Multiplying Frogs"));
+                Assert.That(view.AboutCreditText.text, Is.EqualTo("Designed by Connor"));
+
+                Assert.That(
+                    view.AboutNameText.fontSize,
+                    Is.EqualTo((int)SettingsDialogView.SettingsAboutNameSize));
+                Assert.That(view.AboutNameText.fontStyle, Is.EqualTo(FontStyle.Bold));
+                Assert.That(
+                    view.AboutCreditText.fontSize,
+                    Is.EqualTo((int)SettingsDialogView.SettingsAboutCreditSize));
+
+                var lines = new[] { view.AboutNameText, view.AboutCreditText, view.VersionText };
+                var sizes = new[]
+                {
+                    SettingsDialogView.SettingsAboutNameSize,
+                    SettingsDialogView.SettingsAboutCreditSize,
+                    TitleScreenView.VersionLabelSize
+                };
+
+                for (var index = 0; index < lines.Length; index++)
+                {
+                    var line = lines[index];
+
+                    Assert.That(
+                        LeftEdge(line.rectTransform),
+                        Is.EqualTo(LeftEdge(view.AboutRect)).Within(0.001f),
+                        "one left-aligned stack");
+
+                    // Each line sits in a box of its own size at
+                    // SettingsAboutLineHeight — written down rather than left
+                    // to the font's default, so the gaps between the three are
+                    // 12 px in any renderer and not 12 px in one of them.
+                    Assert.That(
+                        line.rectTransform.rect.height,
+                        Is.EqualTo(sizes[index] * SettingsDialogView.SettingsAboutLineHeight).Within(0.001f),
+                        "line box");
+                }
+
+                Assert.That(
+                    BottomEdge(view.AboutNameText.rectTransform) - TopEdge(view.AboutCreditText.rectTransform),
+                    Is.EqualTo(SettingsDialogView.SettingsAboutLineGap).Within(0.001f));
+                Assert.That(
+                    BottomEdge(view.AboutCreditText.rectTransform) - TopEdge(view.VersionText.rectTransform),
+                    Is.EqualTo(SettingsDialogView.SettingsAboutLineGap).Within(0.001f));
+
+                // And the three of them are exactly the block: 48 + 12 + 38.4
+                // + 12 + 33.6 = 144, which is why SettingsAboutBlockHeight is
+                // a round number rather than a rounded one.
+                Assert.That(
+                    TopEdge(view.AboutNameText.rectTransform),
+                    Is.EqualTo(TopEdge(view.AboutRect)).Within(0.001f));
+                Assert.That(
+                    BottomEdge(view.VersionText.rectTransform),
+                    Is.EqualTo(BottomEdge(view.AboutRect)).Within(0.001f));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void About_IsTextAndOnlyText_WithNothingOnItToPress()
+        {
+            // settings-dialog.md's own invariant: "the About block is text and
+            // only text. It carries no control, no link, and nothing tappable.
+            // It is the one part of this dialog that is not a way to do
+            // something." And: "there is no build-info easter egg behind seven
+            // taps on the version."
+            var view = CreateView();
+
+            try
+            {
+                Assert.That(view.AboutRect.GetComponentsInChildren<Button>(true), Is.Empty);
+                Assert.That(view.AboutRect.GetComponentsInChildren<Selectable>(true), Is.Empty);
+
+                foreach (var graphic in view.AboutRect.GetComponentsInChildren<Graphic>(true))
+                {
+                    Assert.That(
+                        graphic.raycastTarget,
+                        Is.False,
+                        $"{graphic.name} in `about` would swallow a touch");
+                }
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
+        public void About_ClearsTheActionsColumnBySettingsAboutSectionGap()
+        {
+            // The two halves of this panel are measured from opposite ends —
+            // `about` grows down from the title, the actions column grows up
+            // from the button row — "and the space between them is what is
+            // left over". SettingsAboutSectionGap is the floor that leftover
+            // has to clear, which is what stops the block crowding the column
+            // if either grows.
+            //
+            // It is a floor rather than an equality because the mockup's
+            // 970 px panel is a CSS border box with a 3 px border and the
+            // Unity panel rect is not, so every offset measured from the
+            // bottom of this panel sits 6 px lower here than in the drawing —
+            // a difference this screen has carried since it was first built,
+            // and the same one player-won.md's "634 px padding box" describes.
+            var view = CreateView();
+
+            try
+            {
+                var leftOver = BottomEdge(view.AboutRect) - TopEdge(view.HowToPlayButton.RectTransform);
+
+                Assert.That(
+                    leftOver,
+                    Is.GreaterThanOrEqualTo(SettingsDialogView.SettingsAboutSectionGap - 0.001f));
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        [Test]
         public void Version_IsReadThroughAppVersion_NeverTyped()
         {
             // Asserted the same way HelloWorldProbeTests asserts
@@ -518,7 +670,13 @@ namespace Frogs.Unity.EditModeTests
                 nameof(SettingsDialogView.SettingsDialogHeight),
                 nameof(SettingsDialogView.SettingsActionWidth),
                 nameof(SettingsDialogView.SettingsActionGap),
-                nameof(SettingsDialogView.SettingsVersionBottomOffset),
+                nameof(SettingsDialogView.SettingsAboutNameSize),
+                nameof(SettingsDialogView.SettingsAboutCreditSize),
+                nameof(SettingsDialogView.SettingsAboutLineHeight),
+                nameof(SettingsDialogView.SettingsAboutLineGap),
+                nameof(SettingsDialogView.SettingsAboutBlockHeight),
+                nameof(SettingsDialogView.SettingsAboutTopOffset),
+                nameof(SettingsDialogView.SettingsAboutSectionGap),
                 // The two events, spelled out rather than via nameof — an
                 // event cannot be named from outside its declaring type in
                 // every context, and these two are the whole of what this
@@ -528,10 +686,12 @@ namespace Frogs.Unity.EditModeTests
                 nameof(SettingsDialogView.RectTransform),
                 nameof(SettingsDialogView.Dialog),
                 nameof(SettingsDialogView.ActionsRect),
-                nameof(SettingsDialogView.FootprintRect),
+                nameof(SettingsDialogView.AboutRect),
                 nameof(SettingsDialogView.HowToPlayButton),
                 nameof(SettingsDialogView.EndGameButton),
                 nameof(SettingsDialogView.BackToTheGameButton),
+                nameof(SettingsDialogView.AboutNameText),
+                nameof(SettingsDialogView.AboutCreditText),
                 nameof(SettingsDialogView.VersionText),
                 nameof(SettingsDialogView.Open),
                 nameof(SettingsDialogView.Close),
