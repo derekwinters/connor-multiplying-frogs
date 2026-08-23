@@ -22,7 +22,7 @@ namespace Frogs.Unity.EditModeTests
 
             try
             {
-                chip.SetFrog(new Color32(0x3F, 0x8E, 0x4F, 0xFF), "Green");
+                chip.SetFrog(new Color32(0x3E, 0x93, 0x3E, 0xFF), "Green");
                 chip.SetPadCount("3 of 8");
 
                 Assert.That(chip.RectTransform.sizeDelta, Is.EqualTo(new Vector2(PlayerChip.PlayerChipWidth, PlayerChip.PlayerChipHeight)));

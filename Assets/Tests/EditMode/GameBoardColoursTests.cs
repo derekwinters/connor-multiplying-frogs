@@ -11,12 +11,12 @@ using FrogColours = Frogs.Unity.UI.FrogColours;
 namespace Frogs.Unity.EditModeTests
 {
     /// <summary>
-    /// The pond reads as water — issue #291, and
+    /// The pond reads as water — issues #291 and #301, and
     /// docs/specs/ui/game-board.md § Colours, which is where the board's
     /// colours now live. Written before the change, per
     /// docs/engineering/testing.md's sanctioned flow: pushed unexecuted, with
-    /// CI turning them red against the old pale values before green — there is
-    /// no editor here to watch them fail in.
+    /// CI turning them red against the values they replace before green —
+    /// there is no editor here to watch them fail in.
     ///
     /// The hex values are written out **as literals** rather than read from
     /// <see cref="BoardColours"/>. A test that asserts a constant equals itself
@@ -37,9 +37,9 @@ namespace Frogs.Unity.EditModeTests
         // docs/specs/ui/game-board.md § Colours — the page's own table,
         // copied by hand rather than read from the code under test.
         static readonly Color PondWater = new Color32(0x9F, 0xD8, 0xF2, 0xFF);
-        static readonly Color LilyPadGreen = new Color32(0xCC, 0xEA, 0xAF, 0xFF);
-        static readonly Color LilyPadEdge = new Color32(0x7F, 0xAE, 0x5E, 0xFF);
-        static readonly Color LogBrown = new Color32(0xE2, 0xC7, 0x9C, 0xFF);
+        static readonly Color LilyPadGreen = new Color32(0xB2, 0xE6, 0x7F, 0xFF);
+        static readonly Color LilyPadEdge = new Color32(0x6E, 0x9E, 0x4A, 0xFF);
+        static readonly Color LogBrown = new Color32(0x4A, 0x2E, 0x1A, 0xFF);
         static readonly Color LogEdge = new Color32(0xA9, 0x7F, 0x4F, 0xFF);
         static readonly Color BandFill = new Color32(0xE2, 0xE8, 0xE5, 0xFF);
         static readonly Color BoardInk = new Color32(0x1E, 0x24, 0x22, 0xFF);
@@ -210,14 +210,17 @@ namespace Frogs.Unity.EditModeTests
                         ContrastRatio(piece, surface.Value),
                         Is.GreaterThanOrEqualTo(MinimumContrastRatio),
                         $"the {frog} frog is too close in brightness to {surface.Key}. "
-                        + "Fix the surface, not the frog — the frog colours are the art "
-                        + "decision this issue does not get to move.");
+                        + "Either side may move: Derek reversed \"the surface moves, not the "
+                        + "frog\" on #301, because with the pond he picked no set of four frog "
+                        + "colours existed. Move them together and re-measure — "
+                        + "game-board.md#how-the-ponds-colours-are-constrained.");
 
                     Assert.That(
                         ColourDistance(piece, surface.Value),
                         Is.GreaterThanOrEqualTo(MinimumColourDistance),
                         $"the {frog} frog is too close in colour to {surface.Key}. "
-                        + "Fix the surface, not the frog.");
+                        + "Either side may move, and they move together — "
+                        + "game-board.md#how-the-ponds-colours-are-constrained.");
                 }
             }
         }
