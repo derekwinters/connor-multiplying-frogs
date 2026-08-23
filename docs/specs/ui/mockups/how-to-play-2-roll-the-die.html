@@ -1,0 +1,102 @@
+<!doctype html>
+<!--
+  Multiplying Frogs — How to play, page 2 of 5: roll the die
+  Device: kids' Android tablet, held landscape.
+  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+
+  A SCREEN, NOT A DIALOG. `How to play` is pressed from inside the settings
+  dialog, and shared-components.md#dialog says a dialog never opens over
+  another dialog ("Stacked: does not happen"). So this replaces the board
+  rather than covering it.
+
+  PAGED, NOT SCROLLING. The project has no scroll component and introducing
+  one is a real cost. Five pages, `Back` and `Next` from the shared Button,
+  and a row of dots so a child can see how much is left.
+
+  Numbers here are the numbers in how-to-play.md's constants table.
+  Pond colours are game-board.md's Colours table.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multiplying Frogs — How to play 2/5</title>
+<style>
+  :root{
+    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
+    --green:#3E933E; --blue:#37609A; --orange:#D38231; --pink:#D41C78;
+    --water:#9FD8F2; --pad:#B2E67F; --pad-edge:#6E9E4A;
+    --log:#4A2E1A; --log-label:#C6B49C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+         background:var(--bg);color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .abs{position:absolute}
+
+  /* HowToPlayHeadingSize 72 in an 88 px line box (72 x 1.2 rounded up). */
+  .heading{font-size:72px;line-height:88px;font-weight:700}
+
+  /* picture: 1104 x 808 at (48,184). DialogRadius 32. */
+  .picture{position:absolute;left:48px;top:184px;width:1104px;height:808px;
+           border-radius:32px;overflow:hidden}
+  .picture.water{background:var(--water)}
+  .picture.paper{background:var(--paper);border:3px solid var(--faint)}
+
+  /* words: 656 wide at (1216,184). HowToPlayBodySize 40, line height 1.35. */
+  .words{position:absolute;left:1216px;top:184px;width:656px;
+         font-size:40px;line-height:1.35}
+  .words p{margin-bottom:32px}
+  .words p:last-child{margin-bottom:0}
+  .words b{font-weight:700}
+  .words .q{font-weight:700;margin-bottom:0}
+
+  .btn{position:absolute;height:112px;min-width:320px;padding:0 48px;border-radius:24px;
+       display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700}
+  .btn.p{background:var(--accent);color:#fff}
+  .btn.s{border:4px solid var(--line);color:var(--ink)}
+
+  /* HowToPlayDotSize 20, HowToPlayDotGap 24, centred on the controls row. */
+  .dots{position:absolute;left:0;right:0;top:1086px;display:flex;justify-content:center;gap:24px}
+  .dot{width:20px;height:20px;border-radius:50%;background:var(--faint)}
+  .dot.on{background:var(--ink)}
+
+  /* Pond furniture, drawn smaller than the board's own so a whole lane fits
+     the picture: pad 64 (board 112), log 100 wide (board 176). */
+  .lane{display:flex;align-items:center;gap:43px}
+  .lpad{width:64px;height:64px;flex:none;position:relative}
+  .lpad svg{width:64px;height:64px;display:block}
+  .llog{width:100px;height:120px;border-radius:20px;background:var(--log);flex:none;
+        display:flex;flex-direction:column;align-items:center;padding-top:16px;gap:12px;
+        font-size:20px;color:var(--log-label);letter-spacing:.04em}
+  .lfrog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+         width:50px;height:50px;border-radius:50%;border:3px solid rgba(0,0,0,.35)}
+  .lfrog.onlog{position:static;transform:none;width:50px;height:50px}
+
+  .dice{width:200px;height:200px;border-radius:32px;background:#fff;border:4px solid var(--line);
+        display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:28px}
+  .pip{width:34px;height:34px;border-radius:50%;background:var(--ink);align-self:center;justify-self:center}
+  .pile{width:200px;height:120px;border-radius:16px;background:#fff;border:4px solid var(--line);
+        display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;
+        white-space:nowrap}
+  .pile.dim{opacity:.4}
+  .cell{width:88px;height:88px;border:3px solid var(--line);border-radius:8px;background:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:48px}
+  .cell.fix{border:none;background:transparent;font-weight:700}
+  .cell.ans{border:4px solid var(--accent)}
+  .carry i{display:block;width:48px;height:44px;border:3px dashed var(--faint);border-radius:6px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="abs heading" style="left:48px;top:48px">Roll the die</div>
+<div class="picture paper"><div class="abs" style="left:96px;top:164px"><div class="dice"><span class="pip"></span><span></span><span></span><span></span><span class="pip"></span><span></span><span></span><span></span><span class="pip"></span></div></div><div class="abs" style="left:336px;top:236px;font-size:56px;color:#6C7873">&rarr;</div><div class="abs" style="left:452px;top:60px;display:flex;flex-direction:column;gap:24px"><div class="pile dim">68 &times; 5</div><div class="pile">22 &times; 41</div><div class="pile dim">331 &times; 41</div></div><div class="abs" style="left:96px;top:520px;font-size:34px;line-height:1.4"><div style="display:flex;gap:32px;margin-bottom:20px"><b style="width:220px">You roll</b><b>Your card looks like</b></div><div style="display:flex;gap:32px"><span style="width:220px">1 or 2</span><span>68 &times; 5</span></div><div style="display:flex;gap:32px"><span style="width:220px">3 or 4</span><span>22 &times; 41</span></div><div style="display:flex;gap:32px"><span style="width:220px">5 or 6</span><span>331 &times; 41</span></div></div></div>
+  <div class="words"><p>On your turn you roll one die.</p><p>The roll picks which pile your card comes from. That is the only thing it does &mdash; it never moves your frog.</p><p>You do not choose your pile, and you cannot swap the card. Getting an easy one is luck.</p></div>
+
+  <div class="btn s" style="left:48px;bottom:48px">Back</div>
+  <div class="btn p" style="right:48px;bottom:48px">Next</div>
+  <div class="dots"><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+</body>
+</html>

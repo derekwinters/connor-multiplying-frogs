@@ -27,6 +27,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | A player has won — first frog home | [`player-won-first.html`](player-won-first.html) | [A player has won](../player-won.md) |
 | A player has won — last frog home | [`player-won-later.html`](player-won-later.html) | [A player has won](../player-won.md) |
 | Settings dialog | [`settings-dialog.html`](settings-dialog.html) | [Settings dialog](../settings-dialog.md) |
+| How to play, page 1 — your lane | [`how-to-play-1-your-lane.html`](how-to-play-1-your-lane.html) | [How to play](../how-to-play.md) |
+| How to play, page 2 — roll the die | [`how-to-play-2-roll-the-die.html`](how-to-play-2-roll-the-die.html) | [How to play](../how-to-play.md) |
+| How to play, page 3 — work it out | [`how-to-play-3-work-it-out.html`](how-to-play-3-work-it-out.html) | [How to play](../how-to-play.md) |
+| How to play, page 4 — your frog hops | [`how-to-play-4-your-frog-hops.html`](how-to-play-4-your-frog-hops.html) | [How to play](../how-to-play.md) |
+| How to play, page 5 — things people ask | [`how-to-play-5-things-people-ask.html`](how-to-play-5-things-people-ask.html) | [How to play](../how-to-play.md) |
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
 
