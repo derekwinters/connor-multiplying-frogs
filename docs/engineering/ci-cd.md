@@ -180,7 +180,9 @@ Every PR produces installable debug APKs, so "does it still build" is answered
 by a build rather than by hope, and so Connor can try a change before it merges.
 
 - **Debug signing**, with the Android debug keystore. No secrets, so the
-  workflow runs on any PR without special permissions.
+  workflow runs on any PR without special permissions — and a PR branch can
+  never reach the release key. See [release signing](#release-signing) for
+  which builds use which key.
 - **The commit SHA is in the version name** — `0.2.3-abc1234`. A phone with four
   test builds on it needs to say which is which, and "the one from Tuesday" is
   not an answer.
@@ -313,8 +315,8 @@ it before the release is real.
   already bumped to the version about to ship — exactly the version an RC should
   carry.
 - **Same debug signing and `.debug` suffix as a PR build.** An RC is for trying
-  the game; release signing needs a keystore secret this workflow should not be
-  able to reach.
+  the game; [release signing](#release-signing) needs a keystore secret this
+  workflow should not be able to reach.
 - **Artifacts only.** An RC is not a release: no tag, no GitHub release.
 
 #### The `rcN` number is derived, not chosen
@@ -494,6 +496,80 @@ there is no pair to compare. Attaching a single, correctly named device APK is
 not the mislabelling this gate protects against; attaching two identical files
 still is, and that stays strict.
 
+#### Release signing {#release-signing}
+
+**Both release APKs are signed with the release key.** Android refuses to
+install an update whose signing certificate differs from the installed app's.
+Before #442, every release was signed with Android's debug key, which CI
+generates fresh on each runner, so no release could install over the one
+before it — and the uninstall that forced lost the game in progress (#442).
+
+| Build | Key | Application ID |
+| --- | --- | --- |
+| `release-build` (device and emulator) | the release key, from the secrets below | the app's own |
+| `pr-build`, `rc-build` | the Android debug key | `.debug` suffix |
+
+The debug builds keep their `.debug` suffix, so they still install *alongside*
+the release app rather than over it, and a debug key never meets a
+release-signed install of the same ID.
+
+Five repository Actions secrets hold the key, and only `release-build.yml`
+names them:
+
+| Secret | Holds | Passed to the builder as |
+| --- | --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | the release keystore (JKS), base64-encoded | `androidKeystoreBase64` |
+| `ANDROID_KEYSTORE_PASSWORD` | the keystore password | `androidKeystorePass` |
+| `ANDROID_KEY_ALIAS` | the key alias | `androidKeyaliasName` |
+| `ANDROID_KEY_ALIAS_PASSWORD` | the key password | `androidKeyaliasPass` |
+| `ANDROID_KEYSTORE_SHA256` | the certificate's SHA-256, as keytool prints it | not passed — used to check the result |
+
+`game-ci/unity-builder` decodes the keystore into `release.keystore` (its
+`androidKeystoreName`) on the runner and points Unity's signing settings at it.
+Nothing is committed, and the keystore never leaves the release job.
+
+**`pr-build` and `rc-build` must not mention these secrets at all.** They build
+branches anyone with a PR can push to; a workflow that can read the release
+key from a PR branch can hand it to whoever wrote the branch.
+
+##### The certificate is checked before anything is attached
+
+Passing a keystore is not the same as getting a signed APK. A build that
+ignored the inputs comes out debug-signed and looks entirely healthy — it
+builds, it installs on a clean device, it runs — and fails only on the one
+thing this exists for, installing over the previous release.
+
+So `.github/scripts/check_apk_signature.py` reads each APK's certificate back
+with `apksigner verify --print-certs` and compares its SHA-256 with
+`ANDROID_KEYSTORE_SHA256`. keytool spells the fingerprint `49:09:3C:…` and
+apksigner spells it `49093c…`; both are normalised before comparing.
+
+| Case | Outcome |
+| --- | --- |
+| every signer is the release certificate | passes |
+| any signer is another certificate (the debug key, say) | rejected |
+| `apksigner` says the APK does not verify, or lists no signer | rejected |
+| `ANDROID_KEYSTORE_SHA256` is empty or not a SHA-256 | **rejected** — an unset secret never lets an unchecked APK through |
+
+It runs after the [pair check](#the-two-apks-are-checked-against-each-other-before-either-is-attached)
+and immediately before the attach. A rejected APK is moved out of the
+directories the attach step reads, so it is not attached; the other APK still
+is, under the same partial-attach rule as a failed emulator build below. If
+neither passes, nothing is attached and the step fails there. Either way the
+last step, *Report a rejected signature*, turns the run red after the attach.
+
+`.github/scripts/tests/test_release_signing.py` asserts the shape: both
+release builds get all four keystore inputs from the right secrets, one step
+runs the check on both APK paths after both builds and before the attach, a
+rejected APK is moved out of the way, a later step fails the run on it, and
+neither `pr-build.yml` nor `rc-build.yml` contains any `ANDROID_KEY*` secret or
+keystore input. `test_check_apk_signature.py` covers the checker itself.
+
+The first release-signed release is still one uninstall away from the last
+debug-signed one: the installed app's certificate is the old debug key, and
+that cannot be changed after the fact. From then on, each release installs over
+the one before.
+
 #### A failed emulator build does not cost the release its device APK
 
 The emulator build carries `continue-on-error`, and the device build does not.
@@ -511,6 +587,7 @@ So the job now finishes what it can:
 | Emulator build fails | the device APK is still checked and attached |
 | Only one APK attached | a `::warning::` and a line in the job summary saying the release is incomplete |
 | Emulator build failed | the last step re-raises it, so the **run is still red** |
+| An APK fails its [signature check](#release-signing) | that APK is not attached, the other still is, and the run ends red |
 
 The last row is the one that stops this being a papering-over. Attaching what
 built must not turn a broken build green, because a half-filled release nobody
@@ -541,8 +618,8 @@ months, which defeats the point of tagging it.
 The emulator asset is for *trying* the game on a desktop, not for judging it —
 see [Tech stack](tech-stack.md#two-build-profiles).
 
-Neither build carries a `.debug` suffix or a sha in its version name. This is
-the app.
+Neither build carries a `.debug` suffix or a sha in its version name, and both
+are signed with the [release key](#release-signing). This is the app.
 
 ## Correctness workflows
 
