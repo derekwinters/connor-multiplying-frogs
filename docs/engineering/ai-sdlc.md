@@ -259,6 +259,25 @@ Genuine drift — a closed issue still carrying pipeline labels — is handled b
 anything left is **reported on the dashboard rather than silently repaired**. That is the whole
 bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.
 
+## Routines are not declared here, yet
+
+ai-sdlc v0.5.0 can keep Claude Code routines **as code**: a `routines:` list in `repo-config.yml`
+names definitions ai-sdlc ships (`triage`, the routine the gatekeeper fires, and `dependabot`, a
+weekly sweep that merges green Dependabot pull requests and files an issue for red ones), and a
+`routines` skill renders them for this repository so an agent in a cloud session can create or
+update the live ones to match.
+
+This repository has the version but has **not opted in**. `routines:` is absent and `routines` is
+not in `skills:`, so the triage routine here is still the one configured by hand in the web UI, and
+there is no Dependabot sweep. That is deliberate rather than an oversight: `adopt` never seeds the
+key, because a routine acts on its own once created — the Dependabot one merges pull requests — so
+having one is a decision for Derek, not a default the upgrade inherits.
+
+Opting in later is a change to `repo-config.yml` alone, plus two web-UI steps no tool can do (an API
+trigger for `triage`, and confirming each routine has this repository attached). ai-sdlc's
+[Routines](https://github.com/derekwinters/ai-sdlc/blob/9a51041eb76254a2cd7e306ed7ac352a2cf085d6/docs/spec/routines.md)
+specification has the rules.
+
 ## Upgrading, and checking for drift
 
 ```bash
