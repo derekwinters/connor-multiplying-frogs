@@ -1,0 +1,2717 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The design contract and engineering handbook for Multiplying Frogs — a game Derek is building with his son Connor.">
+      
+      
+        <meta name="author" content="Derek Winters">
+      
+      
+        <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.5.0/engineering/ai-sdlc/">
+      
+      
+        <link rel="prev" href="../unity-serialization/">
+      
+      
+        <link rel="next" href="../../tools/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ai-sdlc - Multiplying Frogs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ai-sdlc" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Multiplying Frogs" class="md-header__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Multiplying Frogs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ai-sdlc
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../intro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Introduction
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../specs/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Specs
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adr/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Decisions
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Engineering
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tools/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tools
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Multiplying Frogs" class="md-nav__button md-logo" aria-label="Multiplying Frogs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Multiplying Frogs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/derekwinters/connor-multiplying-frogs" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    derekwinters/connor-multiplying-frogs
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../intro/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Introduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../specs/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specs
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Specs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/product-scope/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product scope
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules of play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/future-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future ideas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference material
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../specs/ui/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/shared-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/title-screen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Title screen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/roll-and-card/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roll and card
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/answer-result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Answer result
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/player-won/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A player has won
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/settings-dialog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings dialog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/how-to-play/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to play
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/end-game-confirm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-game confirm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/game-over/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Game over
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/ui/mockups/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mockups
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../adr/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0001-rules-sacred-presentation-ours/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 Rules sacred, presentation ours
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0002-structured-working-out-grid/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 The working-out grid
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0003-network-boundary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 The network boundary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0004-core-owns-the-save-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0004 Core owns the save format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adr/0005-ugui-not-ui-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0005 uGUI, not UI Toolkit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engineering
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tech stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../issue-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-design-process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI design process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unity-serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity serialization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ai-sdlc
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ai-sdlc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-lives-where-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What lives where now
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What lives where now">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-kinds-of-caller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two kinds of caller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gatekeeper is one action, and every writer on an issue now queues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two things that point at ai-sdlc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capabilities-arrive-one-at-a-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capabilities arrive one at a time
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pin
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The pin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pinning-a-commit-to-try-unreleased-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pinning a commit, to try unreleased work
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-escape-hatches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two escape hatches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-docs-gate-does-and-does-not-replace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the docs gate does, and does not, replace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-pipeline-replaced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the pipeline replaced
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the pipeline replaced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-skills-get-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the skills get here
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-sweep-is-back-for-a-different-reason" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The sweep is back, for a different reason
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading, and checking for drift
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../tools/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-lives-where-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What lives where now
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What lives where now">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#two-kinds-of-caller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two kinds of caller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gatekeeper is one action, and every writer on an issue now queues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-two-things-that-point-at-ai-sdlc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two things that point at ai-sdlc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capabilities-arrive-one-at-a-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capabilities arrive one at a time
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The pin
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The pin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pinning-a-commit-to-try-unreleased-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pinning a commit, to try unreleased work
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-escape-hatches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two escape hatches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-docs-gate-does-and-does-not-replace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the docs gate does, and does not, replace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-pipeline-replaced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the pipeline replaced
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the pipeline replaced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-skills-get-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the skills get here
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-sweep-is-back-for-a-different-reason" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The sweep is back, for a different reason
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading, and checking for drift
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs/edit/main/docs/engineering/ai-sdlc.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="ai-sdlc">ai-sdlc<a class="headerlink" href="#ai-sdlc" title="Link to this section">&para;</a></h1>
+<p>Multiplying Frogs used to own every piece of its development tooling: its own gatekeeper, its own
+dashboard renderer, its own label sync, its own reconcile sweep. All of it worked, and all of it
+existed in near-identical form in the other repositories Derek maintains — which meant a fix to any
+of it was a fix in one place and a slow divergence everywhere else.</p>
+<p><a href="https://derekwinters.github.io/ai-sdlc/">ai-sdlc</a> is that tooling, extracted once, specified, and
+tested. This repository is a consumer of it.</p>
+<h2 id="what-lives-where-now">What lives where now<a class="headerlink" href="#what-lives-where-now" title="Link to this section">&para;</a></h2>
+<p>The logic lives in ai-sdlc. This repository holds only the parts that genuinely differ:</p>
+<table>
+<thead>
+<tr>
+<th>Here</th>
+<th>Why it cannot be centralised</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.ai-sdlc/repo-config.yml</code></td>
+<td>What <em>this</em> repository is — its capabilities, owners, dashboard, commands</td>
+</tr>
+<tr>
+<td><code>.ai-sdlc/ai-sdlc.pin</code></td>
+<td>The version of ai-sdlc being followed</td>
+</tr>
+<tr>
+<td><code>.ai-sdlc/house-rules.md</code></td>
+<td>The shared rules, installed here so agents read them without a network</td>
+</tr>
+<tr>
+<td><code>.ai-sdlc/adoption.md</code></td>
+<td>Generated from <code>repo-config.yml</code>: what is installed here, and at what version</td>
+</tr>
+<tr>
+<td><code>.claude/skills/ai-sdlc/SKILL.md</code></td>
+<td>The discovery surface, at the path Claude Code requires</td>
+</tr>
+<tr>
+<td><code>.github/workflows/*.yml</code> callers</td>
+<td>A trigger must be declared in the repository it fires for</td>
+</tr>
+</tbody>
+</table>
+<p>A caller is about fifteen lines: a trigger and a <code>uses:</code>. Everything it calls is in ai-sdlc, at the
+pinned version.</p>
+<p>Everything but the last two lives under <code>.ai-sdlc/</code>, which is ai-sdlc's own name. Until v0.4.18 it
+was all under <code>.claude/</code>, and that was wrong in a way worth stating: a GitHub Actions job parsing
+<code>capabilities</code> and <code>owners</code> has nothing to do with an AI coding assistant, and squatting in a
+vendor namespace took a dependency on somebody else's naming for nothing. <code>.claude/skills/</code> is the
+one exception, because Claude Code requires that path.</p>
+<p><code>adopt apply</code> did the move, in the same run as the v0.4.18 upgrade: <code>repo-config.yml</code> moved
+byte-for-byte with its comments intact, the old copies went, and the import line at the bottom of
+<code>CLAUDE.md</code> was repointed.</p>
+<h3 id="two-kinds-of-caller">Two kinds of caller<a class="headerlink" href="#two-kinds-of-caller" title="Link to this section">&para;</a></h3>
+<p>Since v0.4.19 the callers here come in two shapes, and the difference is worth knowing before
+editing one:</p>
+<table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>Which</th>
+<th>What runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Action</strong></td>
+<td><code>closing-keyword.yml</code>, <code>docs-gate.yml</code>, and the four gatekeeper callers</td>
+<td>One <code>uses:</code> step. GitHub fetches the action into the runner's own directory; <strong>nothing of ai-sdlc's enters this repository's workspace</strong>.</td>
+</tr>
+<tr>
+<td><strong>Reusable workflow</strong></td>
+<td><code>dashboard.yml</code>, <code>labels-sync.yml</code>, <code>skills-update.yml</code>, <code>docs-build.yml</code></td>
+<td>The called workflow checks ai-sdlc out into <code>.ai-sdlc-checkout/</code> and runs a script from it.</td>
+</tr>
+</tbody>
+</table>
+<p>The action shape is where the rest are going. It removes a whole class of problem rather than
+avoiding it: <code>actions/checkout</code> empties the directory it writes into, so anything ai-sdlc fetches
+into this workspace is one naming collision away from replacing a file we committed — which is
+exactly why the checkout path had to be renamed away from <code>.ai-sdlc</code> when the configuration moved
+there. A run that fetches nothing cannot collide with anything.</p>
+<p>An action caller also carries <strong>one</strong> reference rather than a <code>uses:</code> and a matching <code>ref:</code>, so
+there is no pair to keep in step.</p>
+<p><strong>A converted caller's status check is renamed</strong>, because GitHub names a reusable workflow's check
+<code>&lt;workflow&gt; / &lt;job&gt;</code> and an action's <code>&lt;job&gt;</code>. That is a branch-protection change and only Derek can
+make it — #383. It affects only checks that gate a pull request, so the gatekeeper callers — which
+run on issues — are unaffected.</p>
+<h3 id="the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues">The gatekeeper is one action, and every writer on an issue now queues<a class="headerlink" href="#the-gatekeeper-is-one-action-and-every-writer-on-an-issue-now-queues" title="Link to this section">&para;</a></h3>
+<p>Four callers — <code>gatekeeper-comment</code>, <code>gatekeeper-close</code>, <code>triage</code> and <code>gatekeeper-sweep</code> — run the
+same action and differ only in the <code>mode:</code> they ask for and the trigger that starts them.</p>
+<p>Converting them settled something that had been wrong here since triage arrived. <code>triage.yml</code> used
+to have a concurrency group of its own, so a triage fire could run <em>at the same time</em> as a
+gatekeeper comment on the same issue. That is not harmless: every label write goes through
+<code>set_labels</code>, which replaces the whole label set rather than patching it, so two runs on one issue
+read-modify-write the same list and one silently loses — whichever label each meant to change.</p>
+<p>The gatekeeper's own moves cannot trigger triage, because GitHub starts no run from an event its
+token authored. But labelling an issue <strong>by hand</strong> while a <code>/admit</code> is in flight could, and
+labelling by hand is precisely what the triage caller was added for (ai-sdlc#123).</p>
+<p>All three issue-scoped callers now share <code>gatekeeper-&lt;issue number&gt;</code>, and none may be cancelled: a
+cancelled run leaves the label set half applied. A triage fire may now wait a few seconds behind a
+comment on the same issue, which is the trade.</p>
+<h3 id="the-two-things-that-point-at-ai-sdlc">The two things that point at ai-sdlc<a class="headerlink" href="#the-two-things-that-point-at-ai-sdlc" title="Link to this section">&para;</a></h3>
+<p><code>adoption.md</code> and the <code>ai-sdlc</code> skill are the answer to <em>how does an agent working here know any of
+this</em>. They are not alternatives:</p>
+<ul>
+<li>The <code>@.ai-sdlc/house-rules.md</code> import in <code>CLAUDE.md</code> is <strong>always on</strong>. It is read every session,
+  which is why it has to stay short, and it is what carries the one sentence saying ai-sdlc governs
+  this repository's issues, labels, milestones, triage, gates and releases.</li>
+<li>The <code>ai-sdlc</code> skill is loaded <strong>on demand</strong>, so it can afford detail. But loading it is a
+  judgement the model makes from its description, and you cannot go looking for a skill about a
+  thing you do not know exists — which is exactly the failure here, an agent editing a stale
+  pipeline doc with no idea ai-sdlc owns it. Hence the always-on sentence as well.</li>
+</ul>
+<p><code>adoption.md</code> is <strong>generated</strong> and holds only resolved state: the pin, the capabilities and profiles
+in force, the pipeline-state labels this repository actually uses, the callers installed, the skills
+installed, and links into the specification at the exact commit this repository runs. It explains
+nothing, deliberately. Every hand-maintained copy of something ai-sdlc generates has drifted here
+eventually — four label colours in <code>conventions.md</code> disagreed with <code>labels.core.yml</code>, and 27
+references survived a pipeline state that no longer existed. Do not edit it: change
+<code>repo-config.yml</code> and run <code>adopt apply</code>.</p>
+<h2 id="capabilities-arrive-one-at-a-time">Capabilities arrive one at a time<a class="headerlink" href="#capabilities-arrive-one-at-a-time" title="Link to this section">&para;</a></h2>
+<p>ai-sdlc is six capabilities, ordered so each may depend only on those below it:</p>
+<div class="highlight"><pre><span></span><code>substrate → hygiene → consistency → labels → release → pipeline
+</code></pre></div>
+<p>A repository takes what it wants. <code>repo-config.yml</code> lists what is <strong>live here right now</strong>, not what
+is intended — <code>adopt</code> installs everything a declared capability owns on its next run, so declaring
+<code>pipeline</code> before the old gatekeeper is gone would put two handlers on one event, racing, both
+writing.</p>
+<p>The migration is tracked in the <strong>ai-sdlc adoption</strong> milestone, one issue per capability. It is
+deliberately not a version milestone: this is infrastructure, and a version number belongs to a
+release of the game.</p>
+<h2 id="the-pin">The pin<a class="headerlink" href="#the-pin" title="Link to this section">&para;</a></h2>
+<p><code>.ai-sdlc/ai-sdlc.pin</code> records the version <strong>and</strong> the commit it resolves to:</p>
+<div class="highlight"><pre><span></span><code>v0.4.2 b95d6bb30481e24e4b9eb8c6cdfda1a85cdb20d3
+</code></pre></div>
+<p>The callers reference that commit, with the version as a trailing comment — the same form as every
+other pin here, and no exception to <a href="../ci-cd/">the SHA-pinning rule</a>. A reusable workflow runs with
+this repository's token, on <code>issue_comment</code> and <code>issues</code>, so a mutable ref there is the same
+exposure as a mutable action; ai-sdlc being ours says who could move a tag, not that it cannot move.</p>
+<p>An upgrade is still a pull request that moves one line, because <code>adopt apply &lt;version&gt;</code> resolves the
+version and rewrites both the SHA and the comment. Nobody resolves a SHA by hand, and nobody has to
+read forty characters of hexadecimal to tell how far behind they are.</p>
+<h3 id="pinning-a-commit-to-try-unreleased-work">Pinning a commit, to try unreleased work<a class="headerlink" href="#pinning-a-commit-to-try-unreleased-work" title="Link to this section">&para;</a></h3>
+<p><code>adopt apply</code> also takes a <strong>bare commit SHA</strong>, and then the pin records that commit twice:</p>
+<div class="highlight"><pre><span></span><code>86edeee56e7f976a9c1ab85f3038984eabcc8a51 86edeee56e7f976a9c1ab85f3038984eabcc8a51
+</code></pre></div>
+<p>This is how a change is tried here before it has a version — which is the normal case, because this
+repository is where ai-sdlc gets proven and a release should not be cut for something unproven. The
+trade is that the trailing comment on each caller repeats the SHA instead of naming a version, so
+<code>check_action_pins.py</code> warns that nobody can tell which version it is. That warning is <strong>correct
+and expected on a commit pin</strong>: there is no version, and that is the point.</p>
+<p>A commit pin is temporary. When the work it is testing is released, move the pin to the version, so
+the board reads <code>v0.5.1</code> rather than forty characters of hexadecimal.</p>
+<h2 id="the-two-escape-hatches">The two escape hatches<a class="headerlink" href="#the-two-escape-hatches" title="Link to this section">&para;</a></h2>
+<p>Both adopted checks can be overridden, and both do it the same way — with a <strong>label that makes the
+check pass</strong>, never one that skips it. That distinction is the whole design: a skipped required
+check stays pending forever and blocks the merge it was meant to permit, so an <code>if:</code> would turn an
+escape hatch into a trap.</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Overrides</th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>no-closing-keyword</code></td>
+<td><code>closing-keyword</code></td>
+<td>the pull request deliberately closes no issue</td>
+</tr>
+<tr>
+<td><code>skip-docs</code></td>
+<td><code>docs-gate</code></td>
+<td>the change genuinely needs no documentation</td>
+</tr>
+</tbody>
+</table>
+<p>Adding either label re-runs its check, because <code>labeled</code> is among the caller's triggers. Nothing
+needs pushing. Using one is a decision, so it belongs in <code>## Deviations and Decisions</code>.</p>
+<p>Verified end to end when the closing-keyword check was adopted: a pull request with no closing
+keyword failed, the label made it pass on a fresh run, and removing the label failed it again.</p>
+<h2 id="what-the-docs-gate-does-and-does-not-replace">What the docs gate does, and does not, replace<a class="headerlink" href="#what-the-docs-gate-does-and-does-not-replace" title="Link to this section">&para;</a></h2>
+<p>The reconciliation gate — <em>a pull request that changes code must change documentation, or carry
+<code>skip-docs</code></em> — is now ai-sdlc's, called from <code>docs-gate.yml</code>.</p>
+<p><code>docs-test.yml</code> stays, because the shared profile does not cover everything frogs had:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Where it runs now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>docs reconciliation</td>
+<td><code>docs-gate.yml</code> — ai-sdlc's shared action</td>
+</tr>
+<tr>
+<td><code>mkdocs build --strict</code></td>
+<td><code>docs-test.yml</code>, still ours</td>
+</tr>
+<tr>
+<td>the CI scripts' own tests, and the action-pin check</td>
+<td><code>docs-test.yml</code>, still ours</td>
+</tr>
+</tbody>
+</table>
+<p>ai-sdlc's mkdocs profile does have a build-and-publish workflow, but it publishes through GitHub
+Pages, and frogs publishes with <code>mike</code> to <code>gh-pages</code> to get the version selector. Replacing a
+working publisher with a differently-shaped one is not a migration, so <code>docs-publish.yml</code> is
+untouched.</p>
+<p>One behavioural difference worth knowing: frogs' gate re-read the pull request's live labels during
+a grace window, to survive <code>skip-docs</code> being added while the check was running. The shared gate
+relies on the <code>labeled</code> trigger instead — adding the label starts a fresh run. Same outcome, fewer
+moving parts, and <code>test_docs_gate_triggers.py</code> still guards the trigger because that is the half
+that cannot be centralised.</p>
+<h2 id="what-the-pipeline-replaced">What the pipeline replaced<a class="headerlink" href="#what-the-pipeline-replaced" title="Link to this section">&para;</a></h2>
+<p>The whole issue lifecycle now runs from ai-sdlc. What used to live here, and where it went:</p>
+<table>
+<thead>
+<tr>
+<th>Was here</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gatekeeper-comment.yml</code> + <code>pipeline-gatekeeper</code></td>
+<td><code>gatekeeper-comment.yml</code>, a caller</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>gatekeeper-close.yml</code>, a caller — frogs had no equivalent</td>
+</tr>
+<tr>
+<td><code>dashboard.yml</code> + <code>pipeline-dashboard</code></td>
+<td><code>dashboard.yml</code>, a caller</td>
+</tr>
+<tr>
+<td><code>gatekeeper-sweep.yml</code> + <code>pipeline-reconcile</code></td>
+<td><code>gatekeeper-sweep.yml</code>, a caller — same name, different job</td>
+</tr>
+<tr>
+<td><code>pipeline-analysis</code>, <code>pipeline-dev</code>, <code>triage-issue</code>, <code>ci-watch</code>, <code>milestone-ops</code>, <code>issue-blockers</code>, <code>release-flow</code></td>
+<td>named in <code>repo-config.yml</code>, installed by <code>skills-update.yml</code> — see <a href="#how-the-skills-get-here">How the skills get here</a></td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>github-api</code>, new with v0.4.21: how an agent reads and changes anything in GitHub</td>
+</tr>
+<tr>
+<td><code>pipeline-tests.yml</code></td>
+<td>gone with the code it tested</td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-the-skills-get-here">How the skills get here<a class="headerlink" href="#how-the-skills-get-here" title="Link to this section">&para;</a></h3>
+<p>The workflows arrived; the skills did not. <code>.claude/skills/</code> holds this repository's own —
+<code>core-unity-split</code>, <code>dw-run-tests</code>, <code>grilling</code> and the rest — and nothing from ai-sdlc. The row
+above used to say they were installed with <code>gh skill</code>, and that was a description of the intended
+end state written in the present tense, which is the same failure as a specified-but-uncalled
+function: it reads as covered, so nobody checks.</p>
+<p>Nothing had ever run <code>gh skill install</code> for a consumer. The mechanism was settled in ai-sdlc's
+<code>docs/design.md</code> §7 from the beginning and no job invoked it (ai-sdlc#144).</p>
+<p>What installs them is <code>skills-update.yml</code>, an ai-sdlc caller that runs on a schedule, installs what
+<code>skills:</code> in <code>repo-config.yml</code> names, and opens a <strong>pull request</strong> — never a direct commit, because
+an installed skill is an instruction an agent reads and a timer that put unreviewed ones into its
+context would be a consent problem rather than an untidiness. A skill edited here is reported and
+left alone, never overwritten.</p>
+<p>It arrived with v0.4.17, and <code>repo-config.yml</code> now names seven: <code>github-api</code>, <code>triage-issue</code>,
+<code>pipeline-dev</code>, <code>issue-blockers</code>, <code>ci-watch</code>, <code>milestone-ops</code> and <code>release-flow</code>. The list is not
+every skill — <code>pipeline-gatekeeper</code>, <code>pipeline-dashboard</code>, <code>label-sync</code>, <code>closing-keyword</code> and
+<code>docs-gate</code> are <strong>scripts</strong>, fetched into the runner by an ai-sdlc action and never installed here,
+so a copy would be a second version to keep at the pin that nothing reads.</p>
+<p><code>adopt</code> is absent despite the upgrade command below naming it: it is a script too, and imports
+<code>lib.config</code>, which is not part of the skill — so an installed copy raises <code>ModuleNotFoundError</code>.
+Upgrades are run from an ai-sdlc checkout, and that is the intended arrangement rather than a gap.</p>
+<p><strong><code>issue-blockers</code> used to be listed with a caveat</strong>, because it had the same import and the
+installed copy could not run. Four skills had that shape — they were Python expecting somebody to
+hand them a GitHub client, which happens in ai-sdlc's tests and never here. ai-sdlc#153 converted
+all four to instructions: <code>issue-blockers</code>, <code>milestone-ops</code>, <code>pipeline-dev</code> and <code>triage-issue</code>
+carry no Python at all now, and do their GitHub work through the new <code>github-api</code> skill, which is
+the single statement of what may be read and written and what may not.</p>
+<p>That setting was granted in #378, and the job has been opening its pull request since — but until
+ai-sdlc v0.4.22 it could only ever open it <strong>once</strong>. Every later run pushed to a branch the runner
+had never fetched, <code>--force-with-lease</code> refused, and the job died at its last step with the pull
+request still sitting open looking current. So #380 offered the same six skills at the same
+three-day-old ai-sdlc commit through four releases (ai-sdlc#170).</p>
+<h3 id="the-sweep-is-back-for-a-different-reason">The sweep is back, for a different reason<a class="headerlink" href="#the-sweep-is-back-for-a-different-reason" title="Link to this section">&para;</a></h3>
+<p>frogs' original sweep existed because frogs <strong>stored</strong> blockedness as pipeline state, and stored
+state goes stale. ai-sdlc derives blockedness at selection time from the live dependency graph
+instead. State computed when it is used cannot drift, so that sweep was not dropped — its cause
+was.</p>
+<p>v0.4.17 brought a different one. Firing triage is a poke, and a poke can be lost: a routine that
+never starts, starts and dies, or is refused leaves the issue exactly as it was, and nothing looks
+at it again. Eight issues sat stranded here overnight that way (#373). <code>gatekeeper-sweep.yml</code> runs
+hourly and moves an issue whose session never answered to <code>ai-triage-stalled</code>.</p>
+<p>It <strong>starts no sessions</strong>. A scheduled job that can start them can spend the account's usage limits
+while nobody is watching, so the sweep only writes labels — whatever it gets wrong, it gets wrong
+cheaply. Deciding another session is worth spending is <code>/admit</code>.</p>
+<p>Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
+anything left is <strong>reported on the dashboard rather than silently repaired</strong>. That is the whole
+bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.</p>
+<h2 id="upgrading-and-checking-for-drift">Upgrading, and checking for drift<a class="headerlink" href="#upgrading-and-checking-for-drift" title="Link to this section">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>plan<span class="w">   </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># read-only: what would change</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>apply<span class="w">  </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># writes, on a branch</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>verify<span class="w"> </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># read-only: are we still current</span>
+</code></pre></div>
+<p><code>apply</code> is both the install and the upgrade path, so the upgrade cannot rot separately from the
+install.</p>
+<p>Every file <code>adopt</code> writes carries a provenance header naming the source, the ref, and a content
+hash. That is how it tells a file of its own from one of ours, and a locally-edited managed file
+from a merely outdated one. <strong>An edit is a conflict, not a stale file</strong> — it is reported and left
+alone, never overwritten, because overwriting it would discard the edit silently. If you need to
+change a managed file, change it in ai-sdlc and move the pin.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by Derek and Connor.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/derekwinters/connor-multiplying-frogs" target="_blank" rel="noopener" title="This project on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.indexes", "toc.follow", "content.action.edit", "content.code.copy", "search.highlight", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,18 @@
+# Docs site toolchain. Pinned exactly, because a docs build that passes locally
+# and fails in CI (or vice versa) is a docs build nobody trusts. Bump these
+# deliberately, in their own PR, with `mkdocs build --strict` green.
+#
+#     python -m pip install -r docs/requirements.txt
+#     mkdocs serve          # live preview on http://127.0.0.1:8000
+#     mkdocs build --strict # what CI runs
+
+mkdocs==1.6.1
+mkdocs-material==9.7.7
+
+# Versioned publishing: each release gets its own copy of the site under a
+# version alias, with `latest` pointing at the newest.
+mike==2.2.0
+
+# Pulled in by mkdocs-material, pinned here so the markdown extensions this
+# site relies on (details, superfences, tabbed) can't move underneath it.
+pymdown-extensions==11.0.1

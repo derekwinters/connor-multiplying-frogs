@@ -1,0 +1,111 @@
+<!doctype html>
+<!--
+  Multiplying Frogs — A player has won — a later frog home
+  Device: kids' Android tablet, held landscape.
+  Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
+
+  Numbers here are the numbers in player-won.md's constants table.
+
+  A LATER FROG HOME, and specifically the LAST one. Two things differ from its
+  twin and this file shows both at once:
+
+    1. The wording is "is home", not "wins". Only the first frog home wins.
+    2. The button hands to the game over screen rather than to a next player,
+       because there is no next player: this frog was the last, so Game.IsOver
+       has just become true.
+
+  A later frog that is NOT the last combines the two files: this headline with
+  its twin's button. That case is not drawn separately because it introduces no
+  third thing to look at.
+
+  The frog is drawn at WonFrogDiameter (220 px), which is NOT the board's
+  FrogPieceDiameter (88 px). This is the one screen in the game that draws a
+  frog big, and that is the whole point of it: the board says a frog moved, and
+  this says a frog arrived.
+
+  There is no standings column here on purpose. game-over.md already lists every
+  frog in finishing order; a second table in different words on the screen
+  before it would be the same information twice. This dialog says one thing.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multiplying Frogs — A player has won — a later frog home</title>
+<style>
+  :root{
+    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
+    --green:#3E933E; --blue:#37609A; --orange:#D38231; --pink:#D41C78;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
+         background:var(--bg);color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .abs{position:absolute}
+  .row{display:flex;align-items:center}
+  .col{display:flex;flex-direction:column}
+  .mid{display:flex;align-items:center;justify-content:center}
+  .band{position:absolute;left:0;right:0}
+  .note{font-size:26px;color:#7A8783}
+  .hatch{background:repeating-linear-gradient(45deg,#DCE3E0 0 14px,#E8EDEB 14px 28px)}
+  .panel{background:var(--paper);border:3px solid var(--line);border-radius:32px}
+  .btn{height:112px;min-width:320px;padding:0 48px;border-radius:24px;display:flex;align-items:center;
+       justify-content:center;font-size:44px;font-weight:700}
+  .btn.p{background:var(--accent);color:#fff}
+  .btn.s{border:4px solid var(--line);color:var(--ink)}
+  .btn.d{border:4px solid var(--warn);color:var(--warn)}
+  .btn.off{background:#C9D2CE;color:#8C9793}
+  .chip{width:256px;height:96px;border-radius:20px;border:3px solid var(--faint);display:flex;
+        align-items:center;gap:24px;padding:0 20px;font-size:32px;background:#fff;flex:none}
+  .chip.act{border:6px solid var(--ink);font-weight:700}
+  .chip b{display:block;font-size:32px;font-weight:700;line-height:1.1}
+  .chip s{display:block;font-size:24px;color:#6C7873;text-decoration:none;line-height:1.2}
+  .sw{width:64px;height:64px;border-radius:50%;flex:none}
+  .pad{width:112px;height:112px;border-radius:50%;background:#CFE0D2;border:3px solid #9FB8A5;flex:none;position:relative}
+  .log{width:176px;height:120px;border-radius:24px;background:#E0D4C3;border:3px solid #B9A78E;flex:none;
+       display:flex;align-items:center;justify-content:center;font-size:22px;color:#8A7A63}
+  .frog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;
+        border:4px solid rgba(0,0,0,.35)}
+  .scrim{position:absolute;inset:0;background:rgba(20,26,24,.66)}
+  .cell{width:104px;height:104px;border:3px solid var(--line);border-radius:10px;background:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:56px}
+  .cell.fix{border:none;background:transparent;font-weight:700}
+  .carry{width:104px;height:56px;display:flex;align-items:center;justify-content:center}
+  .carry i{display:block;width:56px;height:52px;border:3px dashed var(--faint);border-radius:8px}
+  .key{width:140px;height:140px;border:3px solid var(--line);border-radius:20px;background:#fff;
+       display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:700}
+  .dice{width:240px;height:240px;border-radius:40px;background:#fff;border:4px solid var(--line);
+        display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:34px}
+  .pip{width:40px;height:40px;border-radius:50%;background:var(--ink);align-self:center;justify-self:center}
+  .card{width:560px;height:420px;border-radius:24px;background:#fff;border:4px solid var(--line);
+        display:flex;align-items:center;justify-content:center}
+  .gear{width:96px;height:96px;border-radius:50%;border:4px solid var(--line);display:flex;align-items:center;
+        justify-content:center;font-size:44px}
+
+  /* This dialog's own three pieces. WonFrogDiameter is not the board's
+     FrogPieceDiameter (88 px) — a celebration is the one place the frog is
+     drawn big, and it is this page's constant, not the board's. */
+  .wonfrog{width:220px;height:220px;border-radius:50%;border:8px solid rgba(0,0,0,.35)}
+  .wonhead{font-size:76px;line-height:92px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="frame">
+    <div class="abs" style="inset:0;background:#E2E8E5"></div>
+    <div class="scrim"></div>
+
+    <!-- Panel 900 x 640, centred: left (1920-900)/2 = 510, top (1200-640)/2 = 280.
+         Padding box is 894 x 634.
+           frog      56 -> 276   (DialogPadding, then WonFrogDiameter)
+           headline 316 -> 408   (WonHeadlineGap 40, then a 92 px line box)
+           button   466 -> 578   (DialogPadding 56 up from 634) -->
+    <div class="abs panel" style="left:510px;top:280px;width:900px;height:640px">
+      <div class="abs wonfrog" style="left:50%;transform:translateX(-50%);top:56px;
+           background:var(--pink)"></div>
+      <div class="abs wonhead" style="left:0;right:0;top:316px;text-align:center">Pink is home!</div>
+      <div class="abs btn p" style="right:56px;bottom:56px">See the results</div>
+    </div>
+</div>
+</body>
+</html>
