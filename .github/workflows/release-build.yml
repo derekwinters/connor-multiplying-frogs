@@ -112,6 +112,14 @@ jobs:
       # No build sha and no rc number: this is the release, so the version name
       # is bare. No applicationId suffix either — this is the app.
       #
+      # Signed with the release key, from the repository secrets, so every
+      # release installs over the one before it. Without these inputs Unity
+      # signs with a debug key generated fresh on each runner, and Android
+      # refuses an update signed by a different key (#442). Only this workflow
+      # names those secrets: pr-build and rc-build build branches anyone can
+      # push to, and stay debug-signed. Guarded by
+      # .github/scripts/tests/test_release_signing.py.
+      #
       # `customParameters`, not `env:`. unity-builder runs the editor inside a
       # container and forwards only its own allow-list of variables into it, so
       # a FROGS_* variable set here would never reach Unity — which is exactly
@@ -134,6 +142,11 @@ jobs:
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}
           allowDirtyBuild: true
           customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsAndroidProfile device
+          androidKeystoreName: release.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEY_ALIAS }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEY_ALIAS_PASSWORD }}
 
       # Its own build path, so the two APKs cannot be confused with each other —
       # they have the same version and differ only in architecture, which is not
@@ -163,6 +176,11 @@ jobs:
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-emulator
           allowDirtyBuild: true
           customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsAndroidProfile emulator
+          androidKeystoreName: release.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEY_ALIAS }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEY_ALIAS_PASSWORD }}
 
       # Before attaching, not after. Two profiles that produced one build is a
       # release that should not go out: an ARM64-only APK labelled "emulator"
@@ -191,6 +209,52 @@ jobs:
           else
             echo "::error::No device APK at $device. The device build is the" \
                  "release; there is nothing worth attaching without it."
+            exit 1
+          fi
+
+      # After the pair check, so that check still sees both APKs, and before
+      # the attach, so nothing goes onto the release unchecked. Each APK's
+      # certificate must be the release key's, as ANDROID_KEYSTORE_SHA256 says.
+      # A build that ignored the keystore inputs looks perfectly healthy — it
+      # builds, installs on a clean device, runs — and fails only when someone
+      # tries to update, which is the one thing this release exists to fix.
+      #
+      # A rejected APK is moved out of the directories the attach step globs,
+      # so it is not attached, and the other APK still can be: the same
+      # partial-attach rule as a failed emulator build. "Report a rejected
+      # signature" at the bottom turns the run red afterwards. An empty
+      # ANDROID_KEYSTORE_SHA256 rejects every APK rather than skipping the check.
+      - name: Check each APK is signed with the release key
+        id: signature
+        if: steps.licence.outputs.present == 'true'
+        env:
+          ANDROID_KEYSTORE_SHA256: ${{ secrets.ANDROID_KEYSTORE_SHA256 }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          rejected=()
+          for apk in build/device/Android/*.apk build/emulator/Android/*.apk; do
+            if python3 .github/scripts/check_apk_signature.py \
+                 --apk "$apk" --expected "$ANDROID_KEYSTORE_SHA256"; then
+              continue
+            fi
+            # sudo because the builder's container wrote these as root and
+            # left them only world-readable (`chmod -R a+r`), so the runner
+            # user cannot move them out of the directory on its own.
+            mkdir -p "$RUNNER_TEMP/rejected"
+            sudo mv "$apk" "$RUNNER_TEMP/rejected/"
+            rejected+=("$(basename "$apk")")
+          done
+
+          if [ ${#rejected[@]} -gt 0 ]; then
+            echo "rejected=${rejected[*]}" >> "$GITHUB_OUTPUT"
+          fi
+
+          survivors=(build/device/Android/*.apk build/emulator/Android/*.apk)
+          if [ ${#survivors[@]} -eq 0 ]; then
+            echo "::error::No APK passed the signature check, so nothing is" \
+                 "attached to ${{ inputs.tag }}. Rejected: ${rejected[*]:-none built}."
             exit 1
           fi
 
@@ -253,13 +317,15 @@ jobs:
           # there is an asset, it installs, it runs — so the only place the gap
           # can be stated is here.
           if [ ${#assets[@]} -lt 2 ]; then
-            echo "::warning::$TAG got ${#assets[@]} of the 2 APKs. The build that" \
-                 "produced nothing is the failed step in this job."
+            echo "::warning::$TAG got ${#assets[@]} of the 2 APKs. The missing one" \
+                 "either did not build or failed its signature check — see the" \
+                 "failed step in this job."
             echo >> "$GITHUB_STEP_SUMMARY"
             echo "**This release is incomplete**: ${#assets[@]} of the 2 APKs." \
-                 "The other profile's build failed — see the failed step in this" \
-                 "job — so the release is missing it until this workflow is" \
-                 "re-run against \`$TAG\`." >> "$GITHUB_STEP_SUMMARY"
+                 "The other one did not build or was not signed with the release" \
+                 "key — see the failed step in this job — so the release is" \
+                 "missing it until this workflow is re-run against \`$TAG\`." \
+                 >> "$GITHUB_STEP_SUMMARY"
           fi
 
       # Last, so everything above has already run: the device APK is attached,
@@ -272,6 +338,17 @@ jobs:
           echo "::error::The emulator APK did not build, so ${{ inputs.tag }} has" \
                "only its device APK. The device build and the attach both" \
                "succeeded; this job is red for the emulator build alone."
+          exit 1
+
+      # Same shape as the step above: whatever passed is already attached, and
+      # only now does the job go red, so a release missing an APK for want of
+      # the right signature is never a green run.
+      - name: Report a rejected signature
+        if: steps.licence.outputs.present == 'true' && steps.signature.outputs.rejected != ''
+        run: |
+          echo "::error::Not attached to ${{ inputs.tag }}, because they are not" \
+               "signed with the release key: ${{ steps.signature.outputs.rejected }}." \
+               "The check step's log says which certificate each one had."
           exit 1
 
       - name: Summarise a skip
