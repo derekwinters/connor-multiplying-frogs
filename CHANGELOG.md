@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.5.0...v0.6.0) (2026-10-11)
+
+
+### Features
+
+* **art:** generate the Android app-icon set from Connor's artwork ([#449](https://github.com/derekwinters/connor-multiplying-frogs/issues/449)) ([23de49c](https://github.com/derekwinters/connor-multiplying-frogs/commit/23de49c0c99c641202b567f9596f30b3db8723e7))
+* **release:** sign release APKs with the stable release key ([#443](https://github.com/derekwinters/connor-multiplying-frogs/issues/443)) ([e6c010c](https://github.com/derekwinters/connor-multiplying-frogs/commit/e6c010c6cc19ae85c74d17a647752e070f7e7804)), closes [#442](https://github.com/derekwinters/connor-multiplying-frogs/issues/442)
+
 ## [0.5.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.4.0...v0.5.0) (2026-08-23)
 
 
