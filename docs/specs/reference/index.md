@@ -61,6 +61,14 @@ beside each pile:
 Two faces per pile, so each difficulty comes up a uniform **⅓** of the time.
 That distribution is what the problem generator has to reproduce.
 
+## The app icon
+
+Connor's drawing of a frog on a log is the app icon. It is committed, unmodified,
+at `Assets/Art/app-icon-source.png` — an asset that ships, rather than reference
+material, so it lives under `Assets/` rather than on this page. How the Android
+icon set is generated from it is in
+[tech stack: the app icon](../../engineering/tech-stack.md#the-app-icon).
+
 ## What the photograph does not settle
 
 Two of these were confirmed by Derek in
