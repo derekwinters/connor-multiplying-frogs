@@ -155,6 +155,72 @@ Committing a reviewed `ProjectSettings.asset` is still worth doing — it would
 make the settings a diffable source file rather than something reconstructed
 each build — but it needs an editor session to generate honestly.
 
+### The app icon
+
+**Connor's frog picture is the app icon.** Derek's decision in
+[#169](https://github.com/derekwinters/connor-multiplying-frogs/issues/169).
+The picture is committed once, byte-for-byte as it was drawn, and every file
+Android wants is generated from it. Nobody edits a generated icon by hand: change
+the picture, or the mode below, and regenerate.
+
+| | |
+| --- | --- |
+| Source | `Assets/Art/app-icon-source.png` — 608 × 608, unmodified |
+| Generated into | `Assets/Art/AppIcon/` |
+| Generator | `.github/scripts/generate_app_icons.py` (needs Pillow) |
+| Its tests | `.github/scripts/tests/test_generate_app_icons.py` |
+
+What it generates, at mdpi, hdpi, xhdpi, xxhdpi and xxxhdpi:
+
+| File | Size | What it is |
+| --- | --- | --- |
+| `adaptive-foreground-<density>.png` | 108 dp: 108 – 432 px | The adaptive icon's foreground layer |
+| `adaptive-background-<density>.png` | 108 dp: 108 – 432 px | Its background layer |
+| `legacy-<density>.png` | 48 dp: 48 – 192 px | The square icon older launchers use |
+| `round-<density>.png` | 48 dp: 48 – 192 px | The same, cut to a circle |
+| `play-store-512.png` | 512 px | The store listing image, fully opaque |
+
+Every one of them is smaller than the source, so nothing is upscaled.
+
+**How the picture sits in the adaptive mask is one switch.** An adaptive icon is
+a 108 dp canvas of which a launcher shows only the middle 72 dp, cut to its own
+shape — a circle, a squircle, a rounded square. Only the middle 66 dp circle is
+guaranteed to survive every shape. The generator's `--mode` decides what that
+does to the picture:
+
+- **`fill`** — the default, and what is committed. The picture spans the whole
+  72 dp viewport. A round launcher trims the scenery in the corners; the frog in
+  the middle stays whole. Nothing is added around it: the background layer is
+  the picture too. Derek's call, 2026-10-11.
+- **`shrink`** — the whole picture is scaled into the 66 dp safe circle on a
+  plain cream background (`#F5F2EA`), so no launcher ever trims anything, at the
+  cost of a smaller frog.
+
+The legacy, round and store images are what the adaptive icon shows through its
+viewport, so they agree with the adaptive icon in either mode. To switch, or
+after changing the source:
+
+```bash
+python3 -m pip install Pillow
+python3 .github/scripts/generate_app_icons.py               # fill
+python3 .github/scripts/generate_app_icons.py --mode shrink
+python3 .github/scripts/run_python_tests.py scripts
+```
+
+One of those tests checks that the committed icons are exactly what a fresh run
+of the generator produces, so an icon edited by hand, or a source changed without
+regenerating, fails it. It and the other rendering tests are skipped — by name,
+in the test output — where Pillow is not installed; the geometry tests need
+nothing but Python.
+
+**Not done yet: putting the icons into the build.** The icon slots in
+`PlayerSettings` are set the same way as everything else in this section, by
+code at build time, and that waits on a committed `ProjectSettings` (#104). It is
+tracked on #169. Until then the APK still carries Unity's default icon. The
+generated PNGs also have no committed `.meta` files yet — see
+[Unity serialization](unity-serialization.md) for why those are not
+hand-written.
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
