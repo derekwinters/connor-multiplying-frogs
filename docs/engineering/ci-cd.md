@@ -544,6 +544,15 @@ with `apksigner verify --print-certs` and compares its SHA-256 with
 `ANDROID_KEYSTORE_SHA256`. keytool spells the fingerprint `49:09:3C:…` and
 apksigner spells it `49093c…`; both are normalised before comparing.
 
+apksigner also names each signer in one of two ways, and the checker reads
+both: numbered (`Signer #1 certificate SHA-256 digest: …`) or by signature
+scheme (`V2 Signer: certificate SHA-256 digest: …`, likewise `V1`, `V3`,
+`V3.1`, `V4`). Only the `SHA-256 digest` line counts — the SHA-1 and MD5 lines
+beside it are never read as the fingerprint. When two schemes list the same
+certificate, each is a signer and each must be the release key. v0.6.0 printed
+only the scheme-named form, which the checker could not yet read, so both of
+its correctly signed APKs were rejected as unsigned (#450).
+
 | Case | Outcome |
 | --- | --- |
 | every signer is the release certificate | passes |

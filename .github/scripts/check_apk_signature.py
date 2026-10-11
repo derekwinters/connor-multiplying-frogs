@@ -46,9 +46,14 @@ from pathlib import Path
 SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 
 # apksigner prints one of these per signer, alongside SHA-1 and MD5 lines that
-# must not be read as the same thing.
+# must not be read as the same thing. It spells the signer two ways: numbered
+# (`Signer #1 certificate SHA-256 digest: …`) or named by signature scheme
+# (`V2 Signer: certificate SHA-256 digest: …`, and V1, V3, V3.1, V4 alike).
+# The v0.6.0 release printed the second, which the first-only pattern could
+# not read (#450). A scheme that lists the same certificate is read once per
+# scheme, and each must be the release key.
 SIGNER_SHA256 = re.compile(
-    r"^Signer\b.*\bcertificate SHA-256 digest:\s*([0-9A-Fa-f:]+)\s*$")
+    r"^(?:V[0-9.]+\s+)?Signer\b.*\bcertificate SHA-256 digest:\s*([0-9A-Fa-f:]+)\s*$")
 
 
 def normalise_fingerprint(value):
