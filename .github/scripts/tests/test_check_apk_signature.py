@@ -43,6 +43,16 @@ RELEASE_APKSIGNER = RELEASE_KEYTOOL.replace(":", "").lower()
 
 DEBUG_APKSIGNER = "ab" * 32
 
+# Verbatim from the v0.6.0 release build (issue #450). apksigner names the
+# signature scheme here, `V2 Signer:`, rather than numbering the signer.
+V0_6_0_SHA256 = "f58e068b8616f10abe75021b242d8a96be82924616bd5d5716ea0c1f97727978"
+V0_6_0_OUTPUT = (
+    "V2 Signer: certificate DN: CN=Multiplying Frogs, O=Derek Winters, C=US\n"
+    f"V2 Signer: certificate SHA-256 digest: {V0_6_0_SHA256}\n"
+    "V2 Signer: certificate SHA-1 digest: 03dd51d933dfc67972e0e788b7aece9a5fe67565\n"
+    "V2 Signer: certificate MD5 digest: 2692f7a618692cbe02de6eb08c4a05ef\n"
+)
+
 
 def apksigner_output(*digests):
     """What `apksigner verify --print-certs` prints, one signer per digest."""
@@ -88,6 +98,35 @@ class ParsingTests(unittest.TestCase):
 
     def test_output_with_no_signer_yields_nothing(self):
         self.assertEqual(signer_fingerprints("DOES NOT VERIFY\n"), [])
+
+    def test_the_v2_signer_form_from_the_v0_6_0_release_is_read(self):
+        """Issue #450: apksigner's real output on the v0.6.0 release build.
+
+        Reading only `Signer #1 …` lines saw no signer here, and both correctly
+        signed APKs were rejected.
+        """
+        self.assertEqual(signer_fingerprints(V0_6_0_OUTPUT), [V0_6_0_SHA256])
+
+    def test_every_scheme_prefixed_form_is_read(self):
+        for scheme in ("V1", "V2", "V3", "V3.1", "V4"):
+            with self.subTest(scheme=scheme):
+                output = V0_6_0_OUTPUT.replace("V2 Signer:", f"{scheme} Signer:")
+                self.assertEqual(signer_fingerprints(output), [V0_6_0_SHA256])
+
+    def test_v2_and_v3_listing_the_same_certificate_are_each_read(self):
+        output = V0_6_0_OUTPUT + V0_6_0_OUTPUT.replace("V2 Signer:", "V3 Signer:")
+        self.assertEqual(signer_fingerprints(output), [V0_6_0_SHA256] * 2)
+        self.assertEqual(problems(V0_6_0_SHA256, signer_fingerprints(output)), [])
+
+    def test_a_foreign_v3_signer_beside_a_release_v2_signer_fails(self):
+        output = (V0_6_0_OUTPUT
+                  + f"V3 Signer: certificate SHA-256 digest: {DEBUG_APKSIGNER}\n")
+        self.assertTrue(problems(V0_6_0_SHA256, signer_fingerprints(output)))
+
+    def test_scheme_prefixed_sha1_and_md5_lines_are_not_mistaken_for_it(self):
+        only_short_digests = "\n".join(
+            line for line in V0_6_0_OUTPUT.splitlines() if "SHA-256" not in line)
+        self.assertEqual(signer_fingerprints(only_short_digests), [])
 
 
 class ProblemTests(unittest.TestCase):
@@ -146,6 +185,11 @@ class MainTests(FakeApksigner):
     def test_a_debug_signed_apk_fails(self):
         apksigner = self.fake(apksigner_output(DEBUG_APKSIGNER))
         self.assertEqual(self.run_main(RELEASE_KEYTOOL, apksigner), 1)
+
+    def test_the_v0_6_0_release_output_passes(self):
+        """Issue #450, end to end: the APKs v0.6.0 rejected were release-signed."""
+        apksigner = self.fake(V0_6_0_OUTPUT)
+        self.assertEqual(self.run_main(V0_6_0_SHA256.upper(), apksigner), 0)
 
     def test_an_empty_expected_fingerprint_fails_even_for_a_good_apk(self):
         apksigner = self.fake(apksigner_output(RELEASE_APKSIGNER))
