@@ -2010,6 +2010,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#routines-are-not-declared-here-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routines are not declared here, yet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#upgrading-and-checking-for-drift" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2278,6 +2289,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routines-are-not-declared-here-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routines are not declared here, yet
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2623,6 +2645,21 @@ cheaply. Deciding another session is worth spending is <code>/admit</code>.</p>
 <p>Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
 anything left is <strong>reported on the dashboard rather than silently repaired</strong>. That is the whole
 bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.</p>
+<h2 id="routines-are-not-declared-here-yet">Routines are not declared here, yet<a class="headerlink" href="#routines-are-not-declared-here-yet" title="Link to this section">&para;</a></h2>
+<p>ai-sdlc v0.5.0 can keep Claude Code routines <strong>as code</strong>: a <code>routines:</code> list in <code>repo-config.yml</code>
+names definitions ai-sdlc ships (<code>triage</code>, the routine the gatekeeper fires, and <code>dependabot</code>, a
+weekly sweep that merges green Dependabot pull requests and files an issue for red ones), and a
+<code>routines</code> skill renders them for this repository so an agent in a cloud session can create or
+update the live ones to match.</p>
+<p>This repository has the version but has <strong>not opted in</strong>. <code>routines:</code> is absent and <code>routines</code> is
+not in <code>skills:</code>, so the triage routine here is still the one configured by hand in the web UI, and
+there is no Dependabot sweep. That is deliberate rather than an oversight: <code>adopt</code> never seeds the
+key, because a routine acts on its own once created — the Dependabot one merges pull requests — so
+having one is a decision for Derek, not a default the upgrade inherits.</p>
+<p>Opting in later is a change to <code>repo-config.yml</code> alone, plus two web-UI steps no tool can do (an API
+trigger for <code>triage</code>, and confirming each routine has this repository attached). ai-sdlc's
+<a href="https://github.com/derekwinters/ai-sdlc/blob/9a51041eb76254a2cd7e306ed7ac352a2cf085d6/docs/spec/routines.md">Routines</a>
+specification has the rules.</p>
 <h2 id="upgrading-and-checking-for-drift">Upgrading, and checking for drift<a class="headerlink" href="#upgrading-and-checking-for-drift" title="Link to this section">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>plan<span class="w">   </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># read-only: what would change</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>apply<span class="w">  </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># writes, on a branch</span>
