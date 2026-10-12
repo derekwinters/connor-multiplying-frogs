@@ -83,6 +83,26 @@ jobs:
           ref: ${{ inputs.tag }}
           fetch-depth: 0
 
+      # The pipeline's own scripts, from the workflow's own commit — not the
+      # tag's copies. The game is built from the tag above; the checks that
+      # gate the release run from here. On the release-please path this is the
+      # release commit, so nothing changes. On a backfill it is the commit the
+      # dispatch was made from, which is what lets a backfill recover from a
+      # bug in a checker script: v0.6.0 got no APKs because its copy of
+      # check_apk_signature.py was broken (#450), and a backfill running that
+      # same copy would have rejected them again (#453).
+      #
+      # After the tag checkout, not before: checking out into the workspace
+      # root clears it first. Guarded by
+      # .github/scripts/tests/test_release_pipeline_scripts.py.
+      - name: Check out the pipeline scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.licence.outputs.present == 'true'
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: _pipeline
+          sparse-checkout: .github/scripts
+
       - name: Work out the build stamp
         id: stamp
         if: steps.licence.outputs.present == 'true'
@@ -200,7 +220,7 @@ jobs:
           emulator="build/emulator/Android/multiplying-frogs-$version-emulator.apk"
 
           if [ -f "$device" ] && [ -f "$emulator" ]; then
-            python3 .github/scripts/check_release_apks.py \
+            python3 _pipeline/.github/scripts/check_release_apks.py \
               --device "$device" --emulator "$emulator"
           elif [ -f "$device" ]; then
             echo "::warning::Only the device APK was built, so there is no pair" \
@@ -235,7 +255,7 @@ jobs:
 
           rejected=()
           for apk in build/device/Android/*.apk build/emulator/Android/*.apk; do
-            if python3 .github/scripts/check_apk_signature.py \
+            if python3 _pipeline/.github/scripts/check_apk_signature.py \
                  --apk "$apk" --expected "$ANDROID_KEYSTORE_SHA256"; then
               continue
             fi
