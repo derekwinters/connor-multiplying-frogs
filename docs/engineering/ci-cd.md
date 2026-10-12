@@ -619,6 +619,20 @@ makes a backfill able to rescue a release whose failure was in the workflow
 rather than in the code. A fix that lives in the source at `main` does **not**
 reach a backfill of an older tag; only the next release gets it.
 
+The pipeline's **checker scripts** count as the workflow, not the source. The
+YAML shells out to `.github/scripts/` — `check_release_apks.py`,
+`check_apk_signature.py` — and those are run from a second checkout of
+`github.workflow_sha`, the workflow's own commit, into `_pipeline/`, not from
+the tag's checkout. So a backfill **builds from the tag but checks with the
+current pipeline scripts**. Without that, a bug in a checker script could never
+be backfilled away: v0.6.0 got no APKs because its copy of
+`check_apk_signature.py` could not read apksigner's output (#450), and a
+backfill running that same copy would have rejected them again (#453). On the
+release-please path the workflow's commit is the release commit, so the two
+checkouts agree. `.github/scripts/tests/test_release_pipeline_scripts.py`
+asserts that every `.github/scripts/` invocation in `release-build` runs from
+the workflow's commit.
+
 Both are **attached to the GitHub release** rather than left as workflow
 artifacts, so the tag and the thing you install are one object. A release whose
 APK lives in an expiring artifact is a release you cannot re-install in six
