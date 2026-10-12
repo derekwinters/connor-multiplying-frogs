@@ -83,6 +83,33 @@ skills:
   - ci-watch
   - milestone-ops
   - release-flow
+  # `routines` is what renders the list below into an exact plan, which an
+  # agent in a cloud session then makes the live routines match. v0.5.0's seed
+  # only ever runs once, on a repository with no `skills:` key, so a repository
+  # that already had one adds it by hand — here.
+  - routines
+
+# The Claude Code routines this repository keeps as code. The definitions are
+# ai-sdlc's (RTN); this list of which ones exist here is ours, and `adopt`
+# never seeds it, because a routine acts on its own once created — so each one
+# is a decision. Derek made both.
+#
+# `triage` is the analysis routine the gatekeeper fires through the `fire:`
+#   secrets above. It replaces the routine configured by hand in the web UI:
+#   the live one is renamed to the plan's name and updated to its prompt, so it
+#   keeps its API trigger and AI_TRIAGE_URL / AI_TRIAGE_SECRET stay valid.
+#
+# `dependabot` is a weekly sweep (Monday morning, US Central) that
+#   squash-merges green Dependabot pull requests with a Conventional Commit
+#   title, updates ones that are behind, and files one issue per red one rather
+#   than touching it (RTN-051..053). Creating it is the standing instruction
+#   that lets it merge — a merge is otherwise a person's decision.
+#
+# Neither is live until an agent applies the plan from a cloud session after
+# this merges; the plan itself writes nothing.
+routines:
+  - triage
+  - dependabot
 
 commands:
   # The Core suite: no editor, no licence, about two seconds.
