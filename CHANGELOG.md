@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.6.0...v0.6.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* **release:** read apksigner's scheme-named signer lines in the APK signature check ([#451](https://github.com/derekwinters/connor-multiplying-frogs/issues/451)) ([63945dc](https://github.com/derekwinters/connor-multiplying-frogs/commit/63945dc62294430bb5a90687ab2fd4b3e3ba5ec0)), closes [#450](https://github.com/derekwinters/connor-multiplying-frogs/issues/450)
+* **release:** run the release checks from the workflow's commit, not the tag ([#454](https://github.com/derekwinters/connor-multiplying-frogs/issues/454)) ([70994d1](https://github.com/derekwinters/connor-multiplying-frogs/commit/70994d12b8cedfebf000b69e3b8b1511928428b7))
+
 ## [0.6.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.5.0...v0.6.0) (2026-10-11)
 
 
