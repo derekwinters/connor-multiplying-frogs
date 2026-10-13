@@ -197,6 +197,7 @@ The whole issue lifecycle now runs from ai-sdlc. What used to live here, and whe
 | `gatekeeper-sweep.yml` + `pipeline-reconcile` | `gatekeeper-sweep.yml`, a caller — same name, different job |
 | `pipeline-analysis`, `pipeline-dev`, `triage-issue`, `ci-watch`, `milestone-ops`, `issue-blockers`, `release-flow` | named in `repo-config.yml`, installed by `skills-update.yml` — see [How the skills get here](#how-the-skills-get-here) |
 | — | `github-api`, new with v0.4.21: how an agent reads and changes anything in GitHub |
+| the triage routine, configured by hand in the web UI | declared under `routines:` in `repo-config.yml` with a new Dependabot sweep — see [Routines are declared as code](#routines-are-declared-as-code) |
 | `pipeline-tests.yml` | gone with the code it tested |
 
 ### How the skills get here
@@ -216,8 +217,9 @@ an installed skill is an instruction an agent reads and a timer that put unrevie
 context would be a consent problem rather than an untidiness. A skill edited here is reported and
 left alone, never overwritten.
 
-It arrived with v0.4.17, and `repo-config.yml` now names seven: `github-api`, `triage-issue`,
-`pipeline-dev`, `issue-blockers`, `ci-watch`, `milestone-ops` and `release-flow`. The list is not
+It arrived with v0.4.17, and `repo-config.yml` now names eight: `github-api`, `triage-issue`,
+`pipeline-dev`, `issue-blockers`, `ci-watch`, `milestone-ops`, `release-flow` and — since the
+routines below were declared — `routines`. The list is not
 every skill — `pipeline-gatekeeper`, `pipeline-dashboard`, `label-sync`, `closing-keyword` and
 `docs-gate` are **scripts**, fetched into the runner by an ai-sdlc action and never installed here,
 so a copy would be a second version to keep at the pin that nothing reads.
@@ -259,24 +261,42 @@ Genuine drift — a closed issue still carrying pipeline labels — is handled b
 anything left is **reported on the dashboard rather than silently repaired**. That is the whole
 bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.
 
-## Routines are not declared here, yet
+## Routines are declared as code
 
-ai-sdlc v0.5.0 can keep Claude Code routines **as code**: a `routines:` list in `repo-config.yml`
-names definitions ai-sdlc ships (`triage`, the routine the gatekeeper fires, and `dependabot`, a
-weekly sweep that merges green Dependabot pull requests and files an issue for red ones), and a
-`routines` skill renders them for this repository so an agent in a cloud session can create or
-update the live ones to match.
+Since ai-sdlc v0.5.0 the Claude Code routines this repository runs are kept **as code**. The
+definitions — each routine's prompt, schedule and triggers — are ai-sdlc's; which of them exist here
+is the `routines:` list in `.ai-sdlc/repo-config.yml`, and that list is ours. `adopt` never seeds
+it, because a routine acts on its own once created, so each entry is a decision. Derek made both:
 
-This repository has the version but has **not opted in**. `routines:` is absent and `routines` is
-not in `skills:`, so the triage routine here is still the one configured by hand in the web UI, and
-there is no Dependabot sweep. That is deliberate rather than an oversight: `adopt` never seeds the
-key, because a routine acts on its own once created — the Dependabot one merges pull requests — so
-having one is a decision for Derek, not a default the upgrade inherits.
+| Routine | Live name | Fired by | What it does |
+| --- | --- | --- | --- |
+| `triage` | `connor-multiplying-frogs Triage` | its API trigger, called by the gatekeeper | Runs `triage-issue` on the one issue number the fire names, and nothing else in the payload. |
+| `dependabot` | `connor-multiplying-frogs Dependabot` | a schedule, Monday 07:52 US Central | Squash-merges green, mergeable Dependabot pull requests with a Conventional Commit title; updates ones that are behind through the API; files one issue per red one and never pushes to, closes or merges it. |
 
-Opting in later is a change to `repo-config.yml` alone, plus two web-UI steps no tool can do (an API
-trigger for `triage`, and confirming each routine has this repository attached). ai-sdlc's
+The `routines` skill (listed in `skills:`, and installed by `skills-update` like the rest) renders
+that list into an exact plan — `python3 .claude/skills/routines/main.py plan` — and writes nothing.
+Making the live routines match the plan is done by an agent following that skill **from a Claude
+Code cloud session in this repository**, because only those sessions have the trigger tools, and
+only after the operator has seen the plan and said yes. Nothing here deletes a routine.
+
+**The triage routine is the existing one, renamed.** The routine configured by hand in the web UI
+before this is not replaced by a second one: it is renamed to the plan's name, and its prompt
+updated to the plan's, so the skill matches it and updates it in place. That keeps its API trigger,
+which no tool can create, and with it the `AI_TRIAGE_URL` and `AI_TRIAGE_SECRET` secrets the
+gatekeeper fires it through (`fire:` in `repo-config.yml`). Renaming it first matters: routines are
+matched by exact name, so an unrenamed one would be left alone and a new, triggerless `Triage`
+created beside it.
+
+**The Dependabot routine is new**, and needs one manual step after the skill creates it: confirm on
+its page in the web UI that this repository is attached. Its merges are the standing instruction
+Derek gave by creating it; a merge is otherwise a person's decision. Until the Dependabot pull
+requests stop failing checks they cannot pass from a Dependabot run (#441, #445), it will file
+issues for those rather than merge anything.
+
+A routine's URL, its token and any session link are never written into a file, an issue, a comment
+or a commit. ai-sdlc's
 [Routines](https://github.com/derekwinters/ai-sdlc/blob/9a51041eb76254a2cd7e306ed7ac352a2cf085d6/docs/spec/routines.md)
-specification has the rules.
+specification (`RTN`) has the rules.
 
 ## Upgrading, and checking for drift
 
