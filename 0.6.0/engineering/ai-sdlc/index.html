@@ -2010,10 +2010,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#routines-are-not-declared-here-yet" class="md-nav__link">
+  <a href="#routines-are-declared-as-code" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Routines are not declared here, yet
+        Routines are declared as code
       
     </span>
   </a>
@@ -2293,10 +2293,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#routines-are-not-declared-here-yet" class="md-nav__link">
+  <a href="#routines-are-declared-as-code" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Routines are not declared here, yet
+        Routines are declared as code
       
     </span>
   </a>
@@ -2593,6 +2593,10 @@ that cannot be centralised.</p>
 <td><code>github-api</code>, new with v0.4.21: how an agent reads and changes anything in GitHub</td>
 </tr>
 <tr>
+<td>the triage routine, configured by hand in the web UI</td>
+<td>declared under <code>routines:</code> in <code>repo-config.yml</code> with a new Dependabot sweep — see <a href="#routines-are-declared-as-code">Routines are declared as code</a></td>
+</tr>
+<tr>
 <td><code>pipeline-tests.yml</code></td>
 <td>gone with the code it tested</td>
 </tr>
@@ -2611,8 +2615,9 @@ function: it reads as covered, so nobody checks.</p>
 an installed skill is an instruction an agent reads and a timer that put unreviewed ones into its
 context would be a consent problem rather than an untidiness. A skill edited here is reported and
 left alone, never overwritten.</p>
-<p>It arrived with v0.4.17, and <code>repo-config.yml</code> now names seven: <code>github-api</code>, <code>triage-issue</code>,
-<code>pipeline-dev</code>, <code>issue-blockers</code>, <code>ci-watch</code>, <code>milestone-ops</code> and <code>release-flow</code>. The list is not
+<p>It arrived with v0.4.17, and <code>repo-config.yml</code> now names eight: <code>github-api</code>, <code>triage-issue</code>,
+<code>pipeline-dev</code>, <code>issue-blockers</code>, <code>ci-watch</code>, <code>milestone-ops</code>, <code>release-flow</code> and — since the
+routines below were declared — <code>routines</code>. The list is not
 every skill — <code>pipeline-gatekeeper</code>, <code>pipeline-dashboard</code>, <code>label-sync</code>, <code>closing-keyword</code> and
 <code>docs-gate</code> are <strong>scripts</strong>, fetched into the runner by an ai-sdlc action and never installed here,
 so a copy would be a second version to keep at the pin that nothing reads.</p>
@@ -2645,21 +2650,56 @@ cheaply. Deciding another session is worth spending is <code>/admit</code>.</p>
 <p>Genuine drift — a closed issue still carrying pipeline labels — is handled by the close handler, and
 anything left is <strong>reported on the dashboard rather than silently repaired</strong>. That is the whole
 bargain: nothing fixes the board behind your back, so the board has to show you what is wrong.</p>
-<h2 id="routines-are-not-declared-here-yet">Routines are not declared here, yet<a class="headerlink" href="#routines-are-not-declared-here-yet" title="Link to this section">&para;</a></h2>
-<p>ai-sdlc v0.5.0 can keep Claude Code routines <strong>as code</strong>: a <code>routines:</code> list in <code>repo-config.yml</code>
-names definitions ai-sdlc ships (<code>triage</code>, the routine the gatekeeper fires, and <code>dependabot</code>, a
-weekly sweep that merges green Dependabot pull requests and files an issue for red ones), and a
-<code>routines</code> skill renders them for this repository so an agent in a cloud session can create or
-update the live ones to match.</p>
-<p>This repository has the version but has <strong>not opted in</strong>. <code>routines:</code> is absent and <code>routines</code> is
-not in <code>skills:</code>, so the triage routine here is still the one configured by hand in the web UI, and
-there is no Dependabot sweep. That is deliberate rather than an oversight: <code>adopt</code> never seeds the
-key, because a routine acts on its own once created — the Dependabot one merges pull requests — so
-having one is a decision for Derek, not a default the upgrade inherits.</p>
-<p>Opting in later is a change to <code>repo-config.yml</code> alone, plus two web-UI steps no tool can do (an API
-trigger for <code>triage</code>, and confirming each routine has this repository attached). ai-sdlc's
+<h2 id="routines-are-declared-as-code">Routines are declared as code<a class="headerlink" href="#routines-are-declared-as-code" title="Link to this section">&para;</a></h2>
+<p>Since ai-sdlc v0.5.0 the Claude Code routines this repository runs are kept <strong>as code</strong>. The
+definitions — each routine's prompt, schedule and triggers — are ai-sdlc's; which of them exist here
+is the <code>routines:</code> list in <code>.ai-sdlc/repo-config.yml</code>, and that list is ours. <code>adopt</code> never seeds
+it, because a routine acts on its own once created, so each entry is a decision. Derek made both:</p>
+<table>
+<thead>
+<tr>
+<th>Routine</th>
+<th>Live name</th>
+<th>Fired by</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>triage</code></td>
+<td><code>connor-multiplying-frogs Triage</code></td>
+<td>its API trigger, called by the gatekeeper</td>
+<td>Runs <code>triage-issue</code> on the one issue number the fire names, and nothing else in the payload.</td>
+</tr>
+<tr>
+<td><code>dependabot</code></td>
+<td><code>connor-multiplying-frogs Dependabot</code></td>
+<td>a schedule, Monday 07:52 US Central</td>
+<td>Squash-merges green, mergeable Dependabot pull requests with a Conventional Commit title; updates ones that are behind through the API; files one issue per red one and never pushes to, closes or merges it.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>routines</code> skill (listed in <code>skills:</code>, and installed by <code>skills-update</code> like the rest) renders
+that list into an exact plan — <code>python3 .claude/skills/routines/main.py plan</code> — and writes nothing.
+Making the live routines match the plan is done by an agent following that skill <strong>from a Claude
+Code cloud session in this repository</strong>, because only those sessions have the trigger tools, and
+only after the operator has seen the plan and said yes. Nothing here deletes a routine.</p>
+<p><strong>The triage routine is the existing one, renamed.</strong> The routine configured by hand in the web UI
+before this is not replaced by a second one: it is renamed to the plan's name, and its prompt
+updated to the plan's, so the skill matches it and updates it in place. That keeps its API trigger,
+which no tool can create, and with it the <code>AI_TRIAGE_URL</code> and <code>AI_TRIAGE_SECRET</code> secrets the
+gatekeeper fires it through (<code>fire:</code> in <code>repo-config.yml</code>). Renaming it first matters: routines are
+matched by exact name, so an unrenamed one would be left alone and a new, triggerless <code>Triage</code>
+created beside it.</p>
+<p><strong>The Dependabot routine is new</strong>, and needs one manual step after the skill creates it: confirm on
+its page in the web UI that this repository is attached. Its merges are the standing instruction
+Derek gave by creating it; a merge is otherwise a person's decision. Until the Dependabot pull
+requests stop failing checks they cannot pass from a Dependabot run (#441, #445), it will file
+issues for those rather than merge anything.</p>
+<p>A routine's URL, its token and any session link are never written into a file, an issue, a comment
+or a commit. ai-sdlc's
 <a href="https://github.com/derekwinters/ai-sdlc/blob/9a51041eb76254a2cd7e306ed7ac352a2cf085d6/docs/spec/routines.md">Routines</a>
-specification has the rules.</p>
+specification (<code>RTN</code>) has the rules.</p>
 <h2 id="upgrading-and-checking-for-drift">Upgrading, and checking for drift<a class="headerlink" href="#upgrading-and-checking-for-drift" title="Link to this section">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>plan<span class="w">   </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># read-only: what would change</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.claude/skills/adopt/main.py<span class="w"> </span>apply<span class="w">  </span>&lt;pin&gt;<span class="w">   </span><span class="c1"># writes, on a branch</span>
