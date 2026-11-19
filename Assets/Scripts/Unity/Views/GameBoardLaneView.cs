@@ -529,10 +529,10 @@ namespace Frogs.Unity.Views
 
         /// <summary>
         /// The frog drawn on the piece — game-board.md § The frog piece: a
-        /// small 3D frog in its frog's colour, outlined
-        /// <see cref="FrogPieceOutline"/> wide in <c>PieceEdge</c>, whose four
-        /// legs take the pose for whatever point of a move this lane was last
-        /// drawn at.
+        /// the approved 3D frog model in its frog's colour, outlined
+        /// <see cref="FrogPieceOutline"/> wide in <c>PieceEdge</c>, posed by
+        /// its Hop clip for whatever point of a move this lane was last drawn
+        /// at, and sitting otherwise.
         /// </summary>
         public FrogModel Frog
         {
@@ -615,9 +615,9 @@ namespace Frogs.Unity.Views
             _pieceRect.pivot = new Vector2(0.5f, 0.5f);
             _pieceRect.anchoredPosition = Vector2.zero;
 
-            // At rest: a frog drawn from Core's state is standing, not
+            // At rest: a frog drawn from Core's state is sitting, not
             // part-way through anything (FP-8).
-            _frog.SetLegPose(FrogLegPose.Rest);
+            _frog.SetPose(FrogPose.Rest);
 
             _chip.SetPadCount(string.Format(PadCountFormat, position, Lane.LaneWinningPosition));
 
@@ -643,12 +643,12 @@ namespace Frogs.Unity.Views
         ///
         /// This lane still decides nothing and animates nothing: it holds no
         /// clock and no tween, and only draws the frame it is asked for.
-        /// The frog's legs are posed for that same point —
-        /// <see cref="FrogLegPose.At"/> of <paramref name="progress"/>, Core's
-        /// function — so the move that carries the frog is the move that bends
-        /// its legs, with no second clock to drift. A move from a position to
-        /// itself is not a hop (a wrong answer on the Start log), and leaves
-        /// the legs at rest.
+        /// The frog is posed for that same point —
+        /// <see cref="FrogPose.ForMove"/> of the move and
+        /// <paramref name="progress"/>, Core's function — so the move that
+        /// carries the frog is the move that bends its legs, with no second
+        /// clock to drift. A move from a position to itself is not a hop (a
+        /// wrong answer on the Start log), and leaves the frog sitting.
         ///
         /// (It is deliberately not *named* for one either — #220's
         /// <c>Board_HasNoHopAnimation_AndNoEndOfGameDetection</c> greps both
@@ -681,7 +681,7 @@ namespace Frogs.Unity.Views
                 Mathf.Lerp(PositionCenterX(from), PositionCenterX(to), Mathf.Clamp01(progress)),
                 0f);
 
-            _frog.SetLegPose(from == to ? FrogLegPose.Rest : FrogLegPose.At(progress));
+            _frog.SetPose(FrogPose.ForMove(from, to, progress));
         }
 
         static void RequirePosition(int position, string name)
@@ -858,11 +858,11 @@ namespace Frogs.Unity.Views
 
         void BuildPiece()
         {
-            // piece — the frog itself, a small 3D frog drawn straight into
-            // this canvas (game-board.md § The frog piece, #461), in the same
-            // FrogPieceDiameter square the flat disc it replaced filled. It
-            // starts on the Start log, at rest, and is moved onto whichever
-            // position Core reports on the first Render.
+            // piece — the frog itself, the approved 3D frog model drawn
+            // straight into this canvas (game-board.md § The frog piece,
+            // #461), in the same FrogPieceDiameter square the flat disc it
+            // replaced filled. It starts on the Start log, sitting, and is
+            // moved onto whichever position Core reports on the first Render.
             var pieceGO = new GameObject("Piece", typeof(RectTransform));
             _pieceRect = (RectTransform)pieceGO.transform;
             _pieceRect.SetParent(_positionRects[0], worldPositionStays: false);

@@ -1095,7 +1095,8 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(view.SettingsButton.Glyph.fontSize, Is.EqualTo((int)GameBoardScreenView.SettingsGlyphSize));
 
                 var lane = view.LaneFor(FrogColour.Green);
-                Assert.That(lane.Frog.Legs.Count, Is.EqualTo(4), "the frog piece is built, so there is no sprite to miss");
+                Assert.That(lane.Frog.Legs.Count, Is.EqualTo(4), "the frog piece's model loaded, rig and all");
+                Assert.That(lane.Frog.Skin.mainTexture, Is.Not.Null, "and its albedo with it");
                 Assert.That(lane.LilyPads[0].sprite, Is.Not.Null);
 
                 Assert.That(view.StartLog.sprite, Is.Not.Null);

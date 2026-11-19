@@ -221,6 +221,55 @@ generated PNGs also have no committed `.meta` files yet — see
 [Unity serialization](unity-serialization.md) for why those are not
 hand-written.
 
+### The frog model
+
+**The frog piece is a 3D model built in Blender**, approved by Derek for
+[#461](https://github.com/derekwinters/connor-multiplying-frogs/issues/461).
+What it must look like and do is
+[game board § The frog piece](../specs/ui/game-board.md#the-frog-piece); this
+is how it gets into the project.
+
+| | |
+| --- | --- |
+| Source | `tools/art/frog_model.py` — builds, rigs, animates and exports the frog headless; nothing is edited by hand in Blender |
+| Runs on | Blender as a Python module, `bpy` 5.x on Python 3.13 — `venv/bin/python tools/art/frog_model.py --out <dir>` (see the script's docstring) |
+| Imported files | `Assets/Art/Frog/Resources/FrogPiece/frog.fbx` and `frog_albedo.png`, copied unchanged from the script's output |
+| Import settings | `Assets/Editor/FrogModelImport.cs`, applied on every import of those two files |
+| Loaded by | `FrogModel`, through `Resources.Load` — so both files are in every build, and nothing refers to them by GUID |
+
+To change the frog, change the script, run it, and copy `frog.fbx` and
+`frog_albedo.png` over the imported ones. Do not edit either file directly, and
+do not change the bone or clip names without changing `FrogModel` with them.
+
+**The import settings are code, not a hand-written `.meta`.** A
+`ModelImporter` block is dozens of version-dependent keys and integer enums,
+which is exactly the guess [Unity serialization](unity-serialization.md) rules
+out. `FrogModelImport` is an `AssetPostprocessor`. It sets them through the
+typed `ModelImporter` and `TextureImporter` API, so a wrong name is a compile
+error, and `FrogPieceTests` reads every one back from the importer:
+
+| File | Setting | Why |
+| --- | --- | --- |
+| `frog.fbx` | Generic rig, avatar from this model, animation imported, no keyframe reduction | The 14-bone rig and its Sit and Hop clips, exactly as approved |
+| `frog.fbx` | Read/Write enabled | The frog is skinned on the CPU to draw it into the canvas, in a player build too |
+| `frog.fbx` | No materials, cameras, lights, blend shapes or colliders | No lit shader enters the build; colliders need the 3D physics module, which the project does not have |
+| `frog_albedo.png` | sRGB, mipmaps, trilinear, clamp, max 1024, **uncompressed** | Drawn at 88 px from 1024 px; uncompressed keeps white exactly white, so the tint is exactly the frog colour |
+
+The two files have **no committed `.meta`** yet, like the app icons above. Unity
+generates one on import with a fresh GUID, which nothing depends on because the
+model is loaded by path. Pinning those GUIDs needs an Editor session, and is
+part of
+[#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
+
+**Sampling a clip needs the animation module.** `Packages/manifest.json`
+carries `com.unity.modules.animation`, Unity's built-in module for
+`AnimationClip` and `Animator`. It is part of the engine, not a third-party
+package, and it makes no network calls. Outside the editor,
+`AnimationClip.SampleAnimation` on a non-legacy clip needs an `Animator` on
+the sampled object. It needs no controller (Unity issue *"Non-Legacy animations
+cannot be sampled outside the Editor without an Animator"*, fixed in 2019.1).
+So `FrogModel` makes sure the rig has one, and a test checks it.
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
