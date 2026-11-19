@@ -301,11 +301,13 @@ namespace Frogs.Unity.EditModeTests
                     var vertices = VerticesOf(lane.Frog.Skin).Concat(VerticesOf(lane.Frog)).ToList();
                     Assert.That(vertices, Is.Not.Empty, "the frog draws something");
 
-                    foreach (var vertex in vertices)
-                    {
-                        Assert.That(Mathf.Abs(vertex.position.x), Is.LessThanOrEqualTo(half + pixelOfSlack), $"frame {frame}, x");
-                        Assert.That(Mathf.Abs(vertex.position.y), Is.LessThanOrEqualTo(half + pixelOfSlack), $"frame {frame}, y");
-                    }
+                    // The furthest any vertex reaches, then one assert each —
+                    // thousands of vertices a frame make per-vertex asserts slow.
+                    var reachX = vertices.Max(vertex => Mathf.Abs(vertex.position.x));
+                    var reachY = vertices.Max(vertex => Mathf.Abs(vertex.position.y));
+
+                    Assert.That(reachX, Is.LessThanOrEqualTo(half + pixelOfSlack), $"frame {frame}, x");
+                    Assert.That(reachY, Is.LessThanOrEqualTo(half + pixelOfSlack), $"frame {frame}, y");
                 }
             });
         }
