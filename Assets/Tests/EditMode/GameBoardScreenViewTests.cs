@@ -243,7 +243,7 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(
                     lane.PieceRect.sizeDelta,
                     Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceDiameter, GameBoardLaneView.FrogPieceDiameter)));
-                Assert.That(lane.Piece.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
+                Assert.That(lane.Frog.color, Is.EqualTo(FrogColours.For(FrogColour.Green)));
             }
             finally
             {
@@ -365,10 +365,14 @@ namespace Frogs.Unity.EditModeTests
                         $"position {position}'s own rect is too");
                 }
 
+                // The frog piece (#461) is drawn into the piece's own
+                // FrogPieceDiameter square, outline included — FrogPieceTests
+                // asserts it stays inside at every moment of a hop.
+                Assert.That(lane.Frog.rectTransform, Is.SameAs(lane.PieceRect));
                 Assert.That(
-                    lane.Piece.rectTransform.offsetMin,
-                    Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceOutline, GameBoardLaneView.FrogPieceOutline)),
-                    "the piece's fill is inset by FrogPieceOutline, so the piece is still FrogPieceDiameter across");
+                    lane.PieceRect.rect.size,
+                    Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceDiameter, GameBoardLaneView.FrogPieceDiameter)),
+                    "the piece is still FrogPieceDiameter across");
             }
             finally
             {
@@ -1091,8 +1095,7 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(view.SettingsButton.Glyph.fontSize, Is.EqualTo((int)GameBoardScreenView.SettingsGlyphSize));
 
                 var lane = view.LaneFor(FrogColour.Green);
-                Assert.That(lane.Piece.sprite, Is.Not.Null);
-                Assert.That(lane.PieceOutline.sprite, Is.Not.Null);
+                Assert.That(lane.Frog.Legs.Count, Is.EqualTo(4), "the frog piece is built, so there is no sprite to miss");
                 Assert.That(lane.LilyPads[0].sprite, Is.Not.Null);
 
                 Assert.That(view.StartLog.sprite, Is.Not.Null);

@@ -794,9 +794,103 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 
 - **Frog piece** — one per lane, on its current position, in the frog's colour.
   On a shared log it sits on its own lane's centre line, which is what keeps
-  "frogs never interact" true in the picture as well as in the state.
+  "frogs never interact" true in the picture as well as in the state. It is a
+  small 3D frog whose legs move when it hops — see
+  [the frog piece](#the-frog-piece).
 - **Pad count** — on the chip: `3 of 8`, so progress is readable in words as
   well as by looking.
+
+## The frog piece
+
+Derek asked for *"a 3D model of a frog for this game. The legs of the frog
+should be able to move when the frog jumps"*
+([#461](https://github.com/derekwinters/connor-multiplying-frogs/issues/461)).
+The piece is that frog. It replaced the flat coloured disc the piece used to
+be, **at the same footprint**: where a frog sits, when it moves, how far and
+for how long are all exactly what [Behaviour](#behaviour) says, unchanged.
+
+### Requirements
+
+- **FP-1 — Built from simple shapes, in code.** A body, a head, two eyes (a
+  bulge with a pupil each) and four legs. Each leg is two segments — a thigh and
+  a shin — joined at a **knee**, and hung from the body at a **hip**. There is
+  no imported model file and no new package, so the frog does not wait on how
+  imported art enters the project
+  ([#330](https://github.com/derekwinters/connor-multiplying-frogs/issues/330)).
+- **FP-2 — Same footprint.** The frog, its outline included, is drawn inside
+  the `FrogPieceDiameter` square the disc filled, centred on the same point, at
+  every moment of a hop.
+- **FP-3 — In its frog's colour.** Body, head, legs and eye bulges are the
+  frog's colour from [shared components](shared-components.md#frog-colours).
+  The pupils are `BoardInk`.
+- **FP-4 — Outlined as the disc was.** The frog's silhouette carries a
+  `FrogPieceOutline`-wide edge in `PieceEdge`, the separation
+  [keeping the frogs visible](#keeping-the-frogs-visible) asks for on top of
+  colour.
+- **FP-5 — Facing the End log.** The frog faces right, along its lane, the way
+  it is racing — turned three-quarters toward the player and seen a little
+  from above so all four legs show.
+- **FP-6 — Its legs follow the hop.** The leg pose is a function of how far
+  through the hop the frog is, 0 to 1, per the table below: tucked at rest,
+  back legs kick out at take-off, everything tucks in the air, front legs reach
+  for the landing, back to rest.
+- **FP-7 — A frog that does not move does not hop.** A wrong answer on the
+  Start log leaves the frog where it is
+  ([answer result](answer-result.md)), so its legs stay at rest.
+- **FP-8 — At rest otherwise.** Whenever the board is drawn from Core's state
+  rather than part-way through a hop, the legs are in the rest pose.
+
+**Invariant:** the leg pose is computed in Core from the hop's progress and
+nothing else. The board holds no clock for it: the one hop that carries the
+frog from pad to pad is the hop that moves its legs, so the two cannot drift
+apart.
+**Invariant:** a hop starts and ends in the rest pose, so a frog that has just
+landed is drawn exactly like a frog that has been standing there all along.
+**Invariant:** the two legs of a pair move together. A pose has one front and
+one back, never four independent legs — a frog hops with both feet.
+**Invariant:** lit faces are drawn in exactly the frog's colour and shading
+only ever darkens them, by no more than `FrogShadeFloor`. The separability bar
+above is measured against the frog colours themselves, and a frog shaded
+*lighter* than its colour could cross the water's ceiling.
+**Invariant:** no leg, at any point of the hop, reaches outside the footprint
+(FP-2) — a kicking frog must not cover the pad or lane next to it.
+
+### The legs through a hop
+
+Angles in degrees. **Hip** is the thigh's angle from straight down — positive
+swings it forward, toward the head; negative, back toward the tail. **Knee** is
+how far the shin folds back from straight along the thigh — 0 is a straight
+leg, larger is more tucked. Between two rows the angles move in a straight
+line.
+
+| Moment | Progress | Back hip | Back knee | Front hip | Front knee |
+| --- | --- | --- | --- | --- | --- |
+| Rest | 0 and 1 | 60 | 150 | 20 | 30 |
+| Take-off — back legs kick out | 0.25 | −50 | 10 | −10 | 40 |
+| In the air — all tucked | 0.5 | 50 | 140 | −30 | 60 |
+| Landing — front legs reach | 0.8 | 40 | 120 | 50 | 0 |
+
+These numbers are `FrogLegPose` in Core and are tested there. They and the
+frog's proportions are **placeholders for Connor to judge on the tablet** —
+how the frog looks is his call; that it has these joints and moves through
+these moments is the spec.
+
+### How it is drawn
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| Turned toward the player | `FrogViewYaw` | 25° |
+| Seen from above | `FrogViewPitch` | 25° |
+| Darkest a shaded face gets, as a fraction of the frog colour | `FrogShadeFloor` | 0.7 |
+| How squarely a face must meet the light to be drawn in exactly the frog colour (cosine) | `FrogFullyLit` | 0.6 |
+
+**It is drawn straight into the board's canvas, as a mesh** — not by a second
+camera into a render texture. The board is a uGUI screen-space overlay; the
+frog projects its shapes onto the piece's own rectangle, sorts them back to
+front and hands the triangles to uGUI like any other graphic. So it moves,
+scales and layers with the board exactly as the disc did, and it needs no
+camera, layer, light, shader or render texture that a player build might
+quietly be missing.
 
 ## Behaviour
 
@@ -883,6 +977,18 @@ decided against; keeping a mockup of a layout nobody is building is how a
 `mockups/` folder stops being trustworthy.
 
 ## Open questions
+
+- **Does the 3D frog replace the drawn frog?** The plan for frog art was 2D —
+  [#333](https://github.com/derekwinters/connor-multiplying-frogs/issues/333)
+  (Connor and Derek draw it) and
+  [#337](https://github.com/derekwinters/connor-multiplying-frogs/issues/337)
+  (draw the frogs from it). [The frog piece](#the-frog-piece) does not decide
+  that; those issues are untouched for Derek and Connor.
+- **Does the frog turn round when it hops back?** It always faces the End log
+  (FP-5), so a wrong answer's hop back one pad is the same leg motion carrying
+  it backwards. Open as
+  [#462](https://github.com/derekwinters/connor-multiplying-frogs/issues/462)
+  for Connor.
 
 - **Which blue is the water? Settled: `#9FD8F2`.** Derek's call on
   [#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301),

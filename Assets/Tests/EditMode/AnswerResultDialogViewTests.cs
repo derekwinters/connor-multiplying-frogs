@@ -496,6 +496,53 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        /// <summary>
+        /// game-board.md § The frog piece, FP-6 (#461): the hop that carries
+        /// the frog is the hop that moves its legs — the pose is
+        /// FrogLegPose.At of this dialog's own HopProgress, with no second
+        /// clock anywhere.
+        /// </summary>
+        [Test]
+        public void TheHop_MovesTheFrogsLegs_ThroughThePoseForEachPointOfIt()
+        {
+            var game = StartedGame(FrogColour.Green, FrogColour.Blue);
+            var turn = ResolvedAt(game, startingOn: 3, correct: true);
+            var board = CreateBoard(game);
+            var lane = board.LaneFor(FrogColour.Green);
+
+            var view = CreateView(turn, board);
+
+            try
+            {
+                Press(view.NextTurnButton);
+                view.Advance(DialogPanel.DialogFadeDuration + AnswerResultDialogView.ResultHopDelay);
+
+                AssertLegPose(lane.Frog.LegPose, FrogLegPose.Rest, "still standing before the hop");
+
+                view.Advance(GameBoardScreenView.FrogHopDuration * FrogLegPose.TakeOffProgress);
+                AssertLegPose(lane.Frog.LegPose, FrogLegPose.At(view.HopProgress), "part-way");
+                AssertLegPose(lane.Frog.LegPose, FrogLegPose.TakeOff, "the back legs kick out at take-off");
+
+                view.Advance(GameBoardScreenView.FrogHopDuration);
+                AssertLegPose(lane.Frog.LegPose, FrogLegPose.Rest, "landed, and at rest");
+            }
+            finally
+            {
+                Destroy(view);
+                Destroy(board);
+            }
+        }
+
+        static void AssertLegPose(FrogLegPose actual, FrogLegPose expected, string because)
+        {
+            const float degrees = 0.01f;
+
+            Assert.That(actual.Front.Hip, Is.EqualTo(expected.Front.Hip).Within(degrees), because + " — front hip");
+            Assert.That(actual.Front.Knee, Is.EqualTo(expected.Front.Knee).Within(degrees), because + " — front knee");
+            Assert.That(actual.Back.Hip, Is.EqualTo(expected.Back.Hip).Within(degrees), because + " — back hip");
+            Assert.That(actual.Back.Knee, Is.EqualTo(expected.Back.Knee).Within(degrees), because + " — back knee");
+        }
+
         [Test]
         public void AHopOntoTheEndLog_JustFinishes_AndTheBoardsOwnRenderShowsTheHomeChip()
         {
