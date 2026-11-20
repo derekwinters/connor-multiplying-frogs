@@ -1097,7 +1097,8 @@ namespace Frogs.Unity.EditModeTests
                 var lane = view.LaneFor(FrogColour.Green);
                 Assert.That(lane.Frog.Legs.Count, Is.EqualTo(4), "the frog piece's model loaded, rig and all");
                 Assert.That(lane.Frog.Skin.mainTexture, Is.Not.Null, "and its albedo with it");
-                Assert.That(lane.LilyPads[0].sprite, Is.Not.Null);
+                Assert.That(lane.LilyPads[0].Mesh, Is.Not.Null, "the lily pad model loaded");
+                Assert.That(lane.LilyPads[0].mainTexture, Is.Not.Null, "and its albedo with it");
 
                 Assert.That(view.StartLog.sprite, Is.Not.Null);
                 Assert.That(view.EndLog.sprite, Is.Not.Null);

@@ -239,6 +239,16 @@ A pad is a circle with a wedge cut from it and five veins across it. Both the
 notch's **width** and the direction it **points** vary from pad to pad, so a
 four-frog board draws 28 pads that are not 28 identical discs.
 
+Since
+[#465](https://github.com/derekwinters/connor-multiplying-frogs/issues/465)
+every pad is **the approved 3D lily pad model** — a model built in Blender,
+which Derek turned round in a 3D viewer and said looks good and should go in
+the game. It replaced the generated 2D sprite **at the same footprint**, and
+everything in this section is still what decides which pad goes where. What
+moved is who draws the notch and the veins: they are in the model now, built to
+the numbers below by its script, rather than drawn by the game. See
+[the lily pad model](#the-lily-pad-model) for what it must do.
+
 **The variation is a pure function of where the pad is.** A twelve-entry table,
 indexed by the pad's own coordinates:
 
@@ -277,10 +287,17 @@ things:**
 - **A pad never changes shape** when the board redraws, when a frog hops, or
   between devices and runs.
 - **Rotation is free at runtime** — you rotate the transform. So the
-  implementation needs **four sprites, one per entry in `LilyPadNotchAngles`**,
-  not twelve. The same holds when real art replaces these shapes.
+  implementation needs **four pads, one per entry in `LilyPadNotchAngles`**,
+  not twelve. That held for the four generated sprites, and it holds for the
+  model, which is four meshes for exactly this reason.
 - It is **presentation, not game logic**, so it belongs in the Unity layer
   rather than Core — but it is a static pure function and is testable as one.
+
+**The veins below are painted into the model's albedo** by
+`tools/art/lilypad_model.py`, from these same constants, and
+`GameBoardLilyPadTests` reads them back out of the committed texture. Changing
+one of them is a change to that script and to the texture it bakes, not to the
+game's code.
 
 **The veins radiate from the circle's geometric centre**, not from the notch's
 apex. The notch stopping short of the diameter is the notch's business; the
@@ -304,9 +321,66 @@ above it and still be a different drawing.
 
 **None of this changes `LilyPadDiameter`.** 112 px is the number that
 [decided lanes-across over lanes-up](#why-the-lanes-run-across); only the
-outline and the surface moved. And note that a frog covers all but a 12 px ring
+outline and the surface moved — and, with #465, what they are drawn with. And note that a frog covers all but a 12 px ring
 of the pad it sits on, so the veins and most of the notch are visible on
 **empty** pads — which is most of the board, but never the pad being looked at.
+
+#### The lily pad model
+
+![The approved lily pad, with the approved frog sitting on it, three-quarter view](images/lily-pad/lilypad_hero_3q.png)
+
+![The four pads, one per notch width, from straight above](images/lily-pad/lilypad_four_top.png)
+
+![A lane of seven pads through the variation table, spaced like the board](images/lily-pad/lilypad_lane_top.png)
+
+These are the modelling script's own preview renders, lit in Blender. On the
+board a pad is seen from straight above, like the last two, and drawn in its
+albedo without a light ([LP-4](#lp-4)).
+
+- **LP-1 — The approved model, unchanged.** <a id="lp-1"></a> The pads are
+  `tools/art/lilypad_model.py`'s output, imported as it is: **four meshes**,
+  `LilyPad_Notch10`, `LilyPad_Notch15`, `LilyPad_Notch20` and
+  `LilyPad_Notch25` (about 2,300 triangles each), one per entry in
+  `LilyPadNotchAngles`, sharing **one 2048 px albedo atlas** — a quadrant per
+  notch width. Nothing in the game reshapes them. To change how a pad looks,
+  change the script, run it again, and replace the imported files.
+- **LP-2 — Same footprint.** <a id="lp-2"></a> A pad's rim touches the edges
+  of its `LilyPadDiameter` square and goes no further, centred on its position,
+  exactly where the sprite was.
+- **LP-3 — Pointed by the table.** <a id="lp-3"></a> Each mesh is drawn with its
+  notch along its own +x — the table's 0° — and the pad is turned by the
+  table's angle, as the sprite was. Which way the model's notch points, and
+  which way is up, are **read off the model's own outline** (the widest gap in
+  its rim; its thin axis, the way its rim curls), not assumed from the
+  importer's axis conversion.
+- **LP-4 — Its own colours, untinted and unlit.** <a id="lp-4"></a> A pad is
+  not a player's colour, so the albedo is drawn exactly as it is: `LilyPadEdge`
+  rim `TrackOutline` wide, five veins in `LilyPadEdge` at `LilyPadVeinOpacity`,
+  and a fill of `LilyPadGreen` **lightened by up to 4% towards the middle and
+  darkened by up to 6% towards the rim** — the falloff the approved model
+  paints so the leaf does not read as a flat disc. From straight above, only
+  the top of the leaf shows, and no light is added on top of the albedo.
+- **LP-5 — Drawn into the board's canvas.** <a id="lp-5"></a> Like the
+  [frog piece](#the-frog-piece) (FP-9): each mesh is laid flat once, its
+  upward faces handed to uGUI lowest first, with the albedo as the texture and
+  uGUI's default material — no camera, light, render texture or project
+  shader.
+- **LP-6 — Imported by code.** <a id="lp-6"></a> The model's import settings
+  are set in code and read back by a test — see
+  [tech stack § The lily pad model](../../engineering/tech-stack.md#the-lily-pad-model).
+
+**Invariant:** four meshes, never twelve. The pointing angle is a rotation of
+the pad's rectangle; a fifth mesh, or a mesh per row of the table, means the
+variation has stopped being a rotation.
+**Invariant:** which mesh a pad draws and how far it is turned are the table's,
+a pure function of the pad's coordinates, exactly as above. The model changes
+what a pad looks like, never which pad is where.
+**Invariant:** the pad's colours are the albedo's. The game never tints,
+lights or recolours a pad, so the colours the separability bar below is
+measured against are the colours on the screen. Whether the falloff's darkest
+ring may sit below that bar is
+[#466](https://github.com/derekwinters/connor-multiplying-frogs/issues/466),
+open.
 
 The two shared logs. They belong to the pond, so they are their own table:
 
@@ -626,6 +700,15 @@ than picked and then checked** — see [how the pond's colours are
 constrained](#how-the-ponds-colours-are-constrained) below, which is the part
 worth reading before changing any of these six values.
 
+**The lily pad column is measured against `LilyPadGreen`, and the approved
+model's fill is not exactly that** ([LP-4](#lp-4)). Read off the model's own
+albedo, the darkest fill where a sitting frog is — inside 0.79 of the radius —
+is `#ABDE7A`: `FrogOrange` 1.92 : 1 and `FrogGreen` ΔE 31.3, still clear. The
+ring outside that, out to the rim line, darkens to `#A9DA78`, where
+`FrogOrange` is 1.85 : 1 — below the bar. Whether that is acceptable, or the
+albedo is regenerated, is
+[#466](https://github.com/derekwinters/connor-multiplying-frogs/issues/466).
+
 **The settings gear is held to the same bar**, and it is here rather than with
 the frogs because it is the one piece of ink on this screen with nothing of its
 own behind it. Until
@@ -787,8 +870,9 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   Two to four frogs sit on the Start log at the beginning of every game and
   gather on the End log as they finish — that is a shared drawing, not a shared
   position, per the invariant above.
-    Each pad is a notched circle with five veins, and its notch's width and
-    direction come from
+    Each pad is a notched circle with five veins — the approved 3D lily pad
+    model, seen from above ([the lily pad model](#the-lily-pad-model)) — and
+    its notch's width and direction come from
     [the variation table](#the-lily-pad-is-notched-veined-and-varies-per-pad)
     rather than being the same on every pad.
 

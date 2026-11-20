@@ -2,11 +2,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using Frogs.Core;
+using Frogs.EditorTools;
 using Frogs.Unity.Views;
 using BoardColours = Frogs.Unity.UI.BoardColours;
-using Image = UnityEngine.UI.Image;
+using LilyPadModel = Frogs.Unity.UI.LilyPadModel;
 
 namespace Frogs.Unity.EditModeTests
 {
@@ -25,12 +28,19 @@ namespace Frogs.Unity.EditModeTests
     /// changed to. These twelve rows are the spec page's, copied by hand, so a
     /// pad cannot change shape without the page changing with it.
     ///
-    /// Two of these tests are the issue's own acceptance criteria, asserted
-    /// rather than eyeballed:
+    /// Since #465 a pad is the approved 3D model (LP-1 to LP-5 on that page):
+    /// one of four meshes, textured with an albedo that carries the rim and
+    /// the veins. These tests were rewritten against it before it was wired
+    /// in, and pushed unexecuted for the same reason. The veins are now read
+    /// out of that albedo — the committed PNG — rather than out of a
+    /// generated sprite.
     ///
-    /// - <see cref="AFourFrogBoard_Draws12DistinctSilhouettes_FromFourSprites"/>
+    /// Two of these tests are #411's acceptance criteria, asserted rather than
+    /// eyeballed:
+    ///
+    /// - <see cref="AFourFrogBoard_Draws12DistinctSilhouettes_FromFourMeshes"/>
     ///   walks all 28 pads and counts what they draw. Twelve silhouettes, four
-    ///   sprites — because rotation is free and only a notch *width* costs an
+    ///   meshes — because rotation is free and only a notch *width* costs an
     ///   asset.
     /// - <see cref="APadsShape_DoesNotChange_WhenTheBoardRedrawsOrAFrogMoves"/>
     ///   redraws the board and moves a frog, and compares. The variation is a
@@ -49,9 +59,12 @@ namespace Frogs.Unity.EditModeTests
 
         const float Tolerance = 0.001f;
 
-        // A byte of slack on a colour read back out of a generated texture:
-        // the pad is composited in floats and stored as Color32.
-        const float ColourTolerance = 2f / 255f;
+        // How far a colour painted on the approved albedo may be from the
+        // page's own: the model's fill is LilyPadGreen lightened by up to 4%
+        // towards the middle and darkened by up to 6% towards the rim
+        // (game-board.md, LP-4), and a vein is LilyPadEdge at half opacity
+        // over that.
+        const float ColourTolerance = 8f / 255f;
 
         // docs/specs/ui/game-board.md — "The lily pad is notched, veined, and
         // varies per pad", the twelve-entry table, copied by hand. Row `i` is
@@ -67,7 +80,7 @@ namespace Frogs.Unity.EditModeTests
         };
 
         // The four notch widths of `LilyPadNotchAngles`, which are the only
-        // values on that table that cost a sprite.
+        // values on that table that cost a mesh.
         static readonly float[] TableNotchAngles = { 10f, 15f, 20f, 25f };
 
         [Test]
@@ -98,7 +111,7 @@ namespace Frogs.Unity.EditModeTests
             }
 
             // Only four widths are ever asked for, and they are the page's own
-            // `LilyPadNotchAngles`. This is what makes four sprites enough.
+            // `LilyPadNotchAngles`. This is what makes four meshes enough.
             Assert.That(
                 GameBoardLaneView.LilyPadNotchAngles.ToArray(),
                 Is.EqualTo(TableNotchAngles),
@@ -110,13 +123,13 @@ namespace Frogs.Unity.EditModeTests
         }
 
         /// <summary>
-        /// The issue's first acceptance criterion, counted rather than looked
-        /// at: 28 pads, 12 distinct silhouettes, and **four** sprites between
-        /// them. The wireframe verified this by extracting the drawn paths;
+        /// #411's first acceptance criterion, counted rather than looked at:
+        /// 28 pads, 12 distinct silhouettes, and **four** meshes between them
+        /// (LP-1). The wireframe verified this by extracting the drawn paths;
         /// this asserts the same mapping on the built board.
         /// </summary>
         [Test]
-        public void AFourFrogBoard_Draws12DistinctSilhouettes_FromFourSprites()
+        public void AFourFrogBoard_Draws12DistinctSilhouettes_FromFourMeshes()
         {
             var canvas = CanvasOf(CanvasWidth, CanvasHeight);
 
@@ -129,9 +142,9 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(pads.Count, Is.EqualTo(28), "four lanes of seven lily pads");
 
                 Assert.That(
-                    pads.Select(pad => pad.sprite.GetInstanceID()).Distinct().Count(),
+                    pads.Select(pad => pad.Mesh.GetInstanceID()).Distinct().Count(),
                     Is.EqualTo(GameBoardLaneView.LilyPadNotchAngles.Count),
-                    "four sprites, one per notch width — the pointing angle is a rotation, not an asset");
+                    "four meshes, one per notch width — the pointing angle is a rotation, not an asset");
 
                 Assert.That(
                     pads.Select(SilhouetteOf).Distinct().Count(),
@@ -148,9 +161,13 @@ namespace Frogs.Unity.EditModeTests
                         var what = $"lane {lane}, position {position} (row {index})";
 
                         Assert.That(
-                            pad.sprite,
-                            Is.SameAs(SpriteForWidth(pads, TableNotchWidths[index])),
-                            $"{what}: draws the sprite for a {TableNotchWidths[index]} degree notch");
+                            pad.Mesh,
+                            Is.SameAs(MeshForWidth(pads, TableNotchWidths[index])),
+                            $"{what}: draws the same mesh as every {TableNotchWidths[index]} degree pad");
+                        Assert.That(
+                            pad.Mesh.name,
+                            Is.EqualTo("LilyPad_Notch" + TableNotchWidths[index].ToString("00", CultureInfo.InvariantCulture)),
+                            $"{what}: and it is the model's mesh for that width");
 
                         // The page measures its angles the way the mockup's
                         // SVG does — 0 points right along the lane, 90 points
@@ -212,12 +229,99 @@ namespace Frogs.Unity.EditModeTests
 
         /// <summary>
         /// The veins are on the pad, not only in the arithmetic: read back out
-        /// of the pixels the sprite is made of, in `LilyPadEdge` at
-        /// `LilyPadVeinOpacity` over `LilyPadGreen`, with clean green between
-        /// them.
+        /// of the approved model's albedo (LP-4), one quadrant per notch
+        /// width, in `LilyPadEdge` at `LilyPadVeinOpacity` over the fill, with
+        /// clean green between them.
         /// </summary>
         [Test]
-        public void ThePadsSprite_DrawsFiveVeins_InLilyPadEdgeAtHalfOpacity()
+        public void TheModelsAlbedo_DrawsFiveVeins_InLilyPadEdgeAtHalfOpacity()
+        {
+            var expectedVein = Color.Lerp(
+                BoardColours.LilyPadGreen,
+                BoardColours.LilyPadEdge,
+                GameBoardLaneView.LilyPadVeinOpacity);
+
+            foreach (var width in GameBoardLaneView.LilyPadNotchAngles)
+            {
+                var veins = GameBoardLaneView.LilyPadVeinAnglesFor(width);
+                var spacing = (360f - width) / (GameBoardLaneView.LilyPadVeinCount + 1);
+
+                foreach (var vein in veins)
+                {
+                    var what = $"a {width} degree pad: the vein at {vein} degrees from its notch";
+
+                    // Along the vein's own ray, at three radii. That one ray is
+                    // inked the whole way along is what says the fan radiates
+                    // from the circle's geometric centre rather than from the
+                    // notch's apex.
+                    foreach (var radius in AlongTheVein)
+                    {
+                        AssertPixel(width, vein, radius, expectedVein, $"{what}, {radius:0.00} out");
+                    }
+
+                    // And it stops short at both ends — `LilyPadVeinInset` at
+                    // the centre, `LilyPadVeinOutset` at the rim.
+                    AssertTheVeinsEnds(width, vein, expectedVein, what);
+
+                    AssertPixel(
+                        width,
+                        vein + (spacing / 2f),
+                        VeinSampleRadius,
+                        BoardColours.LilyPadGreen,
+                        $"a {width} degree pad: clean green between veins");
+                }
+
+                // Inside the notch is not the leaf: the rim colour the script
+                // paints everything outside the pad with, never the fill.
+                AssertPixel(width, 0f, NotchSampleRadius, BoardColours.LilyPadEdge, $"a {width} degree pad: its notch points along its own axis");
+            }
+        }
+
+        /// <summary>
+        /// LP-6: the model's import settings, pinned in code by
+        /// <see cref="LilyPadModelImport"/>, read back from the importers
+        /// rather than assumed.
+        /// </summary>
+        [Test]
+        public void TheModel_IsImportedAsFourReadableStaticMeshes_WithNoMaterial()
+        {
+            var importer = (ModelImporter)AssetImporter.GetAtPath(LilyPadModelImport.ModelPath);
+
+            Assert.That(importer, Is.Not.Null, LilyPadModelImport.ModelPath + " is imported");
+            Assert.That(importer.animationType, Is.EqualTo(ModelImporterAnimationType.None), "no rig");
+            Assert.That(importer.importAnimation, Is.False, "no clips");
+            Assert.That(importer.isReadable, Is.True, "each mesh is laid flat on the CPU to draw it into the canvas");
+            Assert.That(importer.materialImportMode, Is.EqualTo(ModelImporterMaterialImportMode.None), "no lit material, so no lit shader to go missing from a build");
+            Assert.That(importer.addCollider, Is.False, "the project has no 3D physics module");
+
+            var meshes = AssetDatabase.LoadAllAssetsAtPath(LilyPadModelImport.ModelPath)
+                .OfType<Mesh>()
+                .Select(mesh => mesh.name)
+                .OrderBy(name => name)
+                .ToArray();
+
+            Assert.That(
+                meshes,
+                Is.EqualTo(new[] { "LilyPad_Notch10", "LilyPad_Notch15", "LilyPad_Notch20", "LilyPad_Notch25" }),
+                "LP-1: four meshes, one per `LilyPadNotchAngles` entry");
+
+            var texture = (TextureImporter)AssetImporter.GetAtPath(LilyPadModelImport.AlbedoPath);
+
+            Assert.That(texture, Is.Not.Null, LilyPadModelImport.AlbedoPath + " is imported");
+            Assert.That(texture.sRGBTexture, Is.True);
+            Assert.That(texture.mipmapEnabled, Is.True, "a 2048 px atlas drawn 112 px a pad");
+            Assert.That(texture.textureCompression, Is.EqualTo(TextureImporterCompression.Uncompressed), "the page's colours, not a compressed approximation of them");
+        }
+
+        /// <summary>
+        /// LP-2, LP-3 and LP-5: what a pad hands uGUI. Its triangles fill
+        /// exactly its 112 px rectangle; the model's notch points along the
+        /// rectangle's +x before the rectangle is turned, so turning it by the
+        /// table's angle points the notch where the table says; and it is
+        /// textured with the albedo, untinted, with uGUI's default material.
+        /// </summary>
+        [Test]
+        public void EachPad_DrawsItsMeshFlat_FillingItsPad_WithTheNotchAlongItsOwnAxis()
         {
             var canvas = CanvasOf(CanvasWidth, CanvasHeight);
 
@@ -225,55 +329,27 @@ namespace Frogs.Unity.EditModeTests
             {
                 var view = BoardOn(canvas, FourFrogGame());
 
-                for (var lane = 0; lane < view.Lanes.Count; lane++)
+                foreach (var pad in AllPads(view).GroupBy(pad => pad.NotchWidth).Select(group => group.First()))
                 {
-                    for (var position = 1; position < Lane.LaneWinningPosition; position++)
-                    {
-                        var pad = view.Lanes[lane].LilyPads[position - 1];
-                        var width = GameBoardLaneView.LilyPadNotchWidthFor(lane, position);
-                        var veins = GameBoardLaneView.LilyPadVeinAnglesFor(width);
-                        var spacing = (360f - width) / (GameBoardLaneView.LilyPadVeinCount + 1);
-                        var pixels = pad.sprite.texture.GetPixels32();
-                        var size = pad.sprite.texture.width;
+                    var what = $"a {pad.NotchWidth} degree pad";
+                    var triangles = TrianglesOf(pad);
+                    var rect = pad.rectTransform.rect;
+                    var half = GameBoardLaneView.LilyPadDiameter / 2f;
 
-                        // The sprite is drawn with its notch pointing at 0 —
-                        // the rotation above is what aims it — so every angle
-                        // here is measured from the notch's own axis.
-                        var expectedVein = Color.Lerp(
-                            BoardColours.LilyPadGreen,
-                            BoardColours.LilyPadEdge,
-                            GameBoardLaneView.LilyPadVeinOpacity);
+                    Assert.That(triangles.Count, Is.GreaterThan(0), $"{what} draws something");
 
-                        foreach (var vein in veins)
-                        {
-                            var what = $"lane {lane}, position {position}: the vein at {vein} degrees";
+                    var furthest = triangles.SelectMany(t => t).Max(point => (point - rect.center).magnitude);
 
-                            // Along the vein's own ray, at three radii. That
-                            // one ray is inked the whole way along is what says
-                            // the fan radiates from the circle's geometric
-                            // centre rather than from the notch's apex: drawn
-                            // from the apex it would sit off-centre and leave
-                            // this ray at two of the three.
-                            foreach (var radius in AlongTheVein)
-                            {
-                                AssertPixel(pixels, size, vein, radius, expectedVein, $"{what}, {radius:0.00} out");
-                            }
+                    Assert.That(furthest, Is.EqualTo(half).Within(Tolerance + 0.01f), $"{what}: its rim reaches the edge of its pad and no further");
 
-                            // And it stops short at both ends —
-                            // `LilyPadVeinInset` at the centre so the five do
-                            // not converge into a dark hub, `LilyPadVeinOutset`
-                            // at the rim.
-                            AssertTheVeinsEnds(pixels, size, vein, expectedVein, what);
+                    Assert.That(Covers(triangles, pad.RectPointOf(180f, VeinSampleRadius)), Is.True, $"{what}: the leaf is opposite its notch");
+                    Assert.That(Covers(triangles, pad.RectPointOf(0f, NotchSampleRadius)), Is.False, $"{what}: the notch is along the rectangle's +x");
+                    Assert.That(Covers(triangles, pad.RectPointOf(0f, 0.05f)), Is.True, $"{what}: the notch stops short of the middle (`LilyPadNotchDepth`)");
 
-                            AssertPixel(
-                                pixels,
-                                size,
-                                vein + (spacing / 2f),
-                                VeinSampleRadius,
-                                BoardColours.LilyPadGreen,
-                                $"lane {lane}, position {position}: clean green between veins");
-                        }
-                    }
+                    Assert.That(pad.mainTexture, Is.Not.Null, $"{what} is textured");
+                    Assert.That(pad.mainTexture.name, Is.EqualTo("lilypad_albedo"), $"{what}: with the model's albedo");
+                    Assert.That(pad.color, Is.EqualTo(Color.white), $"{what}: untinted — its colours are the albedo's");
+                    Assert.That(pad.material, Is.SameAs(Graphic.defaultGraphicMaterial), $"{what}: with uGUI's default material");
                 }
             }
             finally
@@ -283,7 +359,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         /// <summary>
-        /// The issue's second acceptance criterion, asserted by redrawing and
+        /// #411's second acceptance criterion, asserted by redrawing and
         /// hopping rather than by inspection. The variation is a pure function
         /// of the pad's coordinates: nothing is stored, so there is nothing to
         /// come back different.
@@ -406,7 +482,7 @@ namespace Frogs.Unity.EditModeTests
                                 GameBoardLaneView.LilyPadDiameter,
                                 GameBoardLaneView.LilyPadDiameter)),
                             $"position {position}'s art fills its pad");
-                        Assert.That(pad.sprite, Is.Not.Null, $"position {position} has art at all");
+                        Assert.That(pad.Mesh, Is.Not.Null, $"position {position} has art at all");
                     }
                 }
             }
@@ -417,33 +493,33 @@ namespace Frogs.Unity.EditModeTests
         }
 
         // Every pad on the board, lane by lane and left to right.
-        static List<Image> AllPads(GameBoardScreenView view)
+        static List<LilyPadModel> AllPads(GameBoardScreenView view)
         {
             return view.Lanes.SelectMany(lane => lane.LilyPads).ToList();
         }
 
-        // What a pad draws: its sprite, and the angle it is turned to. Two
+        // What a pad draws: its mesh, and the angle it is turned to. Two
         // pads with the same pair are the same silhouette.
-        static string SilhouetteOf(Image pad)
+        static string SilhouetteOf(LilyPadModel pad)
         {
             var turn = Mathf.Round(pad.rectTransform.localEulerAngles.z * 10f) / 10f;
 
-            return pad.sprite.GetInstanceID().ToString(CultureInfo.InvariantCulture)
+            return pad.Mesh.GetInstanceID().ToString(CultureInfo.InvariantCulture)
                 + "@"
                 + turn.ToString("0.0", CultureInfo.InvariantCulture);
         }
 
-        static Sprite SpriteForWidth(IEnumerable<Image> pads, float width)
+        static Mesh MeshForWidth(IEnumerable<LilyPadModel> pads, float width)
         {
-            // The sprite the board itself drew for a pad with this notch
-            // width — found on the board rather than generated a second time,
-            // so this asserts what is on screen.
+            // The mesh the board itself drew for a pad with this notch width
+            // — found on the board rather than loaded a second time, so this
+            // asserts what is on screen.
             var pad = pads.First(candidate => Mathf.Abs(WidthOf(candidate) - width) < Tolerance);
 
-            return pad.sprite;
+            return pad.Mesh;
         }
 
-        static float WidthOf(Image pad)
+        static float WidthOf(LilyPadModel pad)
         {
             var lane = pad.GetComponentInParent<GameBoardLaneView>();
             var position = lane.LilyPads.ToList().IndexOf(pad) + 1;
@@ -458,34 +534,33 @@ namespace Frogs.Unity.EditModeTests
 
         static readonly float[] AlongTheVein = { 0.25f, VeinSampleRadius, 0.85f };
 
+        // Inside every notch: 0.6 of the radius out along its axis, even the
+        // narrowest (10 degree) notch is about 0.05 of the radius wide on
+        // either side — 2.6 px on the board, 21 px in the albedo.
+        const float NotchSampleRadius = 0.6f;
+
         // How far either end of a drawn vein may be from the constant that
-        // puts it there: a sample lands on a whole pixel, and a vein is
-        // stroked with a round cap whose last fraction of a pixel is fainter
-        // than the vein itself.
-        const float VeinEndTolerance = 2f;
+        // puts it there, as a fraction of the radius: a vein is stroked with
+        // a round cap, which carries its end a little past the constant.
+        // The same 2 px the sprite's test allowed, on a 56 px radius.
+        const float VeinEndTolerance = 2f / 56f;
 
         /// <summary>
         /// Where the vein at this angle starts and stops, walked a pixel at a
-        /// time along its own ray, against the two constants that put its ends
-        /// there.
-        ///
-        /// What is looked for is the **fully inked** stretch — the pixels that
-        /// are exactly `LilyPadEdge` over `LilyPadGreen` at
-        /// `LilyPadVeinOpacity` — and only the first unbroken run of them.
-        /// Further out the ray crosses the rim, whose inner edge is
-        /// antialiased from the surface to `LilyPadEdge` and so passes through
-        /// that very colour on its way. A vein is the run that starts first;
-        /// the rim is a pad's own business.
+        /// time along its own ray in the albedo, against the two constants
+        /// that put its ends there. Only the first unbroken inked run counts:
+        /// further out the ray crosses the rim, whose antialiased inner edge
+        /// passes through the vein's colour on its way.
         /// </summary>
-        static void AssertTheVeinsEnds(Color32[] pixels, int size, float degrees, Color inked, string what)
+        static void AssertTheVeinsEnds(float notchWidth, float degrees, Color inked, string what)
         {
-            var radius = size / 2f;
+            var step = 1f / LilyPadAlbedo.RadiusInPixels;
             var nearest = 0f;
             var furthest = 0f;
 
-            for (var along = 1f; along < radius; along += 1f)
+            for (var along = step; along < 1f; along += step)
             {
-                if (IsColour(pixels, size, degrees, along / radius, inked))
+                if (IsColour(LilyPadAlbedo.PixelAt(notchWidth, degrees, along), inked))
                 {
                     if (nearest == 0f)
                     {
@@ -504,52 +579,73 @@ namespace Frogs.Unity.EditModeTests
 
             Assert.That(
                 nearest,
-                Is.EqualTo(GameBoardLaneView.LilyPadVeinInset * radius).Within(VeinEndTolerance),
+                Is.EqualTo(GameBoardLaneView.LilyPadVeinInset).Within(VeinEndTolerance),
                 $"{what} starts `LilyPadVeinInset` out from the centre");
             Assert.That(
                 furthest,
-                Is.EqualTo((1f - GameBoardLaneView.LilyPadVeinOutset) * radius).Within(VeinEndTolerance),
+                Is.EqualTo(1f - GameBoardLaneView.LilyPadVeinOutset).Within(VeinEndTolerance),
                 $"{what} stops `LilyPadVeinOutset` short of the rim");
         }
 
-        static bool IsColour(Color32[] pixels, int size, float degrees, float radiusFraction, Color expected)
+        static bool IsColour(Color pixel, Color expected)
         {
-            var pixel = (Color)pixels[IndexOf(size, degrees, radiusFraction)];
-
             return Mathf.Abs(pixel.r - expected.r) <= ColourTolerance
                 && Mathf.Abs(pixel.g - expected.g) <= ColourTolerance
                 && Mathf.Abs(pixel.b - expected.b) <= ColourTolerance;
         }
 
-        // One pixel of a pad's own texture, at an angle measured from the
-        // notch's axis and that fraction of the way out from its centre.
-        static void AssertPixel(
-            Color32[] pixels,
-            int size,
-            float degrees,
-            float radiusFraction,
-            Color expected,
-            string what)
+        static void AssertPixel(float notchWidth, float degrees, float radiusFraction, Color expected, string what)
         {
-            var actual = (Color)pixels[IndexOf(size, degrees, radiusFraction)];
+            var actual = LilyPadAlbedo.PixelAt(notchWidth, degrees, radiusFraction);
 
             Assert.That(actual.r, Is.EqualTo(expected.r).Within(ColourTolerance), $"{what}: red");
             Assert.That(actual.g, Is.EqualTo(expected.g).Within(ColourTolerance), $"{what}: green");
             Assert.That(actual.b, Is.EqualTo(expected.b).Within(ColourTolerance), $"{what}: blue");
-            Assert.That(actual.a, Is.EqualTo(1f).Within(ColourTolerance), $"{what}: opaque");
         }
 
-        // The page measures angles the way the mockup's SVG does — 0 right, 90
-        // down — and a texture's rows run the other way, so y is flipped.
-        static int IndexOf(int size, float degrees, float radiusFraction)
+        // The triangles a pad hands uGUI, in its own rectangle.
+        static List<Vector2[]> TrianglesOf(LilyPadModel pad)
         {
-            var radius = size / 2f;
-            var radians = degrees * Mathf.Deg2Rad;
+            var vh = new VertexHelper();
+            var stream = new List<UIVertex>();
 
-            var x = Mathf.FloorToInt(radius + (radiusFraction * radius * Mathf.Cos(radians)));
-            var y = Mathf.FloorToInt(radius - (radiusFraction * radius * Mathf.Sin(radians)));
+            pad.Draw(vh);
+            vh.GetUIVertexStream(stream);
+            vh.Dispose();
 
-            return (y * size) + x;
+            var triangles = new List<Vector2[]>();
+
+            for (var i = 0; i + 2 < stream.Count; i += 3)
+            {
+                triangles.Add(new Vector2[] { stream[i].position, stream[i + 1].position, stream[i + 2].position });
+            }
+
+            return triangles;
+        }
+
+        static bool Covers(IEnumerable<Vector2[]> triangles, Vector2 point)
+        {
+            foreach (var t in triangles)
+            {
+                var d1 = Cross(t[0], t[1], point);
+                var d2 = Cross(t[1], t[2], point);
+                var d3 = Cross(t[2], t[0], point);
+
+                var hasNegative = d1 < 0f || d2 < 0f || d3 < 0f;
+                var hasPositive = d1 > 0f || d2 > 0f || d3 > 0f;
+
+                if (!(hasNegative && hasPositive))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        static float Cross(Vector2 a, Vector2 b, Vector2 p)
+        {
+            return ((b.x - a.x) * (p.y - a.y)) - ((b.y - a.y) * (p.x - a.x));
         }
 
         static Game FourFrogGame()

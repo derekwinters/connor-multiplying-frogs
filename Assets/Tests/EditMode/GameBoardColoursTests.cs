@@ -79,9 +79,15 @@ namespace Frogs.Unity.EditModeTests
         /// Read out of the pad's own pixels rather than off an
         /// <c>Image.color</c>, because since #411 a pad is one drawing rather
         /// than a green disc inside a darker one: its surface, its rim and its
-        /// veins are three colours in one sprite. That is a stronger check
+        /// veins are three colours in one drawing. That is a stronger check
         /// than the tint was — it is what ends up on the screen — and it is
         /// still this page's two named colours it is checked against.
+        ///
+        /// Since #465 that drawing is the approved model's albedo, which is
+        /// what is sampled: the quadrant for each pad's notch width. Its fill
+        /// is `LilyPadGreen` lightened by up to 4% towards the middle and
+        /// darkened by up to 6% towards the rim (game-board.md, LP-4), so the
+        /// surface is held to that and the rim to `LilyPadEdge` exactly.
         /// </summary>
         [Test]
         public void EveryLilyPadIsGreen()
@@ -100,23 +106,25 @@ namespace Frogs.Unity.EditModeTests
                     for (var index = 0; index < lane.LilyPads.Count; index++)
                     {
                         var position = index + 1;
-                        var pad = lane.LilyPads[index].sprite;
+                        var notchWidth = lane.LilyPads[index].NotchWidth;
 
                         // The pad is drawn with its notch pointing at 0 and
                         // turned into place, so both samples are taken well
                         // away from it: on the surface between two veins, and
                         // half way through the rim directly opposite.
                         AssertPixel(
-                            pad,
+                            notchWidth,
                             SurfaceDegrees,
                             SurfaceRadius,
                             LilyPadGreen,
+                            BakedShading,
                             $"{lane.Colour}'s lily pad at position {position} is `LilyPadGreen`");
                         AssertPixel(
-                            pad,
+                            notchWidth,
                             RimDegrees,
                             RimRadius,
                             LilyPadEdge,
+                            ColourTolerance,
                             $"{lane.Colour}'s lily pad at position {position} has the `LilyPadEdge` rim");
                     }
                 }
@@ -138,26 +146,21 @@ namespace Frogs.Unity.EditModeTests
         static readonly float RimRadius =
             1f - (GameBoardLaneView.TrackOutline / GameBoardLaneView.LilyPadDiameter);
 
-        // A byte of slack: the pad is composited in floats and stored as
-        // Color32.
+        // A byte of slack: the albedo was painted in floats and stored as
+        // bytes.
         const float ColourTolerance = 2f / 255f;
 
-        static void AssertPixel(Sprite sprite, float degrees, float radiusFraction, Color expected, string what)
+        // The approved albedo's light-to-dark falloff across the fill — at
+        // most 4% of `LilyPadGreen` either side at SurfaceRadius.
+        const float BakedShading = 8f / 255f;
+
+        static void AssertPixel(float notchWidth, float degrees, float radiusFraction, Color expected, float tolerance, string what)
         {
-            var size = sprite.texture.width;
-            var radius = size / 2f;
-            var radians = degrees * Mathf.Deg2Rad;
+            var actual = LilyPadAlbedo.PixelAt(notchWidth, degrees, radiusFraction);
 
-            // game-board.md measures angles the way the mockup's SVG does — 0
-            // right, 90 down — and a texture's rows run the other way.
-            var x = Mathf.FloorToInt(radius + (radiusFraction * radius * Mathf.Cos(radians)));
-            var y = Mathf.FloorToInt(radius - (radiusFraction * radius * Mathf.Sin(radians)));
-
-            var actual = (Color)sprite.texture.GetPixels32()[(y * size) + x];
-
-            Assert.That(actual.r, Is.EqualTo(expected.r).Within(ColourTolerance), $"{what}: red");
-            Assert.That(actual.g, Is.EqualTo(expected.g).Within(ColourTolerance), $"{what}: green");
-            Assert.That(actual.b, Is.EqualTo(expected.b).Within(ColourTolerance), $"{what}: blue");
+            Assert.That(actual.r, Is.EqualTo(expected.r).Within(tolerance), $"{what}: red");
+            Assert.That(actual.g, Is.EqualTo(expected.g).Within(tolerance), $"{what}: green");
+            Assert.That(actual.b, Is.EqualTo(expected.b).Within(tolerance), $"{what}: blue");
             Assert.That(actual.a, Is.EqualTo(1f).Within(ColourTolerance), $"{what}: opaque");
         }
 
