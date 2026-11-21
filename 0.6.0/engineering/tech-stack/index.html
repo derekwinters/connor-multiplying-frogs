@@ -1759,6 +1759,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-log-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The log model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2454,6 +2465,17 @@
     <span class="md-ellipsis">
       
         The lily pad model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-log-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The log model
       
     </span>
   </a>
@@ -3192,6 +3214,107 @@ its transforms, and Core's <code>LilyPadOutline</code> finds up (the thin axis, 
 the rim curls) and the notch (the widest gap in the rim) from those points.</p>
 <p>The two files have <strong>no committed <code>.meta</code></strong> yet, like the frog's, for the same
 reason; pinning their GUIDs is part of
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/183">#183</a>.</p>
+<h3 id="the-log-model">The log model<a class="headerlink" href="#the-log-model" title="Link to this section">&para;</a></h3>
+<p><strong>The shared logs are a 3D model built in Blender</strong> as well, approved by Derek
+for <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/468">#468</a>.
+What they must look like and do is
+<a href="../../specs/ui/game-board/#the-log-model">game board § The log model</a>; this is
+how they get into the project. It follows <a href="#the-lily-pad-model">the lily pad model</a>
+in every respect that applies: three static meshes, no rig, no clips — but a
+log is <strong>assembled</strong> from them at the length it is drawn, rather than drawn as
+one mesh.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source</td>
+<td><code>tools/art/log_model.py</code> — builds the three pieces, paints their albedo and exports them headless; nothing is edited by hand in Blender</td>
+</tr>
+<tr>
+<td>Runs on</td>
+<td>Blender as a Python module, <code>bpy</code> 5.x — <code>venv/bin/python tools/art/log_model.py --out &lt;dir&gt;</code> (see the script's docstring)</td>
+</tr>
+<tr>
+<td>Imported files</td>
+<td><code>Assets/Art/Log/Resources/Log/log.fbx</code> and <code>log_albedo.png</code>, copied unchanged from the script's output</td>
+</tr>
+<tr>
+<td>Import settings</td>
+<td><code>Assets/Editor/LogModelImport.cs</code>, applied on every import of those two files</td>
+</tr>
+<tr>
+<td>Assembly rule</td>
+<td>Core's <code>LogAssembly</code> — how many bodies, how far each is stretched, and where every piece goes, for a length in frog units. Plain NUnit, in the fast suite</td>
+</tr>
+<tr>
+<td>Loaded and drawn by</td>
+<td><code>LogModel</code>, through <code>Resources.Load</code> — so both files are in every build, and nothing refers to them by GUID</td>
+</tr>
+</tbody>
+</table>
+<p>To change a log, change the script, run it, and copy <code>log.fbx</code> and
+<code>log_albedo.png</code> over the imported ones. Do not edit either file directly, and
+do not rename the three pieces (<code>LogBody_A</code>, <code>LogBody_B</code>, <code>LogCap</code>) without
+changing <code>LogModel</code> with them. The FBX also carries the script's two prebuilt
+assemblies, <code>SharedLog</code> and <code>PlayerLog</code>, whose children share the pieces'
+meshes; <code>LogModel</code> finds the pieces by their own node names, so it never picks
+up one of those children's offsets, turns or stretches. If the assembly rule in
+the script's docstring changes, <code>LogAssembly</code> and its tests change with it.</p>
+<p><strong>The import settings are code</strong>, for the reason the frog's and the lily pad's
+are, and <code>GameBoardLogTests</code> reads every one back:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Setting</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log.fbx</code></td>
+<td>No rig, no animation</td>
+<td>Three static meshes</td>
+</tr>
+<tr>
+<td><code>log.fbx</code></td>
+<td>Read/Write enabled</td>
+<td>Each piece is laid flat on the CPU to draw it into the canvas, in a player build too</td>
+</tr>
+<tr>
+<td><code>log.fbx</code></td>
+<td>Normals imported, not recalculated</td>
+<td>The model's own normals say which faces look up</td>
+</tr>
+<tr>
+<td><code>log.fbx</code></td>
+<td>No materials, cameras, lights, blend shapes or colliders</td>
+<td>No lit shader enters the build; colliders need the 3D physics module, which the project does not have</td>
+</tr>
+<tr>
+<td><code>log_albedo.png</code></td>
+<td>sRGB, mipmaps, trilinear, clamp, max 1024, <strong>uncompressed</strong></td>
+<td>Its native 1024 px; a body is drawn 112 px long from about 225 texels, so nothing smaller would do. Uncompressed keeps the bark the colours <code>LogLabelInk</code> and the frogs were measured against</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Which way a piece runs is measured, not assumed</strong>, for the lily pad's reason.
+<code>LogModel</code> takes each piece's vertices into the model's own space through its
+transforms, relative to the piece's own origin (its joining face, on the
+waterline), and Core's <code>LogAssembly.MeasureFrame</code> reads <code>LogBody_A</code>'s points:
+along is the axis the body lies all on one side of its joining face, up is the
+way its section reaches furthest from the waterline, and across is the
+right-handed third, so the stub on <code>LogBody_B</code> cannot be mirrored to the other
+side. The body's measured length is one frog unit, whatever units the importer
+chose.</p>
+<p>The two files have <strong>no committed <code>.meta</code></strong> yet, like the frog's and the lily
+pad's, for the same reason; pinning their GUIDs is part of
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/183">#183</a>.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
