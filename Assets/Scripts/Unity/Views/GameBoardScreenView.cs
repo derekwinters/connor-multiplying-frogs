@@ -42,10 +42,12 @@ namespace Frogs.Unity.Views
     ///
     /// Two things it deliberately does not do:
     ///
-    /// - **No motion.** Every frog is drawn at rest at whatever position Core
-    ///   reports. The hop that plays after the result dialog closes belongs
-    ///   to <c>answer-result</c> (#224), which owns the dialog that closes and
-    ///   starts it.
+    /// - **No motion of a piece.** Every frog is drawn at rest at whatever
+    ///   position Core reports. The hop that plays after the result dialog
+    ///   closes belongs to <c>answer-result</c> (#224), which owns the dialog
+    ///   that closes and starts it. The one thing this view does move is the
+    ///   water's texture, drifting left behind everything (#471, PW-3) — the
+    ///   backdrop, not a piece, and only its window onto the tile changes.
     /// - **No end-of-game detection.** This board keeps rendering whatever
     ///   Core reports for as long as it is shown; noticing that the last frog
     ///   got home and moving off this screen is <c>unity-game-over</c> (#225),
@@ -90,6 +92,16 @@ namespace Frogs.Unity.Views
         // and one End log for the whole board however many frogs are playing,
         // and every frog's position 0 and position 8 are on them (#296).
         public const float LogWidth = 176f;
+
+        // `PondWaterTile`, for Resources.Load:
+        // Assets/Art/Water/Resources/Water/pond_water_tile.png, written by
+        // tools/art/water_tile.py — docs/specs/ui/game-board.md § The water's
+        // marks. Private, because this class's public constants are exactly
+        // game-board.md's geometry table (GameBoardScreenViewTests) and a load
+        // path is not geometry. How fast the water drifts and how big one tile
+        // is drawn are Core's PondWaterDrift, which this view reads and never
+        // re-derives.
+        const string PondWaterTileResource = "Water/pond_water_tile";
 
         // `LogRadius` (24 px) is gone rather than renamed (#468). It was the
         // corner of the flat rounded rectangle the log used to be; the log is
@@ -200,6 +212,17 @@ namespace Frogs.Unity.Views
         RectTransform _rect;
         Image _background;
 
+        // The water's tile, drawn over each flat `PondWater` fill: one on the
+        // background, one in the pond band (PW-1). Loaded once and shared.
+        static Texture2D s_waterTile;
+
+        // Reused every frame rather than allocated, since the water is
+        // redrawn every frame.
+        static readonly Vector3[] s_waterCorners = new Vector3[4];
+        RawImage _backgroundWater;
+        RawImage _pondWater;
+        double _waterClockStart;
+
         RectTransform _headerRect;
         Image _headerHairline;
         Text _turnBannerText;
@@ -255,6 +278,33 @@ namespace Frogs.Unity.Views
             {
                 EnsureInitialized();
                 return _background;
+            }
+        }
+
+        /// <summary>
+        /// The water drawn over <see cref="BackgroundImage"/>: `PondWaterTile`,
+        /// repeated to every edge of the screen and drifting left (PW-1, PW-3).
+        /// </summary>
+        public RawImage BackgroundWater
+        {
+            get
+            {
+                EnsureInitialized();
+                return _backgroundWater;
+            }
+        }
+
+        /// <summary>
+        /// The water drawn in the `pond` band, under everything else in it:
+        /// `PondWaterTile`, repeated across the band and drifting left (PW-1,
+        /// PW-3, PW-5).
+        /// </summary>
+        public RawImage PondBandWater
+        {
+            get
+            {
+                EnsureInitialized();
+                return _pondWater;
             }
         }
 
@@ -408,6 +458,10 @@ namespace Frogs.Unity.Views
 
         void Update()
         {
+            // PW-4: how far the water has moved is a function of how long it
+            // has been on screen, not of how many frames there were.
+            ShowWaterAt(Time.unscaledTimeAsDouble - _waterClockStart);
+
             // Android back arrives as Escape. The board owns this rather than
             // delegating it, because "hardware back opens settings, never
             // quits" is game-board.md's own rule about this screen — see
@@ -432,6 +486,26 @@ namespace Frogs.Unity.Views
 
             BuildLanes();
             Refresh();
+            ShowWaterAt(Time.unscaledTimeAsDouble - _waterClockStart);
+        }
+
+        /// <summary>
+        /// Draws the water as it is <paramref name="elapsedSeconds"/> after it
+        /// started drifting: each surface's window onto the tile, from Core's
+        /// <see cref="PondWaterDrift.WindowAt"/>, placed by where that surface
+        /// is on the screen so the background's water and the pond's are one
+        /// picture (PW-1). Only the windows change — nothing is moved, resized
+        /// or recoloured, so no piece moves with the water.
+        ///
+        /// <see cref="Update"/> calls this every frame with the time since the
+        /// board was built; it is public so a test can ask for any moment.
+        /// </summary>
+        public void ShowWaterAt(double elapsedSeconds)
+        {
+            EnsureInitialized();
+
+            ShowWaterAt(_backgroundWater, elapsedSeconds);
+            ShowWaterAt(_pondWater, elapsedSeconds);
         }
 
         /// <summary>
@@ -537,6 +611,8 @@ namespace Frogs.Unity.Views
             // `controls` contain: anchored controls, not a track.
             StretchToFill(_rect);
 
+            _waterClockStart = Time.unscaledTimeAsDouble;
+
             BuildBackground();
 
             BuildHeader();
@@ -556,6 +632,61 @@ namespace Frogs.Unity.Views
             // The canvas, not the reference rectangle: this is the paint that
             // reaches the edge of the screen whatever shape the screen is.
             StretchToFill(backgroundRect);
+
+            _backgroundWater = BuildWater(backgroundRect);
+        }
+
+        // PondWaterTile over a flat PondWater fill, filling it. The fill
+        // stays: it is exactly the tile's own water, and it is what the
+        // colour checks measure. The tile is drawn white — untinted — with
+        // uGUI's default material, and takes no input.
+        RawImage BuildWater(RectTransform surface)
+        {
+            var waterGO = new GameObject("Water", typeof(RectTransform), typeof(RawImage));
+            var water = waterGO.GetComponent<RawImage>();
+            water.texture = WaterTile();
+            water.color = Color.white;
+            water.raycastTarget = false;
+
+            var waterRect = water.rectTransform;
+            waterRect.SetParent(surface, worldPositionStays: false);
+            StretchToFill(waterRect);
+
+            // First in its surface, so everything else in it is drawn over
+            // the water (PW-5).
+            waterRect.SetAsFirstSibling();
+
+            return water;
+        }
+
+        void ShowWaterAt(RawImage water, double elapsedSeconds)
+        {
+            // Where this surface is on the screen, in reference pixels from
+            // the screen's bottom-left corner.
+            water.rectTransform.GetWorldCorners(s_waterCorners);
+
+            var min = (Vector2)_rect.InverseTransformPoint(s_waterCorners[0]) - _rect.rect.min;
+            var max = (Vector2)_rect.InverseTransformPoint(s_waterCorners[2]) - _rect.rect.min;
+
+            var window = PondWaterDrift.WindowAt(elapsedSeconds, min.x, min.y, max.x - min.x, max.y - min.y);
+
+            water.uvRect = new Rect(window.X, window.Y, window.Width, window.Height);
+        }
+
+        static Texture2D WaterTile()
+        {
+            if (s_waterTile == null)
+            {
+                s_waterTile = Resources.Load<Texture2D>(PondWaterTileResource);
+
+                if (s_waterTile == null)
+                {
+                    throw new InvalidOperationException(
+                        $"The water tile is missing: expected Resources/{PondWaterTileResource}.");
+                }
+            }
+
+            return s_waterTile;
         }
 
         void BuildHeader()
@@ -667,6 +798,10 @@ namespace Frogs.Unity.Views
             _pondRect.anchorMax = Vector2.one;
             _pondRect.offsetMin = new Vector2(0f, BoardControlsHeight);
             _pondRect.offsetMax = new Vector2(0f, -BoardHeaderHeight);
+
+            // The water first, so every log, lane, pad and frog in the pond
+            // is drawn over it (PW-5).
+            _pondWater = BuildWater(_pondRect);
 
             // The two logs the lanes share. One Start log down the left and
             // one End log down the right, whatever the frog count — they are
