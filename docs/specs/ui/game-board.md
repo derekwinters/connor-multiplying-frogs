@@ -388,7 +388,6 @@ The two shared logs. They belong to the pond, so they are their own table:
 | --- | --- | --- |
 | Log width | `LogWidth` | 176 px |
 | Log height | `SharedLogHeight` | 896 px — `1200 − BoardHeaderHeight − BoardControlsHeight` |
-| Log corner radius | `LogRadius` | 24 px |
 | `Start` / `End` text size | `LogLabelSize` | 26 px |
 | How far below the log's top edge that word starts | `LogLabelTopPadding` | 28 px |
 
@@ -421,6 +420,93 @@ joins or leaves.
 It is written as the band's own arithmetic rather than as the bare 896 because
 the log **is** the band: if `BoardHeaderHeight` or `BoardControlsHeight` ever
 moves, the logs move with it and nobody has to remember them.
+
+**`LogRadius` (24 px) is gone**, not renamed. It was the corner of the flat
+rounded rectangle the log used to be; since
+[#468](https://github.com/derekwinters/connor-multiplying-frogs/issues/468)
+the log is the approved model below, and its ends are the model's own sawn
+caps. That overtakes the last of #296's three answers — *"the corner is the
+`LogRadius` it always was"* — the way #301 overtook its outline half.
+
+#### The log model
+
+![The approved log, three-quarter view](images/log/log_hero_3q.png)
+
+![The three pieces: the two bodies and the cap](images/log/log_pieces.png)
+
+![A shared log from straight above, with frogs sitting on it, as the board sees it](images/log/log_topdown_board.png)
+
+These are the modelling script's own preview renders, lit in Blender. On the
+board a log is seen from straight above, like the last one, and drawn in its
+albedo without a light ([LG-4](#lg-4)). Derek approved the model for
+[#468](https://github.com/derekwinters/connor-multiplying-frogs/issues/468),
+and chose **one big stretched log** for each end of the pond — the layout
+above — over a log per player.
+
+- **LG-1 — The approved model, unchanged.** <a id="lg-1"></a> A log is built
+  from `tools/art/log_model.py`'s three pieces, imported as they are:
+  `LogBody_A` and `LogBody_B`, tileable middle sections exactly one frog unit
+  long (B has a small sawn-off branch stub on one side), and `LogCap`, the
+  sawn end, half a unit long. They share **one 1024 px albedo**. The file also
+  carries two prebuilt assemblies, `SharedLog` and `PlayerLog`; the game does
+  not use them. To change how a log looks, change the script, run it again,
+  and replace the imported files.
+- **LG-2 — Assembled to the log's length.** <a id="lg-2"></a> One frog unit
+  is `LilyPadDiameter` (112 px), so a log `SharedLogHeight` tall is
+  L = 896 ÷ 112 = 8 units long. It is built by the script's own assembly
+  rule: a cap at each end, and between them
+  n = max(1, ⌊(L − 2 × 0.5) + 0.5⌋) bodies, each stretched along the log by
+  (L − 2 × 0.5) ÷ n, alternating A, B, A… from the bottom. The bottom cap is
+  the top one turned half a turn. At the reference canvas that is **seven
+  bodies at their own length**. The rule is defined down to L = 1.5 units
+  (168 px), where one body is stretched to half its length; below that the
+  script says the caps would have to shrink too, which is not decided, so a
+  shorter log is refused rather than guessed at.
+- **LG-3 — Same rectangle, true scale across.** <a id="lg-3"></a> The model
+  runs the full height of its `LogWidth` × `SharedLogHeight` rectangle, bottom
+  edge to top edge, centred across it, and is drawn at one frog unit to
+  112 px across the log as well as along it — it is not stretched to fill the
+  width. The bark is about 174 px across, inside the 176 px rectangle, and
+  `LogBody_B`'s stub reaches about 17 px past the rectangle's right-hand edge,
+  over the water. Seen from above, the log runs top to bottom and the lanes
+  cross it.
+- **LG-4 — Its own colours, untinted and unlit.** <a id="lg-4"></a> A log is
+  not a player's colour, so the albedo is drawn exactly as it is: bark centred
+  on `LogBrown`, lighter plates and a lighter top, dark grooves and cracks, and
+  a little moss near each sawn end. From straight above only the top of the
+  log shows, and no light is added on top of the albedo.
+- **LG-5 — Drawn into the board's canvas.** <a id="lg-5"></a> Like the
+  [lily pad](#lp-5): each piece is laid flat once, and every piece of the
+  assembly hands its upward faces to uGUI, lowest first across the whole log,
+  with the albedo as the texture and uGUI's default material — no camera,
+  light, render texture or project shader. Which way along a piece runs and
+  which way is up are **read off the piece's own vertices** (along: the axis
+  the body lies all on one side of its joining face; up: the way its section
+  reaches furthest from the waterline), not assumed from the importer's axis
+  conversion.
+- **LG-6 — Imported by code.** <a id="lg-6"></a> The model's import settings
+  are set in code and read back by a test — see
+  [tech stack § The log model](../../engineering/tech-stack.md#the-log-model).
+- **LG-7 — The word stays on top, and readable.** <a id="lg-7"></a> `Start`
+  and `End` are drawn after the model, over it, in `LogLabelInk`, exactly
+  where they were. Under the word the model is lighter than `LogBrown`, so the
+  word is measured against the model's own pixels there, not against the
+  constant: worst **4.8 : 1** and ΔE **46.5** (against `LogBrown` it was
+  6.1 : 1 and 53.0). That still clears the bar the word is held to, and a test
+  measures it on the built board.
+
+**Invariant:** three meshes, whatever the length. A log of another length is
+the same pieces assembled again by the rule, never a new mesh or a mesh per
+length.
+**Invariant:** the model changes what a log looks like, never where it is.
+Its rectangle — `LogWidth` × `SharedLogHeight`, in the column every lane's
+track starts or ends in — is the layout's, exactly as before, and the frogs
+still sit on their own lanes' centre lines across it.
+**Invariant:** the log's colours are the albedo's. The game never tints,
+lights or recolours a log. Whether a blue frog may sit below the separability
+bar on it is
+[#469](https://github.com/derekwinters/connor-multiplying-frogs/issues/469),
+open — see [keeping the frogs visible](#keeping-the-frogs-visible).
 
 ### The horizontal arithmetic
 
@@ -483,11 +569,6 @@ Every outline is drawn **inside** the element's own bounds, so `TrackOutline`,
 `FrogPieceOutline` and `BoardBandOutline` cost the layout nothing and the
 1920 px sum above is unaffected by any of them.
 
-`LogRadius` is the log's own corner. It happens to equal a constant on
-[shared components](shared-components.md) today — `ButtonRadius` is also
-24 px — and it is not that constant. The Button's corner is the Button's to
-restyle; the pond's logs are not, and they must not move when it does.
-
 `SettingsGlyphSize` equals `SettingsButtonSize`, and that is the whole of how
 the gear is sized: **the gear is as big as the square it is tapped on.** It
 used to be 44 px, `ButtonLabelSize`'s number, because it was a glyph sitting
@@ -514,7 +595,7 @@ decision, in his words, on
 | The water — the pond, and the whole screen behind it | `PondWater` | `#9FD8F2` |
 | Lily pad | `LilyPadGreen` | `#B2E67F` |
 | Lily pad rim | `LilyPadEdge` | `#6E9E4A` |
-| Log | `LogBrown` | `#4A2E1A` |
+| Log — what the model's albedo is centred on ([LG-4](#lg-4)) | `LogBrown` | `#4A2E1A` |
 | `Start` / `End` on a log | `LogLabelInk` | `#C6B49C` |
 | Header and controls bands | `BandFill` | `#E2E8E5` |
 | Band hairline | `BandEdge` | `#B9C0BD` |
@@ -530,7 +611,9 @@ log clears the water by 8 : 1 unaided, and a rim darker than the fill measured
 **`LogLabelInk` is new**, and it exists because the log moved. `Start` and `End`
 used to be drawn in a mid-brown chosen against a pale tan; on the new log that
 is unreadable. They now sit at the **top** of each log rather than its middle,
-in a light ink measuring 6.1 : 1 against the fill.
+in a light ink measuring 6.1 : 1 against the fill — and, since the log became
+the 3D model, 4.8 : 1 against the model's lightest bark under the word
+([LG-7](#lg-7)).
 
 The four frog colours are not here. They are one table for the whole game, on
 [shared components](shared-components.md#frog-colours), because a frog is the
@@ -709,6 +792,24 @@ ring outside that, out to the rim line, darkens to `#A9DA78`, where
 albedo is regenerated, is
 [#466](https://github.com/derekwinters/connor-multiplying-frogs/issues/466).
 
+**The log column is measured against `LogBrown`, and the approved log model's
+bark is lighter than that** ([LG-4](#lg-4)). Read off the model as the board
+draws it — from straight above, the middle 112 px of the log where a sitting
+frog is — its lightest bark is `#603E25`, and the frogs measure:
+
+| | Contrast, worst | Contrast, median | ΔE, worst |
+| --- | --- | --- | --- |
+| `FrogGreen` | 2.46 : 1 | 2.68 : 1 | 62.4 |
+| `FrogBlue` | **1.49 : 1** | **1.62 : 1** | 54.9 |
+| `FrogOrange` | 3.17 : 1 | 3.45 : 1 | 47.9 |
+| `FrogPink` | 1.91 : 1 | 2.08 : 1 | 66.2 |
+
+`FrogBlue` is below the contrast bar everywhere on the log, though far apart
+from it in hue, and `FrogPink` only just clears it at the lightest bark. The
+albedo ships as approved; whether that is acceptable, or the albedo or the
+frog colours move, is
+[#469](https://github.com/derekwinters/connor-multiplying-frogs/issues/469).
+
 **The settings gear is held to the same bar**, and it is here rather than with
 the frogs because it is the one piece of ink on this screen with nothing of its
 own behind it. Until
@@ -802,7 +903,9 @@ what made a log read as a log floating on water was its `LogEdge` rim, at
 go](#colours) — and it is why `TrackOutline` is now the lily pad's constant
 alone. The word written on the log is held to the bar in its place:
 `LogLabelInk` measures **6.1 : 1** and ΔE **53.0** against the fill, and with no
-rim behind it the fill is the only thing it has to clear.
+rim behind it the fill is the only thing it has to clear. Against the approved
+model's own bark under the word it is **4.8 : 1** and ΔE **46.5** at worst
+([LG-7](#lg-7)).
 
 ### The bands are unchanged, deliberately
 
@@ -1080,9 +1183,14 @@ arrived.
 
 The third of those answers was *"the corner and outline are the `LogRadius` and
 `TrackOutline` they always were"*, and **half of it has since been overtaken**:
-#301 deleted `LogEdge`, so the log draws no outline at all. The corner is
-untouched. Said here rather than quietly reworded, because #296 settled that
-question and it is worth knowing which later change reopened it and why.
+#301 deleted `LogEdge`, so the log draws no outline at all. **The other half
+went with
+[#468](https://github.com/derekwinters/connor-multiplying-frogs/issues/468)**:
+the log is the approved 3D model now, its ends are the model's sawn caps, and
+`LogRadius` is gone. The mockup still draws the flat rounded log; it is the
+layout's picture, and the log's look is [the log model](#the-log-model)'s.
+Said here rather than quietly reworded, because #296 settled that question and
+it is worth knowing which later changes reopened it and why.
 
 The rejected lanes-up variant is not committed. It was drawn, compared, and
 decided against; keeping a mockup of a layout nobody is building is how a
@@ -1157,7 +1265,9 @@ Derek on
 [issue #296](https://github.com/derekwinters/connor-multiplying-frogs/issues/296),
 and are recorded above rather than here: the log spans the full pond whatever
 the player count, a frog on a log sits on its own lane's centre line, and the
-log keeps `LogRadius` as it is. The last of those three was later overtaken in
-part — `LogEdge` is gone and the log has no rim, per
-[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301) and
+log keeps `LogRadius` as it is. The last of those three was later overtaken —
+`LogEdge` is gone and the log has no rim, per
+[#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301), and
+`LogRadius` went when the log became the 3D model, per
+[#468](https://github.com/derekwinters/connor-multiplying-frogs/issues/468) and
 [the mockup note above](#mockup).

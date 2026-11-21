@@ -466,16 +466,17 @@ namespace Frogs.Unity.EditModeTests
 
                 // A log is one drawing at the log's full size. It used to be
                 // two images, an outer rim inset by `TrackOutline` around an
-                // inner fill; `LogEdge` is gone (#301), so the log's own fill
-                // reaches `LogWidth` x `SharedLogHeight` with nothing drawn
-                // over its edge. `TrackOutline` is the lily pad's now, and the
-                // log is no longer one of the elements that draws one.
+                // inner fill; `LogEdge` is gone (#301), and since #468 the
+                // drawing is the approved 3D model in that same rectangle, so
+                // there is no Image inside it at all. `TrackOutline` is the
+                // lily pad's now, and the log is no longer one of the elements
+                // that draws one.
                 foreach (var log in new[] { view.StartLog, view.EndLog })
                 {
                     Assert.That(
                         log.GetComponentsInChildren<Image>(includeInactive: true).Length,
-                        Is.EqualTo(1),
-                        "the log draws one image — no rim layer inside it");
+                        Is.EqualTo(0),
+                        "the log draws the model and nothing else — no rim layer, no flat fill");
                 }
             }
             finally
@@ -880,7 +881,11 @@ namespace Frogs.Unity.EditModeTests
                 // open question, on #296 — not `LaneCount x LaneHeight`.
                 { "LogWidth", 176f },
                 { "SharedLogHeight", 896f },
-                { "LogRadius", 24f },
+
+                // `LogRadius` (24 px) is gone rather than renamed (#468): it
+                // was the corner of the flat rounded rectangle the log used to
+                // be, and the log is the approved 3D model now, whose ends are
+                // its own sawn caps.
 
                 // The word on each log — `Start` and `End`, which this view
                 // was drawing nowhere at all until #301 put them at the top
@@ -933,13 +938,6 @@ namespace Frogs.Unity.EditModeTests
 
             AssertPublicConstantsAreExactly(typeof(GameBoardScreenView), boardConstants);
             AssertPublicConstantsAreExactly(typeof(GameBoardLaneView), laneConstants);
-
-            // LogRadius holds the same number as shared-components.md's
-            // ButtonRadius today and is deliberately not that constant: the
-            // Button is free to restyle its corner without moving the pond's
-            // logs. Asserted as equal-today so a future divergence is a
-            // visible, deliberate edit here rather than a silent drift.
-            Assert.That(GameBoardScreenView.LogRadius, Is.EqualTo(Button.ButtonRadius));
 
             // SettingsGlyphSize used to be the other half of that pair, at
             // ButtonLabelSize's 44 px. It is not a label size any more — with
@@ -1100,8 +1098,9 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(lane.LilyPads[0].Mesh, Is.Not.Null, "the lily pad model loaded");
                 Assert.That(lane.LilyPads[0].mainTexture, Is.Not.Null, "and its albedo with it");
 
-                Assert.That(view.StartLog.sprite, Is.Not.Null);
-                Assert.That(view.EndLog.sprite, Is.Not.Null);
+                Assert.That(view.StartLog.mainTexture, Is.Not.Null, "the log model's albedo loaded");
+                Assert.That(view.EndLog.mainTexture, Is.Not.Null);
+                Assert.That(Frogs.Unity.UI.LogModel.MeshFor(LogPieceKind.Cap), Is.Not.Null, "and its pieces with it");
                 Assert.That(view.StartLogLabel.font, Is.Not.Null);
                 Assert.That(view.EndLogLabel.font, Is.Not.Null);
             }

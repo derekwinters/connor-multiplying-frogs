@@ -165,19 +165,21 @@ namespace Frogs.Unity.EditModeTests
         }
 
         /// <summary>
-        /// The log is one colour and one shape — game-board.md § Colours.
+        /// The log is one drawing — game-board.md § Colours and § The log
+        /// model, LG-4.
         ///
-        /// **`LogEdge` is gone**, so this asserts the *absence* of a rim as
-        /// well as the presence of the fill. On the old pale tan log a rim was
-        /// what made a log read as floating on the pond rather than as a hole
-        /// in it; against `#4A2E1A` the fill clears the water on its own, and
-        /// a rim darker than that fill was invisible. A log that quietly
-        /// regrew a second painted layer would look almost right and would be
-        /// nobody's decision, which is why one Image per log is asserted
-        /// rather than assumed.
+        /// Since #468 that drawing is the approved 3D model, in its own
+        /// albedo: bark centred on `LogBrown`, never tinted. So this asserts
+        /// the model's albedo and a white tint rather than a `LogBrown` fill.
+        ///
+        /// **`LogEdge` is still gone**, so this still asserts the *absence* of
+        /// a rim. A log that quietly regrew a second painted layer — a flat
+        /// brown rectangle behind the model, say — would look almost right
+        /// and would be nobody's decision, which is why the log is asserted to
+        /// draw no Image at all rather than assumed to.
         /// </summary>
         [Test]
-        public void BothLogsAreBrown_AndNeitherHasARim()
+        public void BothLogsAreTheModelInItsOwnColours_AndNeitherHasARim()
         {
             var view = CreateView(TwoFrogGame());
 
@@ -185,7 +187,7 @@ namespace Frogs.Unity.EditModeTests
             {
                 // Two logs for the whole pond, not a pair per lane (#296), so
                 // this walks the board rather than every lane on it.
-                var logs = new Dictionary<string, Image>
+                var logs = new Dictionary<string, Graphic>
                 {
                     { "Start", view.StartLog },
                     { "End", view.EndLog },
@@ -195,14 +197,19 @@ namespace Frogs.Unity.EditModeTests
                 {
                     Assert.That(
                         log.Value.color,
-                        Is.EqualTo(LogBrown),
-                        $"the {log.Key} log is `LogBrown`");
+                        Is.EqualTo(Color.white),
+                        $"the {log.Key} log is untinted — its colours are the model's albedo");
+                    Assert.That(log.Value.mainTexture, Is.Not.Null, $"the {log.Key} log is textured");
+                    Assert.That(
+                        log.Value.mainTexture.name,
+                        Is.EqualTo("log_albedo"),
+                        $"the {log.Key} log is textured with the model's albedo");
 
                     Assert.That(
                         log.Value.GetComponentsInChildren<Image>(includeInactive: true).Length,
-                        Is.EqualTo(1),
-                        $"the {log.Key} log draws one thing — its own fill. `LogEdge` is gone "
-                        + "and the log has no rim, so there is no second painted layer inside it.");
+                        Is.EqualTo(0),
+                        $"the {log.Key} log draws the model and nothing else — no flat fill "
+                        + "behind it, and no rim: `LogEdge` is gone.");
                 }
             }
             finally
@@ -227,10 +234,10 @@ namespace Frogs.Unity.EditModeTests
 
             try
             {
-                var labels = new Dictionary<string, KeyValuePair<Text, Image>>
+                var labels = new Dictionary<string, KeyValuePair<Text, Graphic>>
                 {
-                    { "Start", new KeyValuePair<Text, Image>(view.StartLogLabel, view.StartLog) },
-                    { "End", new KeyValuePair<Text, Image>(view.EndLogLabel, view.EndLog) },
+                    { "Start", new KeyValuePair<Text, Graphic>(view.StartLogLabel, view.StartLog) },
+                    { "End", new KeyValuePair<Text, Graphic>(view.EndLogLabel, view.EndLog) },
                 };
 
                 foreach (var entry in labels)
@@ -444,7 +451,7 @@ namespace Frogs.Unity.EditModeTests
         // --- the two measures ------------------------------------------------
 
         // WCAG's relative luminance contrast, (L1 + 0.05) / (L2 + 0.05).
-        static float ContrastRatio(Color a, Color b)
+        internal static float ContrastRatio(Color a, Color b)
         {
             var first = RelativeLuminance(a);
             var second = RelativeLuminance(b);
@@ -472,7 +479,7 @@ namespace Frogs.Unity.EditModeTests
         // Straight-line distance in CIE L*a*b* (ΔE*ab). Roughly: 2.3 is the
         // smallest difference anyone can see, and 30 is two colours nobody
         // would call shades of one another.
-        static float ColourDistance(Color a, Color b)
+        internal static float ColourDistance(Color a, Color b)
         {
             var first = ToLab(a);
             var second = ToLab(b);

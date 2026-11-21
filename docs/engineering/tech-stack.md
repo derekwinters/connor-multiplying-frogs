@@ -317,6 +317,60 @@ The two files have **no committed `.meta`** yet, like the frog's, for the same
 reason; pinning their GUIDs is part of
 [#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
 
+### The log model
+
+**The shared logs are a 3D model built in Blender** as well, approved by Derek
+for [#468](https://github.com/derekwinters/connor-multiplying-frogs/issues/468).
+What they must look like and do is
+[game board § The log model](../specs/ui/game-board.md#the-log-model); this is
+how they get into the project. It follows [the lily pad model](#the-lily-pad-model)
+in every respect that applies: three static meshes, no rig, no clips — but a
+log is **assembled** from them at the length it is drawn, rather than drawn as
+one mesh.
+
+| | |
+| --- | --- |
+| Source | `tools/art/log_model.py` — builds the three pieces, paints their albedo and exports them headless; nothing is edited by hand in Blender |
+| Runs on | Blender as a Python module, `bpy` 5.x — `venv/bin/python tools/art/log_model.py --out <dir>` (see the script's docstring) |
+| Imported files | `Assets/Art/Log/Resources/Log/log.fbx` and `log_albedo.png`, copied unchanged from the script's output |
+| Import settings | `Assets/Editor/LogModelImport.cs`, applied on every import of those two files |
+| Assembly rule | Core's `LogAssembly` — how many bodies, how far each is stretched, and where every piece goes, for a length in frog units. Plain NUnit, in the fast suite |
+| Loaded and drawn by | `LogModel`, through `Resources.Load` — so both files are in every build, and nothing refers to them by GUID |
+
+To change a log, change the script, run it, and copy `log.fbx` and
+`log_albedo.png` over the imported ones. Do not edit either file directly, and
+do not rename the three pieces (`LogBody_A`, `LogBody_B`, `LogCap`) without
+changing `LogModel` with them. The FBX also carries the script's two prebuilt
+assemblies, `SharedLog` and `PlayerLog`, whose children share the pieces'
+meshes; `LogModel` finds the pieces by their own node names, so it never picks
+up one of those children's offsets, turns or stretches. If the assembly rule in
+the script's docstring changes, `LogAssembly` and its tests change with it.
+
+**The import settings are code**, for the reason the frog's and the lily pad's
+are, and `GameBoardLogTests` reads every one back:
+
+| File | Setting | Why |
+| --- | --- | --- |
+| `log.fbx` | No rig, no animation | Three static meshes |
+| `log.fbx` | Read/Write enabled | Each piece is laid flat on the CPU to draw it into the canvas, in a player build too |
+| `log.fbx` | Normals imported, not recalculated | The model's own normals say which faces look up |
+| `log.fbx` | No materials, cameras, lights, blend shapes or colliders | No lit shader enters the build; colliders need the 3D physics module, which the project does not have |
+| `log_albedo.png` | sRGB, mipmaps, trilinear, clamp, max 1024, **uncompressed** | Its native 1024 px; a body is drawn 112 px long from about 225 texels, so nothing smaller would do. Uncompressed keeps the bark the colours `LogLabelInk` and the frogs were measured against |
+
+**Which way a piece runs is measured, not assumed**, for the lily pad's reason.
+`LogModel` takes each piece's vertices into the model's own space through its
+transforms, relative to the piece's own origin (its joining face, on the
+waterline), and Core's `LogAssembly.MeasureFrame` reads `LogBody_A`'s points:
+along is the axis the body lies all on one side of its joining face, up is the
+way its section reaches furthest from the waterline, and across is the
+right-handed third, so the stub on `LogBody_B` cannot be mirrored to the other
+side. The body's measured length is one frog unit, whatever units the importer
+chose.
+
+The two files have **no committed `.meta`** yet, like the frog's and the lily
+pad's, for the same reason; pinning their GUIDs is part of
+[#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
