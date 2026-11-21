@@ -270,6 +270,53 @@ the sampled object. It needs no controller (Unity issue *"Non-Legacy animations
 cannot be sampled outside the Editor without an Animator"*, fixed in 2019.1).
 So `FrogModel` makes sure the rig has one, and a test checks it.
 
+### The lily pad model
+
+**The lily pads are a 3D model built in Blender** too, approved by Derek for
+[#465](https://github.com/derekwinters/connor-multiplying-frogs/issues/465).
+What they must look like and do is
+[game board § The lily pad model](../specs/ui/game-board.md#the-lily-pad-model);
+this is how they get into the project. It follows
+[the frog model](#the-frog-model) in every respect that applies, and is
+simpler: four static meshes, no rig, no clips.
+
+| | |
+| --- | --- |
+| Source | `tools/art/lilypad_model.py` — builds the four pads, paints their albedo atlas and exports them headless; nothing is edited by hand in Blender |
+| Runs on | Blender as a Python module, `bpy` 5.x — `venv/bin/python tools/art/lilypad_model.py --out <dir>` (see the script's docstring) |
+| Imported files | `Assets/Art/LilyPad/Resources/LilyPad/lilypad.fbx` and `lilypad_albedo.png`, copied unchanged from the script's output |
+| Import settings | `Assets/Editor/LilyPadModelImport.cs`, applied on every import of those two files |
+| Loaded by | `LilyPadModel`, through `Resources.Load` — so both files are in every build, and nothing refers to them by GUID |
+
+To change a pad, change the script, run it, and copy `lilypad.fbx` and
+`lilypad_albedo.png` over the imported ones. Do not edit either file directly,
+and do not rename the four meshes (`LilyPad_Notch10` … `LilyPad_Notch25`)
+without changing `LilyPadModel` with them. The atlas's layout — a 1024 px
+quadrant per notch width, in `LilyPadNotchAngles` order — is the script's, and
+`GameBoardLilyPadTests` reads the veins back out of it.
+
+**The import settings are code**, for the reason the frog's are, and
+`GameBoardLilyPadTests` reads every one back:
+
+| File | Setting | Why |
+| --- | --- | --- |
+| `lilypad.fbx` | No rig, no animation | Four static meshes |
+| `lilypad.fbx` | Read/Write enabled | Each mesh is laid flat on the CPU to draw it into the canvas, in a player build too |
+| `lilypad.fbx` | Normals imported, not recalculated | The model's own normals say which faces look up |
+| `lilypad.fbx` | No materials, cameras, lights, blend shapes or colliders | No lit shader enters the build; colliders need the 3D physics module, which the project does not have |
+| `lilypad_albedo.png` | sRGB, mipmaps, trilinear, clamp, **max 1024**, **uncompressed** | A pad is drawn 112 px across, so a 512 px quadrant is still four times what shows, at a quarter of the 2048 px atlas's memory; uncompressed keeps `LilyPadGreen` and `LilyPadEdge` the colours the separability bar was measured against |
+
+**Which way a pad faces is measured, not assumed.** Blender is Z-up and the FBX
+is written Y-up, and how Unity's importer carries that across (a rotated node,
+a scale of 100, or baked vertices) is not something this project relies on.
+`LilyPadModel` takes each mesh's vertices into the model's own space through
+its transforms, and Core's `LilyPadOutline` finds up (the thin axis, the way
+the rim curls) and the notch (the widest gap in the rim) from those points.
+
+The two files have **no committed `.meta`** yet, like the frog's, for the same
+reason; pinning their GUIDs is part of
+[#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
