@@ -1737,6 +1737,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-frog-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frog model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2417,6 +2428,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-frog-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frog model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2969,6 +2991,95 @@ tracked on #169. Until then the APK still carries Unity's default icon. The
 generated PNGs also have no committed <code>.meta</code> files yet — see
 <a href="../unity-serialization/">Unity serialization</a> for why those are not
 hand-written.</p>
+<h3 id="the-frog-model">The frog model<a class="headerlink" href="#the-frog-model" title="Link to this section">&para;</a></h3>
+<p><strong>The frog piece is a 3D model built in Blender</strong>, approved by Derek for
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/461">#461</a>.
+What it must look like and do is
+<a href="../../specs/ui/game-board/#the-frog-piece">game board § The frog piece</a>; this
+is how it gets into the project.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source</td>
+<td><code>tools/art/frog_model.py</code> — builds, rigs, animates and exports the frog headless; nothing is edited by hand in Blender</td>
+</tr>
+<tr>
+<td>Runs on</td>
+<td>Blender as a Python module, <code>bpy</code> 5.x on Python 3.13 — <code>venv/bin/python tools/art/frog_model.py --out &lt;dir&gt;</code> (see the script's docstring)</td>
+</tr>
+<tr>
+<td>Imported files</td>
+<td><code>Assets/Art/Frog/Resources/FrogPiece/frog.fbx</code> and <code>frog_albedo.png</code>, copied unchanged from the script's output</td>
+</tr>
+<tr>
+<td>Import settings</td>
+<td><code>Assets/Editor/FrogModelImport.cs</code>, applied on every import of those two files</td>
+</tr>
+<tr>
+<td>Loaded by</td>
+<td><code>FrogModel</code>, through <code>Resources.Load</code> — so both files are in every build, and nothing refers to them by GUID</td>
+</tr>
+</tbody>
+</table>
+<p>To change the frog, change the script, run it, and copy <code>frog.fbx</code> and
+<code>frog_albedo.png</code> over the imported ones. Do not edit either file directly, and
+do not change the bone or clip names without changing <code>FrogModel</code> with them.</p>
+<p><strong>The import settings are code, not a hand-written <code>.meta</code>.</strong> A
+<code>ModelImporter</code> block is dozens of version-dependent keys and integer enums,
+which is exactly the guess <a href="../unity-serialization/">Unity serialization</a> rules
+out. <code>FrogModelImport</code> is an <code>AssetPostprocessor</code>. It sets them through the
+typed <code>ModelImporter</code> and <code>TextureImporter</code> API, so a wrong name is a compile
+error, and <code>FrogPieceTests</code> reads every one back from the importer:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Setting</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frog.fbx</code></td>
+<td>Generic rig, avatar from this model, animation imported, no keyframe reduction</td>
+<td>The 14-bone rig and its Sit and Hop clips, exactly as approved</td>
+</tr>
+<tr>
+<td><code>frog.fbx</code></td>
+<td>Read/Write enabled</td>
+<td>The frog is skinned on the CPU to draw it into the canvas, in a player build too</td>
+</tr>
+<tr>
+<td><code>frog.fbx</code></td>
+<td>No materials, cameras, lights, blend shapes or colliders</td>
+<td>No lit shader enters the build; colliders need the 3D physics module, which the project does not have</td>
+</tr>
+<tr>
+<td><code>frog_albedo.png</code></td>
+<td>sRGB, mipmaps, trilinear, clamp, max 1024, <strong>uncompressed</strong></td>
+<td>Drawn at 88 px from 1024 px; uncompressed keeps white exactly white, so the tint is exactly the frog colour</td>
+</tr>
+</tbody>
+</table>
+<p>The two files have <strong>no committed <code>.meta</code></strong> yet, like the app icons above. Unity
+generates one on import with a fresh GUID, which nothing depends on because the
+model is loaded by path. Pinning those GUIDs needs an Editor session, and is
+part of
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/183">#183</a>.</p>
+<p><strong>Sampling a clip needs the animation module.</strong> <code>Packages/manifest.json</code>
+carries <code>com.unity.modules.animation</code>, Unity's built-in module for
+<code>AnimationClip</code> and <code>Animator</code>. It is part of the engine, not a third-party
+package, and it makes no network calls. Outside the editor,
+<code>AnimationClip.SampleAnimation</code> on a non-legacy clip needs an <code>Animator</code> on
+the sampled object. It needs no controller (Unity issue <em>"Non-Legacy animations
+cannot be sampled outside the Editor without an Animator"</em>, fixed in 2019.1).
+So <code>FrogModel</code> makes sure the rig has one, and a test checks it.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
 if a choice is easier because Android is the only target, take the easier

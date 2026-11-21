@@ -1269,6 +1269,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-frog-piece" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frog piece
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The frog piece">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-frog-through-a-hop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frog through a hop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-is-drawn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it is drawn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#behaviour" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2462,6 +2512,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#the-frog-piece" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frog piece
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The frog piece">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-frog-through-a-hop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The frog through a hop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-it-is-drawn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it is drawn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#behaviour" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3639,11 +3739,168 @@ rather than being the same on every pad.</p>
 <li>
 <p><strong>Frog piece</strong> — one per lane, on its current position, in the frog's colour.
   On a shared log it sits on its own lane's centre line, which is what keeps
-  "frogs never interact" true in the picture as well as in the state.</p>
+  "frogs never interact" true in the picture as well as in the state. It is
+  the approved 3D frog model, whose legs move when it hops — see
+  <a href="#the-frog-piece">the frog piece</a>.</p>
 </li>
 <li><strong>Pad count</strong> — on the chip: <code>3 of 8</code>, so progress is readable in words as
   well as by looking.</li>
 </ul>
+<h2 id="the-frog-piece">The frog piece<a class="headerlink" href="#the-frog-piece" title="Link to this section">&para;</a></h2>
+<p>Derek asked for <em>"a 3D model of a frog for this game. The legs of the frog
+should be able to move when the frog jumps"</em>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/461">#461</a>).
+The piece is that frog: a model built in Blender and <strong>approved by Derek</strong>, who
+turned it round and watched it hop in a 3D viewer and said <em>"Looks great let's
+use it"</em>. It replaced the flat coloured disc the piece used to be, <strong>at the
+same footprint</strong>: where a frog sits, when it moves, how far and for how long
+are all exactly what <a href="#behaviour">Behaviour</a> says, unchanged.</p>
+<p><img alt="The approved frog, sitting, three-quarter view, in FrogGreen" src="../images/frog-piece/frog_hero_3q.png" /></p>
+<p><img alt="The approved hop, side-on: sit, push off, tuck, reach, sit" src="../images/frog-piece/frog_hop_strip.png" /></p>
+<p>These are the modelling script's own preview renders, lit and tinted
+<code>FrogGreen</code>. On the board the frog is smaller, seen from the angle
+<a href="#how-it-is-drawn">How it is drawn</a> gives, and shaded more simply.</p>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Link to this section">&para;</a></h3>
+<ul>
+<li><strong>FP-1 — The approved model, unchanged.</strong> The frog is
+  <code>tools/art/frog_model.py</code>'s output, imported as it is: one mesh (about 6,000
+  triangles) with one albedo texture, a rig of 14 bones — <code>root</code>, <code>spine</code>, and a
+  <code>thigh</code>, <code>shin</code> and <code>foot</code> for each of <code>front</code>/<code>back</code> × <code>.L</code>/<code>.R</code> — and two
+  clips, <strong>Sit</strong> and <strong>Hop</strong>. Nothing in the game reshapes, re-proportions or
+  re-poses it. To change how the frog looks, change the script, run it again,
+  and replace the imported files.</li>
+<li><strong>FP-2 — Same footprint.</strong> The frog, its outline included, is drawn inside
+  the <code>FrogPieceDiameter</code> square the disc filled, centred on the same point, at
+  every moment of a hop — the rise into the air included.</li>
+<li><strong>FP-3 — In its frog's colour.</strong> The albedo is multiplied by the frog's
+  colour from <a href="../shared-components/#frog-colours">shared components</a>. The
+  albedo is white wherever the frog <em>is</em> its colour, so there it is exactly
+  <code>FrogGreen</code>, <code>FrogBlue</code>, <code>FrogOrange</code> or <code>FrogPink</code>; the belly, back spots,
+  mouth, nostrils and pupils are darker detail painted into the albedo.</li>
+<li><strong>FP-4 — Outlined as the disc was.</strong> The frog's silhouette carries a
+  <code>FrogPieceOutline</code>-wide edge in <code>PieceEdge</code>, the separation
+  <a href="#keeping-the-frogs-visible">keeping the frogs visible</a> asks for on top of
+  colour.</li>
+<li><strong>FP-5 — Facing the End log.</strong> The frog faces right, along its lane, the way
+  it is racing — turned three-quarters toward the player and seen a little
+  from above so all four legs show.</li>
+<li><strong>FP-6 — The hop is the Hop clip.</strong> A hop's progress, 0 to 1, is the Hop
+  clip from its first frame to its last, in a straight line, per the table
+  below: sitting, the back legs drive out at take-off, everything tucks in the
+  air, the front legs reach for the landing, sitting again. The clip lifts the
+  frog off the pad as it goes.</li>
+<li><strong>FP-7 — A frog that does not move does not hop.</strong> A wrong answer on the
+  Start log leaves the frog where it is
+  (<a href="../answer-result/">answer result</a>), so it stays sitting.</li>
+<li><strong>FP-8 — Sitting otherwise.</strong> Whenever the board is drawn from Core's state
+  rather than part-way through a hop, the frog is in the Sit pose.</li>
+<li><strong>FP-9 — Drawn into the board's canvas.</strong> The frog is drawn as part of the
+  board's uGUI canvas with uGUI's default material — no camera, light, render
+  texture or project shader that a player build could be missing
+  (<a href="#how-it-is-drawn">How it is drawn</a>).</li>
+</ul>
+<p><strong>Invariant:</strong> the pose is computed in Core from the hop's progress and
+nothing else (<code>FrogPose</code>). The board holds no clock for it: the one hop that
+carries the frog from pad to pad is the hop that moves its legs, so the two
+cannot drift apart.
+<strong>Invariant:</strong> every bone is exactly where the Sit or Hop clip puts it. Unity
+samples the clip; no code turns a bone by hand, so what the board shows at each
+point of a hop is what Derek approved.
+<strong>Invariant:</strong> the Hop clip begins and ends on the Sit pose, and lasts
+<code>FrogHopDuration</code>. So a frog that has just landed is drawn exactly like a frog
+that has been sitting there all along, and the clip and the board agree how
+long a hop is.
+<strong>Invariant:</strong> lit surfaces are drawn in exactly the frog's colour (times the
+albedo, which is never lighter than white) and shading only ever darkens them,
+by no more than <code>FrogShadeFloor</code>. The separability bar above is measured
+against the frog colours themselves, and a frog shaded <em>lighter</em> than its
+colour could cross the water's ceiling.
+<strong>Invariant:</strong> no part of the frog, at any point of the hop, reaches outside
+the footprint (FP-2) — a kicking frog must not cover the pad or lane next to it.</p>
+<h3 id="the-frog-through-a-hop">The frog through a hop<a class="headerlink" href="#the-frog-through-a-hop" title="Link to this section">&para;</a></h3>
+<p>The Hop clip's key poses, and where in the hop each falls. Between them the
+clip moves smoothly, as Blender interpolated it; the clip is exported with a key
+on every frame at 60 fps, 24 frames for the 0.4 s hop.</p>
+<table>
+<thead>
+<tr>
+<th>Moment</th>
+<th>Progress</th>
+<th>What the frog does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sit</td>
+<td>0 and 1</td>
+<td>Back legs folded Z-wise under the haunches, front legs propping the chest up</td>
+</tr>
+<tr>
+<td>Take-off</td>
+<td>0.25</td>
+<td>Back legs drive out straight behind; the body pitches nose-up</td>
+</tr>
+<tr>
+<td>In the air</td>
+<td>0.5</td>
+<td>Everything tucked, at the top of the hop</td>
+</tr>
+<tr>
+<td>Landing</td>
+<td>0.8</td>
+<td>Front legs reach forward and down for the pad; nose-down</td>
+</tr>
+</tbody>
+</table>
+<p>The progress points are <code>FrogPose</code> in Core and are tested there. The poses
+themselves are the clip's, authored in <code>tools/art/frog_model.py</code> (<code>POSES</code> and
+<code>HOP_KEYS</code>); how the frog looks on the tablet is still Connor's to judge.</p>
+<h3 id="how-it-is-drawn">How it is drawn<a class="headerlink" href="#how-it-is-drawn" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Turned toward the player</td>
+<td><code>FrogViewYaw</code></td>
+<td>25°</td>
+</tr>
+<tr>
+<td>Seen from above</td>
+<td><code>FrogViewPitch</code></td>
+<td>25°</td>
+</tr>
+<tr>
+<td>Darkest a shaded surface gets, as a fraction of the frog colour</td>
+<td><code>FrogShadeFloor</code></td>
+<td>0.7</td>
+</tr>
+<tr>
+<td>How squarely a surface must meet the light to be drawn in exactly the frog colour (cosine)</td>
+<td><code>FrogFullyLit</code></td>
+<td>0.6</td>
+</tr>
+</tbody>
+</table>
+<p><strong>It is drawn straight into the board's canvas, as a mesh</strong> — not by a second
+camera into a render texture. The board is a uGUI screen-space overlay, which
+does not draw a 3D renderer. So each piece keeps its own copy of the model's
+rig, samples the clip onto it, skins the mesh from those bones on the CPU, and
+turns the result to the view above. Then it scales it so the whole hop fits the
+footprint, shades it against one fixed light, and hands the triangles to uGUI
+back to front with the albedo as the texture. It moves, scales and layers with
+the board exactly as the disc did, and uses only uGUI's default material. That
+material is always in a build.</p>
+<p>The scale is fixed for the whole hop, not refitted frame by frame, so the frog
+does not grow or shrink as it moves. Because the hop rises, the sitting frog
+sits in the lower part of its footprint and has room above it to jump into.</p>
+<p>How the model and its texture are imported is
+<a href="../../../engineering/tech-stack/#the-frog-model">tech stack § The frog model</a>.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
 <li>Entering from <a href="../game-setup/">game setup</a>: every frog on its Start log, frog 1
@@ -3719,12 +3976,27 @@ decided against; keeping a mockup of a layout nobody is building is how a
 <code>mockups/</code> folder stops being trustworthy.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong>Which blue is the water? Settled: <code>#9FD8F2</code>.</strong> Derek's call on
+<li><strong>Does the 3D frog replace the drawn frog?</strong> The plan for frog art was 2D —
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/333">#333</a>
+  (Connor and Derek draw it) and
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/337">#337</a>
+  (draw the frogs from it). <a href="#the-frog-piece">The frog piece</a> does not decide
+  that; those issues are untouched for Derek and Connor.</li>
+<li>
+<p><strong>Does the frog turn round when it hops back?</strong> It always faces the End log
+  (FP-5), so a wrong answer's hop back one pad is the same Hop clip carrying
+  it backwards. Open as
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/462">#462</a>
+  for Connor.</p>
+</li>
+<li>
+<p><strong>Which blue is the water? Settled: <code>#9FD8F2</code>.</strong> Derek's call on
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a>,
   over the paler <code>#B5E3F7</code>. The losing mockup is deleted. <code>LogBrown</code> and
   <code>LilyPadGreen</code> were settled in the same session and are no longer proposals
   either — but note that neither was a free choice: see
-  <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are constrained</a>.</li>
+  <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are constrained</a>.</p>
+</li>
 <li>
 <p><strong>Should the turn banner show the frog's colour at all? Settled: no.</strong> Derek's
   call — the banner is words alone, and <code>game-board-banner-swatch.html</code> is
