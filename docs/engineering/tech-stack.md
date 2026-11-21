@@ -371,6 +371,44 @@ The two files have **no committed `.meta`** yet, like the frog's and the lily
 pad's, for the same reason; pinning their GUIDs is part of
 [#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
 
+### The water tile
+
+**The pond's water is one seamless texture tile**, approved by Derek for
+[#471](https://github.com/derekwinters/connor-multiplying-frogs/issues/471).
+What it must look like and do is
+[game board § The water's marks](../specs/ui/game-board.md#the-waters-marks);
+this is how it gets into the project. It is a flat 2D image rather than a
+model, so it needs no Blender: the script is plain Python with NumPy and Pillow.
+
+| | |
+| --- | --- |
+| Source | `tools/art/water_tile.py` — draws the tile from a fixed seed; nothing is edited by hand |
+| Runs on | Python 3 with `numpy` and `pillow` — `python3 tools/art/water_tile.py` (see the script's docstring) |
+| Imported file | `Assets/Art/Water/Resources/Water/pond_water_tile.png`, written there by the script |
+| Import settings | `Assets/Editor/WaterTileImport.cs`, applied on every import of that file |
+| Drift | Core's `PondWaterDrift` — how far the water has moved left, as a pure function of elapsed time, wrapped at one tile. Plain NUnit, in the fast suite |
+| Loaded and drawn by | `GameBoardScreenView`, through `Resources.Load`, as a `RawImage` whose `uvRect` repeats the tile and carries the drift — uGUI's default material, no shader of its own |
+
+The script is **deterministic**: the same seed draws the same marks, and a run
+writes the committed PNG byte for byte. To change the water, change the
+script's numbers, run it, and commit the PNG it writes. Do not edit the PNG
+directly.
+
+**The import settings are code**, for the reason the models' are, and
+`GameBoardWaterTests` reads every one back:
+
+| Setting | Why |
+| --- | --- |
+| sRGB, no alpha | It is a colour image, opaque everywhere |
+| **Wrap: repeat** | The `RawImage` draws the tile many times over by asking for UVs past 1; clamp would smear the edge pixels across the screen instead |
+| No mipmaps, bilinear | It is drawn larger than its 512 px (one tile is `PondWaterTileSize`, 1024 px), so a smaller mip is never wanted |
+| Max 512, **uncompressed** | Its own size; uncompressed keeps the water exactly `PondWater` between the marks, so the colour checks still measure what is on screen |
+| Not readable | Nothing reads its pixels at runtime |
+
+The PNG has **no committed `.meta`**, like the models', for the same reason;
+pinning its GUID is part of
+[#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
