@@ -93,15 +93,15 @@ namespace Frogs.Unity.Views
         // and every frog's position 0 and position 8 are on them (#296).
         public const float LogWidth = 176f;
 
-        /// <summary>
-        /// `PondWaterTile`, for <see cref="Resources.Load(string)"/>:
-        /// Assets/Art/Water/Resources/Water/pond_water_tile.png, written by
-        /// tools/art/water_tile.py — docs/specs/ui/game-board.md § The water's
-        /// marks. How fast it drifts and how big one tile is drawn are Core's
-        /// <see cref="PondWaterDrift"/>, which this view reads and never
-        /// re-derives.
-        /// </summary>
-        public const string PondWaterTileResource = "Water/pond_water_tile";
+        // `PondWaterTile`, for Resources.Load:
+        // Assets/Art/Water/Resources/Water/pond_water_tile.png, written by
+        // tools/art/water_tile.py — docs/specs/ui/game-board.md § The water's
+        // marks. Private, because this class's public constants are exactly
+        // game-board.md's geometry table (GameBoardScreenViewTests) and a load
+        // path is not geometry. How fast the water drifts and how big one tile
+        // is drawn are Core's PondWaterDrift, which this view reads and never
+        // re-derives.
+        const string PondWaterTileResource = "Water/pond_water_tile";
 
         // `LogRadius` (24 px) is gone rather than renamed (#468). It was the
         // corner of the flat rounded rectangle the log used to be; the log is
