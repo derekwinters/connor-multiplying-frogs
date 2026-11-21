@@ -1190,6 +1190,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The water is the whole screen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-waters-marks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water's marks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2461,6 +2478,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The water is the whole screen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-waters-marks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water's marks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2682,8 +2716,10 @@ log are not sharing a space: each is on position 0 <em>of its own lane</em>, dra
 its own lane's centre line, and neither can be moved, blocked, or read off by
 the other. The shared log is the only thing on this screen a player could
 mistake for frogs sharing something, which is why it is written down here.
-<strong>Invariant:</strong> the board never moves on its own. A frog moves only as the direct
-result of the answer the player just gave.
+<strong>Invariant:</strong> no <em>piece</em> on the board moves on its own — not a frog, a lily pad
+or a log. A frog moves only as the direct result of the answer the player just
+gave. The water's slow drift (<a href="#pw-3">PW-3</a>) is the backdrop, not a piece, and is
+the one exception.
 <strong>Invariant:</strong> whose turn it is is stated in words in the header, not only shown
 by a highlight. Since
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a> the
@@ -2961,6 +2997,21 @@ lanes-across</strong> after seeing both drawn.</p>
 <td>Frog hop duration</td>
 <td><code>FrogHopDuration</code></td>
 <td>0.4 s</td>
+</tr>
+<tr>
+<td>The water's tile</td>
+<td><code>PondWaterTile</code></td>
+<td><code>Assets/Art/Water/Resources/Water/pond_water_tile.png</code>, 512 px — see <a href="#the-waters-marks">the water's marks</a></td>
+</tr>
+<tr>
+<td>How fast the water drifts left</td>
+<td><code>PondWaterDriftSpeed</code></td>
+<td>25 px/s</td>
+</tr>
+<tr>
+<td>How big one tile is drawn</td>
+<td><code>PondWaterTileSize</code></td>
+<td>1024 px — the approved preview's scale; can be retuned</td>
 </tr>
 <tr>
 <td>Lanes in play</td>
@@ -3608,6 +3659,37 @@ rule from
 <a href="../shared-components/#what-fills-a-screen-that-is-not-1610">the canvas every component is measured in</a>
 is unchanged and still holds here: nothing behind the canvas is ever visible,
 because this screen's own paint reaches the edges.</p>
+<h4 id="the-waters-marks">The water's marks<a class="headerlink" href="#the-waters-marks" title="Link to this section">&para;</a></h4>
+<ul>
+<li><strong>PW-1 — One tile, repeated.</strong> <a id="pw-1"></a> The water is drawn as one seamless
+  tile, <code>PondWaterTile</code>, repeated across every part of the screen that <code>PondWater</code>
+  paints today, at any aspect ratio. Nowhere on the board shows a seam.</li>
+<li><strong>PW-2 — Blue under white.</strong> <a id="pw-2"></a> The tile is <code>PondWater</code> (#9FD8F2) with
+  see-through white marks on it: small arcs in groups of one to three, of mixed
+  sizes, at the calm density Derek approved on 2026-11-20. Between the marks,
+  the water is exactly <code>PondWater</code>.</li>
+<li><strong>PW-3 — A slow drift left.</strong> <a id="pw-3"></a> The tile slides to the left at
+  <code>PondWaterDriftSpeed</code> = <strong>25 px per second</strong> on the 1920 × 1200 reference canvas,
+  forever, and nothing else about it changes. It loops without a jump.</li>
+<li><strong>PW-4 — Drift is time, not frames.</strong> <a id="pw-4"></a> How far the water has moved
+  is a pure function of elapsed time, computed in Core, so a slow tablet shows the
+  same drift as a fast one and the arithmetic is tested without Unity.</li>
+<li><strong>PW-5 — Behind everything.</strong> <a id="pw-5"></a> The marks are drawn under every lane,
+  log, lily pad, frog and band. Nothing is drawn over a piece.</li>
+</ul>
+<p><strong>Invariant:</strong> the water's colour is <code>PondWater</code> and only its marks move. The drift
+never tints, darkens or lightens the water, so the colour checks in
+<a href="#how-the-ponds-colours-are-constrained">How the pond's colours are constrained</a>
+still measure what is on screen.
+<strong>Invariant:</strong> the drift never moves a piece. Logs, lily pads and frogs stay exactly
+where the layout puts them; only the texture's offset changes.
+<strong>Invariant:</strong> the water never takes input. It is not a button, and it never blocks a
+tap on anything drawn over it.</p>
+<p>One tile is drawn <code>PondWaterTileSize</code> (1024 px) across on the reference canvas,
+so at <code>PondWaterDriftSpeed</code> the pattern comes round again about every 41 s. The
+tile is generated by <code>tools/art/water_tile.py</code>, so it is regenerated rather than
+hand-edited; how it is imported is
+<a href="../../../engineering/tech-stack/#the-water-tile">tech stack § The water tile</a>.</p>
 <h3 id="the-bands-reach-the-edges-too">The bands reach the edges too<a class="headerlink" href="#the-bands-reach-the-edges-too" title="Link to this section">&para;</a></h3>
 <p><strong>Invariant:</strong> every one of the three bands is as wide as the screen, <code>header</code>'s
 top edge is the top of the screen, and <code>controls</code>' bottom edge is the bottom of
@@ -4163,8 +4245,9 @@ sits in the lower part of its footprint and has room above it to jump into.</p>
   <a href="../answer-result/">answer result</a> → back here with the frog moved and the turn
   passed to the next frog in order.</li>
 <li><strong>The move is animated on this screen, after the result dialog closes</strong>, over
-  <code>FrogHopDuration</code> (0.4 s), one pad's distance. It is the only motion on the
-  board, which is what makes it worth watching.</li>
+  <code>FrogHopDuration</code> (0.4 s), one pad's distance. It is the only motion of a
+  <strong>piece</strong> on the board, which is what makes it worth watching. The water
+  drifts underneath it, too slowly to compete (<a href="#pw-3">PW-3</a>).</li>
 <li>A frog that reaches the End log stays there and its chip switches to the
   <code>Home</code> state, and <a href="../player-won/">a player has won</a> opens to say so — the one
   screen in the game about a single child's moment. <strong>Play continues</strong> — the
@@ -4248,13 +4331,16 @@ decided against; keeping a mockup of a layout nobody is building is how a
   for Connor.</p>
 </li>
 <li>
-<p><strong>Which blue is the water? Settled: <code>#9FD8F2</code>.</strong> Derek's call on
+<p><strong>Do the water's marks look right on the tablet?</strong> Their colour and density
+  (<a href="#pw-2">PW-2</a>) are taste calls that are Connor's, the same as the other
+  colours on this page: Connor to look at on the tablet.</p>
+</li>
+<li><strong>Which blue is the water? Settled: <code>#9FD8F2</code>.</strong> Derek's call on
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/301">#301</a>,
   over the paler <code>#B5E3F7</code>. The losing mockup is deleted. <code>LogBrown</code> and
   <code>LilyPadGreen</code> were settled in the same session and are no longer proposals
   either — but note that neither was a free choice: see
-  <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are constrained</a>.</p>
-</li>
+  <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are constrained</a>.</li>
 <li>
 <p><strong>Should the turn banner show the frog's colour at all? Settled: no.</strong> Derek's
   call — the banner is words alone, and <code>game-board-banner-swatch.html</code> is

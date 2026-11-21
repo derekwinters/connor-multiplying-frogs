@@ -1770,6 +1770,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-water-tile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water tile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2476,6 +2487,17 @@
     <span class="md-ellipsis">
       
         The log model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-water-tile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The water tile
       
     </span>
   </a>
@@ -3315,6 +3337,86 @@ side. The body's measured length is one frog unit, whatever units the importer
 chose.</p>
 <p>The two files have <strong>no committed <code>.meta</code></strong> yet, like the frog's and the lily
 pad's, for the same reason; pinning their GUIDs is part of
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/183">#183</a>.</p>
+<h3 id="the-water-tile">The water tile<a class="headerlink" href="#the-water-tile" title="Link to this section">&para;</a></h3>
+<p><strong>The pond's water is one seamless texture tile</strong>, approved by Derek for
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/471">#471</a>.
+What it must look like and do is
+<a href="../../specs/ui/game-board/#the-waters-marks">game board § The water's marks</a>;
+this is how it gets into the project. It is a flat 2D image rather than a
+model, so it needs no Blender: the script is plain Python with NumPy and Pillow.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source</td>
+<td><code>tools/art/water_tile.py</code> — draws the tile from a fixed seed; nothing is edited by hand</td>
+</tr>
+<tr>
+<td>Runs on</td>
+<td>Python 3 with <code>numpy</code> and <code>pillow</code> — <code>python3 tools/art/water_tile.py</code> (see the script's docstring)</td>
+</tr>
+<tr>
+<td>Imported file</td>
+<td><code>Assets/Art/Water/Resources/Water/pond_water_tile.png</code>, written there by the script</td>
+</tr>
+<tr>
+<td>Import settings</td>
+<td><code>Assets/Editor/WaterTileImport.cs</code>, applied on every import of that file</td>
+</tr>
+<tr>
+<td>Drift</td>
+<td>Core's <code>PondWaterDrift</code> — how far the water has moved left, as a pure function of elapsed time, wrapped at one tile. Plain NUnit, in the fast suite</td>
+</tr>
+<tr>
+<td>Loaded and drawn by</td>
+<td><code>GameBoardScreenView</code>, through <code>Resources.Load</code>, as a <code>RawImage</code> whose <code>uvRect</code> repeats the tile and carries the drift — uGUI's default material, no shader of its own</td>
+</tr>
+</tbody>
+</table>
+<p>The script is <strong>deterministic</strong>: the same seed draws the same marks, and a run
+writes the committed PNG byte for byte. To change the water, change the
+script's numbers, run it, and commit the PNG it writes. Do not edit the PNG
+directly.</p>
+<p><strong>The import settings are code</strong>, for the reason the models' are, and
+<code>GameBoardWaterTests</code> reads every one back:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sRGB, no alpha</td>
+<td>It is a colour image, opaque everywhere</td>
+</tr>
+<tr>
+<td><strong>Wrap: repeat</strong></td>
+<td>The <code>RawImage</code> draws the tile many times over by asking for UVs past 1; clamp would smear the edge pixels across the screen instead</td>
+</tr>
+<tr>
+<td>No mipmaps, bilinear</td>
+<td>It is drawn larger than its 512 px (one tile is <code>PondWaterTileSize</code>, 1024 px), so a smaller mip is never wanted</td>
+</tr>
+<tr>
+<td>Max 512, <strong>uncompressed</strong></td>
+<td>Its own size; uncompressed keeps the water exactly <code>PondWater</code> between the marks, so the colour checks still measure what is on screen</td>
+</tr>
+<tr>
+<td>Not readable</td>
+<td>Nothing reads its pixels at runtime</td>
+</tr>
+</tbody>
+</table>
+<p>The PNG has <strong>no committed <code>.meta</code></strong>, like the models', for the same reason;
+pinning its GUID is part of
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/183">#183</a>.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
