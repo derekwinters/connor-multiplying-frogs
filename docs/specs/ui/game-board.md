@@ -794,9 +794,131 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 
 - **Frog piece** — one per lane, on its current position, in the frog's colour.
   On a shared log it sits on its own lane's centre line, which is what keeps
-  "frogs never interact" true in the picture as well as in the state.
+  "frogs never interact" true in the picture as well as in the state. It is
+  the approved 3D frog model, whose legs move when it hops — see
+  [the frog piece](#the-frog-piece).
 - **Pad count** — on the chip: `3 of 8`, so progress is readable in words as
   well as by looking.
+
+## The frog piece
+
+Derek asked for *"a 3D model of a frog for this game. The legs of the frog
+should be able to move when the frog jumps"*
+([#461](https://github.com/derekwinters/connor-multiplying-frogs/issues/461)).
+The piece is that frog: a model built in Blender and **approved by Derek**, who
+turned it round and watched it hop in a 3D viewer and said *"Looks great let's
+use it"*. It replaced the flat coloured disc the piece used to be, **at the
+same footprint**: where a frog sits, when it moves, how far and for how long
+are all exactly what [Behaviour](#behaviour) says, unchanged.
+
+![The approved frog, sitting, three-quarter view, in FrogGreen](images/frog-piece/frog_hero_3q.png)
+
+![The approved hop, side-on: sit, push off, tuck, reach, sit](images/frog-piece/frog_hop_strip.png)
+
+These are the modelling script's own preview renders, lit and tinted
+`FrogGreen`. On the board the frog is smaller, seen from the angle
+[How it is drawn](#how-it-is-drawn) gives, and shaded more simply.
+
+### Requirements
+
+- **FP-1 — The approved model, unchanged.** The frog is
+  `tools/art/frog_model.py`'s output, imported as it is: one mesh (about 6,000
+  triangles) with one albedo texture, a rig of 14 bones — `root`, `spine`, and a
+  `thigh`, `shin` and `foot` for each of `front`/`back` × `.L`/`.R` — and two
+  clips, **Sit** and **Hop**. Nothing in the game reshapes, re-proportions or
+  re-poses it. To change how the frog looks, change the script, run it again,
+  and replace the imported files.
+- **FP-2 — Same footprint.** The frog, its outline included, is drawn inside
+  the `FrogPieceDiameter` square the disc filled, centred on the same point, at
+  every moment of a hop — the rise into the air included.
+- **FP-3 — In its frog's colour.** The albedo is multiplied by the frog's
+  colour from [shared components](shared-components.md#frog-colours). The
+  albedo is white wherever the frog *is* its colour, so there it is exactly
+  `FrogGreen`, `FrogBlue`, `FrogOrange` or `FrogPink`; the belly, back spots,
+  mouth, nostrils and pupils are darker detail painted into the albedo.
+- **FP-4 — Outlined as the disc was.** The frog's silhouette carries a
+  `FrogPieceOutline`-wide edge in `PieceEdge`, the separation
+  [keeping the frogs visible](#keeping-the-frogs-visible) asks for on top of
+  colour.
+- **FP-5 — Facing the End log.** The frog faces right, along its lane, the way
+  it is racing — turned three-quarters toward the player and seen a little
+  from above so all four legs show.
+- **FP-6 — The hop is the Hop clip.** A hop's progress, 0 to 1, is the Hop
+  clip from its first frame to its last, in a straight line, per the table
+  below: sitting, the back legs drive out at take-off, everything tucks in the
+  air, the front legs reach for the landing, sitting again. The clip lifts the
+  frog off the pad as it goes.
+- **FP-7 — A frog that does not move does not hop.** A wrong answer on the
+  Start log leaves the frog where it is
+  ([answer result](answer-result.md)), so it stays sitting.
+- **FP-8 — Sitting otherwise.** Whenever the board is drawn from Core's state
+  rather than part-way through a hop, the frog is in the Sit pose.
+- **FP-9 — Drawn into the board's canvas.** The frog is drawn as part of the
+  board's uGUI canvas with uGUI's default material — no camera, light, render
+  texture or project shader that a player build could be missing
+  ([How it is drawn](#how-it-is-drawn)).
+
+**Invariant:** the pose is computed in Core from the hop's progress and
+nothing else (`FrogPose`). The board holds no clock for it: the one hop that
+carries the frog from pad to pad is the hop that moves its legs, so the two
+cannot drift apart.
+**Invariant:** every bone is exactly where the Sit or Hop clip puts it. Unity
+samples the clip; no code turns a bone by hand, so what the board shows at each
+point of a hop is what Derek approved.
+**Invariant:** the Hop clip begins and ends on the Sit pose, and lasts
+`FrogHopDuration`. So a frog that has just landed is drawn exactly like a frog
+that has been sitting there all along, and the clip and the board agree how
+long a hop is.
+**Invariant:** lit surfaces are drawn in exactly the frog's colour (times the
+albedo, which is never lighter than white) and shading only ever darkens them,
+by no more than `FrogShadeFloor`. The separability bar above is measured
+against the frog colours themselves, and a frog shaded *lighter* than its
+colour could cross the water's ceiling.
+**Invariant:** no part of the frog, at any point of the hop, reaches outside
+the footprint (FP-2) — a kicking frog must not cover the pad or lane next to it.
+
+### The frog through a hop
+
+The Hop clip's key poses, and where in the hop each falls. Between them the
+clip moves smoothly, as Blender interpolated it; the clip is exported with a key
+on every frame at 60 fps, 24 frames for the 0.4 s hop.
+
+| Moment | Progress | What the frog does |
+| --- | --- | --- |
+| Sit | 0 and 1 | Back legs folded Z-wise under the haunches, front legs propping the chest up |
+| Take-off | 0.25 | Back legs drive out straight behind; the body pitches nose-up |
+| In the air | 0.5 | Everything tucked, at the top of the hop |
+| Landing | 0.8 | Front legs reach forward and down for the pad; nose-down |
+
+The progress points are `FrogPose` in Core and are tested there. The poses
+themselves are the clip's, authored in `tools/art/frog_model.py` (`POSES` and
+`HOP_KEYS`); how the frog looks on the tablet is still Connor's to judge.
+
+### How it is drawn
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| Turned toward the player | `FrogViewYaw` | 25° |
+| Seen from above | `FrogViewPitch` | 25° |
+| Darkest a shaded surface gets, as a fraction of the frog colour | `FrogShadeFloor` | 0.7 |
+| How squarely a surface must meet the light to be drawn in exactly the frog colour (cosine) | `FrogFullyLit` | 0.6 |
+
+**It is drawn straight into the board's canvas, as a mesh** — not by a second
+camera into a render texture. The board is a uGUI screen-space overlay, which
+does not draw a 3D renderer. So each piece keeps its own copy of the model's
+rig, samples the clip onto it, skins the mesh from those bones on the CPU, and
+turns the result to the view above. Then it scales it so the whole hop fits the
+footprint, shades it against one fixed light, and hands the triangles to uGUI
+back to front with the albedo as the texture. It moves, scales and layers with
+the board exactly as the disc did, and uses only uGUI's default material. That
+material is always in a build.
+
+The scale is fixed for the whole hop, not refitted frame by frame, so the frog
+does not grow or shrink as it moves. Because the hop rises, the sitting frog
+sits in the lower part of its footprint and has room above it to jump into.
+
+How the model and its texture are imported is
+[tech stack § The frog model](../../engineering/tech-stack.md#the-frog-model).
 
 ## Behaviour
 
@@ -883,6 +1005,18 @@ decided against; keeping a mockup of a layout nobody is building is how a
 `mockups/` folder stops being trustworthy.
 
 ## Open questions
+
+- **Does the 3D frog replace the drawn frog?** The plan for frog art was 2D —
+  [#333](https://github.com/derekwinters/connor-multiplying-frogs/issues/333)
+  (Connor and Derek draw it) and
+  [#337](https://github.com/derekwinters/connor-multiplying-frogs/issues/337)
+  (draw the frogs from it). [The frog piece](#the-frog-piece) does not decide
+  that; those issues are untouched for Derek and Connor.
+- **Does the frog turn round when it hops back?** It always faces the End log
+  (FP-5), so a wrong answer's hop back one pad is the same Hop clip carrying
+  it backwards. Open as
+  [#462](https://github.com/derekwinters/connor-multiplying-frogs/issues/462)
+  for Connor.
 
 - **Which blue is the water? Settled: `#9FD8F2`.** Derek's call on
   [#301](https://github.com/derekwinters/connor-multiplying-frogs/issues/301),

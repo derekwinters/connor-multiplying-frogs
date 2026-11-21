@@ -496,6 +496,44 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        /// <summary>
+        /// game-board.md § The frog piece, FP-6 (#461): the hop that carries
+        /// the frog is the hop that moves its legs — the frog is drawn from
+        /// FrogPose.At of this dialog's own HopProgress, with no second clock
+        /// anywhere.
+        /// </summary>
+        [Test]
+        public void TheHop_PosesTheFrog_ThroughTheHopClipForEachPointOfIt()
+        {
+            var game = StartedGame(FrogColour.Green, FrogColour.Blue);
+            var turn = ResolvedAt(game, startingOn: 3, correct: true);
+            var board = CreateBoard(game);
+            var lane = board.LaneFor(FrogColour.Green);
+
+            var view = CreateView(turn, board);
+
+            try
+            {
+                Press(view.NextTurnButton);
+                view.Advance(DialogPanel.DialogFadeDuration + AnswerResultDialogView.ResultHopDelay);
+
+                Assert.That(lane.Frog.Pose, Is.EqualTo(FrogPose.Rest), "still sitting before the hop");
+
+                view.Advance(GameBoardScreenView.FrogHopDuration * FrogPose.TakeOffProgress);
+                Assert.That(lane.Frog.Pose, Is.EqualTo(FrogPose.At(view.HopProgress)), "part-way");
+                Assert.That(lane.Frog.Pose.Clip, Is.EqualTo(FrogClip.Hop), "hopping");
+                Assert.That(lane.Frog.Pose.Fraction, Is.EqualTo(FrogPose.TakeOffProgress).Within(0.0001f), "at take-off");
+
+                view.Advance(GameBoardScreenView.FrogHopDuration);
+                Assert.That(lane.Frog.Pose, Is.EqualTo(FrogPose.Rest), "landed, and sitting");
+            }
+            finally
+            {
+                Destroy(view);
+                Destroy(board);
+            }
+        }
+
         [Test]
         public void AHopOntoTheEndLog_JustFinishes_AndTheBoardsOwnRenderShowsTheHomeChip()
         {

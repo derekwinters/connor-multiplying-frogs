@@ -5,10 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using BoardColours = Frogs.Unity.UI.BoardColours;
 using FrogColours = Frogs.Unity.UI.FrogColours;
+using FrogModel = Frogs.Unity.UI.FrogModel;
 using LilyPadSprite = Frogs.Unity.UI.LilyPadSprite;
 using PlayerChip = Frogs.Unity.UI.PlayerChip;
 using PlayerChipState = Frogs.Unity.UI.PlayerChipState;
-using RoundedRectSprite = Frogs.Unity.UI.RoundedRectSprite;
 
 namespace Frogs.Unity.Views
 {
@@ -176,9 +176,6 @@ namespace Frogs.Unity.Views
         // order they are written.
         static readonly Sprite[] s_lilyPadSprites = new Sprite[s_lilyPadNotchAngles.Length];
 
-        static Sprite s_pieceSprite;
-        static Sprite s_pieceFillSprite;
-
         /// <summary>
         /// The four notch widths in the variation table — game-board.md's
         /// `LilyPadNotchAngles`, 10, 15, 20 and 25 degrees.
@@ -300,33 +297,6 @@ namespace Frogs.Unity.Views
                 "a lily pad's notch is one of game-board.md's `LilyPadNotchAngles`.");
         }
 
-        static Sprite PieceSprite
-        {
-            get
-            {
-                if (s_pieceSprite == null)
-                {
-                    s_pieceSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(FrogPieceDiameter / 2f));
-                }
-
-                return s_pieceSprite;
-            }
-        }
-
-        static Sprite PieceFillSprite
-        {
-            get
-            {
-                if (s_pieceFillSprite == null)
-                {
-                    s_pieceFillSprite = RoundedRectSprite.CreateRoundedRect(
-                        Mathf.RoundToInt((FrogPieceDiameter - (2f * FrogPieceOutline)) / 2f));
-                }
-
-                return s_pieceFillSprite;
-            }
-        }
-
         /// <summary>
         /// The gap between two positions on a lane drawn on a screen this
         /// wide — game-board.md's Anchors section, and the one number on that
@@ -400,8 +370,7 @@ namespace Frogs.Unity.Views
         readonly List<RectTransform> _positionRects = new List<RectTransform>();
         readonly List<Image> _lilyPads = new List<Image>();
         RectTransform _pieceRect;
-        Image _pieceOutline;
-        Image _piece;
+        FrogModel _frog;
 
         bool _initialized;
         int _laneIndex;
@@ -558,23 +527,19 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The piece's outline — <see cref="FrogPieceOutline"/> thick.</summary>
-        public Image PieceOutline
+        /// <summary>
+        /// The frog drawn on the piece — game-board.md § The frog piece: a
+        /// the approved 3D frog model in its frog's colour, outlined
+        /// <see cref="FrogPieceOutline"/> wide in <c>PieceEdge</c>, posed by
+        /// its Hop clip for whatever point of a move this lane was last drawn
+        /// at, and sitting otherwise.
+        /// </summary>
+        public FrogModel Frog
         {
             get
             {
                 EnsureInitialized();
-                return _pieceOutline;
-            }
-        }
-
-        /// <summary>The piece's fill — a circle in the frog's colour.</summary>
-        public Image Piece
-        {
-            get
-            {
-                EnsureInitialized();
-                return _piece;
+                return _frog;
             }
         }
 
@@ -619,7 +584,7 @@ namespace Frogs.Unity.Views
 
             _colour = colour;
             _chip.SetFrog(FrogColours.For(colour), name ?? PlayerName.DefaultFor(colour));
-            _piece.color = FrogColours.For(colour);
+            _frog.color = FrogColours.For(colour);
         }
 
         /// <summary>
@@ -650,6 +615,10 @@ namespace Frogs.Unity.Views
             _pieceRect.pivot = new Vector2(0.5f, 0.5f);
             _pieceRect.anchoredPosition = Vector2.zero;
 
+            // At rest: a frog drawn from Core's state is sitting, not
+            // part-way through anything (FP-8).
+            _frog.SetPose(FrogPose.Rest);
+
             _chip.SetPadCount(string.Format(PadCountFormat, position, Lane.LaneWinningPosition));
 
             if (lane.IsHome)
@@ -673,8 +642,15 @@ namespace Frogs.Unity.Views
         /// sits on screen exists anywhere.
         ///
         /// This lane still decides nothing and animates nothing: it holds no
-        /// clock and no tween, and only draws the frame it is asked for. (It
-        /// is deliberately not *named* for one either — #220's
+        /// clock and no tween, and only draws the frame it is asked for.
+        /// The frog is posed for that same point —
+        /// <see cref="FrogPose.ForMove"/> of the move and
+        /// <paramref name="progress"/>, Core's function — so the move that
+        /// carries the frog is the move that bends its legs, with no second
+        /// clock to drift. A move from a position to itself is not a hop (a
+        /// wrong answer on the Start log), and leaves the frog sitting.
+        ///
+        /// (It is deliberately not *named* for one either — #220's
         /// <c>Board_HasNoHopAnimation_AndNoEndOfGameDetection</c> greps both
         /// board types for words like that, and a method called
         /// `…Between` trips it on the four letters in the middle. The guard is
@@ -704,6 +680,8 @@ namespace Frogs.Unity.Views
             _pieceRect.anchoredPosition = new Vector2(
                 Mathf.Lerp(PositionCenterX(from), PositionCenterX(to), Mathf.Clamp01(progress)),
                 0f);
+
+            _frog.SetPose(FrogPose.ForMove(from, to, progress));
         }
 
         static void RequirePosition(int position, string name)
@@ -880,19 +858,13 @@ namespace Frogs.Unity.Views
 
         void BuildPiece()
         {
-            // piece — a flat-coloured circle in the frog's colour inside its
-            // own outline, per game-board.md's Shape-only note and the
-            // committed mockup's `.frog` ring. It starts on the Start log and
-            // is moved onto whichever position Core reports on the first
-            // Render.
-            var pieceGO = new GameObject("Piece", typeof(RectTransform), typeof(Image));
-            _pieceOutline = pieceGO.GetComponent<Image>();
-            _pieceOutline.sprite = PieceSprite;
-            _pieceOutline.type = Image.Type.Sliced;
-            _pieceOutline.color = BoardColours.PieceEdge;
-            _pieceOutline.raycastTarget = false;
-
-            _pieceRect = _pieceOutline.rectTransform;
+            // piece — the frog itself, the approved 3D frog model drawn
+            // straight into this canvas (game-board.md § The frog piece,
+            // #461), in the same FrogPieceDiameter square the flat disc it
+            // replaced filled. It starts on the Start log, sitting, and is
+            // moved onto whichever position Core reports on the first Render.
+            var pieceGO = new GameObject("Piece", typeof(RectTransform));
+            _pieceRect = (RectTransform)pieceGO.transform;
             _pieceRect.SetParent(_positionRects[0], worldPositionStays: false);
             _pieceRect.anchorMin = new Vector2(0.5f, 0.5f);
             _pieceRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -900,18 +872,8 @@ namespace Frogs.Unity.Views
             _pieceRect.sizeDelta = new Vector2(FrogPieceDiameter, FrogPieceDiameter);
             _pieceRect.anchoredPosition = Vector2.zero;
 
-            var pieceFillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
-            _piece = pieceFillGO.GetComponent<Image>();
-            _piece.sprite = PieceFillSprite;
-            _piece.type = Image.Type.Sliced;
-            _piece.raycastTarget = false;
-
-            var pieceFillRect = _piece.rectTransform;
-            pieceFillRect.SetParent(_pieceRect, worldPositionStays: false);
-            pieceFillRect.anchorMin = Vector2.zero;
-            pieceFillRect.anchorMax = Vector2.one;
-            pieceFillRect.offsetMin = new Vector2(FrogPieceOutline, FrogPieceOutline);
-            pieceFillRect.offsetMax = new Vector2(-FrogPieceOutline, -FrogPieceOutline);
+            _frog = pieceGO.AddComponent<FrogModel>();
+            _frog.SetOutline(BoardColours.PieceEdge, FrogPieceOutline);
         }
     }
 }
