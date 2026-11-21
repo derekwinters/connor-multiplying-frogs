@@ -14,7 +14,7 @@ using UnityEngine.UI;
 using BoardColours = Frogs.Unity.UI.BoardColours;
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
-using RoundedRectSprite = Frogs.Unity.UI.RoundedRectSprite;
+using LogModel = Frogs.Unity.UI.LogModel;
 
 namespace Frogs.Unity.Views
 {
@@ -90,7 +90,11 @@ namespace Frogs.Unity.Views
         // and one End log for the whole board however many frogs are playing,
         // and every frog's position 0 and position 8 are on them (#296).
         public const float LogWidth = 176f;
-        public const float LogRadius = 24f;
+
+        // `LogRadius` (24 px) is gone rather than renamed (#468). It was the
+        // corner of the flat rounded rectangle the log used to be; the log is
+        // the approved 3D model now, and its ends are the model's own sawn
+        // caps — docs/specs/ui/game-board.md § The log model.
 
         /// <summary>
         /// How big the word on a log is — `LogLabelSize`.
@@ -202,9 +206,9 @@ namespace Frogs.Unity.Views
         GameBoardSettingsButton _settingsButton;
 
         RectTransform _pondRect;
-        Image _startLog;
+        LogModel _startLog;
         Text _startLogLabel;
-        Image _endLog;
+        LogModel _endLog;
         Text _endLogLabel;
         readonly List<GameBoardLaneView> _lanes = new List<GameBoardLaneView>();
         readonly Dictionary<FrogColour, GameBoardLaneView> _lanesByColour = new Dictionary<FrogColour, GameBoardLaneView>();
@@ -215,26 +219,6 @@ namespace Frogs.Unity.Views
 
         bool _initialized;
         Game _game;
-
-        static Sprite s_logSprite;
-
-        // One sprite, because a log is one drawing. It used to be two — a rim
-        // at LogRadius around a fill inset by TrackOutline, each generated at
-        // its own radius so the inner one kept its curve. `LogEdge` is gone
-        // (#301), so there is no rim to generate and no inset to keep clear
-        // of: the log's own fill reaches its full LogWidth x SharedLogHeight.
-        static Sprite LogSprite
-        {
-            get
-            {
-                if (s_logSprite == null)
-                {
-                    s_logSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(LogRadius));
-                }
-
-                return s_logSprite;
-            }
-        }
 
         /// <summary>
         /// `Roll` was pressed. The board disables `Roll` before raising this
@@ -338,13 +322,13 @@ namespace Frogs.Unity.Views
         /// `start-log` — **one** log down the left of the pond, position 0 of
         /// every lane at once.
         ///
-        /// This is the whole log: one image at `LogWidth` x
-        /// `SharedLogHeight`, in `LogBrown`, with no rim. It used to be a rim
-        /// and a separate fill, and `StartLogFill` is gone with `LogEdge`
-        /// rather than renamed — there is no second layer left for a name to
-        /// point at.
+        /// This is the whole log: the approved 3D model (#468), assembled to
+        /// the log's height and drawn in a `LogWidth` x `SharedLogHeight`
+        /// rectangle, in its own albedo, with no rim. It used to be a flat
+        /// `LogBrown` rounded rectangle, and before that a rim and a separate
+        /// fill — there is no second layer for a name to point at.
         /// </summary>
-        public Image StartLog
+        public LogModel StartLog
         {
             get
             {
@@ -365,10 +349,10 @@ namespace Frogs.Unity.Views
 
         /// <summary>
         /// `end-log` — **one** log down the right of the pond, position 8 of
-        /// every lane at once, and the winning space. One image, no rim, as
-        /// <see cref="StartLog"/> is.
+        /// every lane at once, and the winning space. The same model, drawn
+        /// the same way, as <see cref="StartLog"/> is.
         /// </summary>
-        public Image EndLog
+        public LogModel EndLog
         {
             get
             {
@@ -736,23 +720,21 @@ namespace Frogs.Unity.Views
         // Every lane's centre line crosses it, which is what lets a frog on a
         // log still sit on its own lane's line.
         //
-        // One image, and one word written along the top of it. The log used to
-        // be two images, a `LogEdge` rim around a fill inset by TrackOutline;
-        // the rim is gone (#301) and so is the inset, so the log's own fill is
-        // the drawing and it reaches the log's full size. `TrackOutline` is
-        // the lily pad's now — the log is no longer one of the elements that
-        // draws one.
+        // One drawing, and one word written along the top of it. The drawing
+        // is the approved 3D log (#468): Core's LogAssembly puts its pieces
+        // together to this rectangle's height, at one frog unit to a lily
+        // pad's width, and LogModel draws them from straight above in their
+        // own albedo — untinted, so no colour is set here. The rectangle is
+        // where the log is; the model is only what it looks like. The word is
+        // the log's child, so it is drawn after the model, over it.
         //
         // `edge` is which of the log's own sides is the one placed against the
         // row's end — its left (0) or its right (1). Where that end is, is
         // PlaceSharedLogs'.
-        Image BuildSharedLog(string logName, float edge, string labelText, out Text label)
+        LogModel BuildSharedLog(string logName, float edge, string labelText, out Text label)
         {
-            var logGO = new GameObject(logName, typeof(RectTransform), typeof(Image));
-            var log = logGO.GetComponent<Image>();
-            log.sprite = LogSprite;
-            log.type = Image.Type.Sliced;
-            log.color = BoardColours.LogBrown;
+            var logGO = new GameObject(logName, typeof(RectTransform), typeof(LogModel));
+            var log = logGO.GetComponent<LogModel>();
             log.raycastTarget = false;
 
             var logRect = log.rectTransform;
@@ -761,6 +743,9 @@ namespace Frogs.Unity.Views
             logRect.anchorMax = new Vector2(0.5f, 0.5f);
             logRect.pivot = new Vector2(edge, 0.5f);
             logRect.sizeDelta = new Vector2(LogWidth, SharedLogHeight);
+
+            // One frog unit is one lily pad: the scale the model was built at.
+            log.SetUnitSize(GameBoardLaneView.LilyPadDiameter);
 
             var labelGO = new GameObject("Label", typeof(RectTransform), typeof(Text));
             label = labelGO.GetComponent<Text>();

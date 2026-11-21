@@ -145,7 +145,7 @@ namespace Frogs.Unity.Views
         // whatever Lane reports; the denominator is Lane.LaneWinningPosition.
         const string PadCountFormat = "{0} of {1}";
 
-        // `LogWidth`, `SharedLogHeight` and `LogRadius` are game-board.md's
+        // `LogWidth` and `SharedLogHeight` are game-board.md's
         // third table, and they are not this type's either. The logs belong to
         // the pond, so they are GameBoardScreenView's — referenced here, under
         // the identical names, because the track's own width arithmetic still
