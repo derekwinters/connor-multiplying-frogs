@@ -282,32 +282,122 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TheFrog_StaysInsideItsFootprint_ThroughTheWholeHop()
+        public void Sitting_TheFrogFillsItsFootprint_CentredOnIt()
         {
-            // FP-2: inside the FrogPieceDiameter square the disc filled, at
-            // every moment of a hop, outline included.
+            // FP-2 (#474): the scale is chosen from the Sit pose, so a sitting
+            // frog, outline included, is as big as fits the FrogPieceDiameter
+            // square — its taller or wider side reaching the edges — with its
+            // box centred on the square's centre.
             WithBoard((view, game) =>
             {
                 var lane = view.Lanes[0];
                 var half = GameBoardLaneView.FrogPieceDiameter / 2f;
+                var inside = GameBoardLaneView.FrogPieceDiameter - (2f * GameBoardLaneView.FrogPieceOutline);
                 const float pixelOfSlack = 0.01f;
 
-                Assert.That(lane.PieceRect.sizeDelta, Is.EqualTo(new Vector2(GameBoardLaneView.FrogPieceDiameter, GameBoardLaneView.FrogPieceDiameter)));
+                Assert.That(lane.Frog.Pose, Is.EqualTo(FrogPose.Rest));
 
-                for (var frame = 0; frame <= 40; frame++)
+                var skin = VerticesOf(lane.Frog.Skin);
+                var minX = skin.Min(vertex => vertex.position.x);
+                var maxX = skin.Max(vertex => vertex.position.x);
+                var minY = skin.Min(vertex => vertex.position.y);
+                var maxY = skin.Max(vertex => vertex.position.y);
+
+                Assert.That(Mathf.Max(maxX - minX, maxY - minY), Is.EqualTo(inside).Within(pixelOfSlack), "the longer side fills the square, less the outline either side");
+                Assert.That((minX + maxX) / 2f, Is.EqualTo(0f).Within(pixelOfSlack), "centred across the square");
+                Assert.That((minY + maxY) / 2f, Is.EqualTo(0f).Within(pixelOfSlack), "centred up and down it");
+
+                var all = skin.Concat(VerticesOf(lane.Frog)).ToList();
+
+                Assert.That(all.Max(vertex => Mathf.Abs(vertex.position.x)), Is.LessThanOrEqualTo(half + pixelOfSlack), "outline included, inside the square across");
+                Assert.That(all.Max(vertex => Mathf.Abs(vertex.position.y)), Is.LessThanOrEqualTo(half + pixelOfSlack), "and up and down");
+            });
+        }
+
+        [Test]
+        public void ThroughTheWholeHop_TheFrogIsDrawnAtOneScale_AndOvershootsItsFootprint()
+        {
+            // FP-2's other half: one scale, fitted once — a frog that has
+            // landed is exactly the size it was sitting — and the hop is what
+            // overshoots the square, not something squeezed into it.
+            WithBoard((view, game) =>
+            {
+                var lane = view.Lanes[0];
+                var half = GameBoardLaneView.FrogPieceDiameter / 2f;
+                var sitting = VerticesOf(lane.Frog.Skin).Select(vertex => vertex.position).ToList();
+
+                var reach = 0f;
+
+                for (var frame = 1; frame < 40; frame++)
                 {
                     lane.PlacePiecePartWay(1, 2, frame / 40f);
+                    reach = Mathf.Max(reach, VerticesOf(lane.Frog.Skin).Max(vertex => Mathf.Max(Mathf.Abs(vertex.position.x), Mathf.Abs(vertex.position.y))));
+                }
 
-                    var vertices = VerticesOf(lane.Frog.Skin).Concat(VerticesOf(lane.Frog)).ToList();
-                    Assert.That(vertices, Is.Not.Empty, "the frog draws something");
+                Assert.That(reach, Is.GreaterThan(half), "mid-hop the frog reaches outside its square");
 
-                    // The furthest any vertex reaches, then one assert each —
-                    // thousands of vertices a frame make per-vertex asserts slow.
-                    var reachX = vertices.Max(vertex => Mathf.Abs(vertex.position.x));
-                    var reachY = vertices.Max(vertex => Mathf.Abs(vertex.position.y));
+                lane.PlacePiecePartWay(1, 2, 1f);
+                var landed = VerticesOf(lane.Frog.Skin).Select(vertex => vertex.position).ToList();
 
-                    Assert.That(reachX, Is.LessThanOrEqualTo(half + pixelOfSlack), $"frame {frame}, x");
-                    Assert.That(reachY, Is.LessThanOrEqualTo(half + pixelOfSlack), $"frame {frame}, y");
+                Assert.That(landed.Count, Is.EqualTo(sitting.Count));
+
+                for (var i = 0; i < landed.Count; i++)
+                {
+                    Assert.That(Vector3.Distance(landed[i], sitting[i]), Is.LessThanOrEqualTo(0.01f), "landed is drawn exactly as sitting");
+                }
+            });
+        }
+
+        [Test]
+        public void ThroughTheWholeHop_TheFrogStaysInItsOwnLane_AndReachesNoOtherPad()
+        {
+            // The invariant FP-2's overshoot is bounded by: a kicking frog
+            // does not cover the lane next to it, or any pad but the one it is
+            // leaving and the one it is landing on. Forward, and back a pad —
+            // where it still faces the End log, so its legs kick the way it
+            // is going.
+            WithBoard((view, game) =>
+            {
+                var lane = view.Lanes[1];
+                var padHalf = GameBoardLaneView.LilyPadDiameter / 2f;
+                var laneHalf = GameBoardLaneView.LaneHeight / 2f;
+                const float pixelOfSlack = 0.01f;
+
+                foreach (var (from, to) in new[] { (2, 3), (3, 2), (0, 1), (1, 0) })
+                {
+                    var centreY = WorldCentre(lane.PositionRects[from]).y;
+
+                    for (var frame = 0; frame <= 40; frame++)
+                    {
+                        lane.PlacePiecePartWay(from, to, frame / 40f);
+
+                        var world = VerticesOf(lane.Frog.Skin).Concat(VerticesOf(lane.Frog))
+                            .Select(vertex => lane.Frog.rectTransform.TransformPoint(vertex.position))
+                            .ToList();
+
+                        var what = $"hop {from} to {to}, frame {frame}";
+
+                        Assert.That(world.Max(point => point.y), Is.LessThanOrEqualTo(centreY + laneHalf + pixelOfSlack), what + ": not into the lane above");
+                        Assert.That(world.Min(point => point.y), Is.GreaterThanOrEqualTo(centreY - laneHalf - pixelOfSlack), what + ": not into the lane below");
+
+                        var left = world.Min(point => point.x);
+                        var right = world.Max(point => point.x);
+
+                        for (var pad = 1; pad < Lane.LanePositionCount - 1; pad++)
+                        {
+                            if (pad == from || pad == to)
+                            {
+                                continue;
+                            }
+
+                            var padX = WorldCentre(lane.PositionRects[pad]).x;
+
+                            Assert.That(
+                                right < padX - padHalf || left > padX + padHalf,
+                                Is.True,
+                                $"{what}: clear of pad {pad} ({left:F1}..{right:F1} against {padX - padHalf:F1}..{padX + padHalf:F1})");
+                        }
+                    }
                 }
             });
         }
@@ -338,6 +428,14 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(outline, Is.Not.Empty, "FP-4: the outline is drawn");
                 Assert.That(outline.All(colour => Same(colour, BoardColours.PieceEdge)), Is.True, "FP-4: in PieceEdge");
             });
+        }
+
+        static Vector3 WorldCentre(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+
+            return (corners[0] + corners[2]) / 2f;
         }
 
         static IEnumerable<string> BoneNames()
