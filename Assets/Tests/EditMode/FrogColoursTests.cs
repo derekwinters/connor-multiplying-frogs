@@ -24,7 +24,7 @@ namespace Frogs.Unity.EditModeTests
         public void FourFrogColours_ExistAndMatchTheNamedHexValues()
         {
             Assert.That(FrogColours.FrogGreen, Is.EqualTo((Color)new Color32(0x3E, 0x93, 0x3E, 0xFF)));
-            Assert.That(FrogColours.FrogBlue, Is.EqualTo((Color)new Color32(0x37, 0x60, 0x9A, 0xFF)));
+            Assert.That(FrogColours.FrogBlue, Is.EqualTo((Color)new Color32(0x42, 0x73, 0xB8, 0xFF)));
             Assert.That(FrogColours.FrogOrange, Is.EqualTo((Color)new Color32(0xD3, 0x82, 0x31, 0xFF)));
             Assert.That(FrogColours.FrogPink, Is.EqualTo((Color)new Color32(0xD4, 0x1C, 0x78, 0xFF)));
         }
@@ -44,7 +44,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [TestCase(CoreFrogColour.Green, 0x3E, 0x93, 0x3E)]
-        [TestCase(CoreFrogColour.Blue, 0x37, 0x60, 0x9A)]
+        [TestCase(CoreFrogColour.Blue, 0x42, 0x73, 0xB8)]
         [TestCase(CoreFrogColour.Orange, 0xD3, 0x82, 0x31)]
         [TestCase(CoreFrogColour.Pink, 0xD4, 0x1C, 0x78)]
         public void For_MapsEachCoreIdentity_ToItsOneNamedColour(CoreFrogColour colour, byte r, byte g, byte b)

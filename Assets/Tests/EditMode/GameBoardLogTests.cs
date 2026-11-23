@@ -262,6 +262,78 @@ namespace Frogs.Unity.EditModeTests
             }
         }
 
+        /// <summary>
+        /// game-board.md § Keeping the frogs visible, and #469: every frog
+        /// clears the separability bar against the bark it actually sits on,
+        /// not only against `LogBrown`, which the approved model's bark is
+        /// lighter than. Measured the way LG-7 measures the word: on the built
+        /// board, the topmost triangle at each point and its albedo pixel —
+        /// across the middle `LilyPadDiameter` of the log, where a sitting
+        /// frog is, from one end cap to the other.
+        ///
+        /// This is the test `FrogBlue` `#37609A` failed (1.49 : 1 against the
+        /// lightest bark) and `#4273B8` passes (1.98 : 1); `FrogPink` is the
+        /// one that only just clears it (1.91 : 1).
+        /// </summary>
+        [Test]
+        public void EveryFrog_ClearsTheBarAgainstTheBarkWhereItSits()
+        {
+            var canvas = CanvasOf(CanvasWidth, CanvasHeight);
+            var albedo = LilyPadAlbedo.DecodePng(File.ReadAllBytes(LogModelImport.AlbedoPath), out var width, out var height);
+
+            try
+            {
+                var view = BoardOn(canvas, 4);
+
+                foreach (var log in Logs(view))
+                {
+                    var rect = log.Value.rectTransform.rect;
+                    var unit = log.Value.UnitSize;
+                    var triangles = TrianglesOf(log.Value);
+                    var bark = new List<Color>();
+
+                    for (var y = rect.yMin + (LogAssembly.CapLength * unit) + (SampleStep / 2f); y < rect.yMax - (LogAssembly.CapLength * unit); y += SampleStep)
+                    {
+                        for (var x = rect.center.x - (unit / 2f) + (SampleStep / 2f); x < rect.center.x + (unit / 2f); x += SampleStep)
+                        {
+                            if (!TryTopmostUv(triangles, new Vector2(x, y), out var uv))
+                            {
+                                continue;
+                            }
+
+                            var column = Mathf.Clamp(Mathf.FloorToInt(uv.x * width), 0, width - 1);
+                            var row = Mathf.Clamp(Mathf.FloorToInt((1f - uv.y) * height), 0, height - 1);
+                            bark.Add(albedo[(row * width) + column]);
+                        }
+                    }
+
+                    Assert.That(bark.Count, Is.GreaterThan(0), $"the {log.Key} log has bark where a frog sits");
+
+                    foreach (FrogColour frog in System.Enum.GetValues(typeof(FrogColour)))
+                    {
+                        var piece = Frogs.Unity.UI.FrogColours.For(frog);
+                        var worstContrast = bark.Min(b => GameBoardColoursTests.ContrastRatio(piece, b));
+                        var worstDistance = bark.Min(b => GameBoardColoursTests.ColourDistance(piece, b));
+
+                        Assert.That(
+                            worstContrast,
+                            Is.GreaterThanOrEqualTo(MinimumContrastRatio),
+                            $"the {frog} frog is too close in brightness to the {log.Key} log's bark — "
+                            + "game-board.md#keeping-the-frogs-visible");
+                        Assert.That(
+                            worstDistance,
+                            Is.GreaterThanOrEqualTo(MinimumColourDistance),
+                            $"the {frog} frog is too close in colour to the {log.Key} log's bark — "
+                            + "game-board.md#keeping-the-frogs-visible");
+                    }
+                }
+            }
+            finally
+            {
+                DestroyCanvas(canvas);
+            }
+        }
+
         // ---- helpers
 
         sealed class DrawnTriangle

@@ -536,7 +536,7 @@ lightness alone, which is why the set is not four mid-tone colours.
 | Frog | Constant | Value |
 | --- | --- | --- |
 | Green | `FrogGreen` | `#3E933E` |
-| Blue | `FrogBlue` | `#37609A` |
+| Blue | `FrogBlue` | `#4273B8` |
 | Orange | `FrogOrange` | `#D38231` |
 | Pink | `FrogPink` | `#D41C78` |
 
@@ -555,6 +555,15 @@ checked afterwards.
 | `#D2762B` | `#D38231` | |
 | `#C24C86` | `#D41C78` | |
 
+**`FrogBlue` moved again on
+[#469](https://github.com/derekwinters/connor-multiplying-frogs/issues/469)**,
+from `#37609A` to `#4273B8`: the same hue, lightened slightly. The approved 3D
+log's bark is lighter than `LogBrown`, and against its lightest bark the old
+blue measured 1.49 : 1, below the bar. Derek chose to move the frog rather than
+darken the log; the new blue is the smallest step that clears it (1.98 : 1).
+[Keeping the frogs visible](game-board.md#keeping-the-frogs-visible) has the
+measurements.
+
 Two things follow, and both matter more than the hex codes.
 
 **The frogs are now allowed to move when the pond does.** `game-board.md` used
@@ -565,12 +574,14 @@ has to clear the bar, and the arithmetic that constrains it is
 [written out there](game-board.md#how-the-ponds-colours-are-constrained) — it is
 narrow, and a palette chosen without reading it will not fit.
 
-**The third invariant below is still not satisfied.** These four step
-**1.28 : 1** apart in lightness at worst. That is better than the values they
-replace, which stepped **1.11 : 1** — four mid-tones, exactly what the invariant
-says the set is not — but it is not "distinguishable by lightness alone" in any
-strong sense, and it is the most the available band allows once four colours
-share it. The invariant and the separability bar are in genuine tension; neither
+**The third invariant above is still not satisfied, and since #469 it is
+further from it.** The four stepped **1.28 : 1** apart in lightness at worst
+after #301, already short of "distinguishable by lightness alone". Lightening
+`FrogBlue` to clear the log put it at almost the same lightness as `FrogPink`:
+those two are now **1.03 : 1** apart, so a player who cannot tell blue from pink
+by hue has next to no lightness difference to go on. That is the cost of the
+log's lighter bark — it raises the floor every frog must clear, and blue and
+pink both sit just above it. The invariant and the separability bar are in genuine tension; neither
 is wrong, and no set satisfies both today. Said here rather than left for
 somebody to find by measuring.
 

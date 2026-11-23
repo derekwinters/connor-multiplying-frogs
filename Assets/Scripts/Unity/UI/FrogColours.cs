@@ -28,9 +28,10 @@ namespace Frogs.Unity.UI
     /// One thing these four still do **not** satisfy, said here rather than
     /// left to be discovered by measuring: shared-components.md's invariant
     /// that "the four are distinguishable to a colour-blind player by
-    /// lightness alone". They step 1.28 : 1 apart at worst — better than the
-    /// 1.11 : 1 of the values they replace, and the most the available band
-    /// allows once four colours share it.
+    /// lightness alone". Since #469 lightened `FrogBlue` to clear the approved
+    /// log's bark, blue and pink are almost the same lightness — 1.03 : 1
+    /// apart — so the set is further from it than the 1.28 : 1 it stepped
+    /// before.
     ///
     /// <see cref="Frogs.Core.FrogColour"/> names *which* frog a player is; it
     /// carries no <c>UnityEngine.Color</c> because Core never references
@@ -43,8 +44,12 @@ namespace Frogs.Unity.UI
         /// <summary>docs/specs/ui/shared-components.md § Frog colours — `FrogGreen`, `#3E933E`.</summary>
         public static readonly Color FrogGreen = new Color32(0x3E, 0x93, 0x3E, 0xFF);
 
-        /// <summary>docs/specs/ui/shared-components.md § Frog colours — `FrogBlue`, `#37609A`.</summary>
-        public static readonly Color FrogBlue = new Color32(0x37, 0x60, 0x9A, 0xFF);
+        /// <summary>
+        /// docs/specs/ui/shared-components.md § Frog colours — `FrogBlue`, `#4273B8`.
+        /// Lightened from `#37609A` on #469 so it clears the bar against the
+        /// approved log's lightest bark, `#603E25`.
+        /// </summary>
+        public static readonly Color FrogBlue = new Color32(0x42, 0x73, 0xB8, 0xFF);
 
         /// <summary>docs/specs/ui/shared-components.md § Frog colours — `FrogOrange`, `#D38231`.</summary>
         public static readonly Color FrogOrange = new Color32(0xD3, 0x82, 0x31, 0xFF);
