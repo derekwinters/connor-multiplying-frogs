@@ -4130,9 +4130,14 @@ are all exactly what <a href="#behaviour">Behaviour</a> says, unchanged.</p>
   clips, <strong>Sit</strong> and <strong>Hop</strong>. Nothing in the game reshapes, re-proportions or
   re-poses it. To change how the frog looks, change the script, run it again,
   and replace the imported files.</li>
-<li><strong>FP-2 — Same footprint.</strong> The frog, its outline included, is drawn inside
-  the <code>FrogPieceDiameter</code> square the disc filled, centred on the same point, at
-  every moment of a hop — the rise into the air included.</li>
+<li><strong>FP-2 — Sitting, it fills the footprint.</strong> The frog's size is chosen from
+  its <strong>Sit</strong> pose: a sitting frog, its outline included, is as big as fits the
+  <code>FrogPieceDiameter</code> square the disc filled, centred on the same point — the
+  sitting frog's box centred on the square's centre, its taller or wider side
+  reaching the square's edges. That one scale holds for the whole hop, so mid-hop
+  the frog may reach outside the square and off its pad: in Derek's words, <em>"the
+  extended legs can push the body forward off the lilypad"</em>
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/474">#474</a>).</li>
 <li><strong>FP-3 — In its frog's colour.</strong> The albedo is multiplied by the frog's
   colour from <a href="../shared-components/#frog-colours">shared components</a>. The
   albedo is white wherever the frog <em>is</em> its colour, so there it is exactly
@@ -4176,8 +4181,13 @@ albedo, which is never lighter than white) and shading only ever darkens them,
 by no more than <code>FrogShadeFloor</code>. The separability bar above is measured
 against the frog colours themselves, and a frog shaded <em>lighter</em> than its
 colour could cross the water's ceiling.
-<strong>Invariant:</strong> no part of the frog, at any point of the hop, reaches outside
-the footprint (FP-2) — a kicking frog must not cover the pad or lane next to it.</p>
+<strong>Invariant:</strong> the frog is drawn at one scale, fitted once from the Sit pose
+and never refitted frame by frame, so it does not grow or shrink as it hops.
+<strong>Invariant:</strong> a hopping frog may leave its footprint and its pad (FP-2), but a
+kicking frog must not cover the lane next to it or any other pad: at every
+point of a hop, every part of it, outline included, stays inside its own
+lane's <code>LaneHeight</code> band, and reaches no pad but the one it is leaving and the
+one it is landing on.</p>
 <h3 id="the-frog-through-a-hop">The frog through a hop<a class="headerlink" href="#the-frog-through-a-hop" title="Link to this section">&para;</a></h3>
 <p>The Hop clip's key poses, and where in the hop each falls. Between them the
 clip moves smoothly, as Blender interpolated it; the clip is exported with a key
@@ -4252,14 +4262,58 @@ themselves are the clip's, authored in <code>tools/art/frog_model.py</code> (<co
 camera into a render texture. The board is a uGUI screen-space overlay, which
 does not draw a 3D renderer. So each piece keeps its own copy of the model's
 rig, samples the clip onto it, skins the mesh from those bones on the CPU, and
-turns the result to the view above. Then it scales it so the whole hop fits the
-footprint, shades it against one fixed light, and hands the triangles to uGUI
+turns the result to the view above. Then it scales it so the sitting frog fills
+the footprint (FP-2), shades it against one fixed light, and hands the triangles to uGUI
 back to front with the albedo as the texture. It moves, scales and layers with
 the board exactly as the disc did, and uses only uGUI's default material. That
 material is always in a build.</p>
 <p>The scale is fixed for the whole hop, not refitted frame by frame, so the frog
-does not grow or shrink as it moves. Because the hop rises, the sitting frog
-sits in the lower part of its footprint and has room above it to jump into.</p>
+does not grow or shrink as it moves. It is fitted to the Sit pose, so the
+sitting frog is centred in its footprint and fills it, and the hop is what
+overshoots. The fit itself — one scale from a pose's box, the footprint and the
+outline, and the box's centre on the footprint's — is Core's <code>FrogPieceFit</code>.</p>
+<p>At the reference canvas that makes a sitting frog about <strong>79 × 80 px</strong> on its
+112 px pad, outline included. Through a hop, with the 48 px <code>LanePositionGap</code>
+the reference canvas has (a wider screen only widens it):</p>
+<table>
+<thead>
+<tr>
+<th>Where the hop reaches furthest</th>
+<th>How far, outline included</th>
+<th>What it must stay clear of</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Up, at the top of the hop</td>
+<td>91 px above the lane's centre line</td>
+<td>The lane's edge, 92 px</td>
+</tr>
+<tr>
+<td>Back, the legs kicked out at take-off</td>
+<td>66 px behind the pad it leaves — 10 px past its rim, over the water</td>
+<td>The pad before it, 104 px</td>
+</tr>
+<tr>
+<td>Hopping back a pad (FP-5: it still faces the End log)</td>
+<td>31 px past the far rim of the pad it lands on</td>
+<td>The pad beyond that, 48 px</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How the spec is changing
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/474">#474</a>).</strong>
+FP-2 used to fit the <strong>whole hop</strong> inside the footprint at every moment, and
+the invariant said no part of the frog ever left it. The hop is about twice the
+sitting frog's size, so a sitting frog was about <strong>42 × 43 px</strong> — under half its
+pad — and sat in the lower part of its square with room above to jump into.
+Derek asked for the frog <em>"a little bigger … it should fill the lily pad more
+while stationary. The extended legs can push the body forward off the
+lilypad."</em> Now the <strong>sitting</strong> frog is fitted, and the hop may overshoot. The
+old invariant's purpose — a kicking frog does not cover the lane or the pad
+next to it — is kept, as the invariant above. <strong>How big is provisional:</strong> Derek
+gave no number, and "fills the footprint the disc filled" is the reading
+chosen. Whether it is right on the tablet is Derek's and Connor's to judge.</p>
 <p>How the model and its texture are imported is
 <a href="../../../engineering/tech-stack/#the-frog-model">tech stack § The frog model</a>.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
