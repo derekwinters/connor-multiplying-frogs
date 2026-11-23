@@ -3471,10 +3471,11 @@ Its rectangle — <code>LogWidth</code> × <code>SharedLogHeight</code>, in the 
 track starts or ends in — is the layout's, exactly as before, and the frogs
 still sit on their own lanes' centre lines across it.
 <strong>Invariant:</strong> the log's colours are the albedo's. The game never tints,
-lights or recolours a log. Whether a blue frog may sit below the separability
-bar on it is
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/469">#469</a>,
-open — see <a href="#keeping-the-frogs-visible">keeping the frogs visible</a>.</p>
+lights or recolours a log. Its bark is lighter than <code>LogBrown</code>, and every frog
+is held to the separability bar against the bark itself — which is why
+<code>FrogBlue</code> moved on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/469">#469</a>
+rather than the albedo; see <a href="#keeping-the-frogs-visible">keeping the frogs visible</a>.</p>
 <h3 id="the-horizontal-arithmetic">The horizontal arithmetic<a class="headerlink" href="#the-horizontal-arithmetic" title="Link to this section">&para;</a></h3>
 <p>The row used to sum to 1920 px exactly, and the page said so. It still does at
 1920 — but it now sums to the screen's width at every width, because one term in
@@ -3815,10 +3816,10 @@ outline is separation on top of this, never instead of it.</p>
 <td>3.21 / 65.6</td>
 </tr>
 <tr>
-<td><code>FrogBlue</code> <code>#37609A</code></td>
-<td>4.11 / 49.3</td>
-<td>4.40 / 100.3</td>
-<td>1.95 / 57.3</td>
+<td><code>FrogBlue</code> <code>#4273B8</code></td>
+<td>3.10 / 45.5</td>
+<td>3.32 / 101.9</td>
+<td>2.58 / 65.1</td>
 </tr>
 <tr>
 <td><code>FrogOrange</code> <code>#D38231</code></td>
@@ -3835,7 +3836,8 @@ outline is separation on top of this, never instead of it.</p>
 </tbody>
 </table>
 <p>Every pair clears the bar, and this set was <strong>derived against the bar rather
-than picked and then checked</strong> — see <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are
+than picked and then checked</strong> — <code>FrogBlue</code> then moved once more, to clear the
+approved log's bark (below) — see <a href="#how-the-ponds-colours-are-constrained">how the pond's colours are
 constrained</a> below, which is the part
 worth reading before changing any of these six values.</p>
 <p><strong>The lily pad column is measured against <code>LilyPadGreen</code>, and the approved
@@ -3847,9 +3849,11 @@ ring outside that, out to the rim line, darkens to <code>#A9DA78</code>, where
 albedo is regenerated, is
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/466">#466</a>.</p>
 <p><strong>The log column is measured against <code>LogBrown</code>, and the approved log model's
-bark is lighter than that</strong> (<a href="#lg-4">LG-4</a>). Read off the model as the board
-draws it — from straight above, the middle 112 px of the log where a sitting
-frog is — its lightest bark is <code>#603E25</code>, and the frogs measure:</p>
+bark is lighter than that</strong> (<a href="#lg-4">LG-4</a>), so the frogs are held to the bar
+against the bark itself as well. Read off the model as the board draws it —
+from straight above, unlit, the middle 112 px of the log where a sitting frog
+is, from one end cap to the other — its lightest bark is <code>#603E25</code>, and the
+frogs measure:</p>
 <table>
 <thead>
 <tr>
@@ -3868,9 +3872,9 @@ frog is — its lightest bark is <code>#603E25</code>, and the frogs measure:</p
 </tr>
 <tr>
 <td><code>FrogBlue</code></td>
-<td><strong>1.49 : 1</strong></td>
-<td><strong>1.62 : 1</strong></td>
-<td>54.9</td>
+<td>1.98 : 1</td>
+<td>2.15 : 1</td>
+<td>63.7</td>
 </tr>
 <tr>
 <td><code>FrogOrange</code></td>
@@ -3886,11 +3890,19 @@ frog is — its lightest bark is <code>#603E25</code>, and the frogs measure:</p
 </tr>
 </tbody>
 </table>
-<p><code>FrogBlue</code> is below the contrast bar everywhere on the log, though far apart
-from it in hue, and <code>FrogPink</code> only just clears it at the lightest bark. The
-albedo ships as approved; whether that is acceptable, or the albedo or the
-frog colours move, is
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/469">#469</a>.</p>
+<p>Every frog clears the bar on the bark, and a test measures it on the built
+board. <code>FrogPink</code> is the closest, and only just clears it at the lightest bark.</p>
+<p><strong><code>FrogBlue</code> was <code>#37609A</code> until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/469">#469</a></strong>,
+and against this bark it measured <strong>1.49 : 1</strong> worst and <strong>1.62 : 1</strong> median —
+below the bar everywhere on the log, though far apart in hue (ΔE 54.9). Of the
+three ways out — hold the log to the ΔE half of the bar only, darken the
+albedo, or move the frog — <strong>Derek chose to move the frog</strong>, after looking at
+rendered comparisons, and to leave the approved albedo exactly as it is.
+<code>#4273B8</code> is the same hue lightened slightly (HLS lightness +0.08), the smallest
+step that clears 1.9 : 1 against <code>#603E25</code>. No other frog colour moved: the
+other three already cleared the bark. What it cost is on the
+<a href="#the-invariant-the-frog-colours-still-do-not-satisfy">next invariant down</a>.</p>
 <p><strong>The settings gear is held to the same bar</strong>, and it is here rather than with
 the frogs because it is the one piece of ink on this screen with nothing of its
 own behind it. Until
@@ -3949,6 +3961,12 @@ band, and the band is narrow:</p>
 <li><strong>The log sets a floor.</strong> At <code>LogBrown</code>'s L = 0.035, a frog must be
   <strong>L ≥ 0.111</strong>.</li>
 <li>So every frog lives in a band spanning <strong>2.22 : 1</strong>, total, whatever its hue.</li>
+<li><strong>The approved log's bark raises that floor.</strong> Its lightest bark under a
+  sitting frog, <code>#603E25</code>, is L = 0.061, so a frog must be <strong>L ≥ 0.160</strong> — and
+  the band every frog shares shrinks to <strong>1.70 : 1</strong>. This is what moved
+  <code>FrogBlue</code> on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/469">#469</a>:
+  at L = 0.115 it was below the new floor, and <code>#4273B8</code> is L = 0.169.
+  <code>FrogPink</code>, at L = 0.162, sits right on it.</li>
 </ul>
 <p>The pad then has to sit 1.9 : 1 clear of that <em>whole</em> band, which leaves it two
 regions and no middle:</p>
@@ -3976,17 +3994,25 @@ on both measures at ΔE 21. A near-black pad at L = 0.033 was also drawn and doe
 comply, but it puts the pad at the log's exact luminance — the two surfaces then
 differ by hue alone, which is the failure mode the two-measure bar exists to
 catch, and it renders the pad's veins invisible.</p>
+<p>The bark's narrower frog band does not move the pad's light region: that is set
+by the water's ceiling, which the bark does not change, so <code>LilyPadGreen</code> still
+clears every frog.</p>
 <p><strong>The threshold is a cliff, not a slope.</strong> <code>#9CE45C</code> at L = 0.633 passes;
 <code>#93E04F</code> at L = 0.601 fails. <code>LilyPadGreen</code> is the darkest natural leaf green
 available, not a preference.</p>
 <h3 id="the-invariant-the-frog-colours-still-do-not-satisfy">The invariant the frog colours still do not satisfy<a class="headerlink" href="#the-invariant-the-frog-colours-still-do-not-satisfy" title="Link to this section">&para;</a></h3>
 <p><a href="../shared-components/#frog-colours">Shared components</a> requires that <em>"the four
 are distinguishable to a colour-blind player by lightness alone."</em> Measured, the
-four above step <strong>1.28 : 1</strong> between neighbours at worst.</p>
-<p>That is better than the placeholders they replace, which stepped <strong>1.11 : 1</strong>
-and were four mid-tones — the exact thing that invariant says the set is not.
-But 1.28 : 1 is not a comfortable margin, and it is the most the 2.22 : 1 band
-allows once four colours have to share it. <strong>The invariant is not currently
+four above step <strong>1.03 : 1</strong> between neighbours at worst — <code>FrogPink</code> (L = 0.162)
+and <code>FrogBlue</code> (L = 0.169) are almost the same lightness.</p>
+<p>That is worse than it was. Until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/469">#469</a> the
+set stepped <strong>1.28 : 1</strong> at worst, which was itself better than the placeholders
+before it (<strong>1.11 : 1</strong>, four mid-tones — the exact thing that invariant says the
+set is not). Lightening <code>FrogBlue</code> to clear the approved log's bark moved it up
+to the bark's floor, which is where <code>FrogPink</code> already was, and the bark's band
+is only 1.70 : 1 for all four to share. So a player who cannot tell blue from
+pink by hue now has next to no lightness difference between them either. <strong>The invariant is not currently
 satisfied by any set that also clears the separability bar</strong>, and that is worth
 knowing rather than discovering later: it is a genuine tension between two rules
 this project holds, not an oversight in the values.</p>
