@@ -77,11 +77,6 @@ namespace Frogs.Unity.UI
         // The editor adds hidden preview copies of every clip; they are not the clip.
         const string PreviewPrefix = "__preview__";
 
-        // How many evenly spaced points of the hop the footprint is fitted
-        // over. 120 is a multiple of both the clip's 24 frames and the 40
-        // frames FrogPieceTests walks, so every one of those is measured.
-        const int FitSamples = 120;
-
         // The one light, in the piece's own space: from the upper left, in
         // front of the screen. (Unity's z runs into the screen, so the viewer
         // is at negative z.)
@@ -109,10 +104,10 @@ namespace Frogs.Unity.UI
         static Matrix4x4[] s_bindposes;
 
         // Measured once from the first rig: the turn from the model's own
-        // axes to the board's view, and the box the whole hop fills in it.
+        // axes to the board's view, and the box the sitting frog fills in it.
         static bool s_measured;
         static Matrix4x4 s_toView;
-        static Rect s_hopBounds;
+        static Rect s_sitBounds;
 
         /// <summary>One of the frog's four legs: a thigh, a shin and a foot, each hung from the one before.</summary>
         public sealed class Leg
@@ -385,23 +380,32 @@ namespace Frogs.Unity.UI
             return new Color(tint.r * shade, tint.g * shade, tint.b * shade, tint.a);
         }
 
-        // Pixels per model unit: the whole hop, outline included, fits the
-        // piece's rectangle (FP-2).
-        float Scale
+        // The one scale and placement (FP-2, #474): the sitting frog, outline
+        // included, as big as fits the piece's square, its box centred on the
+        // square's centre. The hop is drawn at the same scale and may
+        // overshoot the square — it is not fitted.
+        FrogPieceFit Fit
         {
             get
             {
-                var size = rectTransform.rect.size - (Vector2.one * (2f * _outlineWidth));
+                var size = rectTransform.rect.size;
 
-                return Mathf.Max(0f, Mathf.Min(size.x / s_hopBounds.width, size.y / s_hopBounds.height));
+                return FrogPieceFit.Fit(
+                    s_sitBounds.xMin,
+                    s_sitBounds.yMin,
+                    s_sitBounds.xMax,
+                    s_sitBounds.yMax,
+                    Mathf.Min(size.x, size.y),
+                    _outlineWidth);
             }
         }
 
-        // From the board's view at unit scale to the piece's rectangle: the
-        // hop's box centred on the rectangle's centre.
+        // From the board's view at unit scale to the piece's rectangle.
         Vector2 ToPiece(Vector3 inView)
         {
-            return ((new Vector2(inView.x, inView.y) - s_hopBounds.center) * Scale) + rectTransform.rect.center;
+            var fit = Fit;
+
+            return new Vector2(fit.ToPieceX(inView.x), fit.ToPieceY(inView.y)) + rectTransform.rect.center;
         }
 
         // Skins the mesh at the rig's current pose, into the board's view.
@@ -561,7 +565,8 @@ namespace Frogs.Unity.UI
         }
 
         // Works out, once, how the model's own axes turn into the board's
-        // view, and the box the whole hop fills there.
+        // view, and the box the sitting frog fills there — what the scale is
+        // fitted to (FP-2).
         //
         // The frog's facing is read off its own bones rather than assumed
         // from the importer's axis conversion: forward runs from the back
@@ -606,19 +611,16 @@ namespace Frogs.Unity.UI
             var min = new Vector2(float.MaxValue, float.MaxValue);
             var max = new Vector2(float.MinValue, float.MinValue);
 
-            for (var i = 0; i <= FitSamples; i++)
-            {
-                Sample(new FrogPose(FrogClip.Hop, (float)i / FitSamples));
-                SkinMesh(_posed, _posedNormals);
+            // Still sitting, from the top of this method.
+            SkinMesh(_posed, _posedNormals);
 
-                foreach (var point in _posed)
-                {
-                    min = Vector2.Min(min, point);
-                    max = Vector2.Max(max, point);
-                }
+            foreach (var point in _posed)
+            {
+                min = Vector2.Min(min, point);
+                max = Vector2.Max(max, point);
             }
 
-            s_hopBounds = Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+            s_sitBounds = Rect.MinMaxRect(min.x, min.y, max.x, max.y);
             s_measured = true;
         }
 

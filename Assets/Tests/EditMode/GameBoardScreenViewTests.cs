@@ -365,9 +365,10 @@ namespace Frogs.Unity.EditModeTests
                         $"position {position}'s own rect is too");
                 }
 
-                // The frog piece (#461) is drawn into the piece's own
-                // FrogPieceDiameter square, outline included — FrogPieceTests
-                // asserts it stays inside at every moment of a hop.
+                // The frog piece (#461) is fitted to the piece's own
+                // FrogPieceDiameter square: sitting, it fills it, outline
+                // included, and mid-hop it may overshoot it (#474) —
+                // FrogPieceTests asserts both.
                 Assert.That(lane.Frog.rectTransform, Is.SameAs(lane.PieceRect));
                 Assert.That(
                     lane.PieceRect.rect.size,

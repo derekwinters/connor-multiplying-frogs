@@ -1081,9 +1081,14 @@ These are the modelling script's own preview renders, lit and tinted
   clips, **Sit** and **Hop**. Nothing in the game reshapes, re-proportions or
   re-poses it. To change how the frog looks, change the script, run it again,
   and replace the imported files.
-- **FP-2 — Same footprint.** The frog, its outline included, is drawn inside
-  the `FrogPieceDiameter` square the disc filled, centred on the same point, at
-  every moment of a hop — the rise into the air included.
+- **FP-2 — Sitting, it fills the footprint.** The frog's size is chosen from
+  its **Sit** pose: a sitting frog, its outline included, is as big as fits the
+  `FrogPieceDiameter` square the disc filled, centred on the same point — the
+  sitting frog's box centred on the square's centre, its taller or wider side
+  reaching the square's edges. That one scale holds for the whole hop, so mid-hop
+  the frog may reach outside the square and off its pad: in Derek's words, *"the
+  extended legs can push the body forward off the lilypad"*
+  ([#474](https://github.com/derekwinters/connor-multiplying-frogs/issues/474)).
 - **FP-3 — In its frog's colour.** The albedo is multiplied by the frog's
   colour from [shared components](shared-components.md#frog-colours). The
   albedo is white wherever the frog *is* its colour, so there it is exactly
@@ -1127,8 +1132,13 @@ albedo, which is never lighter than white) and shading only ever darkens them,
 by no more than `FrogShadeFloor`. The separability bar above is measured
 against the frog colours themselves, and a frog shaded *lighter* than its
 colour could cross the water's ceiling.
-**Invariant:** no part of the frog, at any point of the hop, reaches outside
-the footprint (FP-2) — a kicking frog must not cover the pad or lane next to it.
+**Invariant:** the frog is drawn at one scale, fitted once from the Sit pose
+and never refitted frame by frame, so it does not grow or shrink as it hops.
+**Invariant:** a hopping frog may leave its footprint and its pad (FP-2), but a
+kicking frog must not cover the lane next to it or any other pad: at every
+point of a hop, every part of it, outline included, stays inside its own
+lane's `LaneHeight` band, and reaches no pad but the one it is leaving and the
+one it is landing on.
 
 ### The frog through a hop
 
@@ -1160,15 +1170,41 @@ themselves are the clip's, authored in `tools/art/frog_model.py` (`POSES` and
 camera into a render texture. The board is a uGUI screen-space overlay, which
 does not draw a 3D renderer. So each piece keeps its own copy of the model's
 rig, samples the clip onto it, skins the mesh from those bones on the CPU, and
-turns the result to the view above. Then it scales it so the whole hop fits the
-footprint, shades it against one fixed light, and hands the triangles to uGUI
+turns the result to the view above. Then it scales it so the sitting frog fills
+the footprint (FP-2), shades it against one fixed light, and hands the triangles to uGUI
 back to front with the albedo as the texture. It moves, scales and layers with
 the board exactly as the disc did, and uses only uGUI's default material. That
 material is always in a build.
 
 The scale is fixed for the whole hop, not refitted frame by frame, so the frog
-does not grow or shrink as it moves. Because the hop rises, the sitting frog
-sits in the lower part of its footprint and has room above it to jump into.
+does not grow or shrink as it moves. It is fitted to the Sit pose, so the
+sitting frog is centred in its footprint and fills it, and the hop is what
+overshoots. The fit itself — one scale from a pose's box, the footprint and the
+outline, and the box's centre on the footprint's — is Core's `FrogPieceFit`.
+
+At the reference canvas that makes a sitting frog about **79 × 80 px** on its
+112 px pad, outline included. Through a hop, with the 48 px `LanePositionGap`
+the reference canvas has (a wider screen only widens it):
+
+| Where the hop reaches furthest | How far, outline included | What it must stay clear of |
+| --- | --- | --- |
+| Up, at the top of the hop | 91 px above the lane's centre line | The lane's edge, 92 px |
+| Back, the legs kicked out at take-off | 66 px behind the pad it leaves — 10 px past its rim, over the water | The pad before it, 104 px |
+| Hopping back a pad (FP-5: it still faces the End log) | 31 px past the far rim of the pad it lands on | The pad beyond that, 48 px |
+
+**How the spec is changing
+([#474](https://github.com/derekwinters/connor-multiplying-frogs/issues/474)).**
+FP-2 used to fit the **whole hop** inside the footprint at every moment, and
+the invariant said no part of the frog ever left it. The hop is about twice the
+sitting frog's size, so a sitting frog was about **42 × 43 px** — under half its
+pad — and sat in the lower part of its square with room above to jump into.
+Derek asked for the frog *"a little bigger … it should fill the lily pad more
+while stationary. The extended legs can push the body forward off the
+lilypad."* Now the **sitting** frog is fitted, and the hop may overshoot. The
+old invariant's purpose — a kicking frog does not cover the lane or the pad
+next to it — is kept, as the invariant above. **How big is provisional:** Derek
+gave no number, and "fills the footprint the disc filled" is the reading
+chosen. Whether it is right on the tablet is Derek's and Connor's to judge.
 
 How the model and its texture are imported is
 [tech stack § The frog model](../../engineering/tech-stack.md#the-frog-model).
