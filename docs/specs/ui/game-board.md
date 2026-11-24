@@ -192,7 +192,7 @@ lanes-across** after seeing both drawn.
 | `Roll` button width | `RollButtonWidth` | 480 px |
 | `Roll` button height | `RollButtonHeight` | 144 px |
 | `Roll` label size | `RollButtonLabelSize` | 56 px |
-| Frog hop duration | `FrogHopDuration` | 0.4 s |
+| Frog hop duration | `FrogHopDuration` | 0.5 s |
 | The water's tile | `PondWaterTile` | `Assets/Art/Water/Resources/Water/pond_water_tile.png`, 512 px — see [the water's marks](#the-waters-marks) |
 | How fast the water drifts left | `PondWaterDriftSpeed` | 25 px/s |
 | How big one tile is drawn | `PondWaterTileSize` | 1024 px — the approved preview's scale; can be retuned |
@@ -1123,10 +1123,13 @@ cannot drift apart.
 **Invariant:** every bone is exactly where the Sit or Hop clip puts it. Unity
 samples the clip; no code turns a bone by hand, so what the board shows at each
 point of a hop is what Derek approved.
-**Invariant:** the Hop clip begins and ends on the Sit pose, and lasts
-`FrogHopDuration`. So a frog that has just landed is drawn exactly like a frog
-that has been sitting there all along, and the clip and the board agree how
-long a hop is.
+**Invariant:** the Hop clip begins and ends on the Sit pose, and the whole of
+it, first frame to last, plays over exactly one hop of `FrogHopDuration`. So a
+frog that has just landed is drawn exactly like a frog that has been sitting
+there all along, and the clip and the board agree how long a hop is. The clip
+is sampled by the hop's progress, not by seconds, so its authored length need
+not equal `FrogHopDuration`: changing `FrogHopDuration` alone changes how long
+the hop takes on screen, and nothing else about it.
 **Invariant:** lit surfaces are drawn in exactly the frog's colour (times the
 albedo, which is never lighter than white) and shading only ever darkens them,
 by no more than `FrogShadeFloor`. The separability bar above is measured
@@ -1144,7 +1147,10 @@ one it is landing on.
 
 The Hop clip's key poses, and where in the hop each falls. Between them the
 clip moves smoothly, as Blender interpolated it; the clip is exported with a key
-on every frame at 60 fps, 24 frames for the 0.4 s hop.
+on every frame at 60 fps, 24 frames (0.4 s as authored). The board samples it by
+progress and stretches it over `FrogHopDuration` (0.5 s), so the clip's own
+length is not how long a hop takes, and the progress at which each key pose
+falls is the same whatever `FrogHopDuration` is.
 
 | Moment | Progress | What the frog does |
 | --- | --- | --- |
@@ -1218,7 +1224,7 @@ How the model and its texture are imported is
   [answer result](answer-result.md) → back here with the frog moved and the turn
   passed to the next frog in order.
 - **The move is animated on this screen, after the result dialog closes**, over
-  `FrogHopDuration` (0.4 s), one pad's distance. It is the only motion of a
+  `FrogHopDuration` (0.5 s), one pad's distance. It is the only motion of a
   **piece** on the board, which is what makes it worth watching. The water
   drifts underneath it, too slowly to compete ([PW-3](#pw-3)).
 - A frog that reaches the End log stays there and its chip switches to the

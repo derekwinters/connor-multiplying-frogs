@@ -866,11 +866,12 @@ namespace Frogs.Unity.EditModeTests
                 // page's own Behaviour prose — "the move is animated on this
                 // screen, after the result dialog closes, over
                 // FrogHopDuration (0.4 s)" — so this is the table catching up
-                // with the page, not a new number. The value is the board's
+                // with the page, not a new number. #476 slowed the hop to
+                // 0.5 s, in the table and that prose together. The value is the board's
                 // because the hop happens here; running it is #224's, and
                 // Board_HasNoHopAnimation_AndNoEndOfGameDetection still holds
                 // this screen to playing none of it itself.
-                { "FrogHopDuration", 0.4f },
+                { "FrogHopDuration", 0.5f },
 
                 // game-board.md's third table — the two shared logs. They
                 // belong to the pond rather than to a lane (#296), so their

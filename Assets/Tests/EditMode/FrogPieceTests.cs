@@ -71,16 +71,48 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TheHopClip_LastsFrogHopDuration_AndBeginsAndEndsSitting()
+        public void TheWholeHopClip_PlaysOverOneFrogHopDuration_AndBeginsAndEndsSitting()
         {
-            // The approved clip and the board agree about how long a hop is,
-            // and the clip starts and ends on the Sit pose — so a frog that
-            // has just landed looks exactly like one that never moved.
+            // #476: the clip's authored length no longer has to equal
+            // FrogHopDuration. The clip is sampled by the hop's progress and
+            // stretched over however long FrogHopDuration is, so retuning the
+            // hop is a one-number change. What the old length check protected
+            // still holds: the whole clip, first frame to last, plays over
+            // exactly one hop of FrogHopDuration, and it starts and ends on
+            // the Sit pose — so a frog that has just landed looks exactly like
+            // one that never moved.
             WithBoard((view, game) =>
             {
-                var frog = view.Lanes[0].Frog;
+                var lane = view.Lanes[0];
+                var frog = lane.Frog;
 
-                Assert.That(frog.HopClip.length, Is.EqualTo(GameBoardScreenView.FrogHopDuration).Within(1f / 60f));
+                Assert.That(frog.HopClip.length, Is.GreaterThan(0f));
+
+                // Seconds into a hop, as the answer result's clock counts
+                // them, and the point of the clip each one must show: the
+                // same fraction of the clip as of FrogHopDuration — not the
+                // clip at that many seconds, which would cut a longer hop off
+                // early or run a shorter one past the clip's end.
+                foreach (var share in new[] { 0.1f, FrogPose.TakeOffProgress, FrogPose.InTheAirProgress, FrogPose.LandingProgress, 0.99f })
+                {
+                    var elapsed = share * GameBoardScreenView.FrogHopDuration;
+
+                    lane.PlacePiecePartWay(1, 2, elapsed / GameBoardScreenView.FrogHopDuration);
+
+                    var reference = SampledRig(frog.HopClip, share * frog.HopClip.length);
+
+                    try
+                    {
+                        foreach (var bone in BoneNames())
+                        {
+                            AssertSameTurn(Find(frog.Rig.gameObject, bone), Find(reference, bone), $"{bone} {elapsed:0.###} s into a {GameBoardScreenView.FrogHopDuration} s hop");
+                        }
+                    }
+                    finally
+                    {
+                        Object.DestroyImmediate(reference);
+                    }
+                }
 
                 foreach (var fraction in new[] { 0f, 1f })
                 {

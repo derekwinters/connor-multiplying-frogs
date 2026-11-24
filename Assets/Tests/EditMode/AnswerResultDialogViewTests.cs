@@ -583,7 +583,7 @@ namespace Frogs.Unity.EditModeTests
             Assert.That(AnswerResultDialogView.ResultTextLeft, Is.EqualTo(280f));
             Assert.That(AnswerResultDialogView.ResultChipTop, Is.EqualTo(340f));
             Assert.That(AnswerResultDialogView.ResultHopDelay, Is.EqualTo(0.2f));
-            Assert.That(GameBoardScreenView.FrogHopDuration, Is.EqualTo(0.4f));
+            Assert.That(GameBoardScreenView.FrogHopDuration, Is.EqualTo(0.5f));
 
             var view = CreateView(Right(FrogColour.Green, before: 3));
 

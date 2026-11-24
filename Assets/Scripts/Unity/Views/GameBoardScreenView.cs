@@ -149,14 +149,14 @@ namespace Frogs.Unity.Views
         /// How long the frog's hop takes — docs/specs/ui/game-board.md's own
         /// row, and the board's value rather than the result dialog's: "the
         /// move is animated on this screen, after the result dialog closes,
-        /// over <c>FrogHopDuration</c> (0.4 s), one pad's distance."
+        /// over <c>FrogHopDuration</c> (0.5 s), one pad's distance."
         ///
         /// This view still plays no motion of its own. The constant lives here
         /// because it is this page's, and <c>answer-result</c> (#224) — which
         /// owns the dialog that closes and starts the hop — references it
         /// rather than declaring a second copy.
         /// </summary>
-        public const float FrogHopDuration = 0.4f;
+        public const float FrogHopDuration = 0.5f;
 
         // The other two rows of that table, `LanePositionCount` (9) and
         // `LaneWinningPosition` (8), are Frogs.Core.Lane's own constants,
