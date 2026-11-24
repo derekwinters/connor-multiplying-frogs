@@ -45,11 +45,12 @@ namespace Frogs.Unity.UI
     {
         // game-board.md § The frog piece — "How it is drawn".
 
-        /// <summary>How far the frog is turned toward the player from a pure side view, in degrees (FP-5).</summary>
-        public const float FrogViewYaw = 25f;
-
-        /// <summary>How far it is seen from above, in degrees (FP-5).</summary>
-        public const float FrogViewPitch = 25f;
+        /// <summary>
+        /// How far the frog is seen from above, in degrees: 90 is straight
+        /// down onto its back, the view the pads and logs are drawn from
+        /// (FP-5, #477).
+        /// </summary>
+        public const float FrogViewPitch = 90f;
 
         /// <summary>The darkest shading takes a vertex, as a fraction of the frog colour.</summary>
         public const float FrogShadeFloor = 0.7f;
@@ -77,9 +78,9 @@ namespace Frogs.Unity.UI
         // The editor adds hidden preview copies of every clip; they are not the clip.
         const string PreviewPrefix = "__preview__";
 
-        // The one light, in the piece's own space: from the upper left, in
-        // front of the screen. (Unity's z runs into the screen, so the viewer
-        // is at negative z.)
+        // The one light, in the piece's own space: from the upper left and in
+        // front of the screen — above the pond, so it lights the frog's back.
+        // (Unity's z runs into the screen, so the viewer is at negative z.)
         static readonly Vector3 s_light = new Vector3(-0.3f, 0.8f, -0.5f).normalized;
 
         static readonly string[] s_legParts = { "thigh", "shin", "foot" };
@@ -124,7 +125,7 @@ namespace Frogs.Unity.UI
             /// <summary>A front leg, or a back one.</summary>
             public bool IsFront { get; }
 
-            /// <summary>The frog's own left — the side away from the player.</summary>
+            /// <summary>The frog's own left — the upper side of its lane, seen from above.</summary>
             public bool IsLeft { get; }
 
             /// <summary>The thigh bone, turned at the hip.</summary>
@@ -572,9 +573,10 @@ namespace Frogs.Unity.UI
         // from the importer's axis conversion: forward runs from the back
         // hips to the front hips, up from the feet to the hips, sitting. That
         // frame is turned so the frog faces +x (the End log), stands up +y,
-        // and shows the player its right side; then the view turns it
-        // FrogViewYaw toward the player and FrogViewPitch to be seen from
-        // above (FP-5).
+        // and shows the player its right side; then the view tips it
+        // FrogViewPitch about its forward axis, back toward the player, to be
+        // seen from above — at 90°, straight down onto its back, its left
+        // side up the screen (FP-5).
         void Measure()
         {
             s_toView = Matrix4x4.identity;
@@ -605,7 +607,10 @@ namespace Frogs.Unity.UI
             frame.SetRow(1, up);
             frame.SetRow(2, -right);
 
-            var view = Quaternion.AngleAxis(FrogViewPitch, Vector3.right) * Quaternion.AngleAxis(FrogViewYaw, Vector3.up);
+            // Negative: turning up (+y) toward the player (-z) about +x is a
+            // negative angle in Unity's rotations. A positive one would show
+            // the frog from below, belly first.
+            var view = Quaternion.AngleAxis(-FrogViewPitch, Vector3.right);
             s_toView = Matrix4x4.Rotate(view) * frame;
 
             var min = new Vector2(float.MaxValue, float.MaxValue);

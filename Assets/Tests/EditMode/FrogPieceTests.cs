@@ -276,40 +276,66 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TheFrog_FacesTheEndLog_TheRightWayUp()
+        public void TheFrog_FacesTheEndLog_SeenFromStraightAbove()
         {
-            // FP-5: head toward the End log (screen right), feet at the bottom.
+            // FP-5 (#477): seen from straight above, like the pads and logs,
+            // head toward the End log (screen right). From straight above the
+            // frog's two sides are mirror images about one line along the
+            // lane: each left bone is drawn at the same x as its right twin,
+            // and every pair shares one centre line however high off the pad
+            // it is (from any lower angle, the hips would be drawn above the
+            // feet). Its left side is the upper one: seen from above, not
+            // from below.
             WithBoard((view, game) =>
             {
                 var frog = view.Lanes[0].Frog;
+                const float halfAPixel = 0.5f;
+
+                Assert.That(frog.Pose, Is.EqualTo(FrogPose.Rest));
 
                 foreach (var side in s_sides)
                 {
                     var front = frog.PiecePointOf(Find(frog.Rig.gameObject, "front_thigh." + side));
                     var back = frog.PiecePointOf(Find(frog.Rig.gameObject, "back_thigh." + side));
-                    var foot = frog.PiecePointOf(Find(frog.Rig.gameObject, "front_foot." + side));
 
                     Assert.That(front.x, Is.GreaterThan(back.x), "the front legs are nearer the End log");
-                    Assert.That(foot.y, Is.LessThan(front.y), "the feet are below the hips");
+                }
+
+                var hips = Pair(frog, "front", "thigh");
+                var centreLine = (hips.left.y + hips.right.y) / 2f;
+
+                foreach (var leg in s_legs)
+                {
+                    foreach (var part in new[] { "thigh", "shin", "foot" })
+                    {
+                        var (left, right) = Pair(frog, leg, part);
+                        var what = leg + "_" + part;
+
+                        Assert.That(left.x, Is.EqualTo(right.x).Within(halfAPixel), what + ": left and right twins drawn level along the lane — not turned toward the player");
+                        Assert.That((left.y + right.y) / 2f, Is.EqualTo(centreLine).Within(halfAPixel), what + ": on the frog's one centre line — seen from straight above");
+                        Assert.That(left.y, Is.GreaterThan(right.y), what + ": its left side is the upper one — seen from above, not from below");
+                    }
                 }
             });
         }
 
         [Test]
-        public void InTheAir_TheFrogIsOffThePad()
+        public void AtTakeOff_TheBackLegsKickOutBehind_AlongTheLane()
         {
-            // The approved hop rises: at its top the whole frog is higher than
-            // when it sits.
+            // FP-6 from above (#477): the hop's rise is toward the player, so
+            // it does not show as height; what shows is the legs. At take-off
+            // they drive out behind, so the frog is drawn reaching further
+            // back toward the Start log than it does sitting.
             WithBoard((view, game) =>
             {
                 var lane = view.Lanes[0];
-                var sitting = VerticesOf(lane.Frog.Skin).Min(vertex => vertex.position.y);
+                var sitting = VerticesOf(lane.Frog.Skin).Min(vertex => vertex.position.x);
 
-                lane.PlacePiecePartWay(1, 2, FrogPose.InTheAirProgress);
+                lane.PlacePiecePartWay(1, 2, FrogPose.TakeOffProgress);
 
-                var flying = VerticesOf(lane.Frog.Skin).Min(vertex => vertex.position.y);
+                var kicking = VerticesOf(lane.Frog.Skin).Min(vertex => vertex.position.x);
 
-                Assert.That(flying, Is.GreaterThan(sitting + 1f), "lifted off the pad");
+                Assert.That(kicking, Is.LessThan(sitting - GameBoardLaneView.FrogPieceOutline), "the back legs kick out behind along the lane");
             });
         }
 
@@ -501,6 +527,16 @@ namespace Frogs.Unity.EditModeTests
 
             Assert.That(found, Is.Not.Null, "bone " + name);
             return found;
+        }
+
+        // Where one of the frog's bones and its twin on the other side are drawn.
+        static (Vector2 left, Vector2 right) Pair(FrogModel frog, string leg, string part)
+        {
+            var name = leg + "_" + part + ".";
+
+            return (
+                frog.PiecePointOf(Find(frog.Rig.gameObject, name + "L")),
+                frog.PiecePointOf(Find(frog.Rig.gameObject, name + "R")));
         }
 
         static void AssertSameTurn(Transform actual, Transform expected, string because)
