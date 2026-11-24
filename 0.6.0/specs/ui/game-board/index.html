@@ -4119,8 +4119,8 @@ are all exactly what <a href="#behaviour">Behaviour</a> says, unchanged.</p>
 <p><img alt="The approved frog, sitting, three-quarter view, in FrogGreen" src="../images/frog-piece/frog_hero_3q.png" /></p>
 <p><img alt="The approved hop, side-on: sit, push off, tuck, reach, sit" src="../images/frog-piece/frog_hop_strip.png" /></p>
 <p>These are the modelling script's own preview renders, lit and tinted
-<code>FrogGreen</code>. On the board the frog is smaller, seen from the angle
-<a href="#how-it-is-drawn">How it is drawn</a> gives, and shaded more simply.</p>
+<code>FrogGreen</code>. On the board the frog is smaller, seen from straight above (FP-5)
+rather than from the side, and shaded more simply.</p>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Link to this section">&para;</a></h3>
 <ul>
 <li><strong>FP-1 — The approved model, unchanged.</strong> The frog is
@@ -4147,14 +4147,19 @@ are all exactly what <a href="#behaviour">Behaviour</a> says, unchanged.</p>
   <code>FrogPieceOutline</code>-wide edge in <code>PieceEdge</code>, the separation
   <a href="#keeping-the-frogs-visible">keeping the frogs visible</a> asks for on top of
   colour.</li>
-<li><strong>FP-5 — Facing the End log.</strong> The frog faces right, along its lane, the way
-  it is racing — turned three-quarters toward the player and seen a little
-  from above so all four legs show.</li>
+<li><strong>FP-5 — Facing the End log, seen from straight above.</strong> The frog is drawn
+  from straight above, the same view as the pads and logs
+  (<a href="#lp-4">LP-4</a>), sitting flat on its pad: the player sees its back, its head
+  toward the End log (right, along its lane, the way it is racing), its left
+  side toward the top of the screen and its right toward the bottom, its legs
+  folded out to its sides. It is not turned toward the player at all.</li>
 <li><strong>FP-6 — The hop is the Hop clip.</strong> A hop's progress, 0 to 1, is the Hop
   clip from its first frame to its last, in a straight line, per the table
   below: sitting, the back legs drive out at take-off, everything tucks in the
   air, the front legs reach for the landing, sitting again. The clip lifts the
-  frog off the pad as it goes.</li>
+  frog off the pad as it goes — straight up, toward the player, so from above
+  the rise does not show as height. What shows is the legs: kicked out behind
+  along the lane, tucked in, spread and reaching, folded again.</li>
 <li><strong>FP-7 — A frog that does not move does not hop.</strong> A wrong answer on the
   Start log leaves the frog where it is
   (<a href="../answer-result/">answer result</a>), so it stays sitting.</li>
@@ -4184,6 +4189,11 @@ albedo, which is never lighter than white) and shading only ever darkens them,
 by no more than <code>FrogShadeFloor</code>. The separability bar above is measured
 against the frog colours themselves, and a frog shaded <em>lighter</em> than its
 colour could cross the water's ceiling.
+<strong>Invariant:</strong> the frog is drawn from exactly straight above (FP-5). Its left
+and right sides are mirror images about one line along the lane, at every
+depth — nothing on it is drawn further up the screen for being higher off the
+pad — and its left side is the upper one, so it is seen from above, not from
+below.
 <strong>Invariant:</strong> the frog is drawn at one scale, fitted once from the Sit pose
 and never refitted frame by frame, so it does not grow or shrink as it hops.
 <strong>Invariant:</strong> a hopping frog may leave its footprint and its pad (FP-2), but a
@@ -4243,14 +4253,9 @@ themselves are the clip's, authored in <code>tools/art/frog_model.py</code> (<co
 </thead>
 <tbody>
 <tr>
-<td>Turned toward the player</td>
-<td><code>FrogViewYaw</code></td>
-<td>25°</td>
-</tr>
-<tr>
-<td>Seen from above</td>
+<td>Seen from above: 90° is straight down onto its back</td>
 <td><code>FrogViewPitch</code></td>
-<td>25°</td>
+<td>90°</td>
 </tr>
 <tr>
 <td>Darkest a shaded surface gets, as a fraction of the frog colour</td>
@@ -4278,9 +4283,12 @@ does not grow or shrink as it moves. It is fitted to the Sit pose, so the
 sitting frog is centred in its footprint and fills it, and the hop is what
 overshoots. The fit itself — one scale from a pose's box, the footprint and the
 outline, and the box's centre on the footprint's — is Core's <code>FrogPieceFit</code>.</p>
-<p>At the reference canvas that makes a sitting frog about <strong>79 × 80 px</strong> on its
-112 px pad, outline included. Through a hop, with the 48 px <code>LanePositionGap</code>
-the reference canvas has (a wider screen only widens it):</p>
+<p>Seen from above, a sitting frog is longer <strong>across</strong> its lane than along it —
+its legs fold out to its sides — so its width across the lane is what fills the
+square. At the reference canvas that makes a sitting frog about <strong>60 × 80 px</strong>
+(along × across the lane), <strong>68 × 88 px</strong> with its outline, on its 112 px pad.
+Through a hop, with the 48 px <code>LanePositionGap</code> the reference canvas has (a
+wider screen only widens it):</p>
 <table>
 <thead>
 <tr>
@@ -4291,22 +4299,40 @@ the reference canvas has (a wider screen only widens it):</p>
 </thead>
 <tbody>
 <tr>
-<td>Up, at the top of the hop</td>
-<td>91 px above the lane's centre line</td>
+<td>Across the lane, the legs spread as it comes down to land</td>
+<td>63 px either side of the lane's centre line</td>
 <td>The lane's edge, 92 px</td>
 </tr>
 <tr>
 <td>Back, the legs kicked out at take-off</td>
-<td>66 px behind the pad it leaves — 10 px past its rim, over the water</td>
+<td>42 px behind the centre of the pad it leaves — still inside its rim, 56 px</td>
 <td>The pad before it, 104 px</td>
 </tr>
 <tr>
 <td>Hopping back a pad (FP-5: it still faces the End log)</td>
-<td>31 px past the far rim of the pad it lands on</td>
+<td>2 px past the far rim of the pad it lands on</td>
 <td>The pad beyond that, 48 px</td>
 </tr>
 </tbody>
 </table>
+<p><strong>How the spec is changing
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/477">#477</a>).</strong>
+FP-5 used to draw the frog in a three-quarter view — turned 25° toward the
+player (<code>FrogViewYaw</code>) and seen 25° from above (<code>FrogViewPitch</code>), mostly from
+the side, so all four legs showed. (The code in fact tipped it the wrong way,
+so it was seen slightly from <em>below</em>; the FP-5 test now checks it is seen from
+above.) Everything else on the board — pads, logs, water — is drawn from
+straight above, so the frog looked as if it were standing up out of its pad,
+seen by a different camera. Derek: <em>"The frogs are oriented
+wrong. They should be sitting flat on the lily pad, visible from straight
+above."</em> Now the frog is seen from straight above (<code>FrogViewPitch</code> 90°, and
+<code>FrogViewYaw</code> is gone: any turn would face it away from the End log). The
+model, its clips, colours, outline, shading and the fit rule (FP-2) are
+unchanged; FP-2 is simply measured on the Sit pose as seen from above, which
+makes the sitting frog about 60 × 80 px instead of about 79 × 80. Seen from
+above the hop's rise does not show; whether the legs alone make the hop read
+well enough on the tablet is Derek's and Connor's to judge, and any extra cue
+for height (a shadow, a scale bump) would be a new decision for them.</p>
 <p><strong>How the spec is changing
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/474">#474</a>).</strong>
 FP-2 used to fit the <strong>whole hop</strong> inside the footprint at every moment, and
