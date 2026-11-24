@@ -1214,9 +1214,11 @@ wider screen only widens it):
 ([#477](https://github.com/derekwinters/connor-multiplying-frogs/issues/477)).**
 FP-5 used to draw the frog in a three-quarter view — turned 25° toward the
 player (`FrogViewYaw`) and seen 25° from above (`FrogViewPitch`), mostly from
-the side, so all four legs showed. Everything else on the board — pads, logs,
-water — is drawn from straight above, so the frog looked as if it were standing
-up out of its pad, seen by a different camera. Derek: *"The frogs are oriented
+the side, so all four legs showed. (The code in fact tipped it the wrong way,
+so it was seen slightly from *below*; the FP-5 test now checks it is seen from
+above.) Everything else on the board — pads, logs, water — is drawn from
+straight above, so the frog looked as if it were standing up out of its pad,
+seen by a different camera. Derek: *"The frogs are oriented
 wrong. They should be sitting flat on the lily pad, visible from straight
 above."* Now the frog is seen from straight above (`FrogViewPitch` 90°, and
 `FrogViewYaw` is gone: any turn would face it away from the End log). The
