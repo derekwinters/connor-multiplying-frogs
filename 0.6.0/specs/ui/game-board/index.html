@@ -2996,7 +2996,7 @@ lanes-across</strong> after seeing both drawn.</p>
 <tr>
 <td>Frog hop duration</td>
 <td><code>FrogHopDuration</code></td>
-<td>0.4 s</td>
+<td>0.5 s</td>
 </tr>
 <tr>
 <td>The water's tile</td>
@@ -4172,10 +4172,13 @@ cannot drift apart.
 <strong>Invariant:</strong> every bone is exactly where the Sit or Hop clip puts it. Unity
 samples the clip; no code turns a bone by hand, so what the board shows at each
 point of a hop is what Derek approved.
-<strong>Invariant:</strong> the Hop clip begins and ends on the Sit pose, and lasts
-<code>FrogHopDuration</code>. So a frog that has just landed is drawn exactly like a frog
-that has been sitting there all along, and the clip and the board agree how
-long a hop is.
+<strong>Invariant:</strong> the Hop clip begins and ends on the Sit pose, and the whole of
+it, first frame to last, plays over exactly one hop of <code>FrogHopDuration</code>. So a
+frog that has just landed is drawn exactly like a frog that has been sitting
+there all along, and the clip and the board agree how long a hop is. The clip
+is sampled by the hop's progress, not by seconds, so its authored length need
+not equal <code>FrogHopDuration</code>: changing <code>FrogHopDuration</code> alone changes how long
+the hop takes on screen, and nothing else about it.
 <strong>Invariant:</strong> lit surfaces are drawn in exactly the frog's colour (times the
 albedo, which is never lighter than white) and shading only ever darkens them,
 by no more than <code>FrogShadeFloor</code>. The separability bar above is measured
@@ -4191,7 +4194,10 @@ one it is landing on.</p>
 <h3 id="the-frog-through-a-hop">The frog through a hop<a class="headerlink" href="#the-frog-through-a-hop" title="Link to this section">&para;</a></h3>
 <p>The Hop clip's key poses, and where in the hop each falls. Between them the
 clip moves smoothly, as Blender interpolated it; the clip is exported with a key
-on every frame at 60 fps, 24 frames for the 0.4 s hop.</p>
+on every frame at 60 fps, 24 frames (0.4 s as authored). The board samples it by
+progress and stretches it over <code>FrogHopDuration</code> (0.5 s), so the clip's own
+length is not how long a hop takes, and the progress at which each key pose
+falls is the same whatever <code>FrogHopDuration</code> is.</p>
 <table>
 <thead>
 <tr>
@@ -4325,7 +4331,7 @@ chosen. Whether it is right on the tablet is Derek's and Connor's to judge.</p>
   <a href="../answer-result/">answer result</a> → back here with the frog moved and the turn
   passed to the next frog in order.</li>
 <li><strong>The move is animated on this screen, after the result dialog closes</strong>, over
-  <code>FrogHopDuration</code> (0.4 s), one pad's distance. It is the only motion of a
+  <code>FrogHopDuration</code> (0.5 s), one pad's distance. It is the only motion of a
   <strong>piece</strong> on the board, which is what makes it worth watching. The water
   drifts underneath it, too slowly to compete (<a href="#pw-3">PW-3</a>).</li>
 <li>A frog that reaches the End log stays there and its chip switches to the

@@ -2349,9 +2349,11 @@ of this page's. <code>ResultMarkRingWidth</code> and the four rows that place <c
 <code>consequence</code> and <code>chip</code> are numbers the two committed mockups already draw;
 they are on this table so the layout is built from names rather than measured
 off the picture.</p>
-<p>The frog's hop itself runs over <code>FrogHopDuration</code>, which is the
+<p>The frog's hop itself runs over <code>FrogHopDuration</code> (0.5 s), which is the
 <a href="../game-board/#named-constants">game board</a>'s constant, not this page's — the
-hop happens on that screen, after this dialog has gone.</p>
+hop happens on that screen, after this dialog has gone. The hand-off waits on
+that same constant, so the next player's turn begins when the hop ends,
+whatever <code>FrogHopDuration</code> is set to.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
