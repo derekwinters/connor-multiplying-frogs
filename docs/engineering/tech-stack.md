@@ -696,12 +696,12 @@ method body.**
 // No.
 transform.position = new Vector3(1.5f, 0.25f, 0f);
 if (position == 8) { … }
-yield return new WaitForSeconds(0.4f);
+yield return new WaitForSeconds(0.5f);
 
 // Yes.
 const int LaneWinningPosition = 8;
 [SerializeField] float _lanePositionGapMin = 48f;
-[SerializeField] float _frogHopDuration = 0.4f;
+[SerializeField] float _frogHopDuration = 0.5f;
 ```
 
 None of those three names is invented here. `LaneWinningPosition`,
@@ -722,7 +722,7 @@ site that needed it.
 
 - **Tuning is the game.** Whether a wrong answer costs a lily pad or costs
   nothing is the difference between fun and not, and it is a question for
-  Connor. A number with a name is a number he can be asked about; `0.4f` on
+  Connor. A number with a name is a number he can be asked about; `0.5f` on
   line 118 of a method is not.
 - **A named value can be found.** Changing "the gap between lily pads" means
   finding one constant, not grepping for `1.5f` and guessing which of the eleven
@@ -730,7 +730,7 @@ site that needed it.
 - **A named value can be tested.** `LaneWinningPosition` can be asserted
   against; `== 8` buried in a branch can only be re-typed into the test, where
   it will agree with a bug just as happily as with correct code.
-- **The name is the documentation.** `_frogHopDuration = 0.4f` says what 0.4
+- **The name is the documentation.** `_frogHopDuration = 0.5f` says what 0.5
   *is*. No comment required, and no comment to go stale.
 
 ### This includes graybox

@@ -65,9 +65,11 @@ of this page's. `ResultMarkRingWidth` and the four rows that place `verdict`,
 they are on this table so the layout is built from names rather than measured
 off the picture.
 
-The frog's hop itself runs over `FrogHopDuration`, which is the
+The frog's hop itself runs over `FrogHopDuration` (0.5 s), which is the
 [game board](game-board.md#named-constants)'s constant, not this page's — the
-hop happens on that screen, after this dialog has gone.
+hop happens on that screen, after this dialog has gone. The hand-off waits on
+that same constant, so the next player's turn begins when the hop ends,
+whatever `FrogHopDuration` is set to.
 
 ## Elements
 

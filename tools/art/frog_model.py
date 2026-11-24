@@ -32,8 +32,9 @@ The rig is an armature (root, spine, and hip/knee/ankle -- thigh, shin, foot
 -- for each leg) bound with automatic weights. The bind pose holds the legs
 open so the knees can fold without the mesh fusing; the sitting frog is the
 "Sit" clip, and the "Hop" clip runs sit -> push -> tuck -> reach -> sit over
-FrogHopDuration (0.4 s), with its key poses at the progress points of
-game-board.md's "The legs through a hop" table.
+0.4 s as authored, with its key poses at the progress points of
+game-board.md's "The legs through a hop" table. The board samples it by
+progress and stretches it over FrogHopDuration, so the two need not match.
 """
 
 import argparse
@@ -475,7 +476,7 @@ def build_rig(low):
 # --------------------------------------------------------------------------
 
 FPS = 60
-HOP_FRAMES = 24  # 24 frames at 60 fps = FrogHopDuration, 0.4 s
+HOP_FRAMES = 24  # 24 frames at 60 fps = 0.4 s, stretched over FrogHopDuration
 
 POSES = {
     # Sitting on the pad: back legs folded Z-wise under the haunches, feet
