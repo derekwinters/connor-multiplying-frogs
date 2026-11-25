@@ -69,6 +69,14 @@ material, so it lives under `Assets/` rather than on this page. How the Android
 icon set is generated from it is in
 [tech stack: the app icon](../../engineering/tech-stack.md#the-app-icon).
 
+## The splash picture
+
+Connor's splash picture — the pond, the big frog on the log and the title — is
+committed, unmodified, at `Assets/Art/splash-source.png`. It is rebuilt as separate
+layers in `art-source/splash/`; how, and the one change made on the way (the title's
+"MUILTIPLYING" is spelled MULTIPLYING), is in
+[tech stack: the splash art](../../engineering/tech-stack.md#the-splash-art).
+
 ## What the photograph does not settle
 
 Two of these were confirmed by Derek in
