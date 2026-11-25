@@ -50,6 +50,7 @@ INK_CLAIM = 3         # px of adjoining ink an object takes with it (its own out
 COLOUR_DE = 16.0      # a `colour` object differs at least this much (Lab) from its background
 MIN_PART = 30         # visible specks smaller than this (px) are dropped
 KNOWN_TRIM = 2        # px of an object's visible edge not used to fill its hidden part
+GROUND_FRINGE = 10    # px around an object where off-colour ground is that object's fringe
 TUCK = 2              # px an object runs on under whatever hides it
 
 
@@ -79,7 +80,7 @@ OBJECTS = [
        box=(1352, 250, 1586, 590), parts=True, complete=None, own=["green", "brown"], no_sky=True),
     _o("pond", "pond", "Pond", "ground",
        poly=[(0, 628), (232, 600), (400, 592), (1360, 594), (1480, 606), (1586, 616),
-             (1586, 912), (0, 912)], complete="poly"),
+             (1586, 912), (0, 912)], complete="poly", near_own=["water"]),
     _o("pad-left-back", "lily-pads", "Lily pad, left (back)", "flood",
        box=(150, 612, 392, 700), seed=(200, 660), complete="hull", own=["green"]),
     _o("pad-centre-left", "lily-pads", "Lily pad, centre left", "flood",
@@ -107,16 +108,17 @@ OBJECTS = [
     _o("arc-right", "hop-arcs", "Hop arc, right", "ink",
        poly=[(1028, 436), (1196, 436), (1196, 604), (1028, 604)], complete=None),
     _o("grass", "grass", "Front grass", "ground",
-       poly=[(0, 892), (1586, 892), (1586, 992), (0, 992)], complete="poly"),
+       poly=[(0, 892), (1586, 892), (1586, 992), (0, 992)], complete="shore", near_own=["green", "water"],
+       near_min_l=56, near_reach=18),
+    _o("log", "log", "Log", "flood",
+       box=(388, 712, 1308, 958), seed=(1000, 900), complete="hull-all", own=["brown"],
+       foreign=["green"], fill="rows", hidden_outline=5),
     _o("tuft-left", "grass-tufts", "Grass tuft, left", "dark",
        poly=[(270, 893), (296, 852), (306, 850), (330, 884), (352, 846), (366, 846), (370, 886),
              (392, 888), (396, 896), (380, 936), (296, 942), (272, 916)], complete=None),
     _o("tuft-right", "grass-tufts", "Grass tuft, right", "dark",
        poly=[(1290, 880), (1300, 870), (1340, 852), (1352, 852), (1350, 900), (1372, 898),
              (1374, 908), (1350, 948), (1294, 948), (1290, 920)], complete=None),
-    _o("log", "log", "Log", "flood",
-       box=(388, 712, 1308, 958), seed=(1000, 900), complete="hull-all", own=["brown"],
-       foreign=["green"], fill="rows", hidden_outline=5),
     _o("frog-left", "frog-left", "Jumping frog, left", "flood",
        box=(200, 396, 380, 566), seed=(285, 480), complete=None, own=["green"], colours=20, keep_small=True),
     _o("frog-centre-left", "frog-centre-left", "Jumping frog, centre left", "flood",
@@ -320,6 +322,8 @@ def colour_class(names):
             m |= (a > 25) & (b > 0) & (b < 45 + a)
         elif n == "brown":
             m |= (a > 6) & (a < 34) & (b > 15) & (b > a) & (L < 80)
+        elif n == "water":
+            m |= b < 5
         elif n == "pink":
             m |= (a > 30) & (b < 25)
         else:
@@ -357,6 +361,7 @@ def visible():
         done[oid] = m
         claimed |= m
     # ground, front to back (grass over pond over banks)
+    objects = claimed.copy()
     for oid in reversed(ORDER):
         o = OBJ[oid]
         if o["cut"] != "ground":
@@ -364,6 +369,14 @@ def visible():
         m = poly_mask(o["poly"]) & ~claimed & ~sky_guess()
         if o.get("own"):
             m &= colour_class(o["own"]) | ink()
+        if o.get("near_own"):
+            # right next to an object, what is not the ground's own colour is that object's
+            # fringe (a frog's toe, the log's shadow): it is not ground that shows, and is
+            # filled like the ground hidden under the object
+            near = dilate(objects, o.get("near_reach", GROUND_FRINGE))
+            m &= ~(near & ~colour_class(o["near_own"]))
+            if o.get("near_min_l"):
+                m &= ~(near & (original_lab()[..., 0] < o["near_min_l"]))   # its shadow
         done[oid] = drop_specks(m)
         claimed |= done[oid]
     done["sky"] = ~claimed
@@ -375,29 +388,56 @@ def visible():
 # --------------------------------------------------------------------------
 @lru_cache(maxsize=1)
 def regions():
-    """{object id: (full region, visible part)}, both full-frame bool."""
+    """{object id: (full region, visible part)}, both full-frame bool.
+
+    Built front to back, so an object is completed under everything in front of it -
+    including what those objects are completed with themselves (the water runs on under
+    the hidden part of the log as well as under the log that shows)."""
     vis = visible()
     out = {}
-    for i, oid in enumerate(ORDER):
+    front = np.zeros((H, W), bool)       # the full regions of everything in front
+    for oid in reversed(ORDER):
         v = vis[oid]
-        front = np.zeros((H, W), bool)
-        for later in ORDER[i + 1:]:
-            front |= vis[later]
         mode = OBJ[oid]["complete"]
         if mode == "hull-all":
             # a convex object (the log): all of its hull is it, including the specks of
             # the frog's toes the cut-out left behind
-            out[oid] = (hull(v), v)
-            continue
-        if mode == "hull":
-            shape = hull(v)
-        elif mode == "poly":
-            shape = poly_mask(OBJ[oid]["poly"])
+            r = hull(v)
         else:
-            shape = v
-        r = v | (shape & front) | (dilate(v, TUCK) & front & dilate(shape, TUCK))
+            if mode == "hull":
+                shape = hull(v)
+            elif mode == "poly":
+                shape = poly_mask(OBJ[oid]["poly"])
+            elif mode == "shore":
+                shape = poly_mask(OBJ[oid]["poly"]) & below_shore(v, front)
+            else:
+                shape = v
+            r = v | (shape & front) | (dilate(v, TUCK) & front & dilate(shape, TUCK))
+            if mode in ("poly", "shore"):
+                # ground also takes the specks inside its area that no object took (a
+                # pocket of water between splash drops), so nothing there is left empty
+                r |= shape & vis["sky"] & ~sky_guess()
         out[oid] = (r, v)
+        front |= r
     return out
+
+
+def below_shore(v, front):
+    """Everything below the object's top edge, where the top edge behind something in
+    front is carried straight across from the edge either side of it (the shoreline
+    behind the log)."""
+    from scipy import ndimage as ndi
+    top = np.full(W, np.nan)
+    water = colour_class(["water"]) & (original_lab()[..., 2] < -20)
+    for x in range(W):
+        ys = np.nonzero(v[:, x])[0]
+        # a true shoreline has water just above it, not something in front
+        if len(ys) and water[max(0, ys[0] - 4):ys[0], x].any() and not front[max(0, ys[0] - 3):ys[0], x].any():
+            top[x] = ys[0]
+    ok = ~np.isnan(top)
+    xs = np.arange(W)
+    line = ndi.median_filter(np.interp(xs, xs[ok], top[ok]), size=15)
+    return np.arange(H)[:, None] >= line[None, :]
 
 
 def push_pull(img, known):

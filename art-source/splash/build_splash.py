@@ -54,8 +54,11 @@ OBJECT_LONG = 2000         # standalone object PNGs are this long on their long 
 OBJECT_PAD = 6             # original px around an object in its standalone crop
 REVIEW_W = cu.W            # review images are drawn at the original's size
 
-# Back to front. (family, [object ids]); each family is one Inkscape layer in the
-# composite, each object one group (and one file in layers/).
+# Back to front. (family, [members]); each family is one Inkscape layer in the
+# composite, each object one group (and one file in layers/). A member can itself be
+# (group id, [object ids]): a group of objects that belong together - a jumping frog and
+# the dashed arc of its hop, so hiding the frogs hides the arcs too (Derek's review of
+# #512: "there shouldn't be dotted lines for jumps if the frogs aren't there").
 FAMILIES = [
     ("sky", ["sky"]),
     ("title-glow", ["title-glow"]),
@@ -65,29 +68,62 @@ FAMILIES = [
     ("pond", ["pond"]),
     ("lily-pads", ["pad-left-back", "pad-centre-left", "pad-right-back", "pad-left-front", "pad-right-front"]),
     ("water-lilies", ["lily-left", "lily-right"]),
-    ("splashes", ["splash-left", "splash-centre-left", "splash-right"]),
-    ("hop-arcs", ["arc-left", "arc-centre-left", "arc-right"]),
     ("grass", ["grass"]),
-    ("grass-tufts", ["tuft-left", "tuft-right"]),
     ("log", ["log"]),
-    ("frogs", ["frog-left", "frog-centre-left", "frog-right", "frog-big"]),
+    ("grass-tufts", ["tuft-left", "tuft-right"]),
+    ("frogs", [("frog-jump-left", ["arc-left", "frog-left"]),
+               ("frog-jump-centre-left", ["arc-centre-left", "frog-centre-left"]),
+               ("frog-jump-right", ["arc-right", "frog-right"]),
+               "frog-big"]),
     ("title", ["title"]),
 ]
+# Layers that are built and exported but left out of the composite and the review images:
+# the splashes on the lily pads (Derek, review of #512: "make it a layer that we don't use
+# right now so we don't lose it"). The pads and water under them are complete.
+UNUSED = ["splash-left", "splash-centre-left", "splash-right"]
+JUMP_LABELS = {"frog-jump-left": "Jumping frog, left, with its hop",
+               "frog-jump-centre-left": "Jumping frog, centre left, with its hop",
+               "frog-jump-right": "Jumping frog, right, with its hop"}
 LABELS = {"sky": "Sky", "title-glow": "Glow behind the title", "title": "Title: MULTIPLYING FROGS"}
 FROGS = ["frog-left", "frog-centre-left", "frog-right", "frog-big"]
+ARCS = ["arc-left", "arc-centre-left", "arc-right"]
 STANDALONE = ["title", "cloud-left", "cloud-right", "reeds-left", "reeds-right", "pad-left-back",
               "pad-centre-left", "pad-right-back", "pad-left-front", "pad-right-front", "lily-left",
               "lily-right", "tuft-left", "tuft-right", "log"] + FROGS
-WATER_LINE = 600           # original px: below it, behind the big frog, is water and log
-GROUND = ["pond", "log", "grass", "pad-left-back", "pad-centre-left", "pad-right-back",
-          "pad-left-front", "pad-right-front"]
+WATER_LINE = 600           # original px: below it is water, pads, log and grass
+PADS = ["pad-left-back", "pad-centre-left", "pad-right-back", "pad-left-front", "pad-right-front"]
+BEHIND_LOG = ["pond", "grass", "tuft-left", "tuft-right"] + PADS
+# (what is taken away, what must then show through with no hole)
+NO_HOLES = [
+    (["frog-big"], ["log"] + BEHIND_LOG),
+    (["log", "frog-big"], BEHIND_LOG),
+    (UNUSED + ARCS, ["pond"] + PADS),
+]
 
 NS = ('xmlns="http://www.w3.org/2000/svg" '
       'xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"')
 
 
+def flat(members):
+    for m in members:
+        if isinstance(m, tuple):
+            yield from m[1]
+        else:
+            yield m
+
+
 def object_ids():
-    return [oid for _, ids in FAMILIES for oid in ids]
+    """Every object in the composite, back to front."""
+    return [oid for _, members in FAMILIES for oid in flat(members)]
+
+
+def layer_ids():
+    """Every object with a layer file: the composite's, and the unused ones."""
+    return object_ids() + UNUSED
+
+
+def frogs_family():
+    return list(flat(dict(FAMILIES)["frogs"]))
 
 
 def label(oid):
@@ -156,11 +192,18 @@ def stack_svg(ids, title="Multiplying Frogs splash"):
     defs, body = [], []
     for fam, members in FAMILIES:
         inner = []
-        for oid in members:
-            if oid in ids:
-                d, b = parts(oid)
-                defs.append(d)
-                inner.append(b)
+        for m in members:
+            gid, oids = m if isinstance(m, tuple) else (None, [m])
+            got = []
+            for oid in oids:
+                if oid in ids:
+                    d, b = parts(oid)
+                    defs.append(d)
+                    got.append(b)
+            if got and gid:
+                inner.append(f'<g id="{gid}" inkscape:label="{JUMP_LABELS[gid]}">\n' + "".join(got) + "</g>\n")
+            else:
+                inner += got
         if inner:
             body.append(f'<g id="layer-{fam}" inkscape:groupmode="layer" inkscape:label="{fam}">\n'
                         + "".join(inner) + "</g>\n")
@@ -235,7 +278,7 @@ def checker(size, cell=12):
 def layer_sheet(layer_pngs):
     """Every object on its own, cropped, on a checkerboard, with its id."""
     tiles = []
-    for oid in object_ids():
+    for oid in object_ids():          # the unused splashes are left out here too
         img = layer_pngs[oid]
         a = np.asarray(img)[..., 3]
         ys, xs = np.nonzero(a > 0)
@@ -255,14 +298,22 @@ def layer_sheet(layer_pngs):
 def reviews(layer_pngs):
     original = Image.open(cu.ORIGINAL).convert("RGB")
     ids = object_ids()
-    composite = render(stack_svg(ids), REVIEW_W).convert("RGB")
-    no_frogs = render(stack_svg([o for o in ids if o not in FROGS]), REVIEW_W).convert("RGB")
-    bare = render(stack_svg([o for o in ids if o not in FROGS + ["title", "title-glow"]]), REVIEW_W).convert("RGB")
+
+    def without(hide):
+        return render(stack_svg([o for o in ids if o not in hide]), REVIEW_W).convert("RGB")
+
+    composite = without([])
+    frogs = frogs_family()
+    title = ["title", "title-glow"]
     out = {
-        "original-vs-composite.png": stack_vertical([labelled(original, "Original (splash-source.png)"),
-                                                     labelled(composite, "Rebuilt from layers (composite)")]),
-        "no-frogs.png": labelled(no_frogs, "Every layer except the four frogs"),
-        "no-frogs-no-title.png": labelled(bare, "Every layer except the frogs, the title and its glow"),
+        "original-vs-composite.png": stack_vertical([
+            labelled(original, "Original (splash-source.png)"),
+            labelled(composite, "Rebuilt from layers (composite; the splashes are kept as unused layers)")]),
+        "no-frogs.png": labelled(without(frogs), "Without the frogs (and their hop arcs)"),
+        "no-frogs-no-title.png": labelled(without(frogs + title), "Without the frogs, the title and its glow"),
+        "no-frogs-no-log.png": labelled(without(frogs + ["log"]), "Without the frogs and the log"),
+        "no-frogs-no-log-no-title.png": labelled(without(frogs + ["log"] + title),
+                                                 "Without the frogs, the log, the title and its glow"),
         "layer-sheet.png": layer_sheet(layer_pngs),
     }
     x0, y0, x1, y1 = ti.TITLE_ZONE
@@ -283,7 +334,7 @@ def build():
         d.mkdir(parents=True)
     ids = object_ids()
     layer_pngs = {}
-    for oid in ids:
+    for oid in layer_ids():
         svg = layer_svg(oid)
         write(LAYERS_DIR / f"{oid}.svg", svg)
         img = render(svg, EXPORT_W)
@@ -342,21 +393,26 @@ def check(layer_pngs):
             problems.append(f"composite: no group with id {oid}")
     if ti.spelled() != ("MULTIPLYING", "FROGS"):
         problems.append(f"title spells {ti.spelled()}")
-    # no frog-shaped hole: under the big frog, below the water line, water / log / pads
-    # cover every pixel
+    # no hole: whatever is taken away, below the water line the layers behind it let
+    # no sky through (stacked alpha is 1 - product of (1 - alpha))
     s = EXPORT_W / cu.W
-    big = np.asarray(layer_pngs["frog-big"])[..., 3] > 0
-    big[: int(WATER_LINE * s)] = False
-    clear = np.ones(big.shape)
-    for g in GROUND:
-        clear *= 1 - np.asarray(layer_pngs[g])[..., 3] / 255.0
-    cover = clear <= 1 / 255.0
-    if (big & ~cover).sum():
-        problems.append(f"no-frogs: {(big & ~cover).sum()} px under the big frog are not covered")
-    # each small frog: what is under it, with the frogs gone, is sky or ground, never a hole
-    nof = render(stack_svg([o for o in ids if o not in FROGS]), cu.W)
-    if np.asarray(nof)[..., 3].min() != 255:
-        problems.append("no-frogs composite is not opaque")
+    for gone, behind in NO_HOLES:
+        foot = np.zeros(np.asarray(layer_pngs["sky"]).shape[:2], bool)
+        for g in gone:
+            foot |= np.asarray(layer_pngs[g])[..., 3] > 0
+        foot[: int(WATER_LINE * s)] = False
+        clear = np.ones(foot.shape)
+        for b in behind:
+            clear *= 1 - np.asarray(layer_pngs[b])[..., 3] / 255.0
+        n = int((foot & (clear > 1 / 255.0)).sum())
+        if n:
+            problems.append(f"without {gone}: {n} px are a hole")
+    for oid in UNUSED:
+        if f'id="{oid}"' in comp:
+            problems.append(f"composite: unused layer {oid} is in it")
+    for gid in JUMP_LABELS:
+        if f'<g id="{gid}" ' not in comp:
+            problems.append(f"composite: no group {gid}")
     for oid in STANDALONE:
         img = Image.open(OBJECTS_DIR / f"{oid}.png")
         if max(img.size) < OBJECT_LONG - 1:

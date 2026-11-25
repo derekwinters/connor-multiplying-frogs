@@ -12,6 +12,14 @@ acceptance criteria of #481 that can be checked without running the build:
 - with the frogs hidden there is no frog-shaped hole: water, log and pads cover
   everything under the big frog below the water line, and the sky is opaque everywhere,
   so hiding the title leaves no hole either;
+- the hop arcs go with the frogs (Derek's review of #512: "there shouldn't be dotted
+  lines for jumps if the frogs aren't there"): each jumping frog is one group with its
+  arc, inside the frogs' layer, and what the arcs hide is completed;
+- the splashes on the lily pads are kept as their own layer files but left out of the
+  composite (Derek, same review: "make it a layer that we don't use right now"), and
+  the pads and water under them are complete;
+- the log can be taken away too, and leaves no log-shaped hole: water, grass and
+  tufts are complete behind it and under the big frog;
 - the font the title is built from is open-licensed, with its licence committed.
 
 That a second build is byte-identical is checked by the build itself
@@ -50,6 +58,17 @@ OBJECTS = [
 # Groups inside the title: each word, and the action strokes either side of FROGS.
 TITLE_PARTS = ["title-multiplying", "title-frogs", "title-strokes-left", "title-strokes-right"]
 FROGS = ["frog-left", "frog-centre-left", "frog-right", "frog-big"]
+# Each jumping frog's group: the frog and the dashed arc of its hop.
+JUMPS = {
+    "frog-jump-left": ["arc-left", "frog-left"],
+    "frog-jump-centre-left": ["arc-centre-left", "frog-centre-left"],
+    "frog-jump-right": ["arc-right", "frog-right"],
+}
+# Kept as layers, not used in the composite.
+UNUSED = ["splash-left", "splash-centre-left", "splash-right"]
+PADS = ["pad-left-back", "pad-centre-left", "pad-right-back", "pad-left-front", "pad-right-front"]
+# What lies behind the log (and under the big frog, which sits on it).
+BEHIND_THE_LOG = ["pond", "grass", "tuft-left", "tuft-right"] + PADS
 # What lies under the big frog below the water line, in the original's pixels.
 WATER_LINE = 600
 UNDER_THE_BIG_FROG = ["pond", "log", "grass", "pad-left-back", "pad-centre-left",
@@ -89,19 +108,46 @@ class LayerStructureTests(unittest.TestCase):
         svg = COMPOSITE_SVG.read_text(encoding="utf-8")
         self.assertIn('viewBox="0 0 1586 992"', svg)
         for oid in OBJECTS + TITLE_PARTS:
+            if oid in UNUSED:
+                continue
             with self.subTest(oid=oid):
                 self.assertIn(f'<g id="{oid}" ', svg)
+
+    def test_the_splashes_are_kept_as_layers_but_left_out_of_the_composite(self):
+        svg = COMPOSITE_SVG.read_text(encoding="utf-8")
+        for oid in UNUSED:
+            with self.subTest(oid=oid):
+                self.assertTrue((LAYERS / f"{oid}.svg").is_file())
+                self.assertTrue((LAYERS / f"{oid}.png").is_file())
+                self.assertNotIn(f'id="{oid}"', svg)
 
     def test_ids_in_the_composite_are_unique(self):
         ids = re.findall(r'\bid="([^"]+)"', COMPOSITE_SVG.read_text(encoding="utf-8"))
         self.assertEqual(sorted({i for i in ids if ids.count(i) > 1}), [])
 
+    def test_each_jumping_frog_is_one_group_with_its_arc(self):
+        import xml.etree.ElementTree as ET
+        root = ET.parse(COMPOSITE_SVG).getroot()
+        groups = {g.get("id"): g for g in root.iter("{http://www.w3.org/2000/svg}g")}
+        frogs_layer = groups["layer-frogs"]
+        inside_frogs = {g.get("id") for g in frogs_layer.iter("{http://www.w3.org/2000/svg}g")}
+        for jump, members in JUMPS.items():
+            with self.subTest(jump=jump):
+                self.assertIn(jump, inside_frogs)
+                inside = {g.get("id") for g in groups[jump].iter("{http://www.w3.org/2000/svg}g")}
+                for oid in members:
+                    self.assertIn(oid, inside)
+        for oid in ("arc-left", "arc-centre-left", "arc-right"):
+            with self.subTest(oid=oid):
+                self.assertIn(oid, inside_frogs, "hiding the frogs must hide it too")
+
     def test_the_frogs_are_stacked_above_everything_but_the_title(self):
         svg = COMPOSITE_SVG.read_text(encoding="utf-8")
-        at = {oid: svg.index(f'<g id="{oid}" ') for oid in OBJECTS}
+        at = {oid: svg.index(f'<g id="{oid}" ') for oid in OBJECTS if oid not in UNUSED}
+        jumping = [m for ms in JUMPS.values() for m in ms]
         for frog in FROGS:
-            for oid in OBJECTS:
-                if oid in FROGS or oid == "title":
+            for oid in at:
+                if oid in FROGS or oid in jumping or oid == "title":
                     continue
                 with self.subTest(frog=frog, under=oid):
                     self.assertLess(at[oid], at[frog])
@@ -134,7 +180,7 @@ class LayerStructureTests(unittest.TestCase):
 
     def test_the_review_images_are_committed(self):
         for name in ("original-vs-composite.png", "no-frogs.png", "no-frogs-no-title.png",
-                     "layer-sheet.png"):
+                     "no-frogs-no-log.png", "no-frogs-no-log-no-title.png", "layer-sheet.png"):
             with self.subTest(review=name):
                 self.assertTrue((SPLASH / "review" / name).is_file())
 
@@ -167,6 +213,33 @@ class NoHoleTests(unittest.TestCase):
         band = frog[int(780 * scale):int(820 * scale)]
         self.assertTrue(band.any())
         self.assertEqual(int((band & ~log[int(780 * scale):int(820 * scale)]).sum()), 0)
+
+    def covered(self, footprint, layers):
+        """Pixels of footprint (below the water line) that the stacked layers leave
+        clear: alpha composes as 1 - product of (1 - alpha)."""
+        import numpy as np
+        scale = footprint.shape[1] / SOURCE_SIZE[0]
+        footprint = footprint.copy()
+        footprint[: int(WATER_LINE * scale)] = False
+        clear = np.ones(footprint.shape)
+        for oid in layers:
+            clear *= 1 - alpha(LAYERS / f"{oid}.png") / 255.0
+        return int((footprint & (clear > 1 / 255.0)).sum())
+
+    def test_nothing_under_a_splash_or_an_arc_is_a_hole(self):
+        for oid in ("splash-left", "splash-centre-left", "splash-right",
+                    "arc-left", "arc-centre-left", "arc-right"):
+            with self.subTest(oid=oid):
+                self.assertEqual(self.covered(alpha(LAYERS / f"{oid}.png") > 0, ["pond"] + PADS), 0)
+
+    def test_nothing_behind_the_log_is_a_hole_once_it_is_hidden(self):
+        log = alpha(LAYERS / "log.png") > 0
+        self.assertTrue(log.any())
+        self.assertEqual(self.covered(log, BEHIND_THE_LOG), 0)
+
+    def test_nothing_under_the_big_frog_is_a_hole_once_it_and_the_log_are_hidden(self):
+        frog = alpha(LAYERS / "frog-big.png") > 0
+        self.assertEqual(self.covered(frog, BEHIND_THE_LOG), 0)
 
 
 if __name__ == "__main__":
