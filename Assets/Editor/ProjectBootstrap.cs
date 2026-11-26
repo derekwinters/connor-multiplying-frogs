@@ -66,6 +66,11 @@ namespace Frogs.EditorTools
             // A missing file fails the build here rather than shipping Unity's
             // icon, which is what v0.6.0 did (#459).
             AppIcons.ApplyToBuild();
+
+            // Connor's splash picture while the app starts, with no Unity logo.
+            // A missing picture fails the build here rather than shipping
+            // Unity's splash (#482).
+            LaunchSplash.ApplyToBuild();
         }
 
         static void ApplyIdentity()

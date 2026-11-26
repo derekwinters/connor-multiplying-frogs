@@ -61,6 +61,7 @@ namespace Frogs.Unity.EditModeTests
             new BuildStampPreprocessor().OnPreprocessBuild(null);
 
             Assert.That(PlayerSettings.SplashScreen.showUnityLogo, Is.False);
+            Assert.That(PlayerSettings.SplashScreen.logos, Is.Empty);
         }
 
         [Test]
