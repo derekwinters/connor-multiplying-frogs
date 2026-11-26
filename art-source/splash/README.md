@@ -3,8 +3,9 @@
 Connor's splash picture (`Assets/Art/splash-source.png`, 1586 × 992, committed unmodified)
 is one flattened raster. This folder rebuilds it as **one vector layer per object**, so the
 same art can make the launch splash, the app icon and the home screen without redrawing it
-(#481). Nothing here is used by the game; using the art is the job of the splash, icon and
-home-screen issues.
+(#481). The app icon source, `Assets/Art/app-icon-source.png`, is cropped from these
+layers by the build (#483, below); otherwise nothing here is used by the game, and using
+the art is the job of the splash and home-screen issues.
 
 The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapted.
 
@@ -16,8 +17,9 @@ The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapt
 | `layers/<id>.png` | The same layer rendered at 3965 × 2480 (2.5× the canvas, more than twice the 1920 × 1200 tablet), transparent outside the object. Only the sky is opaque. |
 | `composite.svg` / `composite.png` | Every layer in use stacked: one Inkscape layer per family below, one group per object inside it. The splashes are not in it (see below). |
 | `objects/<id>.png` | Each notable object cropped on its own, 2000 px on its long side, transparent. Its vector is `layers/<id>.svg`. |
-| `review/` | `original-vs-composite.png`, `no-frogs.png`, `no-frogs-no-title.png`, `no-frogs-no-log.png`, `no-frogs-no-log-no-title.png`, `layer-sheet.png`, `title-vs-original.png`. |
-| `build_splash.py` | The one script that writes all of the above, then self-checks. |
+| `review/` | `original-vs-composite.png`, `no-frogs.png`, `no-frogs-no-title.png`, `no-frogs-no-log.png`, `no-frogs-no-log-no-title.png`, `layer-sheet.png`, `title-vs-original.png`, `app-icon-masks.png` (the app icon as a circle, a squircle and a rounded square). |
+| `icon.py` | The app icon's crop: the window (`ICON_CROP`), its size (`ICON_SIZE`) and the layers it hides (`ICON_HIDDEN`). |
+| `build_splash.py` | The one script that writes all of the above and the app icon source, then self-checks. |
 | `cutout.py`, `tracing.py`, `sky.py`, `title.py` | Its stages: cut-out and completion, VTracer tracing, the fitted sky and glow, the vector title. |
 | `fonts/Fredoka-Variable.ttf`, `fonts/OFL.txt` | The title's font and its licence (SIL Open Font License 1.1). |
 
@@ -55,6 +57,26 @@ tufts are complete, and so is the water under the big frog; `review/no-frogs-no-
 
 Inside a traced object, one sub-group per colour family (`<id>-<colour>`, such as
 `frog-big-green-2`), each with one path per colour.
+
+## The app icon
+
+The app icon is a close crop of this picture: the big frog on the log, with no title
+(Derek's call, 2026-11-24, #483). `build_splash.py` writes it to
+`Assets/Art/app-icon-source.png`; `.github/scripts/generate_app_icons.py` makes every
+Android icon from that.
+
+- **Hidden:** the title and its glow, and the three jumping frogs with their hop arcs
+  (`frog-centre-left` and `arc-right` would otherwise poke into the frame). The splashes
+  are not in the composite, so not in the icon.
+- **Window:** `ICON_CROP = (473, 345, 640)`, a 640 × 640 square of the canvas, centred
+  left-right on the big frog (its box is x 584–1002, y 385–852), from just above its
+  eyes to just below the log. All of the big frog fits inside the circle a round
+  launcher cuts; the log's ends and the corners of sky and water are what get trimmed.
+- **Size:** rendered from the vectors at `ICON_SIZE = 1024` px square, flattened onto
+  the opaque sky — a fresh render, not an upscale.
+
+The tests in `.github/scripts/tests/test_app_icon_crop.py` check those, and that the
+committed source matches the committed layer PNGs stacked and cropped the same way.
 
 ## How each part is made
 
@@ -104,9 +126,12 @@ polygons, how each is cut) is `OBJECTS` in `cutout.py`.
 pip install vtracer opencv-python-headless scipy cairosvg pillow numpy fonttools skia-pathops
 python3 art-source/splash/build_splash.py                  # about 2 minutes
 python3 art-source/splash/build_splash.py --check-rebuild  # also builds again and compares
+python3 art-source/splash/build_splash.py --icon-only      # only the app icon, from the committed
+                                                           # layer SVGs; seconds, no tracing
 ```
 
 Self-checks: every layer PNG is the full canvas and at least 1920 × 1200; the sky is opaque;
+the app icon source is `ICON_SIZE` square with none of `ICON_HIDDEN` in it;
 every object is a group with a unique id in the composite, each jumping frog is grouped
 with its arc, and the splashes are not in it; the title spells MULTIPLYING FROGS; below
 the water line, the layers behind let no sky through under the big frog, under the log
