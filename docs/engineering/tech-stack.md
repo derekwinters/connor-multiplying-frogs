@@ -409,6 +409,59 @@ The PNG has **no committed `.meta`**, like the models', for the same reason;
 pinning its GUID is part of
 [#183](https://github.com/derekwinters/connor-multiplying-frogs/issues/183).
 
+### The splash art
+
+**Connor's splash picture is kept as separate layers**, so the launch splash, the
+app icon and the home screen can each be made from the same art without redrawing it
+([#481](https://github.com/derekwinters/connor-multiplying-frogs/issues/481)). The
+picture is committed once, byte-for-byte as supplied, and the layers are rebuilt from it
+by one script. Nothing the game builds uses them yet; putting the art on a screen is
+each screen's own issue.
+
+| | |
+| --- | --- |
+| Source | `Assets/Art/splash-source.png` — 1586 × 992, unmodified |
+| Rebuilt into | `art-source/splash/` — outside `Assets/`, so Unity never imports it |
+| Builder | `art-source/splash/build_splash.py` — Python with VTracer, OpenCV, SciPy, CairoSVG, Pillow, NumPy, fontTools and skia-pathops |
+| Its tests | `.github/scripts/tests/test_splash_layers.py` |
+| How it works | `art-source/splash/README.md` |
+
+What it writes:
+
+- **One SVG per object** — sky, title glow, each cloud, the far banks, the reeds, the
+  pond, each lily pad, water lily, splash and hop arc, the grass and its tufts, the log,
+  each frog, and the title — all on one canvas in the original's pixels
+  (`viewBox="0 0 1586 992"`), each a group with an `id`, so any set of them stacks
+  straight back together. Each is also a transparent PNG at 3965 × 2480, more than
+  twice the 1920 × 1200 tablet.
+- **A composite** of every layer in use, and each notable object **cropped** on its own.
+  Each jumping frog is grouped with the dashed arc of its hop, so hiding the frogs hides
+  the arcs. The **splashes** on the lily pads are exported as layers but left out of the
+  composite — kept, not used, Derek's call in review of #481's PR.
+- **Review images**: the original above the rebuild, and the scene without the frogs,
+  without the frogs and the title, without the frogs and the log, and without all three.
+
+Three rules it keeps:
+
+- **The title is vector lettering, spelled MULTIPLYING.** The picture spells it
+  "MUILTIPLYING"; Derek's call (2026-11-24) is that the rebuild corrects it. Letters
+  come from an open-licensed font (Fredoka, SIL Open Font License, licence committed in
+  `art-source/splash/fonts/`), placed where the drawn letters are.
+- **Hiding a layer leaves no hole.** Where an object is hidden behind another, its hidden
+  part is completed: the log carries on under the big frog; the water, shoreline, grass
+  and tufts behind the log and under the big frog; the pads and water under the unused
+  splashes; and the sky — a fitted gradient over the whole canvas — under the title. The
+  tests check that nothing lets the sky through below the water line once the big frog,
+  the log, the splashes or the arcs are taken away, and that the sky is opaque.
+- **The build is deterministic.** A second run writes byte-identical files
+  (`build_splash.py --check-rebuild`). To change the art, change the script's numbers
+  and rebuild; do not edit an output by hand.
+
+The tests that read pixels need Pillow and NumPy and are skipped, by name, where those
+are not installed; the structural ones need only Python. The byte-identical rebuild
+is checked by the build itself, not in CI: it needs the tracing libraries and takes
+minutes.
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
