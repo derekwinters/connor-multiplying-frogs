@@ -61,6 +61,11 @@ namespace Frogs.EditorTools
             ApplyIdentity();
             ApplyMinimumApiLevel();
             ApplyOrientation();
+
+            // Connor's frog in every launcher icon slot, from Assets/Art/AppIcon/.
+            // A missing file fails the build here rather than shipping Unity's
+            // icon, which is what v0.6.0 did (#459).
+            AppIcons.ApplyToBuild();
         }
 
         static void ApplyIdentity()
