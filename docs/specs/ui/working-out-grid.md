@@ -248,8 +248,10 @@ which leaves exactly 96 px — it sits directly beside the card readout pill and
 would look wrong at a different height, and 96 px is the floor a touch target
 may not go below. A 112 px button there would overhang the band by 16 px. This
 is the same kind of screen-local override as the title screen's
-[`TitleButtonHeight`](title-screen.md#named-constants), in the opposite
-direction.
+`TitleButtonHeight` was, in the opposite direction, until
+[#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484) replaced
+that screen's buttons with a sign
+([removed constants](title-screen.md#what-became-of-the-title-button-row-and-scrim-constants)).
 
 `GridHelpItemSize` is 32 px, not `GridSmallDigitSize` (28 px). The items are
 not digits in boxes — they are labels in the margin, read at arm's length,

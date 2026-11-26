@@ -182,6 +182,14 @@ mockup loads the art from `docs/specs/ui/images/title-screen/full.png`, which
 copies, with its licence, into `docs/specs/ui/images/title-screen/fonts/`.
 `--home-only` does just that, in seconds.
 
+The same step writes the game's own copies, for the built title screen (#520): the art
+again, byte for byte, at `Assets/Art/TitleScreen/Resources/TitleScreen/`, and a static
+**Fredoka Bold** with its licence at `Assets/Fonts/Fredoka/Resources/Fredoka/`. The font
+is the variable font instanced at weight 700 with fontTools (`home.bold_font_bytes()`),
+because Unity's legacy font importer cannot choose a variable font's weight and would
+draw its default, Light. See `docs/engineering/tech-stack.md` § The title screen's art
+and font.
+
 The comparison drawings #484 went through needed more (the scene without the frogs,
 with and without the log, the title on its own, a lily pad, and a fade on the title
 glow's tail, which shows once the big frog is gone). They were deleted with the losing
