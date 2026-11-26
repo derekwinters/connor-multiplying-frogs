@@ -526,10 +526,14 @@ namespace Frogs.Unity.EditModeTests
 
             try
             {
+                // The START label, RESUME's label, and the version string —
+                // read first, because GetComponentsInChildren does not build the
+                // hierarchy and the properties do.
+                var expected = new[] { view.StartButton.Label, view.ResumeButton.Label, view.VersionText };
+
                 var texts = view.GetComponentsInChildren<UnityText>(includeInactive: true);
 
-                // The START label, RESUME's label, and the version string.
-                Assert.That(texts, Is.EquivalentTo(new[] { view.StartButton.Label, view.ResumeButton.Label, view.VersionText }));
+                Assert.That(texts, Is.EquivalentTo(expected));
                 Assert.That(texts.Select(t => t.text), Has.None.Contains("Frogs"));
                 Assert.That(typeof(TitleScreenView).GetProperty("TitleText"), Is.Null);
             }
