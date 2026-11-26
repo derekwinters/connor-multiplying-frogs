@@ -1792,6 +1792,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-launch-splash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The launch splash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2520,6 +2531,17 @@
     <span class="md-ellipsis">
       
         The splash art
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-launch-splash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The launch splash
       
     </span>
   </a>
@@ -3520,9 +3542,9 @@ pinning its GUID is part of
 app icon and the home screen can each be made from the same art without redrawing it
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/481">#481</a>). The
 picture is committed once, byte-for-byte as supplied, and the layers are rebuilt from it
-by one script. The <a href="#the-app-icon">app icon</a> is cropped from them by the same script;
-nothing else the game builds uses them yet, and putting the art on a screen is each
-screen's own issue.</p>
+by one script. The <a href="#the-app-icon">app icon</a> is cropped from them by the same script,
+and the <a href="#the-launch-splash">launch splash</a> is rendered from them; nothing else the
+game builds uses them yet, and putting the art on a screen is each screen's own issue.</p>
 <table>
 <thead>
 <tr>
@@ -3588,6 +3610,60 @@ screen's own issue.</p>
 are not installed; the structural ones need only Python. The byte-identical rebuild
 is checked by the build itself, not in CI: it needs the tracing libraries and takes
 minutes.</p>
+<h3 id="the-launch-splash">The launch splash<a class="headerlink" href="#the-launch-splash" title="Link to this section">&para;</a></h3>
+<p><strong>The app opens on Connor's splash picture, with no Unity logo</strong>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/482">#482</a>). Unity's
+own launch splash shows it while the engine starts; the title screen follows.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Picture</td>
+<td><code>Assets/Art/Splash/splash-1920x1200.png</code> — the whole composite, frogs and title, at 1920 × 1200</td>
+</tr>
+<tr>
+<td>Made by</td>
+<td><code>art-source/splash/build_splash.py</code> (<code>--splash-only</code> for just this); the window is in <code>art-source/splash/launch.py</code></td>
+</tr>
+<tr>
+<td>Its tests</td>
+<td><code>.github/scripts/tests/test_launch_splash.py</code></td>
+</tr>
+<tr>
+<td>Set by</td>
+<td><code>LaunchSplash</code>, in <code>Assets/Editor/</code> — at build time</td>
+</tr>
+<tr>
+<td>Import settings</td>
+<td><code>LaunchSplashImport</code> — a single sprite, kept at full size, no mipmaps</td>
+</tr>
+<tr>
+<td>Its EditMode tests</td>
+<td><code>Assets/Tests/EditMode/LaunchSplashTests.cs</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The build sets it, every time.</strong> <code>LaunchSplash</code> is called from
+<code>ProjectBootstrap.ApplyToBuild()</code>, which the build pre-processor runs before every build,
+the same way the app's name and icon get there. Through <code>PlayerSettings.SplashScreen</code> it:</p>
+<ul>
+<li>turns the splash <strong>on</strong> and <strong>the Unity logo off</strong> (Unity 6 allows that on every
+  licence tier), with no other logos;</li>
+<li>makes the picture the <strong>background</strong>, landscape, with no portrait picture since the
+  app never turns portrait;</li>
+<li>shows the picture <strong>as drawn</strong>: no background blur and no darkening overlay. Unity
+  uses both to make logos stand out, and there are none.</li>
+</ul>
+<p>Everything else — how long the splash shows and how it animates — is left at Unity's
+defaults. A missing picture, or one Unity did not import as a sprite, <strong>fails the
+build</strong> rather than shipping Unity's splash. As with the icons, the picture is loaded by
+path, so no committed <code>.meta</code> is needed, and the settings are read back after they are
+set.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
 if a choice is easier because Android is the only target, take the easier
