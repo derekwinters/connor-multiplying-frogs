@@ -14,6 +14,9 @@ Reads `Assets/Art/splash-source.png` (read-only) and writes, under art-source/sp
                                        the app icon: a square crop of the big frog on the
                                        log, title hidden (window and hidden layers in
                                        icon.py; #483)
+    ../../Assets/Art/Splash/splash-1920x1200.png
+                                       the launch splash: the whole composite at the
+                                       tablet's 1920 x 1200 (window in launch.py; #482)
 
 Every coordinate is a pixel of the original (1586 x 992): all SVGs share
 `viewBox="0 0 1586 992"`, so any set of layers stacks straight back together. Layer and
@@ -27,6 +30,7 @@ by building a second time from scratch (every cut-out and trace recomputed) and 
     python3 art-source/splash/build_splash.py                  # build + self-checks
     python3 art-source/splash/build_splash.py --check-rebuild  # ... and a second build to compare
     python3 art-source/splash/build_splash.py --icon-only      # only the app icon, from the committed layers
+    python3 art-source/splash/build_splash.py --splash-only    # only the launch splash, likewise
 
 See README.md in this folder for the layers and how each is made.
 """
@@ -47,6 +51,7 @@ sys.path.insert(0, str(HERE))
 
 import cutout as cu  # noqa: E402
 import icon  # noqa: E402
+import launch  # noqa: E402
 import sky  # noqa: E402
 import title as ti  # noqa: E402
 import tracing as tr  # noqa: E402
@@ -373,6 +378,24 @@ def write_icon():
     save_png(icon_masks(img), REVIEW_DIR / "app-icon-masks.png")
 
 
+def splash_svg():
+    return stack_svg(launch.splash_ids(object_ids()), title="Multiplying Frogs launch splash",
+                     view=launch.SPLASH_VIEW)
+
+
+def splash_png():
+    """The launch splash, rendered from the vectors; opaque, as the sky is."""
+    img = render(splash_svg(), launch.SPLASH_SIZE[0]).convert("RGB")
+    if img.size != launch.SPLASH_SIZE:
+        raise SystemExit(f"the launch splash rendered at {img.size}, not {launch.SPLASH_SIZE}")
+    return img
+
+
+def write_splash():
+    launch.SPLASH_OUT.parent.mkdir(parents=True, exist_ok=True)
+    save_png(splash_png(), launch.SPLASH_OUT)
+
+
 def load_committed_parts():
     """Fill the parts cache from the committed layers/<id>.svg, so the icon can be
     rendered without re-tracing anything. layer_svg() wrote each file as
@@ -412,11 +435,13 @@ def build():
     for name, img in reviews(layer_pngs).items():
         save_png(img, REVIEW_DIR / name)
     write_icon()
+    write_splash()
     return layer_pngs
 
 
 def outputs():
-    files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT]
+    files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT,
+             launch.SPLASH_OUT]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files
@@ -480,6 +505,9 @@ def check(layer_pngs):
     with Image.open(icon.ICON_OUT) as img:
         if img.size != (icon.ICON_SIZE, icon.ICON_SIZE) or icon.ICON_SIZE < 1024:
             problems.append(f"app icon source is {img.size}")
+    with Image.open(launch.SPLASH_OUT) as img:
+        if img.size != launch.SPLASH_SIZE:
+            problems.append(f"launch splash is {img.size}")
     if any(f'id="{oid}"' in icon_svg() for oid in icon.ICON_HIDDEN):
         problems.append("app icon: a hidden layer is in it")
     for oid in STANDALONE:
@@ -496,7 +524,14 @@ def main():
     ap.add_argument("--icon-only", action="store_true",
                     help="only render the app icon, from the committed layer SVGs (seconds, "
                          "needs only CairoSVG, Pillow and NumPy)")
+    ap.add_argument("--splash-only", action="store_true",
+                    help="only render the launch splash, from the committed layer SVGs")
     args = ap.parse_args()
+    if args.splash_only:
+        load_committed_parts()
+        write_splash()
+        print(f"wrote {launch.SPLASH_OUT.relative_to(HERE.parents[1])}")
+        return 0
     if args.icon_only:
         load_committed_parts()
         write_icon()
