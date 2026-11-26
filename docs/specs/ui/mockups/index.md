@@ -37,6 +37,7 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | How to play, page 5 — things people ask | [`how-to-play-5-things-people-ask.html`](how-to-play-5-things-people-ask.html) | [How to play](../how-to-play.md) |
 | End-game confirm | [`end-game-confirm.html`](end-game-confirm.html) | [End-game confirm](../end-game-confirm.md) |
 | Game over | [`game-over.html`](game-over.html) | [Game over](../game-over.md) |
+| Pile card, back and front — a component, not a screen | [`pile-card.html`](pile-card.html) | [Shared components § Pile card](../shared-components.md#pile-card) |
 
 Two screens have more than one mockup, both drawing **a state that only exists
 in contrast** — a state you have to see next to its opposite. The grid is drawn
@@ -151,7 +152,7 @@ Since [#524](https://github.com/derekwinters/connor-multiplying-frogs/issues/524
 they are drawn in the [Pond style](../style-guide.md), whose palette *is* a
 decision — Derek's — and the files say so in their header comment. Those are
 `end-game-confirm.html`, `settings-dialog.html`, both `answer-result-` files,
-both `player-won-` files, `game-over.html`, the five agreed
+both `player-won-` files, `game-over.html`, `pile-card.html`, the five agreed
 `working-out-grid-` files, and the lane chips in both `game-board` files.
 Everything else in this folder is still drawn in the grey wireframe palette, and
 its colours are still placeholders.
@@ -198,6 +199,15 @@ path. The restyled files also load the title's Fredoka from its committed copy,
 for the same reason the title screen does. Nunito, the style's second face, is
 not committed yet, so those files name it and fall back to the system
 sans-serif for sentences.
+
+The [pile card](../shared-components.md#pile-card) is the third case. Its back
+*is* a little pond — two lily pads on the water and a log carrying the pile's
+name — so `pile-card.html` loads the pad renders, the water texture and the
+bark from [`../images/pile-card/`](../images/pile-card/water.png) by relative
+path. It is also the one file in this folder that draws a component rather than
+a screen: the three cards, both ways round, on the turn panel's `Paper`, with a
+few words saying which is which. It was generated once and committed, and has
+no script in it.
 
 **Is not:** a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it

@@ -687,3 +687,320 @@ A frog colour has no states. It is used as a fill by the components that do.
 #### 5. Behaviour
 
 None. It is a value.
+
+### Pile card
+
+#### 1. What it is
+
+One of the three piles a turn draws from, drawn as a card: face down it says
+**which pile** it is, and turned over it carries **the problem** that was drawn.
+The same card is used three times on one panel — Easy, Medium and Hard — which
+is why it is specified here and not on a screen page.
+
+Used by: the turn panel
+([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402),
+not yet written), which replaces [roll and card](roll-and-card.md) and the
+separate [working-out grid](working-out-grid.md) dialog with one panel. Where the
+three cards sit on that panel, and what the two undrawn cards do, is that page's
+question; this section only fixes the card.
+
+Mockup: [`pile-card.html`](mockups/pile-card.html) — the three backs in both
+orientations, the drawn card picked up, and the front carrying `331 × 41` at its
+full covering size.
+
+The design was settled by Derek with interactive prototypes after the issue was
+written, and it differs from the issue in two ways, both his decisions:
+
+- **No rings.** The issue asked for one, two or three rings round the back. The
+  back is instead a little pond — **two lily pads and a log** — with a die face
+  on each pad and the pile's name carved on the log. The die faces already say
+  which pile it is; the name says it again in words.
+- **The reveal is two steps, not one motion.** The drawn card is first **picked
+  up** where it lies, and only then flips, turns and grows. The flip, turn and
+  grow are still one motion.
+
+#### 2. Invariants
+
+**Invariant:** the card never stretches. The turned-over card is the face-down
+card rotated a quarter turn and scaled by exactly `L / S`, the same in both
+directions, so the card's shape is fixed by the space it covers — see
+[the proportions](#the-proportions-are-derived-not-chosen).
+**Invariant:** `L² = 3S² + 2GS` holds exactly, in integers, for the numbers in
+the table. A set of numbers that only nearly satisfies it is a mockup of an
+animation that cannot land.
+**Invariant:** the turned-over card covers the footprint of all three piles
+exactly — the three cards and the two gaps between them — and the two cards that
+were not drawn stay where they are, underneath it.
+**Invariant:** a die face on a card is drawn as **pips**, never as a numeral, in
+the same arrangement as the die on the panel.
+**Invariant:** every pile card is marked by its two die faces **and** its name,
+together. Easy shows 1 and 2, Medium 3 and 4, Hard 5 and 6, and the words are
+exactly `Easy`, `Medium` and `Hard`. A child who cannot yet read the name has the
+pips; a child who has not learned the mapping has the name.
+**Invariant:** a card's look is the same every time. The lily pads are turned
+by a fixed amount per pile so that the three cards do not look stamped, never by
+a random amount.
+**Invariant:** the front names the drawn pile too, so the pile a problem came
+from stays on screen for the whole time the player is solving it.
+**Invariant:** nothing on the card implies one pile is worth more. There is no
+score, star or bonus on any card — every pile is worth the same one lily pad.
+
+#### Requirements
+
+Each is one behaviour, numbered so a build issue and its test can name it.
+
+- **PC-1 — The back is a pond.** <a id="pc-1"></a> The back is filled with the
+  pond-water texture, tiled `PileCardWaterTileSize`, over `PondWater`, inside an
+  `Ink` outline of `PileCardBorderWidth` at `PileCardRadius`, and drops
+  `ShadowPileCard`. Everything on it is clipped to the inside of the outline.
+- **PC-2 — Two pads, notches outward.** <a id="pc-2"></a> Two lily pads of
+  `PileCardPadSize` stand side by side, `PileCardPadGap` apart, centred across
+  the card, `PileCardPadTop` from its top. The left pad is the lily pad render
+  `A` turned 180° plus the pile's `PileCardPadTurn`; the right pad is render
+  `B` turned by `PileCardPadTurn` alone, so the two notches face away from each
+  other. Each pad has a `PileCardPadOutline` and drops `ShadowPileCardPad`
+  straight down on screen, whatever the pad's turn.
+- **PC-3 — A die face on each pad.** <a id="pc-3"></a> A white die face of
+  `PileCardDieFaceSize`, centred on each pad, shows the lower of the pile's two
+  faces on the left pad and the higher on the right. Pips are
+  `PileCardDiePipDiameter`, on a three-by-three grid `PileCardDiePipPitch` apart.
+- **PC-4 — The name on a log.** <a id="pc-4"></a> A log of `PileCardLogWidth`
+  by `PileCardLogHeight`, centred across the card and `PileCardLogBottom` from
+  its bottom, carries the pile's name carved in `LogCarve` at
+  `PileCardNameSize`. The log is drawn from the bark texture with a cut end at
+  its right, outlined in `Ink`.
+- **PC-5 — The front.** <a id="pc-5"></a> The front is `White`, in the same
+  outline and corner as the back. The problem is written the way the classroom
+  cards write it: the two numbers stacked and right-aligned, `×` before the
+  second, and a rule under both as wide as the wider line. A small log under
+  the problem carries the drawn pile's name.
+- **PC-6 — Picked up first.** <a id="pc-6"></a> The drawn card grows to
+  `PileCardLiftScale` about its own centre, where it lies, still face down, over
+  `PileCardLiftDuration` with `PileCardLiftEasing`, and its shadow deepens to
+  `ShadowPileCardLifted`. It rests there for `PileCardLiftHold`.
+- **PC-7 — Then turned over.** <a id="pc-7"></a> Over
+  `PileCardRevealDuration`, with `PileCardRevealEasing`, as **one** motion, the
+  card flips over about its own vertical axis, turns a quarter turn clockwise,
+  grows from `PileCardLiftScale` to `L / S`, and moves so its centre lands on the
+  centre of the three piles' footprint. It ends there, front up, covering the
+  footprint exactly.
+
+#### 3. Named constants
+
+**Every number here is in card units:** pixels on the 1920 × 1200 canvas
+while the card is face down at rest. The turned-over card is the same card at
+scale `L / S` = 9/5, so on screen each of its numbers is 1.8 times its value.
+That is why the front's table gives both. Every position is measured from the
+card's **outer** edge, outline included.
+
+##### The card and its proportions
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| Short side, `S` | `PileCardShortSide` | 225 |
+| Long side, `L` | `PileCardLongSide` | 405 |
+| Gap between piles, `G` | `PileCardGap` | 27 |
+| Scale of the turned-over card | `PileCardRevealScale` | `L / S` = 9/5 = 1.8 |
+| Corner radius | `PileCardRadius` | 26 (46.8 px once turned over) |
+| Outline | `PileCardBorderWidth` | 6, `Ink` (10.8 px once turned over) |
+| Shadow, face down | `ShadowPileCard` | 10 straight down, `Ink` at 35 %, no blur |
+| Shadow, picked up | `ShadowPileCardLifted` | 22 straight down, `Ink` at 30 %, no blur |
+
+These are the values for the chosen layout, **three landscape cards in a column
+beside the die**. The other layout, which #402 still draws for comparison, has
+[its own set](#if-the-piles-sit-above-the-die).
+
+##### The back
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| Water fill | `PondWater` and `PileCardWaterTileSize` | The pond-water texture, one tile 256 across, from the card's top-left corner, over `#9FD8F2` |
+| Lily pad, square | `PileCardPadSize` | 128 |
+| Gap between the two pads | `PileCardPadGap` | 41 |
+| Left edge to the first pad | `PileCardPadLeft` | 54 — `(L − 2 × 128 − 41) / 2`, so the pair is centred |
+| Top edge to both pads | `PileCardPadTop` | 2 — the outline clips the top of each pad, as if it runs under the card's edge |
+| The pads' turn | `PileCardPadTurn` | Easy 15° anticlockwise, Medium 20° clockwise, Hard 30° anticlockwise |
+| Pad outline | `PileCardPadOutline` | 3, `Ink`, round the pad's own shape |
+| Pad shadow | `ShadowPileCardPad` | 6 straight down, `Ink` at 30 % |
+| One die picture, square | `PileCardDieFaceSize` | 62, `White`, centred on its pad |
+| Gap between the two die pictures | `PileCardDieFaceGap` | 107 — `PileCardPadGap` + `PileCardPadSize` − `PileCardDieFaceSize`, because each is centred on its pad |
+| Die picture corner | `PileCardDieFaceRadius` | 12 |
+| Die picture outline | `PileCardDieFaceOutline` | 4, `Ink` |
+| One pip | `PileCardDiePipDiameter` | 11, `Ink` |
+| Pip centre to pip centre | `PileCardDiePipPitch` | 14; the outer pips' centres are 17 from the die picture's edge, so 17 + 14 + 14 + 17 = 62 |
+| Log body | `PileCardLogWidth` × `PileCardLogHeight` | 256 × 58 |
+| Bottom edge to the log | `PileCardLogBottom` | 18 |
+| Log corner | `PileCardLogRadius` | 22 |
+| Log outline | `PileCardLogOutline` | 5, `Ink` |
+| The log's cut end | `PileCardLogEndWidth` | An ellipse 34 wide and as tall as the log, outlined like it, standing 5 past the log's right end. The log and its end together are 261 wide, so the log starts 72 from the card's left edge and the pair is centred. |
+| Log shadow | `ShadowPileCardLog` | 6 straight down, `Ink` at 30 % |
+| Pile name | `PileCardNameSize` | 38, `FontDisplay` semibold, 0.03 em letter spacing, `LogCarve` |
+| The ink round the name | `PileCardNameOutline` | 6 `Ink` stroke drawn behind the letters, so 3 shows outside them |
+
+The pads are the lily-pad renders committed at
+[`images/pile-card/lily-pad-a.png`](images/pile-card/lily-pad-a.png) and
+[`lily-pad-b.png`](images/pile-card/lily-pad-b.png) — the same pad with two
+widths of notch, notch pointing right at 0°. The water is
+[`water.png`](images/pile-card/water.png) and the bark
+[`log-bark.jpg`](images/pile-card/log-bark.jpg), tiled along the log at the
+log's height. They are documentation images, like the
+[frog renders](style-guide.md#the-frog-renders); how the shell gets them is the
+build issue's question. The rings of the log's cut end are part of the log's
+art, not colours the view draws.
+
+A turn is written clockwise-positive here because that is how it reads on the
+screen. Unity's Z rotation is anticlockwise-positive, so the code's values are
+the negatives: `+15`, `−20`, `+30`.
+
+| Pile | Left pad | Right pad | Die pictures | Name |
+| --- | --- | --- | --- | --- |
+| Easy | `A`, 165° clockwise | `B`, 15° anticlockwise | 1, 2 | `Easy` |
+| Medium | `A`, 200° clockwise | `B`, 20° clockwise | 3, 4 | `Medium` |
+| Hard | `A`, 150° clockwise | `B`, 30° anticlockwise | 5, 6 | `Hard` |
+
+The pips sit on a three-by-three grid, numbered 0 to 8 across from the top
+left, and are the same as the panel's die: 1 → centre; 2 → top left, bottom
+right; 3 → those and the centre; 4 → the four corners; 5 → the corners and the
+centre; 6 → the left and right columns. A pip is
+`PileCardDiePipDiameter` / `PileCardDieFaceSize` = 11 / 62 ≈ 0.18 of its die
+picture, the same proportion as the panel's die in the agreed prototype
+(46 / 260), so the card's dice read as small copies of it.
+
+##### The front
+
+The front is the back's other side: `S` wide and `L` tall once it has turned,
+which is `405 × 729` on screen. Positions are from the turned-over card's outer
+edge.
+
+| Element | Constant | Card units | On screen |
+| --- | --- | --- | --- |
+| Fill | — | `White` | — |
+| The problem's text size | `RevealedCardProblemSize` | 60 | 108 px, `FontDisplay` semibold, tabular figures, `Ink` |
+| Line to line | `RevealedCardProblemLinePitch` | 64 | 115.2 px |
+| Top edge to the first line | `RevealedCardProblemTop` | 80 | 144 px |
+| Right edge to the problem | `RevealedCardProblemRight` | 50 | 90 px |
+| The rule's thickness | `RevealedCardRuleThickness` | 5 | 9 px, `Ink`, round ends |
+| Gap above the rule | `RevealedCardRuleGap` | 5 | 9 px |
+| Log body | `RevealedCardLogWidth` × `RevealedCardLogHeight` | 134 × 35 | 241.2 × 63 px |
+| Bottom edge to the log | `RevealedCardLogBottom` | 20 | 36 px |
+| Log corner, outline | — | 12, 3 | 21.6 px, 5.4 px |
+| The log's cut end | — | 20 wide, standing 3 past the log | 36 px, 5.4 px |
+| Pile name | `RevealedCardNameSize` | 20, with a 3 stroke behind | 36 px, 5.4 px |
+| Shadow | — | none: the turned-over card lies flat | — |
+
+The log and its end together are 137 wide, so the log starts 44 from the left
+edge and the pair is centred.
+
+**The problem gets bigger when it is turned over, not smaller.** At 108 px,
+`331` is 165 px wide and `× 41` 178 px, measured in the committed Fredoka, so
+the widest problem in the game sits right-aligned, its left edge 137 px in
+from the card's left edge. Every problem fits: no pile deals anything wider than three digits over
+`×` and two.
+
+##### The motion
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| How big the drawn card grows when picked up | `PileCardLiftScale` | 1.3 |
+| How long that takes | `PileCardLiftDuration` | 0.3 s |
+| Its easing | `PileCardLiftEasing` | `cubic-bezier(0.34, 1.4, 0.64, 1)` — a small overshoot, as if picked up |
+| How long it rests, picked up | `PileCardLiftHold` | 0.15 s |
+| The flip, the quarter turn and the growth, as one motion | `PileCardRevealDuration` | 0.7 s |
+| Its easing | `PileCardRevealEasing` | `cubic-bezier(0.3, 0.7, 0.25, 1)` — quick away, slow to land, no overshoot |
+| The flip | `PileCardRevealFlip` | 180° about the card's own vertical axis |
+| The quarter turn | `PileCardRevealTurn` | 90° clockwise, in the screen's plane |
+| Perspective for the flip | `PileCardFlipPerspective` | 2400 px from the canvas |
+
+#### The proportions are derived, not chosen
+
+Call the card's short side `S`, its long side `L`, and the gap between piles `G`.
+Three landscape cards stacked in a column, `G` apart, cover `L` across and
+`3S + 2G` down. Turning one card a quarter turn makes it `S` across and `L` down;
+growing it by `L / S` makes it `L` across and `L² / S` down. The width matches
+on its own. The height matches only if
+
+```
+L² / S = 3S + 2G,  that is,  L² = 3S² + 2GS
+```
+
+**`S` and `G` were chosen; `L` follows.** The prototype Derek agreed had
+`S = 223`, `L = 400`, `G = 24`, which is close but not exact:
+`3 × 223² + 2 × 24 × 223 = 159 891`, not `400² = 160 000`, so its revealed card
+was 717.49 px long against a 717 px footprint. The nearest set that comes out exactly in
+whole pixels is `S = 225`, `G = 27`:
+
+```
+3S² + 2GS = 3 × 225² + 2 × 27 × 225
+          = 3 × 50 625 + 12 150
+          = 151 875 + 12 150
+          = 164 025
+          = 405²,  so L = 405
+```
+
+Check: the column is `3 × 225 + 2 × 27 = 729` tall and `405` wide. The card
+turned and grown by `405 / 225 = 9/5` is `225 × 9/5 = 405` wide and
+`405 × 9/5 = 729` tall — exactly the column. The drawn card's centre moves by
+`S + G = 252` (down for Easy, none for Medium, up for Hard).
+
+Choosing `S` and `G` rather than `L` keeps the scale a simple fraction, which is
+what makes every number on the front exact: 9/5 times a whole number is never
+more than one decimal place.
+
+#### If the piles sit above the die
+
+#402 still draws the other layout — three **portrait** cards in a row above the
+die, turning over into one **landscape** front — so Derek can compare. It was
+not chosen: its cards are less than a third of the area, and the die pictures
+come out at 38 with 7 px pips. If #402 picks it after all, these replace the
+chosen values; otherwise nothing here is built.
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| `S`, `L`, `G` | `PileCardShortSide`, `PileCardLongSide`, `PileCardGap` | 125, 225, 15 |
+| Check | — | `3 × 125² + 2 × 15 × 125 = 46 875 + 3 750 = 50 625 = 225²`; the row is `3 × 125 + 2 × 15 = 405` by `225`, and the card at `225 / 125 = 9/5` is `405 × 225` |
+| Pads | `PileCardPadSize`, left, tops | 78, at 23 from the left, 2 and 88 from the top — stacked, not side by side, with the same turns as the landscape back (top pad is `A`) |
+| Die pictures | `PileCardDieFaceSize`, corner, outline | 38, 8, 3 |
+| Pips | `PileCardDiePipDiameter`, pitch | 7, 9 apart; outer centres 10 from the edge |
+| Log | width × height, from the bottom, corner, outline | 106 × 34, 14, 14, 4 |
+| Log's cut end | — | 18 wide, standing 3 past the log; the pair starts 8 from the left |
+| Name | `PileCardNameSize`, stroke | 20, 4 |
+
+The outline, corner, shadows and motion are the chosen layout's. The landscape
+front this layout turns into is drawn on #402 if it is chosen; this section does
+not specify it, because nobody has agreed it.
+
+#### 4. States
+
+| State | What it looks like |
+| --- | --- |
+| Face down | The back, `ShadowPileCard`. All three cards, before the roll. |
+| Picked up | The drawn card only: the back at `PileCardLiftScale`, `ShadowPileCardLifted`, drawn above the other two |
+| Turning over | Partway through [PC-7](#pc-7). The back is hidden once it faces away; the front shows from then on. |
+| Turned over | The front, covering the footprint. Stays for as long as the player is solving. |
+| Not drawn | The two other cards: face down, unmoved, under the turned-over card |
+
+The lime glow that marks the matched pile between the die settling and the card
+being picked up is the turn panel's, not the card's — its colour, width and hold
+are on #402.
+
+#### 5. Behaviour
+
+- The card does not take input. It is never a button: the roll decides which
+  card is drawn, and the player never chooses one.
+- It is told which pile it is and, once drawn, which problem to show. It never
+  draws a problem itself; that is Core's.
+- The pick-up and the turn-over run once per turn, in that order, with
+  `PileCardLiftHold` between them. Whether a tap can skip them is the turn
+  panel's question, on #402.
+
+#### Open questions
+
+None. The issue's two are settled:
+
+- **Is the pile named in words on the card?** Yes — `Easy`, `Medium` or `Hard`,
+  carved on the log on the back, and again on a smaller log on the front so the
+  drawn pile stays named while the player works. Derek's decision, made with the
+  prototype.
+- **Are three rings distinguishable from two at arm's length?** No longer a
+  question: there are no rings. The pile is told apart by its two die faces and
+  its name.

@@ -28,6 +28,7 @@ restyle gets its own build issue in v0.8, blocked by the wireframe issue.
 | [Game over](game-over.md) | Restyled, on pond water, frogs in the rows | [`game-over.html`](mockups/game-over.html) |
 | [Game board](game-board.md) | The **lane chips** only | [`game-board.html`](mockups/game-board.html), [`game-board-wide.html`](mockups/game-board-wide.html) |
 | [Roll and card](roll-and-card.md) | **Not restyled — pending redesign** as the turn panel (three piles and a card flip, [#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402)). That wireframe is drawn in this style from the start. | — |
+| [Pile card](shared-components.md#pile-card) | Drawn in this style from the start ([#401](https://github.com/derekwinters/connor-multiplying-frogs/issues/401)): a pond back with two lily pads and a log, a white front | [`pile-card.html`](mockups/pile-card.html) |
 | [Title screen](title-screen.md) | Not touched. It is Connor's splash art, handled on its own page. | — |
 | [Game setup](game-setup.md), [How to play](how-to-play.md) | Not redrawn by this page. They pick up the new [Button](shared-components.md#button) through the shared component, and their own elements keep their current drawings until each is restyled under its own wireframe. | — |
 
@@ -115,6 +116,7 @@ gives the water, the log gives the warm accent.
 | Pond | `PondWater` | `#9FD8F2` | Unchanged — the board's water, [game board](game-board.md#colours). Now also under game over. |
 | Deep pond | `DeepPond` | `#092E4A` | The scrim, at `DialogScrimOpacity` |
 | Log end | `LogEnd` | `#D98A2B` | Warm accent — the log's cut end. Reserved: no restyled screen uses it yet. |
+| Log carve | `LogCarve` | `#F4DDB8` | The pile's name carved on a [pile card](shared-components.md#pile-card)'s log, the pale wood under the bark — the one place it appears |
 | Berry | `Berry` | `#C8361E` | Destructive buttons, and the wrong-answer badge |
 
 The four frog colours are unchanged — [`FrogGreen`, `FrogBlue`, `FrogOrange`,
@@ -137,6 +139,7 @@ Pairs worth having measured (luminance contrast and ΔE, the same measures as
 | `Lime` focus on a `White` cell | 2.26 : 1, ΔE 86.3 | 1.9 : 1 and ΔE 30 — clears |
 | `Lime` focus on a `LilyWash` answer cell | 2.05 : 1, ΔE 71.2 | 1.9 : 1 and ΔE 30 — clears |
 | `Ink` digit on `Lime` | 6.99 : 1 | 4.5 : 1 — clears |
+| `LogCarve` name on the log's bark (its average, `#50331E`) | 8.66 : 1, with a 3 px `Ink` edge besides | 3 : 1 for 38 px semibold text — clears |
 
 **There is one lime.** The splash's own `#8EC701` is 1.85 : 1 against the
 answer row's `LilyWash`, just under the
