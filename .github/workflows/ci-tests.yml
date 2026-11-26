@@ -105,17 +105,28 @@ jobs:
           lfs: false
 
       # Unity's Library/ is expensive to rebuild and safe to reuse for the same
-      # project state.
+      # project state. `android` in the key since the suite moved to the
+      # Android target (#459): a Library imported for another target would only
+      # be re-imported.
       - name: Cache Unity's Library
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: Library
-          key: Library-editmode-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
-          restore-keys: Library-editmode-
+          key: Library-editmode-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-editmode-android-
 
       # continue-on-error, because the exit code is not the verdict: Unity
       # exits nonzero from a teardown crash after a fully green run. The gate
       # below decides. See docs/engineering/ci-cd.md.
+      #
+      # In GameCI's Android image, with Android as the active target, because
+      # the app is only ever built for Android and some of what it is built
+      # with only exists there: `UnityEditor.Android`, which puts the app icon
+      # into the build, needs Android Build Support and the Android target
+      # (Unity script reference, AndroidPlatformIconKind). In the default image
+      # `UNITY_ANDROID` is undefined and the icon tests compile to nothing
+      # (#459). The image is the one unity-builder uses for the APKs, and
+      # .github/scripts/tests/test_editmode_android_target.py keeps it so.
       - name: Run the EditMode suite
         id: tests
         continue-on-error: true
@@ -126,9 +137,10 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: 6000.0.81f1
+          customImage: unityci/editor:ubuntu-6000.0.81f1-android-3
           testMode: EditMode
           artifactsPath: artifacts
-          customParameters: -nographics
+          customParameters: -nographics -buildTarget Android
           checkName: EditMode results
 
       - name: Verify the results
