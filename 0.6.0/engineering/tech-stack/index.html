@@ -2976,11 +2976,15 @@ The order inside that pre-processor matters and is deliberate:</p>
 make the settings a diffable source file rather than something reconstructed
 each build — but it needs an editor session to generate honestly.</p>
 <h3 id="the-app-icon">The app icon<a class="headerlink" href="#the-app-icon" title="Link to this section">&para;</a></h3>
-<p><strong>Connor's frog picture is the app icon.</strong> Derek's decision in
+<p><strong>The app icon is a close crop of Connor's splash art: the big frog sitting on
+the log, with no title.</strong> Derek's call on 2026-11-24
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/483">#483</a>):
+<em>"The app icon will be a cropped version of this image, without the title text,
+zoomed in to the frog on the log in center of the image."</em> It supersedes the
+separate 608 × 608 frog-on-a-log drawing chosen on
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/169">#169</a>.
-The picture is committed once, byte-for-byte as it was drawn, and every file
-Android wants is generated from it. Nobody edits a generated icon by hand: change
-the picture, or the mode below, and regenerate.</p>
+Every file Android wants is generated from that one source. Nobody edits a
+generated icon by hand: change the crop, or the mode below, and regenerate.</p>
 <table>
 <thead>
 <tr>
@@ -2991,7 +2995,15 @@ the picture, or the mode below, and regenerate.</p>
 <tbody>
 <tr>
 <td>Source</td>
-<td><code>Assets/Art/app-icon-source.png</code> — 608 × 608, unmodified</td>
+<td><code>Assets/Art/app-icon-source.png</code> — 1024 × 1024, rendered from <a href="#the-splash-art">the splash art's</a> vector layers</td>
+</tr>
+<tr>
+<td>Made by</td>
+<td><code>art-source/splash/build_splash.py</code>; the window, size and hidden layers are named constants in <code>art-source/splash/icon.py</code></td>
+</tr>
+<tr>
+<td>Its tests</td>
+<td><code>.github/scripts/tests/test_app_icon_crop.py</code></td>
 </tr>
 <tr>
 <td>Generated into</td>
@@ -3002,11 +3014,27 @@ the picture, or the mode below, and regenerate.</p>
 <td><code>.github/scripts/generate_app_icons.py</code> (needs Pillow)</td>
 </tr>
 <tr>
-<td>Its tests</td>
+<td>Generator's tests</td>
 <td><code>.github/scripts/tests/test_generate_app_icons.py</code></td>
 </tr>
 </tbody>
 </table>
+<p><strong>How the source is made.</strong> The splash art's layers are stacked without the
+title and its glow, and without the three small jumping frogs and their hop
+arcs (one frog and one arc would otherwise poke into the frame); the unused
+splashes are not in the stack anyway. That stack is cut to <code>ICON_CROP</code>, a
+640 × 640 square of the 1586 × 992 splash canvas centred left-right on the big
+frog, from just above its eyes to just below the log, and rendered straight from
+the vectors at <code>ICON_SIZE</code>, 1024 px. So it is a fresh render, not an upscale, and
+it is over twice the largest icon Android asks for. The tests check that the
+whole big frog, and a good band of the log, fall inside the circle a round
+launcher cuts, and that the committed source matches the committed layer PNGs
+stacked and cropped the same way.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>art-source/splash/build_splash.py<span class="w"> </span>--icon-only<span class="w">   </span><span class="c1"># seconds: from the committed layer SVGs</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.github/scripts/generate_app_icons.py<span class="w">           </span><span class="c1"># then regenerate every icon</span>
+</code></pre></div>
+<p>A full <code>build_splash.py</code> run writes the icon source too, with the rest of the
+splash art.</p>
 <p>What it generates, at mdpi, hdpi, xhdpi, xxhdpi and xxxhdpi:</p>
 <table>
 <thead>
@@ -3052,8 +3080,8 @@ guaranteed to survive every shape. The generator's <code>--mode</code> decides w
 does to the picture:</p>
 <ul>
 <li><strong><code>fill</code></strong> — the default, and what is committed. The picture spans the whole
-  72 dp viewport. A round launcher trims the scenery in the corners; the frog in
-  the middle stays whole. Nothing is added around it: the background layer is
+  72 dp viewport. A round launcher trims the scenery in the corners — the ends of
+  the log, the sky and the water; the frog in the middle stays whole. Nothing is added around it: the background layer is
   the picture too. Derek's call, 2026-10-11.</li>
 <li><strong><code>shrink</code></strong> — the whole picture is scaled into the 66 dp safe circle on a
   plain cream background (<code>#F5F2EA</code>), so no launcher ever trims anything, at the
@@ -3062,10 +3090,10 @@ does to the picture:</p>
 <p>The legacy, round and store images are what the adaptive icon shows through its
 viewport, so they agree with the adaptive icon in either mode. To switch, or
 after changing the source:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>Pillow
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>.github/scripts/generate_app_icons.py<span class="w">               </span><span class="c1"># fill</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python3<span class="w"> </span>.github/scripts/generate_app_icons.py<span class="w"> </span>--mode<span class="w"> </span>shrink
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python3<span class="w"> </span>.github/scripts/run_python_tests.py<span class="w"> </span>scripts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>Pillow
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>python3<span class="w"> </span>.github/scripts/generate_app_icons.py<span class="w">               </span><span class="c1"># fill</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>python3<span class="w"> </span>.github/scripts/generate_app_icons.py<span class="w"> </span>--mode<span class="w"> </span>shrink
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>python3<span class="w"> </span>.github/scripts/run_python_tests.py<span class="w"> </span>scripts
 </code></pre></div>
 <p>One of those tests checks that the committed icons are exactly what a fresh run
 of the generator produces, so an icon edited by hand, or a source changed without
@@ -3075,7 +3103,7 @@ nothing but Python.</p>
 <p><strong>Not done yet: putting the icons into the build.</strong> The icon slots in
 <code>PlayerSettings</code> are set the same way as everything else in this section, by
 code at build time, and that waits on a committed <code>ProjectSettings</code> (#104). It is
-tracked on #169. Until then the APK still carries Unity's default icon. The
+tracked on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/459">#459</a>. Until then the APK still carries Unity's default icon. The
 generated PNGs also have no committed <code>.meta</code> files yet — see
 <a href="../unity-serialization/">Unity serialization</a> for why those are not
 hand-written.</p>
@@ -3445,8 +3473,9 @@ pinning its GUID is part of
 app icon and the home screen can each be made from the same art without redrawing it
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/481">#481</a>). The
 picture is committed once, byte-for-byte as supplied, and the layers are rebuilt from it
-by one script. Nothing the game builds uses them yet; putting the art on a screen is
-each screen's own issue.</p>
+by one script. The <a href="#the-app-icon">app icon</a> is cropped from them by the same script;
+nothing else the game builds uses them yet, and putting the art on a screen is each
+screen's own issue.</p>
 <table>
 <thead>
 <tr>
@@ -3520,24 +3549,24 @@ costs work we would rather spend on the game.</p>
 <h2 id="code-architecture-the-coreunity-split">Code architecture: the Core/Unity split<a class="headerlink" href="#code-architecture-the-coreunity-split" title="Link to this section">&para;</a></h2>
 <p>The single most important structural rule in this repo.</p>
 <h3 id="the-shape">The shape<a class="headerlink" href="#the-shape" title="Link to this section">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Assets/                       ← everything Unity compiles
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  Scripts/
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    Core/                     ← game logic. No UnityEngine. Ever.
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>      Frogs.Core.asmdef       ← no engine references, no auto-referenced assemblies
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    Unity/                    ← the shell. MonoBehaviours, scene wiring, input.
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      Frogs.Unity.asmdef      ← references Frogs.Core
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  Tests/
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    EditMode/                 ← EditMode tests for the shell; needs the editor
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>      Frogs.Unity.EditModeTests.asmdef
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  Editor/                     ← editor-only tooling; never ships in a build
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    Frogs.EditorTools.asmdef  ← references Frogs.Core and Frogs.Unity; Editor-only
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  Scenes/                     ← HelloWorld.unity, created by editor code (below)
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  Art/  Audio/  Prefabs/
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>Tests/
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>                                and `dotnet test` can run it with no editor.
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>ProjectSettings/              ← ProjectVersion.txt pins the editor version
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>Packages/manifest.json        ← only the packages actually needed
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Assets/                       ← everything Unity compiles
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  Scripts/
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    Core/                     ← game logic. No UnityEngine. Ever.
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>      Frogs.Core.asmdef       ← no engine references, no auto-referenced assemblies
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    Unity/                    ← the shell. MonoBehaviours, scene wiring, input.
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>      Frogs.Unity.asmdef      ← references Frogs.Core
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  Tests/
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    EditMode/                 ← EditMode tests for the shell; needs the editor
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>      Frogs.Unity.EditModeTests.asmdef
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  Editor/                     ← editor-only tooling; never ships in a build
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    Frogs.EditorTools.asmdef  ← references Frogs.Core and Frogs.Unity; Editor-only
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  Scenes/                     ← HelloWorld.unity, created by editor code (below)
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>  Art/  Audio/  Prefabs/
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>Tests/
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>  Core/                       ← plain NUnit. Outside Assets/, so Unity ignores it
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>                                and `dotnet test` can run it with no editor.
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>ProjectSettings/              ← ProjectVersion.txt pins the editor version
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>Packages/manifest.json        ← only the packages actually needed
 </code></pre></div>
 <p>Two placements are worth explaining, because they look inconsistent and aren't:</p>
 <ul>
@@ -3568,7 +3597,7 @@ folder name only makes code editor-only while the folder is part of a predefined
 assembly; once it has an asmdef of its own, the folder convention no longer
 applies and the platform list is what keeps build tooling out of the player.</p>
 <h4 id="the-check-that-catches-it">The check that catches it<a class="headerlink" href="#the-check-that-catches-it" title="Link to this section">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>.github/scripts/check_assembly_references.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>.github/scripts/check_assembly_references.py
 </code></pre></div>
 <p>It reads every <code>using</code> under <code>Assets/</code>, works out which assembly the file
 compiles into, and fails if that assembly cannot see the one the namespace
@@ -3578,7 +3607,7 @@ runs it beside <code>check_core_isolation.py</code> (<a href="../ci-cd/">CI/CD</
 <p>The asmdef flag is the real enforcement, but it only fires inside Unity —
 minutes later, in CI, and only while the flag is still set. So there is a second
 check that runs anywhere in under a second, with no editor and no .NET:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>.github/scripts/check_core_isolation.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>.github/scripts/check_core_isolation.py
 </code></pre></div>
 <p>It fails if <code>Frogs.Core.asmdef</code> loses <code>noEngineReferences</code>, if it gains an engine
 or editor reference, or if any <code>.cs</code> under <code>Assets/Scripts/Core/</code> imports —
@@ -3603,13 +3632,13 @@ for every test run, forever. Five minutes saved once, paid back on every commit.
 <h3 id="when-you-genuinely-need-engine-behaviour-in-core">When you genuinely need engine behaviour in Core<a class="headerlink" href="#when-you-genuinely-need-engine-behaviour-in-core" title="Link to this section">&para;</a></h3>
 <p>You need an <strong>interface Core owns and the Unity layer implements</strong>. Core
 declares what it needs in its own vocabulary; the shell provides it.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// In Core — no engine types.</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// In the Unity layer.</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">UnityClock</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UnityEngine</span><span class="p">.</span><span class="n">Time</span><span class="p">.</span><span class="n">time</span><span class="p">;</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// In Core — no engine types.</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">public</span><span class="w"> </span><span class="k">interface</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">get</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1">// In the Unity layer.</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">sealed</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">UnityClock</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">IClock</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">SecondsSinceStart</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">UnityEngine</span><span class="p">.</span><span class="n">Time</span><span class="p">.</span><span class="n">time</span><span class="p">;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
 </code></pre></div>
 <p>Tests substitute a fake clock and control time exactly. That is the whole point,
 and it is why "I'll just reference UnityEngine here" is never the shortcut it
@@ -3624,8 +3653,8 @@ silently ignores keys it doesn't recognise, so a hand-edited settings file with
 one wrong key builds fine and is wrong at runtime; the same mistake made through
 the C# API is a compile error. See
 <a href="../unity-serialization/">Unity serialization</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.ProjectBootstrap.Apply
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.ProjectBootstrap.Apply
 </code></pre></div>
 <p>It is idempotent, and whatever it changes under <code>ProjectSettings/</code> gets
 committed. The version fields are deliberately absent from it — <code>/VERSION</code> owns
@@ -3643,8 +3672,8 @@ forbids reasoning your way through. Asking Unity to write the file removes the
 guess.</p>
 <p><strong>It is run once, and the asset it produces is committed.</strong> From the menu —
 <code>Frogs → Create the Hello World scene</code> — or headlessly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Unity<span class="w"> </span>-batchmode<span class="w"> </span>-quit<span class="w"> </span>-projectPath<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">      </span>-executeMethod<span class="w"> </span>Frogs.EditorTools.HelloWorldScene.EnsureReadyToBuild
 </code></pre></div>
 <p>Nothing triggers it automatically and no build runs it. It is a tool for making
 the asset; the asset is what ships.</p>
@@ -3735,7 +3764,7 @@ and the standings all read the same game.</p>
 <h3 id="naming">Naming<a class="headerlink" href="#naming" title="Link to this section">&para;</a></h3>
 <p>Use the <code>scaffold-core</code> skill to create a Core type; it applies all of this and
 leaves you with a failing test, which is where a new type should start.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>Card<span class="w"> </span>--subfolder<span class="w"> </span>Cards
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>python3<span class="w"> </span>.claude/skills/scaffold-core/scaffold.py<span class="w"> </span>Card<span class="w"> </span>--subfolder<span class="w"> </span>Cards
 </code></pre></div>
 <ul>
 <li>Assemblies and their folders share a name: <code>Frogs.Core</code>, <code>Frogs.Unity</code>.</li>
@@ -3753,15 +3782,15 @@ leaves you with a failing test, which is where a new type should start.</p>
 <p><strong>Every size, offset, margin, spacing, duration, speed, delay, threshold, and
 count is a named constant or a serialized field. Never a bare literal in a
 method body.</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1">// No.</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">position</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">);</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1">// Yes.</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LaneWinningPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_lanePositionGapMin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">48f</span><span class="p">;</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_frogHopDuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// No.</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">transform</span><span class="p">.</span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3</span><span class="p">(</span><span class="mf">1.5f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">,</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">position</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">…</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nf">WaitForSeconds</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">);</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1">// Yes.</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LaneWinningPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_lanePositionGapMin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">48f</span><span class="p">;</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="na">[SerializeField]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">_frogHopDuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">;</span>
 </code></pre></div>
 <p>None of those three names is invented here. <code>LaneWinningPosition</code>,
 <code>LanePositionGapMin</code> and <code>FrogHopDuration</code> are what
