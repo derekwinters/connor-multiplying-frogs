@@ -470,9 +470,9 @@ pinning its GUID is part of
 app icon and the home screen can each be made from the same art without redrawing it
 ([#481](https://github.com/derekwinters/connor-multiplying-frogs/issues/481)). The
 picture is committed once, byte-for-byte as supplied, and the layers are rebuilt from it
-by one script. The [app icon](#the-app-icon) is cropped from them by the same script;
-nothing else the game builds uses them yet, and putting the art on a screen is each
-screen's own issue.
+by one script. The [app icon](#the-app-icon) is cropped from them by the same script,
+and the [launch splash](#the-launch-splash) is rendered from them; nothing else the
+game builds uses them yet, and putting the art on a screen is each screen's own issue.
 
 | | |
 | --- | --- |
@@ -517,6 +517,38 @@ The tests that read pixels need Pillow and NumPy and are skipped, by name, where
 are not installed; the structural ones need only Python. The byte-identical rebuild
 is checked by the build itself, not in CI: it needs the tracing libraries and takes
 minutes.
+
+### The launch splash
+
+**The app opens on Connor's splash picture, with no Unity logo**
+([#482](https://github.com/derekwinters/connor-multiplying-frogs/issues/482)). Unity's
+own launch splash shows it while the engine starts; the title screen follows.
+
+| | |
+| --- | --- |
+| Picture | `Assets/Art/Splash/splash-1920x1200.png` — the whole composite, frogs and title, at 1920 × 1200 |
+| Made by | `art-source/splash/build_splash.py` (`--splash-only` for just this); the window is in `art-source/splash/launch.py` |
+| Its tests | `.github/scripts/tests/test_launch_splash.py` |
+| Set by | `LaunchSplash`, in `Assets/Editor/` — at build time |
+| Import settings | `LaunchSplashImport` — a single sprite, kept at full size, no mipmaps |
+| Its EditMode tests | `Assets/Tests/EditMode/LaunchSplashTests.cs` |
+
+**The build sets it, every time.** `LaunchSplash` is called from
+`ProjectBootstrap.ApplyToBuild()`, which the build pre-processor runs before every build,
+the same way the app's name and icon get there. Through `PlayerSettings.SplashScreen` it:
+
+- turns the splash **on** and **the Unity logo off** (Unity 6 allows that on every
+  licence tier), with no other logos;
+- makes the picture the **background**, landscape, with no portrait picture since the
+  app never turns portrait;
+- shows the picture **as drawn**: no background blur and no darkening overlay. Unity
+  uses both to make logos stand out, and there are none.
+
+Everything else — how long the splash shows and how it animates — is left at Unity's
+defaults. A missing picture, or one Unity did not import as a sprite, **fails the
+build** rather than shipping Unity's splash. As with the icons, the picture is loaded by
+path, so no committed `.meta` is needed, and the settings are read back after they are
+set.
 
 ### What is explicitly not a target
 

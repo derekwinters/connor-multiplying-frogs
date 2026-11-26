@@ -4,8 +4,9 @@ Connor's splash picture (`Assets/Art/splash-source.png`, 1586 × 992, committed 
 is one flattened raster. This folder rebuilds it as **one vector layer per object**, so the
 same art can make the launch splash, the app icon and the home screen without redrawing it
 (#481). The app icon source, `Assets/Art/app-icon-source.png`, is cropped from these
-layers by the build (#483, below); otherwise nothing here is used by the game, and using
-the art is the job of the splash and home-screen issues.
+layers by the build (#483, below), and so is the launch splash,
+`Assets/Art/Splash/splash-1920x1200.png` (#482, below); otherwise nothing here is used
+by the game, and using the art is the job of the home-screen issue.
 
 The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapted.
 
@@ -19,7 +20,8 @@ The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapt
 | `objects/<id>.png` | Each notable object cropped on its own, 2000 px on its long side, transparent. Its vector is `layers/<id>.svg`. |
 | `review/` | `original-vs-composite.png`, `no-frogs.png`, `no-frogs-no-title.png`, `no-frogs-no-log.png`, `no-frogs-no-log-no-title.png`, `layer-sheet.png`, `title-vs-original.png`, `app-icon-masks.png` (the app icon as a circle, a squircle and a rounded square). |
 | `icon.py` | The app icon's crop: the window (`ICON_CROP`), its size (`ICON_SIZE`) and the layers it hides (`ICON_HIDDEN`). |
-| `build_splash.py` | The one script that writes all of the above and the app icon source, then self-checks. |
+| `launch.py` | The launch splash's window (`SPLASH_VIEW`) and size (`SPLASH_SIZE`). |
+| `build_splash.py` | The one script that writes all of the above, the app icon source and the launch splash, then self-checks. |
 | `cutout.py`, `tracing.py`, `sky.py`, `title.py` | Its stages: cut-out and completion, VTracer tracing, the fitted sky and glow, the vector title. |
 | `fonts/Fredoka-Variable.ttf`, `fonts/OFL.txt` | The title's font and its licence (SIL Open Font License 1.1). |
 
@@ -151,3 +153,18 @@ The tests in `.github/scripts/tests/test_splash_layers.py` check the committed f
 - Hidden parts are our completion, plainer than what shows: under the big frog the log's
   grain is carried straight across, the water under the log and pads is plain water, and
   the pads under the water lilies and splashes are plain green.
+
+## The launch splash
+
+The picture Unity shows while the app starts is the whole composite — every layer it
+uses, frogs and title — at the tablet's 1920 × 1200 (#482). `build_splash.py` renders it
+from the vectors to `Assets/Art/Splash/splash-1920x1200.png`; `--splash-only` renders
+just that, from the committed layers, in seconds.
+
+- **Window:** `SPLASH_VIEW = (0, 0.375, 1586, 991.25)`. The canvas is a hair taller than
+  16:10, so the window keeps the whole width and trims 0.375 canvas px top and bottom —
+  under half a pixel of the export — rather than stretching the picture.
+- **Opaque**, like the sky it is drawn on.
+
+`.github/scripts/tests/test_launch_splash.py` checks those, and that the committed file
+matches the committed composite brought down to the same size.
