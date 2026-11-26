@@ -346,7 +346,7 @@ comes from the tablet, not from a second drawing.
   the title screen, not for a gear inside a game they have not started. What is
   in the way is that
   [title-screen.md's first invariant](title-screen.md#invariants) says *"the
-  only interactive elements on this screen are `RESUME` and `NEW`. There is
+  only interactive elements on this screen are `RESUME` and `START`. There is
   never a third"*, and adding a third is a change to that page rather than a
   consequence of this one. It is a one-button change and it should be its own
   issue, decided on its own terms — not folded into the wireframe for the

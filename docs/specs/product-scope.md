@@ -144,6 +144,8 @@ What that means for the product, rather than for the format:
 when the game writes one, and what a player sees when a saved game is waiting.
 Those are mechanics, and mechanics are Connor's. Where a resumed game is
 re-entered from *has* been settled — the title screen, with `RESUME` and `NEW`
+(since renamed `START`, on
+[#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484))
 in place of `Play`, decided on
 [#228](https://github.com/derekwinters/connor-multiplying-frogs/issues/228) and
 carried into the layout contract by

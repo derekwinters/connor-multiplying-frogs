@@ -12,16 +12,6 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Screen | Mockup | Spec page |
 | --- | --- | --- |
 | Title screen | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, A — drawn title, log kept *(not agreed)* | [`title-screen-art-a-drawn-title-log.html`](title-screen-art-a-drawn-title-log.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, B — drawn title, no log *(not agreed)* | [`title-screen-art-b-drawn-title-no-log.html`](title-screen-art-b-drawn-title-no-log.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, C — text title, no log *(not agreed)* | [`title-screen-art-c-text-title-no-log.html`](title-screen-art-c-text-title-no-log.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, D — drawn title, log kept, scrim *(not agreed)* | [`title-screen-art-d-drawn-title-log-scrim.html`](title-screen-art-d-drawn-title-log-scrim.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, E — all the frogs *(not agreed)* | [`title-screen-art-e-all-frogs.html`](title-screen-art-e-all-frogs.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, F — all the frogs, button moved down *(not agreed)* | [`title-screen-art-f-all-frogs-button-low.html`](title-screen-art-f-all-frogs-button-low.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, G — a lily-pad button *(not agreed)* | [`title-screen-art-g-lilypad.html`](title-screen-art-g-lilypad.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, H — a wooden sign *(not agreed)* | [`title-screen-art-h-sign.html`](title-screen-art-h-sign.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, I — `NEW` on the log *(not agreed)* | [`title-screen-art-i-log.html`](title-screen-art-i-log.html) | [Title screen](../title-screen.md) |
-| Title screen on the art, J — a pond-corner button *(not agreed)* | [`title-screen-art-j-pond-corner.html`](title-screen-art-j-pond-corner.html) | [Title screen](../title-screen.md) |
 | Game setup, at rest with names | [`game-setup-names-set.html`](game-setup-names-set.html) | [Game setup](../game-setup.md) |
 | Game setup, naming a frog | [`game-setup-name-edit-inline.html`](game-setup-name-edit-inline.html) | [Game setup](../game-setup.md) |
 | Game setup, naming a frog — the alternative | [`game-setup-name-edit-pencil.html`](game-setup-name-edit-pencil.html) | [Game setup](../game-setup.md) |
@@ -139,15 +129,12 @@ That question is
 `title-screen.html` is the agreed picture and the losing comparison file is
 deleted, per [issue #216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216).
 
-It has ten, and they are live: the `title-screen-art-` files draw the
-screen on the real splash picture
-([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)).
-A to D hide the frogs, one per combination of drawn or text title, log kept or
-hidden, scrim or not; E to J keep all the frogs, with the button row where it
-is agreed, moved down, or redrawn as a lily pad, a sign, the log itself or a
-small corner button. See the
-[open questions](../title-screen.md#open-questions). Once those are answered
-the winner goes into `title-screen.html` and the rest are deleted.
+It then had ten more, drawn by
+[#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484) to
+put the screen on Connor's real splash picture: with and without the frogs, the
+log, the drawn title and a scrim, and five kinds of button. Derek picked all
+the frogs and a wooden sign reading `START`, so `title-screen.html` is that
+drawing and the other nine are deleted.
 
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
@@ -182,13 +169,13 @@ SVG is inline, static, has no script and fetches nothing, so every reason the
 because it is easier — the test is whether the shape is expressible as a styled
 box at all.
 
-**A committed image is allowed where the subject is the art itself.** The
-title screen's `title-screen-art-` files are the only current case: the
-question they ask is how the buttons sit on Connor's picture, which a
-placeholder block cannot answer. The pictures are rendered by the splash build
-into [`../images/title-screen/`](../images/title-screen/scene.png), committed,
-and loaded by relative path — the file still opens on the sofa with no network.
-So is the title's font, which G to J use to letter `NEW` the way the title is
+**A committed image is allowed where the subject is the art itself.**
+`title-screen.html` is the only current case: the screen *is* Connor's picture
+with a sign standing in it, which a placeholder block cannot show. The picture
+is rendered by the splash build into
+[`../images/title-screen/full.png`](../images/title-screen/full.png),
+committed, and loaded by relative path — the file still opens on the sofa with
+no network. So is the title's font, which letters `START` the way the title is
 lettered: a committed copy, with its licence, loaded by `@font-face` from the
 same folder, never from a font service. It is not a licence to paste
 screenshots into mockups.

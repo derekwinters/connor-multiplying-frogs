@@ -17,9 +17,9 @@ Reads `Assets/Art/splash-source.png` (read-only) and writes, under art-source/sp
     ../../Assets/Art/Splash/splash-1920x1200.png
                                        the launch splash: the whole composite at the
                                        tablet's 1920 x 1200 (window in launch.py; #482)
-    ../../docs/specs/ui/images/title-screen/{scene,scene-no-log,title,full}.png
-                                       the title screen's wireframe art: the splash
-                                       without the frogs, in pieces (home.py; #484)
+    ../../docs/specs/ui/images/title-screen/full.png
+                                       the title screen's art for its mockup: the whole
+                                       composite, with the title's font (home.py; #484)
 
 Every coordinate is a pixel of the original (1586 x 992): all SVGs share
 `viewBox="0 0 1586 992"`, so any set of layers stacks straight back together. Layer and
@@ -401,51 +401,24 @@ def write_splash():
     save_png(splash_png(), launch.SPLASH_OUT)
 
 
-def fade_glow_tail(svg):
-    """Fade out the glow's tail below the title (home.GLOW_TAIL) with a mask on the
-    glow's group. The mask is white shapes whose opacity is what is kept - everything
-    outside the tail's column, the column above y0, and a band fading from white to
-    clear between y0 and y1 - because CairoSVG masks by alpha, not by luminance (white
-    with opacity means the same in both), so the cut has no hard edge."""
-    if '<g id="title-glow" ' not in svg:
-        return svg
-    x0, x1, y0, y1 = home.GLOW_TAIL
-    w, h = cu.W, cu.H
-    mask = (f'<linearGradient id="home-glow-tail-fade" gradientUnits="userSpaceOnUse" '
-            f'x1="0" y1="{y0}" x2="0" y2="{y1}">'
-            f'<stop offset="0" stop-color="#fff" stop-opacity="1"/>'
-            f'<stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>\n'
-            f'<mask id="home-glow-tail" maskUnits="userSpaceOnUse" x="0" y="0" width="{w}" height="{h}">'
-            f'<rect x="0" y="0" width="{x0}" height="{h}" fill="#fff"/>'
-            f'<rect x="{x1}" y="0" width="{w - x1}" height="{h}" fill="#fff"/>'
-            f'<rect x="{x0}" y="0" width="{x1 - x0}" height="{y0}" fill="#fff"/>'
-            f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{y1 - y0}" '
-            f'fill="url(#home-glow-tail-fade)"/></mask>\n')
-    svg = svg.replace("<defs>\n", "<defs>\n" + mask, 1)
-    return svg.replace('<g id="title-glow" ', '<g id="title-glow" mask="url(#home-glow-tail)" ', 1)
-
-
-def home_png(piece):
-    """One piece of the title screen's wireframe art (#484), rendered from the vectors.
-    The scenes and the full picture are opaque, as the sky is; the title is transparent
-    around it. The glow's tail is faded out of every piece (fade_glow_tail)."""
-    svg = fade_glow_tail(stack_svg(home.piece_ids(piece, object_ids()),
-                                   title=f"Multiplying Frogs title screen - {piece}",
-                                   view=home.HOME_VIEW))
-    img = render(svg, home.HOME_SIZE[0])
+def home_png():
+    """The title screen's art (#484): the whole composite, rendered from the vectors at
+    the tablet's size; opaque, as the sky is."""
+    svg = stack_svg(home.home_ids(object_ids()), title="Multiplying Frogs title screen",
+                    view=home.HOME_VIEW)
+    img = render(svg, home.HOME_SIZE[0]).convert("RGB")
     if img.size != home.HOME_SIZE:
-        raise SystemExit(f"title screen {piece} rendered at {img.size}, not {home.HOME_SIZE}")
-    return img if piece == "title" else img.convert("RGB")
+        raise SystemExit(f"the title screen art rendered at {img.size}, not {home.HOME_SIZE}")
+    return img
 
 
 def write_home():
-    home.HOME_OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for piece in home.PIECES:
-        save_png(home_png(piece), home.HOME_OUT_DIR / f"{piece}.png")
-    shutil.copyfile(OBJECTS_DIR / f"{home.LILY_PAD}.png", home.HOME_OUT_DIR / "lily-pad.png")
-    (home.HOME_OUT_DIR / "fonts").mkdir(exist_ok=True)
+    """The title screen's art, and the title's font and licence beside it for the mockup."""
+    home.HOME_OUT.parent.mkdir(parents=True, exist_ok=True)
+    save_png(home_png(), home.HOME_OUT)
+    (home.HOME_OUT.parent / "fonts").mkdir(exist_ok=True)
     for name in home.FONT_FILES:
-        shutil.copyfile(HERE / "fonts" / name, home.HOME_OUT_DIR / "fonts" / name)
+        shutil.copyfile(HERE / "fonts" / name, home.HOME_OUT.parent / "fonts" / name)
 
 
 def load_committed_parts():
@@ -494,8 +467,7 @@ def build():
 
 def outputs():
     files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT,
-             launch.SPLASH_OUT] + [home.HOME_OUT_DIR / f"{p}.png" for p in home.PIECES] + \
-            [home.HOME_OUT_DIR / "lily-pad.png"] + [home.HOME_OUT_DIR / "fonts" / n for n in home.FONT_FILES]
+             launch.SPLASH_OUT, home.HOME_OUT] + [home.HOME_OUT.parent / "fonts" / n for n in home.FONT_FILES]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files
@@ -586,7 +558,7 @@ def main():
     if args.home_only:
         load_committed_parts()
         write_home()
-        print(f"wrote {home.HOME_OUT_DIR.relative_to(HERE.parents[1])}/")
+        print(f"wrote {home.HOME_OUT.relative_to(HERE.parents[1])}")
         return 0
     if args.splash_only:
         load_committed_parts()
