@@ -2328,6 +2328,12 @@ That question is
 <a href="../title-screen/#open-questions">now settled</a> — <code>NEW</code> — so
 <code>title-screen.html</code> is the agreed picture and the losing comparison file is
 deleted, per <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">issue #216</a>.</p>
+<p>It then had ten more, drawn by
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/484">#484</a> to
+put the screen on Connor's real splash picture: with and without the frogs, the
+log, the drawn title and a scrim, and five kinds of button. Derek picked all
+the frogs and a wooden sign reading <code>START</code>, so <code>title-screen.html</code> is that
+drawing and the other nine are deleted.</p>
 <p>Each row arrives with its screen's <code>Wireframe:</code> issue. See
 <a href="../../../engineering/ui-design-process/">UI design process</a>.</p>
 <h3 id="colour-in-these-mockups-is-mostly-a-placeholder">Colour in these mockups is mostly a placeholder<a class="headerlink" href="#colour-in-these-mockups-is-mostly-a-placeholder" title="Link to this section">&para;</a></h3>
@@ -2354,6 +2360,16 @@ SVG is inline, static, has no script and fetches nothing, so every reason the
 "is not" list below exists still holds. It is not a licence to reach for SVG
 because it is easier — the test is whether the shape is expressible as a styled
 box at all.</p>
+<p><strong>A committed image is allowed where the subject is the art itself.</strong>
+<code>title-screen.html</code> is the only current case: the screen <em>is</em> Connor's picture
+with a sign standing in it, which a placeholder block cannot show. The picture
+is rendered by the splash build into
+<a href="../images/title-screen/full.png"><code>../images/title-screen/full.png</code></a>,
+committed, and loaded by relative path — the file still opens on the sofa with
+no network. So is the title's font, which letters <code>START</code> the way the title is
+lettered: a committed copy, with its licence, loaded by <code>@font-face</code> from the
+same folder, never from a font service. It is not a licence to paste
+screenshots into mockups.</p>
 <p><strong>Is not:</strong> a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it
 does instead of how it looks, and it stops being cheap to change — which was the
