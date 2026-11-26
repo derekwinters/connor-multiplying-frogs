@@ -1781,6 +1781,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-splash-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The splash art
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2498,6 +2509,17 @@
     <span class="md-ellipsis">
       
         The water tile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-splash-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The splash art
       
     </span>
   </a>
@@ -3418,6 +3440,78 @@ directly.</p>
 <p>The PNG has <strong>no committed <code>.meta</code></strong>, like the models', for the same reason;
 pinning its GUID is part of
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/183">#183</a>.</p>
+<h3 id="the-splash-art">The splash art<a class="headerlink" href="#the-splash-art" title="Link to this section">&para;</a></h3>
+<p><strong>Connor's splash picture is kept as separate layers</strong>, so the launch splash, the
+app icon and the home screen can each be made from the same art without redrawing it
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/481">#481</a>). The
+picture is committed once, byte-for-byte as supplied, and the layers are rebuilt from it
+by one script. Nothing the game builds uses them yet; putting the art on a screen is
+each screen's own issue.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source</td>
+<td><code>Assets/Art/splash-source.png</code> — 1586 × 992, unmodified</td>
+</tr>
+<tr>
+<td>Rebuilt into</td>
+<td><code>art-source/splash/</code> — outside <code>Assets/</code>, so Unity never imports it</td>
+</tr>
+<tr>
+<td>Builder</td>
+<td><code>art-source/splash/build_splash.py</code> — Python with VTracer, OpenCV, SciPy, CairoSVG, Pillow, NumPy, fontTools and skia-pathops</td>
+</tr>
+<tr>
+<td>Its tests</td>
+<td><code>.github/scripts/tests/test_splash_layers.py</code></td>
+</tr>
+<tr>
+<td>How it works</td>
+<td><code>art-source/splash/README.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>What it writes:</p>
+<ul>
+<li><strong>One SVG per object</strong> — sky, title glow, each cloud, the far banks, the reeds, the
+  pond, each lily pad, water lily, splash and hop arc, the grass and its tufts, the log,
+  each frog, and the title — all on one canvas in the original's pixels
+  (<code>viewBox="0 0 1586 992"</code>), each a group with an <code>id</code>, so any set of them stacks
+  straight back together. Each is also a transparent PNG at 3965 × 2480, more than
+  twice the 1920 × 1200 tablet.</li>
+<li><strong>A composite</strong> of every layer in use, and each notable object <strong>cropped</strong> on its own.
+  Each jumping frog is grouped with the dashed arc of its hop, so hiding the frogs hides
+  the arcs. The <strong>splashes</strong> on the lily pads are exported as layers but left out of the
+  composite — kept, not used, Derek's call in review of #481's PR.</li>
+<li><strong>Review images</strong>: the original above the rebuild, and the scene without the frogs,
+  without the frogs and the title, without the frogs and the log, and without all three.</li>
+</ul>
+<p>Three rules it keeps:</p>
+<ul>
+<li><strong>The title is vector lettering, spelled MULTIPLYING.</strong> The picture spells it
+  "MUILTIPLYING"; Derek's call (2026-11-24) is that the rebuild corrects it. Letters
+  come from an open-licensed font (Fredoka, SIL Open Font License, licence committed in
+  <code>art-source/splash/fonts/</code>), placed where the drawn letters are.</li>
+<li><strong>Hiding a layer leaves no hole.</strong> Where an object is hidden behind another, its hidden
+  part is completed: the log carries on under the big frog; the water, shoreline, grass
+  and tufts behind the log and under the big frog; the pads and water under the unused
+  splashes; and the sky — a fitted gradient over the whole canvas — under the title. The
+  tests check that nothing lets the sky through below the water line once the big frog,
+  the log, the splashes or the arcs are taken away, and that the sky is opaque.</li>
+<li><strong>The build is deterministic.</strong> A second run writes byte-identical files
+  (<code>build_splash.py --check-rebuild</code>). To change the art, change the script's numbers
+  and rebuild; do not edit an output by hand.</li>
+</ul>
+<p>The tests that read pixels need Pillow and NumPy and are skipped, by name, where those
+are not installed; the structural ones need only Python. The byte-identical rebuild
+is checked by the build itself, not in CI: it needs the tracing libraries and takes
+minutes.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
 if a choice is easier because Android is the only target, take the easier
