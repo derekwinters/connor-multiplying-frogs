@@ -43,6 +43,13 @@ right.
 | Body column width | `ConfirmBodyWidth` | 1048 px |
 | Cost line spacing | `ConfirmBodyLineHeight` | 1.4× |
 
+How it looks is the [style guide](style-guide.md)'s, and nothing on this page
+moved for it: the question is set in `FontDisplay` semibold, the cost in
+`FontBody` semibold in `InkSoft` (it used to be the mockups' grey `#6C7873`),
+`End the game` is the `Berry` ring and `Keep playing` the `Leaf` button on its
+lip. Every sentence in a Pond-style dialog is `InkSoft`, so the cost — the
+sentence this dialog exists to say — is darker than it was.
+
 ## Elements
 
 - **Question** — `End the game for everyone?` The words *for everyone* are the
@@ -95,6 +102,7 @@ right.
 [`mockups/end-game-confirm.html`](mockups/end-game-confirm.html) — drawn in the
 three-frogs-still-swimming state, which is the one where the confirm has
 something to lose.
+Redrawn in the Pond style; the words, sizes and button order are unchanged.
 
 ## Who may end a game
 

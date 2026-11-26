@@ -10,6 +10,10 @@
   Numbers are working-out-grid.md's constants table. The grid is placed by the
   page's own rule — centred in the space left over, in both directions — not
   hand-placed the way the three older grid mockups were.
+
+  Drawn in the Pond style — docs/specs/ui/style-guide.md. Sizes and positions
+  are unchanged; the look is the style guide's. The focused cell and the answer
+  row keep today's colours until #525 is answered.
 -->
 <html lang="en">
 <head>
@@ -17,7 +21,7 @@
 <title>Multiplying Frogs — Help me on 12 x 34, items beside the grid</title>
 <style>
   :root{
-    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
+    --ink:#1E2422; --line:var(--moss); --faint:#B9C0BD; --paper:#FFFFFF;
     --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
     /* the cell the caret is in — working-out-grid.md's `GridFocusFill` */
     --focus:#8CB89E;
@@ -46,7 +50,7 @@
         align-items:center;gap:24px;padding:0 20px;font-size:32px;background:#fff;flex:none}
   .chip.act{border:6px solid var(--ink);font-weight:700}
   .chip b{display:block;font-size:32px;font-weight:700;line-height:1.1}
-  .chip s{display:block;font-size:24px;color:#6C7873;text-decoration:none;line-height:1.2}
+  .chip s{display:block;font-size:24px;color:var(--moss);text-decoration:none;line-height:1.2}
   .sw{width:64px;height:64px;border-radius:50%;flex:none}
   .pad{width:112px;height:112px;border-radius:50%;background:#CFE0D2;border:3px solid #9FB8A5;flex:none;position:relative}
   .log{width:176px;height:120px;border-radius:24px;background:#E0D4C3;border:3px solid #B9A78E;flex:none;
@@ -75,18 +79,77 @@
   /* GridHelpItemSize 32 px, right-aligned to a common edge GridHelpGap (32 px)
      left of the grid, each vertically centred on its own addition row. */
   .helpitem{display:flex;align-items:center;justify-content:flex-end;
-            font-size:32px;color:#6C7873;white-space:nowrap}
+            font-size:32px;color:var(--moss);white-space:nowrap}
+</style>
+<style>
+  /* Fredoka, committed beside the title screen's mockup under the SIL OFL, loaded by
+     relative path so the file opens with no network. Nunito is not committed yet:
+     the sentences fall back to the system sans-serif. style-guide.md PS-5, PS-6. */
+  @font-face{font-family:"Fredoka";src:url("../images/title-screen/fonts/Fredoka-Variable.ttf") format("truetype");
+             font-weight:300 700}
+  :root{
+    /* style-guide.md — the palette */
+    --ink:#1A2614; --inksoft:#3B4A33; --moss:#56634F; --reed:#6B7A62;
+    --paper:#FFFDF4; --white:#FFFFFF;
+    --leaf:#2C8C1C; --leaflip:#1B5E10; --leafpressed:#257716;
+    --lime:#8EC701; --activefill:#F2FADF; --lilywash:#EEF8DC; --sunrays:#E6F5C2;
+    --pond:#9FD8F2; --deeppond:#092E4A; --logend:#D98A2B; --berry:#C8361E;
+    --green:#3E933E; --blue:#4273B8; --orange:#D38231; --pink:#D41C78;
+    --display:"Fredoka","Nunito",system-ui,sans-serif;
+    --body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --carry:#A9B89C; /* the carry box's dashed outline */
+  }
+  /* Pond style — style-guide.md */
+  .scrim{position:absolute;inset:0;background:rgba(9,46,74,.60)}          /* DeepPond at DialogScrimOpacity */
+  .panel{background:var(--paper);border:6px solid var(--ink);border-radius:44px;   /* OutlinePanel, DialogRadius */
+         box-shadow:0 14px 0 rgba(26,38,20,.45);color:var(--ink)}             /* ShadowPanel */
+  .dlgtitle{font-family:var(--display);font-weight:600;font-size:56px;line-height:68px}
+  .dlgbody{font-family:var(--body);font-weight:600;font-size:40px;line-height:1.4;color:var(--inksoft)}
+  .btn{height:112px;min-width:320px;padding:0 48px;border-radius:30px;display:flex;align-items:center;
+       justify-content:center;white-space:nowrap;font-family:var(--display);font-size:44px;font-weight:600;
+       border:5px solid var(--ink)}                                            /* OutlineButton, ButtonRadius */
+  .btn.p{background:var(--leaf);color:var(--white);
+         box-shadow:0 10px 0 var(--leaflip),0 10px 0 5px var(--ink)}           /* ButtonLipDepth */
+  .btn.s{background:transparent;color:var(--ink);box-shadow:0 6px 0 rgba(26,38,20,.25)}
+  .btn.d{background:transparent;color:var(--berry);border-color:var(--berry);box-shadow:0 6px 0 rgba(200,54,30,.25)}
+  .btn.off{opacity:.40;box-shadow:none}                                         /* ButtonDisabledOpacity */
+  .chip{display:inline-flex;align-items:center;gap:24px;width:auto;height:96px;padding:0 20px;flex:none;
+        background:var(--white);border:4px solid var(--ink);border-radius:48px;  /* OutlineChip, fully round */
+        font-family:var(--display);font-weight:600;font-size:32px;white-space:nowrap}
+  .chip.act{border-width:7px;background:var(--activefill)}                     /* OutlineChipActive, ActiveFill */
+  .chip .fr{width:108px;height:80px;flex:none}                                  /* PlayerChipFrogSize */
+  .fr{background-size:contain;background-position:center;background-repeat:no-repeat}
+  .fr.green{background-image:url("../images/frogs/frog-green.png")}
+  .fr.blue{background-image:url("../images/frogs/frog-blue.png")}
+  .fr.orange{background-image:url("../images/frogs/frog-orange.png")}
+  .fr.pink{background-image:url("../images/frogs/frog-pink.png")}
+  .badge{border-radius:50%;border:6px solid var(--ink);display:flex;align-items:center;justify-content:center;
+         font-family:var(--display);font-weight:700;color:var(--white);box-shadow:0 8px 0 rgba(26,38,20,.35)}
+  /* The grid and keypad in the Pond style. Every box keeps its size; only the
+     outline, corner, fill and face change. GridFocusFill, the focused cell's outline
+     and the answer row's tint stay at today's values until #525 is answered. */
+  .frame{font-family:var(--body)}
+  .cell{border:4px solid var(--ink);border-radius:18px;background:var(--white);
+        font-family:var(--display);font-weight:500}                 /* GridCellBorderWidth, GridCellRadius */
+  .cell.fix{border:none;background:transparent;font-weight:600}
+  .carry i{border:3px dashed var(--carry);border-radius:10px}         /* GridCarryBoxRadius */
+  .key{border:5px solid var(--ink);border-radius:30px;background:var(--white);
+       font-family:var(--display);font-weight:600;box-shadow:0 8px 0 rgba(26,38,20,.30)}  /* ShadowKey */
+  .pill{height:96px;padding:0 32px;border-radius:48px;border:4px solid var(--ink);background:var(--lilywash);
+        font-family:var(--display);font-size:40px;font-weight:600}  /* the card readout pill */
+  .prompt{font-family:var(--display);font-weight:500;font-size:44px;color:var(--inksoft)}
+  .helpitem{color:var(--moss);font-family:var(--display);font-weight:500}
 </style>
 </head>
 <body>
 <div class="frame">
-    <div class="abs" style="inset:0;background:#E2E8E5"></div>
+    <div class="abs" style="inset:0;background:var(--pond)"></div>
     <div class="scrim"></div>
     <div class="abs panel" style="left:48px;top:48px;width:1824px;height:1104px">
       <div class="abs row" style="left:56px;top:44px;gap:32px">
-        <div class="chip act"><span class="sw" style="background:var(--green)"></span><span>Green</span></div>
-        <div style="font-size:44px;color:#6C7873">Work it out</div>
-        <div class="row" style="height:96px;padding:0 32px;border-radius:20px;border:3px solid var(--faint);font-size:40px;font-weight:700">12 &times; 34 &middot; medium pile</div>
+        <div class="chip act"><span class="fr green"></span><span>Green</span></div>
+        <div class="prompt">Work it out</div>
+        <div class="row pill">12 &times; 34 &middot; medium pile</div>
       </div>
 
       <!-- `Help me`: GridHelpButtonHeight 96, matching the card readout pill it
@@ -94,10 +157,10 @@
       <div class="abs btn s off" style="right:56px;top:44px;height:96px;font-size:44px">Help me</div>
 
       <div class="abs col" style="left:408px;top:212px;gap:8px">
-        <div class="row" style="gap:8px"><div class="carry" style="width:104px"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">1</div><div class="cell fix">2</div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px">&times;</div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">3</div><div class="cell fix">4</div></div><div style="height:6px;background:var(--ink);width:552px"></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px">+</div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div style="height:6px;background:var(--ink);width:552px"></div><div class="row" style="gap:8px"><div class="carry" style="width:104px"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;font-size:28px;color:#6C7873">=</div><div class="cell" style="height:128px;border-width:6px;background:var(--focus);border-color:var(--accent)"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div></div>
+        <div class="row" style="gap:8px"><div class="carry" style="width:104px"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px"></div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">1</div><div class="cell fix">2</div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px">&times;</div><div class="cell fix"></div><div class="cell fix"></div><div class="cell fix">3</div><div class="cell fix">4</div></div><div style="height:6px;background:var(--ink);width:552px"></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;height:56px">+</div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div><div class="cell" style="height:56px;font-size:28px"></div></div><div style="height:6px;background:var(--ink);width:552px"></div><div class="row" style="gap:8px"><div class="carry" style="width:104px"></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div><div class="carry"><i></i></div></div><div class="row" style="gap:8px"><div class="cell fix" style="width:104px;justify-content:flex-end;padding-right:16px;font-size:28px;color:var(--moss)">=</div><div class="cell" style="height:128px;border-width:6px;background:var(--focus);border-color:var(--accent)"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div><div class="cell" style="height:128px;border-width:6px;background:#F3F8F5"></div></div>
       </div>
       <div class="abs helpitem" style="right:1445px;top:514px;height:56px">4 &times; 2</div><div class="abs helpitem" style="right:1445px;top:578px;height:56px">4 &times; 10</div><div class="abs helpitem" style="right:1445px;top:642px;height:56px">30 &times; 2</div><div class="abs helpitem" style="right:1445px;top:706px;height:56px">30 &times; 10</div>
-      <div class="abs col" style="left:64px;top:200px;width:260px;gap:10px"><div style="font-size:26px;font-weight:700;color:#6C7873">the four products</div><div style="font-size:24px;color:#6C7873;line-height:1.3">One per addition row, outside the grid, in the space the grid is centred in. The grid is untouched.</div></div>
+      <div class="abs col" style="left:64px;top:200px;width:260px;gap:10px"><div style="font-size:26px;font-weight:700;color:var(--moss)">the four products</div><div style="font-size:24px;color:var(--moss);line-height:1.3">One per addition row, outside the grid, in the space the grid is centred in. The grid is untouched.</div></div>
 
       <div class="abs col" style="right:56px;top:216px;gap:24px">
         <div style="display:grid;grid-template-columns:repeat(3,140px);gap:16px">

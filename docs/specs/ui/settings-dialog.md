@@ -28,7 +28,7 @@ to do something.
 
 | Region | Job |
 | --- | --- |
-| `title` | `Settings` |
+| `title` | `Settings`, on a lime name-tab straddling the panel's top edge |
 | `actions` | `How to play`, then `End the game` |
 | `about` | The game's name, `Designed by Connor`, and the version |
 | `controls` | `Back to the game` |
@@ -41,7 +41,10 @@ a corner and this is a section with a heading in it — see
 ## Anchors
 
 A centred [dialog](shared-components.md#dialog), `SettingsDialogWidth` by
-`SettingsDialogHeight`. Actions are a single left-aligned column at full inner
+`SettingsDialogHeight`. The `title` is a name-tab: its left edge
+`SettingsTabInset` in from the panel's outer left edge, its top edge
+`SettingsTabRise` above the panel's outer top edge, so it sits half on the
+panel and half above it. Actions are a single left-aligned column at full inner
 width; the primary button is bottom-right; the `about` block is left-aligned at
 the panel's inner left edge, `SettingsAboutTopOffset` down from the panel's top.
 
@@ -85,6 +88,14 @@ anchored to the thing it belongs to.
 | Gap between the three lines of `about` | `SettingsAboutLineGap` | 12 px |
 | Height of the whole `about` block | `SettingsAboutBlockHeight` | 144 px |
 | `about` down from the panel's top edge | `SettingsAboutTopOffset` | 164 px |
+| Name-tab, in from the panel's outer left edge | `SettingsTabInset` | 56 px |
+| Name-tab, risen above the panel's outer top edge | `SettingsTabRise` | 46 px |
+| Name-tab padding, top and bottom | `SettingsTabPaddingY` | 8 px |
+| Name-tab padding, left and right | `SettingsTabPaddingX` | 32 px |
+| Name-tab label size | `SettingsTabLabelSize` | 52 px, `FontDisplay` semibold, line box 1.2 |
+| Name-tab outline | `OutlinePanel` | 6 px `Ink` |
+| Name-tab corner radius | `SettingsTabRadius` | 24 px |
+| Name-tab fill | `Lime` | `#8EC701` |
 | Gap below `about`, before the actions column | `SettingsAboutSectionGap` | 72 px |
 
 `SettingsAboutBlockHeight` is derived, and the arithmetic sums exactly, which is
@@ -99,10 +110,18 @@ It is named anyway rather than left to be recomputed. The block's height is what
 sets `SettingsDialogHeight`, and a number that three other numbers depend on is
 a number worth being able to say out loud.
 
-`SettingsAboutTopOffset` is not a free number: it is `DialogPadding` (56) + the
-title's line box (68) + `DialogTitleGap` (40). It is stated as a single offset
-because that is how the block is positioned, and derived here so a change to
-`DialogTitleGap` is visibly a change to this too.
+`SettingsAboutTopOffset` was derived, not free: `DialogPadding` (56) + the
+title's line box (68) + `DialogTitleGap` (40). Since the
+[Pond style](style-guide.md) moved the title onto the name-tab, nothing in the
+panel sits above `about` any more, so that sum no longer describes anything on
+screen. The value is **kept at 164 px** anyway, because every size and position
+on this page stays as it was unless the style decision named it, and moving
+`about` up would move the whole top half of the dialog — a layout change, which
+is [open question 6](#open-questions).
+
+The name-tab is about 90 px tall — 6 + 8 + 62 + 8 + 6 — and with
+`SettingsTabRise` 46 px of it above the panel, it reaches 44 px down into it,
+well clear of `about` at 164.
 
 The title's line box is 68 px — `DialogTitleSize` 56 at `SettingsAboutLineHeight`
 1.2, rounded up to a whole pixel. It is written down because `DialogTitleGap` is
@@ -173,19 +192,31 @@ of this table's numbers at the same time, so the code and this page now agree.
   board state that was there.
 - **`about`** — three lines, left-aligned, stacked, `SettingsAboutLineGap`
   apart. Not a button, not tappable, no state:
-    1. **`Multiplying Frogs`** at `SettingsAboutNameSize`, bold. The same words
+    1. **`Multiplying Frogs`** at `SettingsAboutNameSize`, in `FontDisplay`
+       semibold. The same words
        the title screen already draws — `TitleScreenView`'s own `TitleLabel`,
        at a smaller size. This is the game saying its own name, not a second
        wordmark. Note that `SettingsDialogView` has a `TitleLabel` of its own
        and it is the string `Settings`; these two are not the same constant and
        must not be made to share one.
-    2. **`Designed by Connor`** at `SettingsAboutCreditSize`. Derek's wording,
+    2. **`Designed by Connor`** at `SettingsAboutCreditSize`, in `FontBody`,
+       `InkSoft`. Derek's wording,
        and the default answer; see [open question 3](#open-questions), which is
        Connor's to settle because the line is about him.
-    3. **The version** at `VersionLabelSize`, in the mockup's `--line` grey,
+    3. **The version** at `VersionLabelSize`, in `FontBody`, `Reed` — the
+       quietest colour in the [palette](style-guide.md#the-palette) —
        from `/VERSION` via `AppVersion`. The same value doing the same job as
        the title screen's own version readout, under the identical name — not a
        second constant for the same number.
+
+### The name-tab
+
+The `title` used to sit inside the panel at `DialogTitleSize`, top-left of the
+padding box, like every other dialog's. In the [Pond style](style-guide.md) it
+is lettered on a `Lime` tab that straddles the panel's top edge, like a name
+tab on a folder. It is this dialog's one decorative element
+([PS-12](style-guide.md#ps-12)) and Derek's choice for it. It is still the
+title: it says `Settings`, it is not a button, and it does nothing when touched.
 
 ## Behaviour
 
@@ -229,7 +260,11 @@ buttons in a row.
 ## Mockup
 
 [`mockups/settings-dialog.html`](mockups/settings-dialog.html) — the agreed
-picture, with `about` under the title.
+picture, with `about` under the title, redrawn in the Pond style with the title
+on its name-tab. The redraw also draws `How to play` **enabled**: the old file
+still drew it disabled, from before
+[#324](https://github.com/derekwinters/connor-multiplying-frogs/issues/324)
+enabled it.
 
 It was one of a pair. Both files were the same 900 × 970 canvas with the same
 stylesheet and the same three lines of text, differing in exactly one thing:
@@ -319,3 +354,10 @@ The footprint placement lifted it 260 px to make room for a band underneath.
   less confusing than a button that appears from nowhere. The button has been
   sitting in this layout since the dialog was first drawn, in exactly the place
   it will work from.
+- **6. Should `about` move up into the space the title left?** With the title on
+  the name-tab, the panel has about 120 px of empty paper between the tab and
+  `about`, where the title used to be. The Pond-style design drawing closed it
+  up, on a panel drawn 1000 × 860; this page kept every size and position,
+  because they were not part of the style decision. Closing it up moves `about`
+  and `SettingsDialogHeight`, so it is a layout question for Connor and a
+  wireframe of its own, not a restyle.

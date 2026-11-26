@@ -191,12 +191,12 @@ the screen is built to.
 | --- | --- | --- |
 | Digit cell, square | `GridCellSize` | 104 px |
 | Gap between cells and between rows | `GridCellGap` | 8 px |
-| Digit cell outline | `GridCellBorderWidth` | 3 px |
-| Digit cell corner radius | `GridCellRadius` | 10 px |
+| Digit cell outline | `GridCellBorderWidth` | 4 px `Ink` |
+| Digit cell corner radius | `GridCellRadius` | 18 px |
 | Carry strip height | `GridCarryRowHeight` | 56 px |
 | Carry box inside the strip | `GridCarryBoxSize` | 56 × 52 px |
 | Carry box outline | `GridCarryBoxBorderWidth` | 3 px |
-| Carry box corner radius | `GridCarryBoxRadius` | 8 px |
+| Carry box corner radius | `GridCarryBoxRadius` | 10 px |
 | Rule line thickness | `GridRuleThickness` | 6 px |
 | Addition row height, once the section is grown | `GridAdditionRowHeight` | 56 px |
 | Answer row height | `GridAnswerRowHeight` | 128 px |
@@ -210,8 +210,9 @@ the screen is built to.
 | `Work it out` | `GridPromptSize` | 44 px |
 | Card readout pill height | `GridCardReadoutHeight` | 96 px |
 | Card readout pill padding, each side | `GridCardReadoutPaddingX` | 32 px |
-| Card readout pill corner radius | `GridCardReadoutRadius` | 20 px |
-| Card readout pill outline | `GridCardReadoutBorderWidth` | 3 px |
+| Card readout pill corner radius | `GridCardReadoutRadius` | 48 px — fully round |
+| Card readout pill outline | `GridCardReadoutBorderWidth` | 4 px `Ink` |
+| Card readout pill fill | `LilyWash` | `#EEF8DC` |
 | Card readout label | `GridCardReadoutLabelSize` | 40 px |
 | Addition rows a card is dealt | `GridAdditionRowsAtStart` | 2 rows |
 | Most addition rows the section can hold | `GridAdditionRowsMax` | 6 rows |
@@ -219,8 +220,9 @@ the screen is built to.
 | Keypad, down from the panel's top edge | `KeypadTop` | 216 px |
 | Keypad key, square | `KeypadKeySize` | 140 px |
 | Gap between keys | `KeypadKeyGap` | 16 px |
-| Key corner radius | `KeypadKeyRadius` | 20 px |
-| Key outline | `KeypadKeyBorderWidth` | 3 px |
+| Key corner radius | `KeypadKeyRadius` | 30 px |
+| Key outline | `KeypadKeyBorderWidth` | 5 px `Ink` |
+| Key shadow | `ShadowKey` | 8 px down, `Ink` at 30 %, no blur |
 | Digit key label | `KeypadKeyLabelSize` | 56 px |
 | Backspace glyph | `KeypadBackspaceLabelSize` | 40 px |
 | `clear` label | `KeypadClearLabelSize` | 32 px |
@@ -285,11 +287,41 @@ Growing the section therefore costs `GridAdditionRowHeight` + `GridCellGap` =
 grown row *shrinks* the grid rather than stretching it — see
 [Mockup](#mockup) for the whole sum.
 
-**`GridFocusFill` is the one colour on that table**, and it is there because it
-is the one colour that carries a rule rather than a picture's paint. The rest of
-this screen's palette is the mockups' — ink, line, faint, paper, accent — copied
-into the shell and named nowhere. This one has to clear a bar, and a bar needs
-somewhere to be written down.
+**`GridFocusFill` is the one colour on that table that carries a rule** rather
+than a picture's paint. The rest of this screen's palette used to be the
+mockups' — ink, line, faint, paper, accent — copied into the shell and named
+nowhere; since the [Pond style](style-guide.md) it is the style guide's named
+palette, and the two fills above (`LilyWash`, and `Ink` on every outline) are
+its constants. `GridFocusFill` stays on this page because it has to clear a bar,
+and a bar needs somewhere to be written down.
+
+### What the Pond style changed here
+
+Every box keeps its size; only its outline, corner, fill and face moved. Digits
+— the printed card, the player's own, the keypad's and the printed products —
+are set in `FontDisplay`, because every number in a sum is
+([PS-5](style-guide.md#ps-5)).
+
+| Was | Is now |
+| --- | --- |
+| Cells: 3 px grey outline, 10 px corners | 4 px `Ink` outline, 18 px corners |
+| Carry boxes: 8 px corners, faint dashes | 10 px corners, dashes in a soft sage `#A9B89C` |
+| Card readout pill: 3 px faint outline, 20 px corners, no fill | 4 px `Ink` outline, fully round, `LilyWash` |
+| Keys: 3 px grey outline, 20 px corners, flat | 5 px `Ink` outline, 30 px corners, an 8 px solid `ShadowKey` |
+| Header chip: swatch and name, 256 px wide | The active [dialog chip](shared-components.md#player-chip): frog and name, as wide as the name needs |
+| `Work it out` in the grey line colour | `FontDisplay` medium, `InkSoft` |
+
+**Three values did not move, on purpose**: `GridFocusFill`, the focused cell's
+outline, and the answer row's tint `#F3F8F5`. The Pond-style drawing gives the
+focused cell a lime `#D8F08A` fill with a 7 px outline and tints the answer row
+`#EEF8DC`, and that combination does not clear the bar
+[below](#what-focus-looks-like): lime on white is 1.25 : 1 and lime on the new
+tint is 1.14 : 1, against a 1.9 : 1 floor, and today's `GridFocusFill` on the
+new tint drops to ΔE 28.1, under 30. Which gives is
+[#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525),
+open question 14; until it is answered, the three stay where they are, because
+the bar is this page's own rule and was written after Derek could not see the
+focus on the tablet.
 
 ### What focus looks like
 
@@ -666,6 +698,13 @@ thought to write down.
 
 Three, all at 1920 × 1200.
 
+**Five of the six files are redrawn in the [Pond style](style-guide.md)** — the
+three below and the two agreed `Help me` drawings. Their grids, keypads and
+annotations are where they were; only the look moved. The `Help me` comparison
+file, `working-out-grid-help-12x34-operator-column.html`, is left in the old
+look: it is the record of a choice already made, not a drawing anyone builds
+from.
+
 - **The widest card, as dealt:** [`mockups/working-out-grid-331x41.html`](mockups/working-out-grid-331x41.html)
 - **The easy pile, as dealt:** [`mockups/working-out-grid-68x5.html`](mockups/working-out-grid-68x5.html)
 - **The widest card, grown to the cap:** [`mockups/working-out-grid-331x41-grown.html`](mockups/working-out-grid-331x41-grown.html)
@@ -965,3 +1004,16 @@ Question 13 arrived with the built button
   only words on this screen that are not a number. Whichever way it goes it
   changes what the player sees, so it is Connor's or Derek's rather than an
   agent's.
+
+Question 14 arrived with the [Pond style](style-guide.md)
+([#524](https://github.com/derekwinters/connor-multiplying-frogs/issues/524)).
+
+- **14. Which focus fill does the Pond-style grid use?**
+  ([#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525))
+  The design drawing's lime focus and 7 px outline fail the separability bar
+  that [what focus looks like](#what-focus-looks-like) sets, and today's fill
+  fails it against the drawing's new answer-row tint. The options are a
+  pond-palette fill that clears the bar, the drawing's outline added on top of
+  such a fill, the drawing as approved with the bar replaced for this cell, or
+  today's focus and tint kept. Until it is answered, the grid keeps today's
+  focus fill, focus outline and answer-row tint, and the mockups draw them.

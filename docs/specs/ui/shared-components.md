@@ -111,12 +111,14 @@ paints, it paints to all four edges, and the scene camera clears to the app's
 background rather than to the engine's default sky — so even a frame drawn
 before any screen has painted is the game's own colour.
 
-The app's background is the mockups' `--bg`, `#EDF1EF`. The title screen, game
-setup and game over paint it, and it is what the camera clears to.
+The app's background is the mockups' `--bg`, `#EDF1EF`. The title screen and
+game setup paint it, and it is what the camera clears to.
 
-**The game board is the exception, and the only one.** It paints
+**The game board and game over are the exceptions.** They paint
 [`PondWater`](game-board.md#colours) instead, to the same four edges by the same
-rule, because that screen is a pond rather than a page. A screen may have a
+rule, because those screens are a pond rather than a page. Game over joined the
+board in the [Pond style](style-guide.md): it used to paint `--bg`, and now its
+standings sit on the same water the frogs just swam in. A screen may have a
 background of its own; what it may not do is leave any of the screen unpainted.
 
 A dialog is the one screen that paints no background at all: what it lays over
@@ -166,6 +168,12 @@ and never allowed past the button's own edge.
 **Invariant:** an outline kind is a ring. Whatever is behind the button — the
 panel, the screen — shows through the middle of it, because *no fill* means no
 fill.
+**Invariant:** every kind is outlined, and a press always reads as the button
+going *in*: the primary kind sinks into its lip, and nothing about a press makes
+a button bigger, brighter or blurred.
+
+How a button **looks** — its colours, outline, lip, shadows and font — is the
+[style guide](style-guide.md)'s. This page keeps its sizes and its behaviour.
 
 #### 3. Named constants
 
@@ -175,12 +183,13 @@ fill.
 | Button height | `ButtonHeight` | 112 px |
 | Minimum button width | `ButtonMinWidth` | 320 px |
 | Horizontal padding inside a button | `ButtonPaddingX` | 48 px |
-| Corner radius | `ButtonRadius` | 24 px |
+| Corner radius | `ButtonRadius` | 30 px |
 | Label size | `ButtonLabelSize` | 44 px |
 | Gap between adjacent buttons | `ButtonGap` | 32 px |
 | Gap between a destructive button and its neighbour | `ButtonDestructiveGap` | 96 px |
-| Press travel | `ButtonPressOffset` | 4 px |
-| Border width, outlined kinds | `ButtonBorderWidth` | 4 px |
+| Press travel | `ButtonPressOffset` | 8 px |
+| Border width, every kind | `ButtonBorderWidth` | 5 px |
+| Depth of the primary kind's solid lip | `ButtonLipDepth` | 10 px |
 | Opacity while disabled | `ButtonDisabledOpacity` | 0.40 |
 
 **`ButtonMinWidth` is a floor, not a fit.** A button is `ButtonMinWidth` wide,
@@ -213,12 +222,26 @@ to its words.
 
 | State | Appearance |
 | --- | --- |
-| Default (primary) | Filled accent, light label |
-| Default (secondary) | Outlined, `ButtonBorderWidth` 4 px, dark label, no fill |
-| Default (destructive) | Outlined in the warning colour, warning-coloured label |
-| Pressed | Moves down by `ButtonPressOffset`; fill darkens |
-| Disabled | `ButtonDisabledOpacity` opacity, no press response |
+| Default (primary) | `Leaf` fill, `White` label, `ButtonBorderWidth` `Ink` outline, standing on a `ButtonLipDepth` solid lip of `LeafLip` that is outlined in `Ink` too |
+| Default (secondary) | A ring: `ButtonBorderWidth` `Ink` outline, `Ink` label, no fill, a 6 px solid shadow of `Ink` at 25 % |
+| Default (destructive) | A ring in `Berry`: `Berry` outline and label, no fill, a 6 px solid shadow of `Berry` at 25 % |
+| Pressed | Moves down by `ButtonPressOffset` and its lip or shadow shrinks by the same amount, so it sinks in rather than moving; a primary's fill goes to `LeafPressed` |
+| Disabled | `ButtonDisabledOpacity` opacity of the kind's own default look, no shadow, no press response |
 | Hidden | Not laid out at all — buttons do not leave gaps behind |
+
+Every colour named in this table is a constant of the
+[style guide's palette](style-guide.md#the-palette), and the labels are set in
+`FontDisplay` (Fredoka) at `WeightDisplay` (semibold) — which answers
+[#422](https://github.com/derekwinters/connor-multiplying-frogs/issues/422).
+
+**The table used to read** *filled accent, light label* for primary, *outlined,
+4 px, dark label* for secondary, *outlined in the warning colour* for
+destructive, and *moves down 4 px, fill darkens* for pressed. Those were
+placeholder looks, written before the game had any art to take a look from.
+The [Pond style](style-guide.md) is that look: the outline and the lip come
+from the splash's lettering, the press travel doubled so the press reads at
+arm's length, and the primary's lip is what it sinks into. Sizes,
+`ButtonMinWidth`, the gaps and the label size did not move.
 
 **Outlined means see-through, and it has to be drawn as a ring.** The three
 kinds are two images stacked — a border shape, and a fill inset by
@@ -242,8 +265,9 @@ disagrees with this page's own States table. This page is the component's
 contract; the mockups are drawings of screens built from it — see
 [CLAUDE.md](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md)
 on which document wins being a decision, not an assumption. This page wins: disabled is the kind's own default appearance at
-`ButtonDisabledOpacity`, not a distinct grey style. The mockups should be
-redrawn to match the next time they are touched.
+`ButtonDisabledOpacity`, not a distinct grey style. The mockups restyled in the
+[Pond style](style-guide.md) draw it that way; the ones not yet restyled still
+draw the grey and should be redrawn to match the next time they are touched.
 
 #### 5. Behaviour
 
@@ -282,13 +306,22 @@ except the four dialogs whose pages make back inert (roll and card,
 working-out grid, answer result, [a player has won](player-won.md)), where back
 does nothing. All four sit inside a single turn's own chain, where a stray press
 should not fast-forward past something the game stopped to show.
+**Invariant:** the scrim lets the board read as water. It is `DeepPond`, never
+black, and never so dark the pond underneath is lost.
+**Invariant:** a dialog opens without moving across the screen. It fades and
+grows in place; it never slides, bounces or overshoots.
+
+A dialog panel is `Paper`, outlined in `Ink` at `OutlinePanel` (6 px), dropping a
+solid `ShadowPanel` — see the [style guide](style-guide.md). Its title is set in
+`FontDisplay` and its sentences in `FontBody`.
 
 #### 3. Named constants
 
 | Element | Constant | Value |
 | --- | --- | --- |
-| Backdrop dim | `DialogScrimOpacity` | 0.66 |
-| Corner radius | `DialogRadius` | 32 px |
+| Backdrop colour | `DialogScrimColour` | `DeepPond`, `#092E4A` |
+| Backdrop dim | `DialogScrimOpacity` | 0.60 |
+| Corner radius | `DialogRadius` | 44 px |
 | Padding inside the panel | `DialogPadding` | 56 px |
 | Title size | `DialogTitleSize` | 56 px |
 | Gap between title and body | `DialogTitleGap` | 40 px |
@@ -296,16 +329,26 @@ should not fast-forward past something the game stopped to show.
 | Widest a dialog may be | `DialogMaxWidth` | 1824 px |
 | Tallest a dialog may be | `DialogMaxHeight` | 1104 px |
 | Open and close duration | `DialogFadeDuration` | 0.15 s |
+| The panel's scale when it starts to open | `DialogOpenScale` | 0.94 |
 
 `DialogMaxWidth` and `DialogMaxHeight` are the canvas inset by 48 px on every
 side. A dialog is allowed to be the whole screen, and the working-out grid is.
+
+**Three values moved with the [Pond style](style-guide.md)**, and none of them
+moves anything on screen: the scrim was black at 0.66 and is now `DeepPond` at
+0.60, so the board behind still reads as water rather than as a hole; the
+corner went from 32 px to 44 px, to match the splash's chunky rounding; and the
+open gained the 94 %-to-full grow, on top of the fade it already had. The old
+*"cross-fade, no slide, no bounce"* row said what opening is not; it still does,
+and now also says what it is.
 
 #### 4. States
 
 | State | Appearance |
 | --- | --- |
 | Open | Panel at full opacity, scrim at `DialogScrimOpacity` |
-| Opening / closing | Scrim and panel cross-fade over `DialogFadeDuration`; no slide, no bounce |
+| Opening | Scrim and panel fade in over `DialogFadeDuration`, and the panel grows from `DialogOpenScale` to full size over the same time, easing out; no slide, no bounce, no overshoot |
+| Closing | Scrim and panel fade out over `DialogFadeDuration`; the panel does not shrink |
 | Stacked | Does not happen. A dialog never opens over another dialog. |
 
 #### 5. Behaviour
@@ -327,11 +370,21 @@ tap.
 
 #### 1. What it is
 
-A frog's identity, wherever the game has to say *which frog* — its colour, its
-name, and how far up its lane it is.
+A frog's identity, wherever the game has to say *which frog* — its frog and its
+name, and, on the board, how far up its lane it is.
 
-Used by: [game board](game-board.md), [roll and card](roll-and-card.md),
-[answer result](answer-result.md).
+Since the [Pond style](style-guide.md) it comes in **two forms**, because the two
+places it sits have different things around it:
+
+| Form | Where | What it holds |
+| --- | --- | --- |
+| **Lane chip** | The [game board](game-board.md)'s lanes | The name, lettered in the frog's colour with a thin `Ink` outline, and the pad count under it. **No frog** — the frog is already sitting in the lane beside it. |
+| **Dialog chip** | Inside a dialog: [answer result](answer-result.md), [working-out grid](working-out-grid.md) | The frog's render, standing free, and the name beside it. Nothing else. |
+
+Used by: [game board](game-board.md) (lane chip),
+[working-out grid](working-out-grid.md) and [answer result](answer-result.md)
+(dialog chip), and [roll and card](roll-and-card.md), which keeps its current
+drawing until it is [redesigned](roll-and-card.md#pending-redesign).
 
 #### 2. Invariants
 
@@ -340,116 +393,141 @@ together, and never by colour alone. The word is the frog's name: its colour's
 name by default, or whatever was typed on
 [game setup](game-setup.md) instead. Colour alone excludes a colour-blind
 player from knowing whose turn it is, in a game where four players share one
-screen.
+screen. On a dialog chip the colour is the frog standing beside the name; on a
+lane chip it is the name's own lettering, with the frog in the lane beside it.
+**Invariant:** a frog is never shown as a coloured dot. Where a chip shows a
+frog, it is that player's frog render in their colour, standing free — no
+circle, no disc behind it ([PS-10](style-guide.md#ps-10)).
 **Invariant:** the chip for the player whose turn it is is visibly different
-from every other chip on screen, by something other than colour.
+from every other chip on screen, by something other than colour: a thicker
+outline, `OutlineChipActive`. It is never given a second ring.
 **Invariant:** nothing is ever appended to a frog's name. The chip shows the
-name and only the name — not `Blue frog`, not `Blue (you)`.
-**Invariant:** the chip never refuses or alters a name it is given; if a name
-does not fit, the chip truncates it with an ellipsis. A readout is not where a
-limit is enforced. The limit is `PlayerNameMaxLength`, and
+name and only the name — not `Blue frog`, not `Blue (you)`, and on a dialog chip
+not `pad 3 → 4` either.
+**Invariant:** the chip never refuses or alters a name it is given. A readout is
+not where a limit is enforced. The limit is `PlayerNameMaxLength`, and
 [game setup](game-setup.md#where-playernamemaxlength-comes-from-and-why-a-count-is-not-enough)
 is where it is enforced.
+**Invariant:** a **dialog chip** grows to fit the whole name and never cuts it
+off. Its text size is fixed; the chip gets wider instead.
+**Invariant:** a **lane chip** is `PlayerChipWidth` wide, always, because its
+width is part of the board's lane arithmetic. If a name does not fit its name
+column it is truncated with an ellipsis — the rule this chip has always had —
+until [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526)
+says otherwise.
 
 The identification invariant was previously worded as colour **and its
 colour's name** — literally the colour word. That letter cannot survive a
 rename: a chip reading `Connor` beside a blue swatch says "Blue" nowhere. Its
 purpose survives intact, because a typed name is also a word, and the reason
 the rule exists is that a colour-blind player needs something other than the
-swatch to read. So the rule now requires a word rather than that specific word.
+colour to read. So the rule now requires a word rather than that specific word.
 
 **Two frogs may end up with the same word**, which is the one case where the
 identifying word stops identifying. Nothing prevents it. They are two children
 sitting next to each other who chose the same name on purpose, and they can
-sort it out; the swatch still tells them apart, and colour-plus-word is still
-what the chip shows.
+sort it out; the frogs' colours still tell them apart, and colour-plus-word is
+still what the chip shows.
 
 #### 3. Named constants
 
 | Element | Constant | Value |
 | --- | --- | --- |
-| Chip height | `PlayerChipHeight` | 96 px |
-| Chip width on the board | `PlayerChipWidth` | 256 px |
-| Frog swatch diameter | `PlayerSwatchDiameter` | 64 px |
-| Gap between swatch and label | `PlayerChipSwatchGap` | 24 px |
-| Label size | `PlayerChipLabelSize` | 32 px |
-| Pad-count text size | `PlayerChipPadCountSize` | 24 px |
-| Corner radius | `PlayerChipRadius` | 20 px |
-| Ring drawn around the active chip | `PlayerChipActiveRing` | 6 px |
-| Horizontal padding inside the chip | `PlayerChipLabelPaddingX` | 20 px |
-| Room the name actually has | `PlayerChipLabelColumn` | 128 px |
+| Chip height, both forms | `PlayerChipHeight` | 96 px |
+| Corner radius, both forms | `PlayerChipRadius` | 48 px — half the height, fully round |
+| Outline, both forms | `OutlineChip` | 4 px `Ink` |
+| Outline of the active chip | `OutlineChipActive` | 7 px `Ink` |
+| Fill of the active chip | `ActiveFill` | `#F2FADF` |
+| **Lane chip** width | `PlayerChipWidth` | 256 px |
+| Lane chip fill | `Paper` | `#FFFDF4` |
+| Lane chip padding, each side, inside the outline | `LaneChipPaddingX` | 24 px (21 px on the active chip, so the name does not move when the outline thickens) |
+| Lane chip name size | `LaneChipNameSize` | 40 px, `FontDisplay` semibold, in the frog's colour |
+| Lane chip name outline | `LaneChipNameOutline` | 5 px `Ink` stroke behind the letters |
+| Lane chip pad-count size | `PlayerChipPadCountSize` | 24 px, `FontBody` extra-bold, `Moss` |
+| Room a lane chip's name has | `LaneChipNameColumn` | 200 px |
+| **Dialog chip** width | — | grows to fit: `PlayerChipLabelPaddingX` + `PlayerChipFrogSize` + `PlayerChipFrogGap` + the name + `PlayerChipLabelPaddingX`, plus the outline |
+| Dialog chip fill | `White` | `#FFFFFF` (`ActiveFill` when active) |
+| Dialog chip padding, each side | `PlayerChipLabelPaddingX` | 20 px |
+| The frog in a dialog chip | `PlayerChipFrogSize` | 108 × 80 px |
+| Gap between the frog and the name | `PlayerChipFrogGap` | 24 px |
+| Dialog chip name size | `PlayerChipLabelSize` | 32 px, `FontDisplay` semibold, `Ink` |
 
-`PlayerChipLabelSize` was 40 px on this page; the committed mockups' shared
-stylesheet — repeated across all eleven files — draws the name at 32 px and the
-pad-count line separately at 24 px, and `game-board.html`'s five instantiated
-chips (covering all three states below) all render at those two sizes. The
-mockups are what Connor approved when each screen's wireframe was signed off,
-so they win: `PlayerChipLabelSize` is corrected to 32 px, and
-`PlayerChipPadCountSize` — a value this table previously had no name for at
-all — is added at 24 px.
+**`LaneChipNameColumn` is 200 px, not 208.** The lane-chip decision counted
+`PlayerChipWidth` 256 less `LaneChipPaddingX` either side, which is 208, but the
+chip's own outline sits inside that width too: 256 − 2 × 4 − 2 × 24 = 200, and
+the active chip's 7 px outline with 21 px padding lands on the same 200. Measured
+against the committed Fredoka at 40 px semibold, ordinary ten-letter names come
+to about 205–208 px (`Maximilian` 205, `Alexandria` 208) and a name of wide
+letters far more (`WWWWWWWWWW` 392). `Orange`, the longest default, is 139 px
+and fits easily. What happens to the ones that do not fit is
+[#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526);
+until it is answered, they truncate, as the chip always has.
 
-`PlayerChipLabelPaddingX` and `PlayerChipLabelColumn` distil the next
-paragraph's own arithmetic into the names the code declares them under — the
-same move [game setup](game-setup.md#named-constants) made for
-`SeatBadgeInset`. The padding was already stated in prose here, and the column
-is what truncation is measured against, so it cannot stay a number that only
-exists inside a sentence.
+**A dialog chip has no column to overflow.** It is as wide as its contents. The
+widest it can be is with a ten-character name of wide letters: about 305 px of
+name at 32 px, so 20 + 108 + 24 + 305 + 20 + 8 = **485 px** — inside every
+dialog that holds one. A typical name comes to about 330 px of chip.
 
-**The label column is 128 px, and it is tighter than it looks.**
-`PlayerChipWidth` 256 less 20 px padding either side, less
-`PlayerSwatchDiameter` 64, less `PlayerChipSwatchGap` 24, leaves 128 px for the
-name and the pad count. The pad count fits easily at 24 px. The name often does
-not: `Orange` renders at 132 px at `PlayerChipLabelSize` 32 and overflows by
-4 px — the game's own longest default name, overflowing before anybody has
-typed anything. This is why the chip truncates rather than refuses, per the
-invariant above, and why `PlayerNameMaxLength` is derived from the setup seat
-instead of from here. Widening the chip is not free: `PlayerChipWidth` is part
-of the [game board](game-board.md)'s lane arithmetic, so it is a board layout
-change and would need its own wireframe.
+##### The constants this component used to carry
+
+| Was | Is now | Why |
+| --- | --- | --- |
+| `PlayerSwatchDiameter` 64 px | `PlayerChipFrogSize` 108 × 80 px | The frog replaces the dot ([PS-10](style-guide.md#ps-10)) |
+| `PlayerChipSwatchGap` 24 px | `PlayerChipFrogGap` 24 px | Renamed with the thing it is a gap to; same value |
+| `PlayerChipRadius` 20 px | `PlayerChipRadius` 48 px | Chips are fully round in the Pond style |
+| `PlayerChipActiveRing` 6 px | `OutlineChipActive` 7 px | Active is a thicker outline, not a ring drawn round the chip |
+| `PlayerChipLabelColumn` 128 px | `LaneChipNameColumn` 200 px (lane); none (dialog) | The lane chip lost its swatch, so the name has the whole inside; the dialog chip grows instead |
+| `PlayerChipLabelSize` 32 px on the board | `LaneChipNameSize` 40 px | The lane chip's name is the only thing in it now, and can be bigger |
+
+The old label-column arithmetic is worth keeping as the reason the lane chip
+changed shape: with a 64 px swatch in it, the name had 128 px, and `Orange` at
+32 px overflowed by 4 px — the game's own longest default name, overflowing
+before anybody had typed anything. Dropping the swatch on the board, where the
+frog is already in the lane, gives the name the whole chip.
+
+`PlayerChipLabelSize` itself was 40 px on this page once before, and was
+corrected to 32 px to match the mockups' shared stylesheet. It stays 32 px — on
+the dialog chip, which is where it now applies.
 
 #### 4. States
 
-| State | Appearance |
-| --- | --- |
-| Default | Swatch, name, pad count |
-| Active (this player's turn) | `PlayerChipActiveRing` ring, label at full weight |
-| Home (frog has finished) | Pad count replaced by `Home!` |
+| State | Lane chip | Dialog chip |
+| --- | --- | --- |
+| Default | Name in the frog's colour, pad count `3 of 8` under it, `Paper` fill, `OutlineChip` | Frog and name, `White` fill, `OutlineChip` |
+| Active (this player's turn) | `OutlineChipActive` and `ActiveFill` | `OutlineChipActive` and `ActiveFill` |
+| Home (frog has finished) | Pad count replaced by `Home!` | No change — a dialog chip carries no pad count |
 
-The Default row said "colour name" until names became editable. It is the same
-row: the chip has always drawn the frog's name, and until
+The Default row said "colour name" until names became editable, and "swatch"
+until the [Pond style](style-guide.md). It is the same row: the chip has always
+drawn the frog's name, and until
 [#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310) a
 frog's name was always its colour's.
 
 **Active still has callers, checked rather than assumed.**
 [#326](https://github.com/derekwinters/connor-multiplying-frogs/issues/326)
 removed the one Active chip in the game board's *header* and asked whether the
-state still earns its place on this component. It does, in four places, and
-three of them are not the board:
+state still earns its place on this component. It does:
 
 | Screen | Where the Active chip is |
 | --- | --- |
 | [Game board](game-board.md) | the active frog's **lane** chip, in the pond |
-| [Roll and card](roll-and-card.md) | the `whose` region, beside `rolled` |
+| [Roll and card](roll-and-card.md) | the `whose` region, beside `rolled` — until it is redesigned |
 | [Working-out grid](working-out-grid.md) | the `header`, beside `Work it out` |
-| [Answer result](answer-result.md) | **none** — it draws a `pad 7 → 8` chip, not an Active one |
+| [Answer result](answer-result.md) | **none** — a Default dialog chip for the frog that just answered |
 
-So the board's header was never the state's only caller, and dropping it there
-changes nothing here. What is worth noticing is the last row: the four screens
-of a single turn were already not uniform about this, which is part of why
-removing the header chip from the board does not make the turn sequence
-inconsistent — it was never consistent, and the chip's job differs by screen. On
-the board the lane chip makes a header chip redundant; in the two dialogs there
-are no lanes, so nothing else there carries the colour.
+On the board the lane chip makes a header chip redundant; in the dialogs there
+are no lanes, so the chip is what carries the frog there.
 
-The Active row dropped "filled background": the mockups' `.chip.act` rule
-gives the ring and the bold weight but leaves the base chip background
-unchanged, and the chip invariant only requires the active chip be visibly
-different by something other than colour, which the ring and weight already
-satisfy without a fill.
+The Active row used to be *"`PlayerChipActiveRing` ring, label at full
+weight"*, and before that it dropped a "filled background" the mockups never
+drew. The Pond style brings a fill back on purpose — the pale `ActiveFill` — and
+replaces the ring with a heavier outline, so the active chip is told apart by
+outline weight first and fill second, and neither is a colour that names a
+frog.
 
 The Home row dropped "a small home marker after the name": no committed
 mockup has ever drawn one — the only rendered Home chip
-(`game-board.html`'s Blue) is just the swatch, the colour name, and `Home!`.
+(`game-board.html`'s Blue) is just the name and `Home!`.
 Building a marker now would mean inventing a visual for it, which
 [rule 8](https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md)
 (wireframe before UI code) exists to prevent. A marker, if wanted later, needs
@@ -462,11 +540,9 @@ that element's numbers, not this one's. See that page for the setup screen.
 
 [Game over](game-over.md) does not use this chip either, for the same
 reason: it specifies its own **Standings row** element — its own constants
-(`StandingsSwatchDiameter` 88 px against this chip's `PlayerSwatchDiameter`
-64 px, `StandingsNameSize` 52 px, no `PlayerChip*` constant anywhere on that
-page) and its mockup draws `.row` markup, not `.chip`. It stays listed under
-[Frog colours](#frog-colours) below, since it legitimately reuses that
-element's four colour constants for its own swatch.
+(`StandingsFrogSize` 150 × 120 px, `StandingsNameSize` 52 px, no
+`PlayerChip*` constant anywhere on that page). It shows the same frog renders
+this chip does, under its own size.
 
 #### 5. Behaviour
 
