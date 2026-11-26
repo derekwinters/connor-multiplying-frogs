@@ -216,7 +216,8 @@ the screen is built to.
 | Card readout label | `GridCardReadoutLabelSize` | 40 px |
 | Addition rows a card is dealt | `GridAdditionRowsAtStart` | 2 rows |
 | Most addition rows the section can hold | `GridAdditionRowsMax` | 6 rows |
-| Fill of the cell the caret is in | `GridFocusFill` | `#8CB89E` |
+| Fill of the cell the caret is in | `GridFocusFill` | `Lime`, `#87BD01` |
+| Fill of the answer row's cells | `GridAnswerFill` | `LilyWash`, `#EEF8DC` |
 | Keypad, down from the panel's top edge | `KeypadTop` | 216 px |
 | Keypad key, square | `KeypadKeySize` | 140 px |
 | Gap between keys | `KeypadKeyGap` | 16 px |
@@ -292,8 +293,9 @@ than a picture's paint. The rest of this screen's palette used to be the
 mockups' — ink, line, faint, paper, accent — copied into the shell and named
 nowhere; since the [Pond style](style-guide.md) it is the style guide's named
 palette, and the two fills above (`LilyWash`, and `Ink` on every outline) are
-its constants. `GridFocusFill` stays on this page because it has to clear a bar,
-and a bar needs somewhere to be written down.
+its constants. `GridFocusFill` is the palette's `Lime` too, and it stays on
+this page because it has to clear a bar, and a bar needs somewhere to be
+written down.
 
 ### What the Pond style changed here
 
@@ -310,23 +312,25 @@ are set in `FontDisplay`, because every number in a sum is
 | Keys: 3 px grey outline, 20 px corners, flat | 5 px `Ink` outline, 30 px corners, an 8 px solid `ShadowKey` |
 | Header chip: swatch and name, 256 px wide | The active [dialog chip](shared-components.md#player-chip): frog and name, as wide as the name needs |
 | `Work it out` in the grey line colour | `FontDisplay` medium, `InkSoft` |
+| `GridFocusFill` `#8CB89E`, sage | `Lime` `#87BD01` — see below |
+| The focused cell outlined in accent green `#2E7D4F` | The same `Ink` outline as its neighbours |
+| Answer-row tint `#F3F8F5` | `GridAnswerFill`, `LilyWash` `#EEF8DC` |
 
-**Three values did not move, on purpose**: `GridFocusFill`, the focused cell's
-outline, and the answer row's tint `#F3F8F5`. The Pond-style drawing gives the
-focused cell a lime `#D8F08A` fill with a 7 px outline and tints the answer row
-`#EEF8DC`, and that combination does not clear the bar
-[below](#what-focus-looks-like): lime on white is 1.25 : 1 and lime on the new
-tint is 1.14 : 1, against a 1.9 : 1 floor, and today's `GridFocusFill` on the
-new tint drops to ΔE 28.1, under 30. Which gives is
-[#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525),
-open question 14; until it is answered, the three stay where they are, because
-the bar is this page's own rule and was written after Derek could not see the
-focus on the tablet.
+**The focus moved last, and by a decision rather than a drawing.** The
+Pond-style drawing gave the focused cell a pale lime `#D8F08A` with a 7 px
+outline and tinted the answer row `#EEF8DC`. That pale lime fails the bar
+[below](#what-focus-looks-like) — 1.25 : 1 on white, 1.14 : 1 on the new tint,
+against a 1.9 : 1 floor — and the old sage `#8CB89E` fails it against the new
+tint too (ΔE 28.1, under 30). Derek kept the bar
+([#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525),
+option 1): the focus fill is the palette's own lime, darkened 5 % to `#87BD01`
+so it clears the bar on both fills; the answer row takes the drawing's
+`#EEF8DC`; and the focused cell keeps its neighbours' outline, with no 7 px.
 
 ### What focus looks like
 
-**The cell the caret is in is filled with `GridFocusFill`**, and keeps the
-accent outline it already had. Nothing else about it changes: not
+**The cell the caret is in is filled with `GridFocusFill`**, and keeps the same
+`Ink` outline its neighbours have. Nothing else about it changes: not
 `GridCellSize`, not `GridCarryBoxSize`, not `GridCellBorderWidth` or
 `GridAnswerBorderWidth`. A filled box among empty boxes reads from across a
 room; a box that is bigger or thicker than its neighbours is a different layout,
@@ -340,8 +344,10 @@ hairline, and on the tablet Derek could not see it — knowing it was there. A
 player who cannot tell which box the next digit lands in taps a box before every
 digit, which is what he did.
 
-The fill is the accent green the outline already uses, laid over paper at 55 %,
-taken to where it clears the bar the project already sets for two colours being
+The fill was first the accent green the outline used, laid over paper at 55 %
+(`#8CB89E`); since the [Pond style](style-guide.md) it is the palette's `Lime`,
+`#87BD01`. Either way it is taken to where it clears the bar the project already
+sets for two colours being
 **clearly separable** — a luminance contrast of at least **1.9 : 1** *and* a CIE
 L\*a\*b\* distance (ΔE\*ab) of at least **30**, both measures, for the reasons
 [`game-board.md`](game-board.md#keeping-the-frogs-visible) gives.
@@ -350,16 +356,27 @@ It has to clear that bar twice over, because a focused cell lands on two
 different fills depending on where the caret is: the ordinary cell fill, and the
 answer row's own tint. As *contrast : 1 / ΔE*:
 
-| | Paper, `#FFFFFF` — every cell but the answer row's | The answer row's tint, `#F3F8F5` |
+| | `White`, `#FFFFFF` — every cell but the answer row's | `GridAnswerFill`, `#EEF8DC` |
 | --- | --- | --- |
-| `GridFocusFill` | 2.22 / 36.2 | 2.07 / 32.5 |
+| `GridFocusFill`, `#87BD01` | 2.26 / 86.3 | 2.05 / 71.2 |
 
 Both clear it, the answer row being the tighter of the two, which is the pair
-the treatment was always going to be decided by. Two more ratios worth recording
-because they are what a darker tint would cost: a digit on the focused fill is
-**7.11 : 1** (`#1E2422` ink, against a 4.5 : 1 text bar), and the accent outline
-against the fill inside it is **2.27 : 1 / 30.4**, so the box still reads as a
+the treatment was always going to be decided by. One more ratio worth recording,
+because it is what a darker fill would cost: an `Ink` (`#1A2614`) digit on the
+focused fill is **6.99 : 1**, against a 4.5 : 1 text bar. The `Ink` outline round
+the focused cell is the same ratio against its fill, so the box still reads as a
 box rather than as a blob.
+
+The numbers are this page's own method, the same as
+[keeping the frogs visible](game-board.md#keeping-the-frogs-visible): WCAG
+relative luminance for contrast, CIE L\*a\*b\* (D65) for ΔE. For the record, the
+sage it replaces measured 2.22 / 36.2 on white and 2.07 / 32.5 on the old tint
+`#F3F8F5`, with a digit on it at 7.11 : 1.
+
+`#87BD01` is **the** lime. The palette has one, and the Settings name-tab and
+every other lime highlight use the same `Lime` constant — it is not a second,
+grid-only green. It is the splash's `#8EC701` darkened 5 %: the splash lime
+itself is only 1.85 : 1 against the answer row's tint, under the bar.
 
 ### How many columns and rows
 
@@ -727,7 +744,7 @@ whoever compares a screenshot against the drawing
 ([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)).
 
 **All three draw the focused cell**, filled with `GridFocusFill`. They always
-drew one — an answer cell with the accent outline — and until
+drew one — an answer cell that, before the Pond style, had the accent outline — and until
 [#304](https://github.com/derekwinters/connor-multiplying-frogs/issues/304) that
 outline was the whole of it, in the drawings as in the shell. The cell is in the
 same place in each; what changed is that you can now see which one it is. A
@@ -1008,12 +1025,11 @@ Question 13 arrived with the built button
 Question 14 arrived with the [Pond style](style-guide.md)
 ([#524](https://github.com/derekwinters/connor-multiplying-frogs/issues/524)).
 
-- **14. Which focus fill does the Pond-style grid use?**
+- **14. Which focus fill does the Pond-style grid use? Settled: the palette's
+  lime, `#87BD01`, under the same bar.**
   ([#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525))
-  The design drawing's lime focus and 7 px outline fail the separability bar
-  that [what focus looks like](#what-focus-looks-like) sets, and today's fill
-  fails it against the drawing's new answer-row tint. The options are a
-  pond-palette fill that clears the bar, the drawing's outline added on top of
-  such a fill, the drawing as approved with the bar replaced for this cell, or
-  today's focus and tint kept. Until it is answered, the grid keeps today's
-  focus fill, focus outline and answer-row tint, and the mockups draw them.
+  The design drawing's pale lime and 7 px outline failed the separability bar
+  that [what focus looks like](#what-focus-looks-like) sets. Derek kept the bar
+  and took the first of the four options: a pond-palette fill that clears it —
+  the splash lime darkened 5 % — with the drawing's `#EEF8DC` answer tint and
+  the focused cell's outline the same as its neighbours'.

@@ -108,9 +108,9 @@ gives the water, the log gives the warm accent.
 | Leaf | `Leaf` | `#2C8C1C` | The one primary button; the right-answer badge |
 | Leaf lip | `LeafLip` | `#1B5E10` | The solid lip under a primary button |
 | Leaf pressed | `LeafPressed` | `#257716` | A primary button's fill while pressed |
-| Lime | `Lime` | `#8EC701` | Highlights: the Settings name-tab. The splash's "FROGS" letters. |
+| Lime | `Lime` | `#87BD01` | Highlights: the Settings name-tab, and the working-out grid's focused cell. The splash's "FROGS" lime `#8EC701`, darkened 5 % |
 | Active fill | `ActiveFill` | `#F2FADF` | The chip, or the standings row, that is the one that matters right now |
-| Lily wash | `LilyWash` | `#EEF8DC` | The card readout pill on the working-out grid |
+| Lily wash | `LilyWash` | `#EEF8DC` | The card readout pill and the answer row's cells on the working-out grid |
 | Sun rays | `SunRays` | `#E6F5C2` | The winner's rays — the one place it appears |
 | Pond | `PondWater` | `#9FD8F2` | Unchanged — the board's water, [game board](game-board.md#colours). Now also under game over. |
 | Deep pond | `DeepPond` | `#092E4A` | The scrim, at `DialogScrimOpacity` |
@@ -126,7 +126,7 @@ that the palette is an `area:art` call. For the dialogs, the buttons, the chips
 and game over, this is that call. The frog colours, the board's surfaces and the
 splash are still decided where they always were.
 
-Three pairs worth having measured (luminance contrast, the same measure as
+Pairs worth having measured (luminance contrast and ΔE, the same measures as
 [keeping the frogs visible](game-board.md#keeping-the-frogs-visible)):
 
 | Pair | Contrast | Bar |
@@ -134,6 +134,18 @@ Three pairs worth having measured (luminance contrast, the same measure as
 | `White` label on `Leaf` | 4.31 : 1 | 3 : 1 for 44 px semibold text — clears |
 | `Berry` label on `Paper` | 5.15 : 1 | 4.5 : 1 — clears |
 | `InkSoft` body on `Paper` | 9.31 : 1 | 4.5 : 1 — clears |
+| `Lime` focus on a `White` cell | 2.26 : 1, ΔE 86.3 | 1.9 : 1 and ΔE 30 — clears |
+| `Lime` focus on a `LilyWash` answer cell | 2.05 : 1, ΔE 71.2 | 1.9 : 1 and ΔE 30 — clears |
+| `Ink` digit on `Lime` | 6.99 : 1 | 4.5 : 1 — clears |
+
+**There is one lime.** The splash's own `#8EC701` is 1.85 : 1 against the
+answer row's `LilyWash`, just under the
+[separability bar](working-out-grid.md#what-focus-looks-like) the grid's focused
+cell must clear, so Derek took it 5 % darker, to `#87BD01`, and made that the
+palette's only `Lime` — the Settings name-tab uses the same value as the focus
+([#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525)).
+The difference from the splash lime is 1.11 : 1 / ΔE 4.7: the same colour to
+the eye.
 
 ## Named constants
 
@@ -210,10 +222,11 @@ fade it is today. The scrim fades and never scales.
 | The frog in a dialog chip | `PlayerChipFrogSize` | 108 × 80 px, the render scaled to fit |
 | The frog in a standings row | `StandingsFrogSize` | 150 × 120 px |
 | The frog on [a player has won](player-won.md) | `WonFrogSize` | 220 × 220 px |
-| Name on a board lane chip | `LaneChipNameSize` | 40 px, `FontDisplay` |
+| Name on a board lane chip | `LaneChipNameSize` | 34 px, `FontDisplay` semibold |
 | The ink outline round that name | `LaneChipNameOutline` | 5 px `Ink` stroke drawn behind the letters, so 2.5 px shows outside them |
 | Letter spacing of that name | `LaneChipNameTracking` | 0.03 em |
-| Padding inside a lane chip | `LaneChipPaddingX` | 24 px |
+| Padding inside a lane chip | `LaneChipPaddingX` | 20 px (17 px on the active chip) |
+| Room the name has | `LaneChipNameColumn` | 208 px, fixed |
 
 The chip rules themselves — what a dialog chip holds, how it grows, what a lane
 chip holds — live on the component, in
@@ -264,17 +277,15 @@ look moved, except where a screen page says otherwise.
 
 ## Open questions
 
-- **The working-out grid's focus fill.** The drawing's lime focus `#D8F08A` and
-  7 px outline fail the separability bar the grid's spec sets for the focused
-  cell, and today's fill fails it against the drawing's new answer-row tint.
-  Asked in
-  [#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525);
-  until it is answered the focus fill, its outline and the answer-row tint stay
-  at today's values. See
-  [working-out grid](working-out-grid.md#open-questions).
-- **A ten-letter name on a board lane chip.** The 208 px the lane-chip decision
-  counted on is 200 px once the chip's outline is counted, and a name of wide
-  letters needs far more. Asked in
-  [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526);
-  until it is answered the lane chip keeps truncating with an ellipsis, as it
-  does today. See [player chip](shared-components.md#player-chip).
+None. The two this page opened with are settled by Derek:
+
+- **The working-out grid's focus fill** —
+  [#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525):
+  keep the separability bar; the focus is `Lime` `#87BD01`, the answer row is
+  `LilyWash` `#EEF8DC`, and the focused cell keeps its neighbours' outline. See
+  [working-out grid](working-out-grid.md#what-focus-looks-like).
+- **A ten-letter name on a board lane chip** —
+  [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526):
+  the name is 34 px in a fixed 208 px column, with 20 px padding (17 px when the
+  active chip's outline is thicker), and a name that still does not fit
+  truncates with an ellipsis. See [player chip](shared-components.md#player-chip).

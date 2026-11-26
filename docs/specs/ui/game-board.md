@@ -1057,14 +1057,14 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   form, `PlayerChipWidth` wide in the `chip` gutter. Since the
   [Pond style](style-guide.md) it holds the frog's **name only** — no swatch,
   no frog, because the frog is already sitting in the lane beside it — at
-  `LaneChipNameSize` (40 px), lettered in the frog's own colour with a thin
+  `LaneChipNameSize` (34 px), lettered in the frog's own colour with a thin
   `Ink` outline round the letters, the way the splash letters its title. The
   outline is what keeps the orange and the green names readable on the chip's
   pale `Paper`. The active frog's chip has the heavier `OutlineChipActive` and
-  the `ActiveFill` wash. A name too long for the chip's 200 px name column is
-  truncated, as it always was, until
-  [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526)
-  decides otherwise.
+  the `ActiveFill` wash, taking its thicker outline out of the padding so the
+  name column stays a fixed 208 px. Every ordinary ten-letter name fits; one
+  that still does not — `WWWWWWWWWW` — is truncated, as it always was. Derek's
+  call on [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526).
 - **Pad count** — on the chip, under the name: `3 of 8`, so progress is readable
   in words as well as by looking. It stays when the swatch goes, because on the
   board it is the only place progress is written in words.

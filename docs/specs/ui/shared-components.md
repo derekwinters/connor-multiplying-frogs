@@ -412,9 +412,12 @@ is where it is enforced.
 off. Its text size is fixed; the chip gets wider instead.
 **Invariant:** a **lane chip** is `PlayerChipWidth` wide, always, because its
 width is part of the board's lane arithmetic. If a name does not fit its name
-column it is truncated with an ellipsis — the rule this chip has always had —
-until [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526)
-says otherwise.
+column it is truncated with an ellipsis — the rule this chip has always had,
+kept by Derek on
+[#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526).
+**Invariant:** a lane chip's name column is a fixed `LaneChipNameColumn`
+(208 px), active or not. The active chip's thicker outline takes its extra width
+out of the padding, never out of the name.
 
 The identification invariant was previously worded as colour **and its
 colour's name** — literally the colour word. That letter cannot survive a
@@ -440,11 +443,11 @@ still what the chip shows.
 | Fill of the active chip | `ActiveFill` | `#F2FADF` |
 | **Lane chip** width | `PlayerChipWidth` | 256 px |
 | Lane chip fill | `Paper` | `#FFFDF4` |
-| Lane chip padding, each side, inside the outline | `LaneChipPaddingX` | 24 px (21 px on the active chip, so the name does not move when the outline thickens) |
-| Lane chip name size | `LaneChipNameSize` | 40 px, `FontDisplay` semibold, in the frog's colour |
+| Lane chip padding, each side, inside the outline | `LaneChipPaddingX` | 20 px (17 px on the active chip, so the 3 px of thicker outline comes out of the padding) |
+| Lane chip name size | `LaneChipNameSize` | 34 px, `FontDisplay` semibold, 0.03 em letter spacing, in the frog's colour |
 | Lane chip name outline | `LaneChipNameOutline` | 5 px `Ink` stroke behind the letters |
 | Lane chip pad-count size | `PlayerChipPadCountSize` | 24 px, `FontBody` extra-bold, `Moss` |
-| Room a lane chip's name has | `LaneChipNameColumn` | 200 px |
+| Room a lane chip's name has | `LaneChipNameColumn` | 208 px, fixed |
 | **Dialog chip** width | — | grows to fit: `PlayerChipLabelPaddingX` + `PlayerChipFrogSize` + `PlayerChipFrogGap` + the name + `PlayerChipLabelPaddingX`, plus the outline |
 | Dialog chip fill | `White` | `#FFFFFF` (`ActiveFill` when active) |
 | Dialog chip padding, each side | `PlayerChipLabelPaddingX` | 20 px |
@@ -452,16 +455,33 @@ still what the chip shows.
 | Gap between the frog and the name | `PlayerChipFrogGap` | 24 px |
 | Dialog chip name size | `PlayerChipLabelSize` | 32 px, `FontDisplay` semibold, `Ink` |
 
-**`LaneChipNameColumn` is 200 px, not 208.** The lane-chip decision counted
-`PlayerChipWidth` 256 less `LaneChipPaddingX` either side, which is 208, but the
-chip's own outline sits inside that width too: 256 − 2 × 4 − 2 × 24 = 200, and
-the active chip's 7 px outline with 21 px padding lands on the same 200. Measured
-against the committed Fredoka at 40 px semibold, ordinary ten-letter names come
-to about 205–208 px (`Maximilian` 205, `Alexandria` 208) and a name of wide
-letters far more (`WWWWWWWWWW` 392). `Orange`, the longest default, is 139 px
-and fits easily. What happens to the ones that do not fit is
-[#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526);
-until it is answered, they truncate, as the chip always has.
+**`LaneChipNameColumn` is 208 px, and it is the same 208 px on the active
+chip.** `PlayerChipWidth` 256 − 2 × `OutlineChip` 4 − 2 × `LaneChipPaddingX` 20
+= 208. On the active chip the outline is 7 px, so the padding is 17 px:
+256 − 2 × 7 − 2 × 17 = 208.
+
+The design drawing put the name at 40 px with 24 px padding and said ten
+letters fit in 208 px. Counting the outline, that column was really 200 px, and
+at 40 px an ordinary ten-letter name came to 205–208 px. Derek settled it on
+[#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526):
+34 px, 20 px padding, a fixed 208 px column, and the ellipsis for anything that
+still does not fit.
+
+Measured with the committed `Fredoka-Variable.ttf` at 34 px, SemiBold (600),
+with 0.03 em between letters:
+
+| Name | Width | In 208 px? |
+| --- | --- | --- |
+| `Orange`, the longest default | 118 px | fits |
+| `Maximilian` | 174 px | fits |
+| `Christophe` | 176 px | fits |
+| `Alexandria` | 177 px | fits |
+| `Gwendolynn` | 198 px | fits |
+| `mmmmmmmmmm` | 282 px | truncates |
+| `WWWWWWWWWW` | 333 px | truncates |
+
+So every ordinary ten-letter name fits whole, and only a name built from the
+widest letters reaches the ellipsis.
 
 **A dialog chip has no column to overflow.** It is as wide as its contents. The
 widest it can be is with a ten-character name of wide letters: about 305 px of
@@ -476,8 +496,8 @@ dialog that holds one. A typical name comes to about 330 px of chip.
 | `PlayerChipSwatchGap` 24 px | `PlayerChipFrogGap` 24 px | Renamed with the thing it is a gap to; same value |
 | `PlayerChipRadius` 20 px | `PlayerChipRadius` 48 px | Chips are fully round in the Pond style |
 | `PlayerChipActiveRing` 6 px | `OutlineChipActive` 7 px | Active is a thicker outline, not a ring drawn round the chip |
-| `PlayerChipLabelColumn` 128 px | `LaneChipNameColumn` 200 px (lane); none (dialog) | The lane chip lost its swatch, so the name has the whole inside; the dialog chip grows instead |
-| `PlayerChipLabelSize` 32 px on the board | `LaneChipNameSize` 40 px | The lane chip's name is the only thing in it now, and can be bigger |
+| `PlayerChipLabelColumn` 128 px | `LaneChipNameColumn` 208 px (lane); none (dialog) | The lane chip lost its swatch, so the name has the whole inside; the dialog chip grows instead |
+| `PlayerChipLabelSize` 32 px on the board | `LaneChipNameSize` 34 px | The lane chip's name is the only thing in it now, and can be a little bigger — 34 px is the size at which ordinary ten-letter names fit ([#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526)) |
 
 The old label-column arithmetic is worth keeping as the reason the lane chip
 changed shape: with a 64 px swatch in it, the name had 128 px, and `Orange` at

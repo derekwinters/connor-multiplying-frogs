@@ -95,7 +95,7 @@ anchored to the thing it belongs to.
 | Name-tab label size | `SettingsTabLabelSize` | 52 px, `FontDisplay` semibold, line box 1.2 |
 | Name-tab outline | `OutlinePanel` | 6 px `Ink` |
 | Name-tab corner radius | `SettingsTabRadius` | 24 px |
-| Name-tab fill | `Lime` | `#8EC701` |
+| Name-tab fill | `Lime` | `#87BD01` — the palette's one lime, the same as the grid's focus |
 | Gap below `about`, before the actions column | `SettingsAboutSectionGap` | 72 px |
 
 `SettingsAboutBlockHeight` is derived, and the arithmetic sums exactly, which is
