@@ -413,12 +413,19 @@ def home_png():
 
 
 def write_home():
-    """The title screen's art, and the title's font and licence beside it for the mockup."""
+    """The title screen's art, and the title's font and licence beside it for the mockup;
+    then the game's copies (#520): the same art under Assets/, and a static Fredoka Bold
+    with its licence."""
     home.HOME_OUT.parent.mkdir(parents=True, exist_ok=True)
     save_png(home_png(), home.HOME_OUT)
     (home.HOME_OUT.parent / "fonts").mkdir(exist_ok=True)
     for name in home.FONT_FILES:
         shutil.copyfile(HERE / "fonts" / name, home.HOME_OUT.parent / "fonts" / name)
+    home.ASSETS_ART_OUT.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(home.HOME_OUT, home.ASSETS_ART_OUT)
+    home.ASSETS_FONT_DIR.mkdir(parents=True, exist_ok=True)
+    (home.ASSETS_FONT_DIR / "Fredoka-Bold.ttf").write_bytes(home.bold_font_bytes())
+    shutil.copyfile(HERE / "fonts" / "OFL.txt", home.ASSETS_FONT_DIR / "OFL.txt")
 
 
 def load_committed_parts():
@@ -468,6 +475,7 @@ def build():
 def outputs():
     files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT,
              launch.SPLASH_OUT, home.HOME_OUT] + [home.HOME_OUT.parent / "fonts" / n for n in home.FONT_FILES]
+    files += [home.ASSETS_ART_OUT] + [home.ASSETS_FONT_DIR / n for n in home.ASSETS_FONT_FILES]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files
@@ -558,7 +566,8 @@ def main():
     if args.home_only:
         load_committed_parts()
         write_home()
-        print(f"wrote {home.HOME_OUT.relative_to(HERE.parents[1])}")
+        for out in [home.HOME_OUT, home.ASSETS_ART_OUT] + [home.ASSETS_FONT_DIR / n for n in home.ASSETS_FONT_FILES]:
+            print(f"wrote {out.relative_to(HERE.parents[1])}")
         return 0
     if args.splash_only:
         load_committed_parts()

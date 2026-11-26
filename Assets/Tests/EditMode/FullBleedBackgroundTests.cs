@@ -147,7 +147,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TitleScreen_PaintsItsBackgroundToEveryEdge_AndLeavesItsContentAtReferenceSize()
+        public void TitleScreen_CoversEveryEdgeWithItsArt_CroppedFromTheCentre_AndLeavesItsContentAtReferenceSize()
         {
             var canvas = OversizedCanvas();
 
@@ -160,19 +160,20 @@ namespace Frogs.Unity.EditModeTests
                 AssertCoversTheWholeCanvas(view.BackgroundImage.rectTransform, canvas, "the title screen's background");
                 AssertIsTheReferenceCanvasCentred(view.ContentRect, canvas, "the title screen's content");
 
-                // The splash art stays at reference size rather than being
-                // stretched to the device. It is a flat placeholder today
-                // (#168 brings the real illustration), and an illustration
-                // stretched to whatever shape the device happens to be is the
-                // one thing a mockup cannot describe.
-                Assert.That(
-                    view.ArtRect.rect.width,
-                    Is.EqualTo(ReferenceWidth).Within(Tolerance),
-                    "the splash art is still the reference canvas wide, not the device wide");
-                Assert.That(
-                    view.ArtRect.rect.height,
-                    Is.EqualTo(ReferenceHeight).Within(Tolerance),
-                    "the splash art is still the reference canvas tall, not the device tall");
+                // The splash art is the one element allowed to run to the
+                // screen edge (docs/specs/ui/title-screen.md's Anchors): it
+                // covers the whole canvas, cropped from the centre outwards,
+                // and keeps its own 16:10 shape rather than being stretched to
+                // the device's. 2400 x 1400 is wider than 16:10, so the art is
+                // scaled to the width and cropped top and bottom.
+                var scale = Mathf.Max(OversizedCanvasWidth / ReferenceWidth, OversizedCanvasHeight / ReferenceHeight);
+
+                Assert.That(view.ArtRect.rect.width, Is.EqualTo(ReferenceWidth * scale).Within(Tolerance),
+                    "the art covers the canvas's width");
+                Assert.That(view.ArtRect.rect.height, Is.EqualTo(ReferenceHeight * scale).Within(Tolerance),
+                    "the art keeps its 16:10 shape, so it overhangs the canvas's height");
+                Assert.That(view.ArtRect.rect.height, Is.GreaterThanOrEqualTo(OversizedCanvasHeight - Tolerance));
+                AssertIsCentredOn(view.ArtRect, canvas, "the title screen's art");
             }
             finally
             {

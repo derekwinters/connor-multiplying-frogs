@@ -36,6 +36,34 @@ namespace Frogs.Unity.Views
         public const float TitleButtonLabelSize = 64f;
         public const float VersionLabelSize = 28f;
 
+        // RED STUB (#520): the sign's constants, declared so the new tests compile.
+        public const float TitleSignWidth = 320f;
+        public const float TitleSignHeight = 128f;
+        public const float TitleSignBottomOffset = 94f;
+        public const float TitleSignTilt = 3f;
+        public const float TitleSignCornerRadius = 18f;
+        public const float TitleSignOutlineWidth = 7f;
+        public const float TitleSignGrainWidth = 4f;
+        public const float TitleSignGrainSpacing = 32f;
+        public const float TitleSignPostWidth = 32f;
+        public const float TitleSignPostDrop = 114f;
+        public const float TitleSignPostOutlineWidth = 6f;
+        public const float TitleSignPostCornerRadius = 8f;
+        public const float TitleSignLabelSize = 72f;
+        public const float TitleSignLabelOutlineWidth = 7f;
+        public const float TitleSignLabelTracking = 2f;
+        public const float TitleSignPressScale = 0.95f;
+        public static readonly Color TitleSignBark = new Color32(0x9C, 0x54, 0x0C, 0xFF);
+        public static readonly Color TitleSignBarkShade = new Color32(0x84, 0x3C, 0x0C, 0xFF);
+        public static readonly Color TitleSignGrain = new Color32(0x54, 0x24, 0x0C, 0x8C);
+        public static readonly Color TitleSignOutline = new Color32(0x06, 0x0B, 0x04, 0xFF);
+        public static readonly Color TitleSignLabelFill = new Color32(0xF8, 0xFA, 0xF6, 0xFF);
+        public const string ArtResource = "TitleScreen/title-screen-1920x1200";
+        public const string SignFontResource = "Fredoka/Fredoka-Bold";
+        public TitleSignButton StartButton => null;
+        public RectTransform PostRect => null;
+        public Image PostFillImage => null;
+
         // Declared so the no-bare-literal checklist item is satisfiable, per
         // the spec's own noted gap: this value has no agreed shape or
         // geometry anywhere on the page, and the committed mockup draws no

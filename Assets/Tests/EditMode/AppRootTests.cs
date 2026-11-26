@@ -62,7 +62,7 @@ namespace Frogs.Unity.EditModeTests
 
                 Assert.That(ActiveScreenRoots(root), Is.EqualTo(new[] { CoreScreen.TitleScreen }));
 
-                Assert.That(root.TitleScreen.NewButton.gameObject.activeSelf, Is.True);
+                Assert.That(root.TitleScreen.StartButton.gameObject.activeSelf, Is.True);
                 Assert.That(root.TitleScreen.ResumeButton.gameObject.activeSelf, Is.False,
                     "there is no save system, so RESUME is not laid out at all");
             }
@@ -161,7 +161,7 @@ namespace Frogs.Unity.EditModeTests
                 TapSeat(root.GameSetup, FrogColour.Pink);
                 Assert.That(root.GameSetup.IsSeatChosen(FrogColour.Pink), Is.True);
 
-                Tap(root.TitleScreen.NewButton);
+                Tap(root.TitleScreen.StartButton);
 
                 Assert.That(root.Router.CurrentScreen, Is.EqualTo(CoreScreen.GameSetup));
                 Assert.That(ActiveScreenRoots(root), Is.EqualTo(new[] { CoreScreen.GameSetup }));
@@ -652,7 +652,7 @@ namespace Frogs.Unity.EditModeTests
 
         static void StartAGame(AppRoot root)
         {
-            Tap(root.TitleScreen.NewButton);
+            Tap(root.TitleScreen.StartButton);
             TapSeat(root.GameSetup, FrogColour.Green);
             TapSeat(root.GameSetup, FrogColour.Blue);
             Tap(root.GameSetup.StartButton);
@@ -707,6 +707,14 @@ namespace Frogs.Unity.EditModeTests
 
             button.OnPointerDown(eventData);
             button.OnPointerUp(eventData);
+        }
+
+        static void Tap(TitleSignButton sign)
+        {
+            var eventData = EventDataAt(sign.RectTransform);
+
+            sign.OnPointerDown(eventData);
+            sign.OnPointerUp(eventData);
         }
 
         static void Tap(WorkingOutKeypadKey key)
