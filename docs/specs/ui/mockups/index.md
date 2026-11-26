@@ -12,6 +12,10 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Screen | Mockup | Spec page |
 | --- | --- | --- |
 | Title screen | [`title-screen.html`](title-screen.html) | [Title screen](../title-screen.md) |
+| Title screen on the art, A — drawn title, log kept *(not agreed)* | [`title-screen-art-a-drawn-title-log.html`](title-screen-art-a-drawn-title-log.html) | [Title screen](../title-screen.md) |
+| Title screen on the art, B — drawn title, no log *(not agreed)* | [`title-screen-art-b-drawn-title-no-log.html`](title-screen-art-b-drawn-title-no-log.html) | [Title screen](../title-screen.md) |
+| Title screen on the art, C — text title, no log *(not agreed)* | [`title-screen-art-c-text-title-no-log.html`](title-screen-art-c-text-title-no-log.html) | [Title screen](../title-screen.md) |
+| Title screen on the art, D — drawn title, log kept, scrim *(not agreed)* | [`title-screen-art-d-drawn-title-log-scrim.html`](title-screen-art-d-drawn-title-log-scrim.html) | [Title screen](../title-screen.md) |
 | Game setup, at rest with names | [`game-setup-names-set.html`](game-setup-names-set.html) | [Game setup](../game-setup.md) |
 | Game setup, naming a frog | [`game-setup-name-edit-inline.html`](game-setup-name-edit-inline.html) | [Game setup](../game-setup.md) |
 | Game setup, naming a frog — the alternative | [`game-setup-name-edit-pencil.html`](game-setup-name-edit-pencil.html) | [Game setup](../game-setup.md) |
@@ -129,6 +133,14 @@ That question is
 `title-screen.html` is the agreed picture and the losing comparison file is
 deleted, per [issue #216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216).
 
+It has four again, and they are live: the `title-screen-art-` files draw the
+screen on the real splash picture with its frogs hidden
+([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)),
+one per combination of the
+[three open questions](../title-screen.md#open-questions) — drawn or text
+title, log kept or hidden, scrim or not. Once those are answered the winner's
+art goes into `title-screen.html` and the four are deleted.
+
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
 
@@ -161,6 +173,14 @@ SVG is inline, static, has no script and fetches nothing, so every reason the
 "is not" list below exists still holds. It is not a licence to reach for SVG
 because it is easier — the test is whether the shape is expressible as a styled
 box at all.
+
+**A committed image is allowed where the subject is the art itself.** The
+title screen's `title-screen-art-` files are the only current case: the
+question they ask is how the buttons sit on Connor's picture, which a
+placeholder block cannot answer. The pictures are rendered by the splash build
+into [`../images/title-screen/`](../images/title-screen/scene.png), committed,
+and loaded by relative path — the file still opens on the sofa with no network.
+It is not a licence to paste screenshots into mockups.
 
 **Is not:** a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it

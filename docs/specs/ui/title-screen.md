@@ -37,7 +37,7 @@ else on this page.
 
 | Region | Job |
 | --- | --- |
-| `art` | The splash illustration — the whole canvas, behind everything |
+| `art` | The splash picture **without its frogs** — the whole canvas, behind everything |
 | `title` | The game's name |
 | `action` | The button row: `RESUME` and `NEW`, side by side |
 | `footprint` | Version string, bottom-left; small and quiet |
@@ -47,6 +47,13 @@ else on this page.
 - `art` fills the canvas, cropped from the centre outwards. It is the one
   element allowed to run to the screen edge, because it is a picture and a
   margin around a picture is a border nobody asked for.
+- `art` is Connor's splash picture, rebuilt as layers under
+  [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
+  with the four frogs and their dashed hop lines hidden — Derek, on
+  [#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484):
+  *"this same image, but without the frogs, to not crowd out the buttons and
+  stuff on the home screen."* What else is hidden with them — the drawn title,
+  the log — is [open questions 3 and 4](#open-questions).
 - `title` is centred horizontally, its baseline at `TitleBaselineY` from the
   top. It is not vertically centred — the art has a subject in the middle of it
   and the title sits above that.
@@ -154,8 +161,10 @@ genuinely new number.
   from `Play`, and it goes exactly where `Play` went: [game
   setup](game-setup.md). Never disabled; there is no state of this screen that
   would justify greying it out.
-- **Title** — text, not a logo image, until an `area:art` issue supplies one.
-  The wireframe reserves the space a wordmark would occupy.
+- **Title** — today, text, not a logo image. The art now has a drawn
+  MULTIPLYING FROGS of its own, and whether that replaces the text is
+  [open question 3](#open-questions). Until it is answered the text title, its
+  `TitleBaselineY` and its `TitleSize` stand as they are.
 - **Version** — `v0.1.0`, from `/VERSION`. It exists so that a screenshot from a
   tablet says which build it came from, which is the difference between a
   reproducible bug and a story about one.
@@ -171,7 +180,22 @@ genuinely new number.
 ## Mockup
 
 - **The agreed picture:** [`mockups/title-screen.html`](mockups/title-screen.html) —
-  `NEW` primary, `RESUME` secondary.
+  `NEW` primary, `RESUME` secondary, with the art as a placeholder block.
+- **The art, four ways — not agreed yet**
+  ([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)),
+  one file per answer to [open questions 3, 4 and 5](#open-questions):
+
+  | | Title | Log | Scrim | Mockup |
+  | --- | --- | --- | --- | --- |
+  | A | Drawn, from the art | Kept | No | [`title-screen-art-a-drawn-title-log.html`](mockups/title-screen-art-a-drawn-title-log.html) |
+  | B | Drawn, from the art | Hidden | No | [`title-screen-art-b-drawn-title-no-log.html`](mockups/title-screen-art-b-drawn-title-no-log.html) |
+  | C | Text, as today | Hidden | No | [`title-screen-art-c-text-title-no-log.html`](mockups/title-screen-art-c-text-title-no-log.html) |
+  | D | Drawn, from the art | Kept | Yes, 0.35 | [`title-screen-art-d-drawn-title-log-scrim.html`](mockups/title-screen-art-d-drawn-title-log-scrim.html) |
+
+  Each changes only the `art` and `title` regions. The button row, the version
+  string and every constant are the agreed ones, untouched. When the questions
+  are answered, the chosen drawing's art goes into `title-screen.html` and the
+  other three files are deleted, as the last pair on this page was.
 
 It used to be one of a pair, drawn to ask which of the two buttons should be
 primary — see "The invariant this page used to carry" and
@@ -187,12 +211,31 @@ re-centred, which is exactly what [the settled open question
 2](#open-questions) below says happens, and it needs no picture of its own to
 be unambiguous.
 
-The splash illustration attached to
-[issue #168](https://github.com/derekwinters/connor-multiplying-frogs/issues/168)
-is the art this screen is built around. The mockup draws its region as a
-placeholder block rather than embedding the image, because a mockup that needs
-a network fetch is a mockup that does not open on the sofa — and because the
-wireframe is deciding *where the art goes*, not what it is.
+The four art mockups draw the same no-save state that exists today: `RESUME`
+hidden, `NEW` alone and centred. The both-buttons state fits the same way — the
+row is 1168 px wide with 376 px clear either side and its bottom edge does not
+move — so it is not drawn four more times. One thing it would show that `NEW`
+alone does not: `RESUME` is secondary, and the shared secondary style is
+outlined with **no fill**, which was drawn against a flat pale background. Over
+the art its label sits straight on the picture. That is for whoever builds the
+save system to look at; nothing on this page changes because of it.
+
+`title-screen.html` draws the art as a placeholder block, as it always has. The
+art mockups draw the real picture, and still need no network: the build that
+makes the splash layers also renders the frog-less art, in three stackable
+pieces, into [`images/title-screen/`](images/title-screen/scene.png) —
+
+| Piece | What it is |
+| --- | --- |
+| `scene.png` | Everything but the frogs, their hop lines, the drawn title and its glow; opaque |
+| `scene-no-log.png` | The same without the log |
+| `title.png` | The drawn title and its glow, transparent around them |
+
+— and each mockup loads them from there, stacked the way the screen would stack
+them: scene, scrim, title, buttons. Pieces rather than one picture per option
+because the questions cross, and because a scrim between the scene and the
+title has to have something on either side of it. To rebuild them:
+`python3 art-source/splash/build_splash.py --home-only`.
 
 ## Open questions
 
@@ -219,6 +262,35 @@ wireframe is deciding *where the art goes*, not what it is.
   answer honestly, not as `RESUME` being removed outright — the `Disabled` and
   `Absent` options this question used to weigh are not chosen; `RESUME` stays
   a real button that is simply always hidden today.
+- **3. The title: the drawn lettering, or the text? Open.**
+  The art has MULTIPLYING FROGS drawn into it (rebuilt as vectors, spelled
+  correctly, in Fredoka). With the frogs gone it sits in the top half of the
+  picture, between the clouds, roughly 70–520 px down.
+  - *Drawn* (A, B, D): the art's own lettering is the title and the text title
+    goes. `TitleBaselineY` and `TitleSize` would then no longer place anything
+    — the title is where the picture puts it — and would be removed with the
+    text. The drawn title is part of the picture, not a control: tapping it
+    does nothing, so the [first invariant](#invariants) holds either way.
+  - *Text* (C): today's plain-text title stays, at `TitleBaselineY` and
+    `TitleSize`, and the drawn lettering and its whitish glow are hidden.
+  Recommended on the issue: drawn, because it matches the launch splash.
+- **4. The empty log: keep it, or hide it too? Open.**
+  With the big frog gone the log is empty, and it is exactly where the `action`
+  row is: `NEW` sits on top of it.
+  - *Kept* (A, D): the button sits on the log.
+  - *Hidden* (B, C): the button sits on water, with grass below. The water,
+    shoreline and grass behind the log are complete, so hiding it leaves no
+    hole.
+- **5. The scrim: still wanted? Open.**
+  The constants table has `TitleScrimOpacity` (0.35), a scrim *"behind the
+  title, over the art"*. It has never had an extent or a colour, no mockup has
+  drawn it, and the built screen declares the constant without applying it.
+  With a drawn title the question is whether there is a scrim at all.
+  - *No scrim* (A, B, C): `TitleScrimOpacity` is removed.
+  - *A scrim* (D): kept. D draws the only reading that adds no new number —
+    black at 0.35 over the whole scene, under the drawn title and its glow —
+    as a picture of the question, not as a proposed shape. If the scrim is
+    kept, its extent and colour are still to be agreed.
 - **Is there a `How to play` button here?** Proposed: still no — but for a
   different reason than before, because half of the old reason has gone.
 

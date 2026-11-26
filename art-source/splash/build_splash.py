@@ -17,6 +17,9 @@ Reads `Assets/Art/splash-source.png` (read-only) and writes, under art-source/sp
     ../../Assets/Art/Splash/splash-1920x1200.png
                                        the launch splash: the whole composite at the
                                        tablet's 1920 x 1200 (window in launch.py; #482)
+    ../../docs/specs/ui/images/title-screen/{scene,scene-no-log,title}.png
+                                       the title screen's wireframe art: the splash
+                                       without the frogs, in pieces (home.py; #484)
 
 Every coordinate is a pixel of the original (1586 x 992): all SVGs share
 `viewBox="0 0 1586 992"`, so any set of layers stacks straight back together. Layer and
@@ -31,6 +34,7 @@ by building a second time from scratch (every cut-out and trace recomputed) and 
     python3 art-source/splash/build_splash.py --check-rebuild  # ... and a second build to compare
     python3 art-source/splash/build_splash.py --icon-only      # only the app icon, from the committed layers
     python3 art-source/splash/build_splash.py --splash-only    # only the launch splash, likewise
+    python3 art-source/splash/build_splash.py --home-only      # only the title screen's art, likewise
 
 See README.md in this folder for the layers and how each is made.
 """
@@ -50,6 +54,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import cutout as cu  # noqa: E402
+import home  # noqa: E402
 import icon  # noqa: E402
 import launch  # noqa: E402
 import sky  # noqa: E402
@@ -396,6 +401,23 @@ def write_splash():
     save_png(splash_png(), launch.SPLASH_OUT)
 
 
+def home_png(piece):
+    """One piece of the title screen's wireframe art (#484), rendered from the vectors.
+    The scenes are opaque, as the sky is; the title is transparent around it."""
+    svg = stack_svg(home.piece_ids(piece, object_ids()),
+                    title=f"Multiplying Frogs title screen - {piece}", view=home.HOME_VIEW)
+    img = render(svg, home.HOME_SIZE[0])
+    if img.size != home.HOME_SIZE:
+        raise SystemExit(f"title screen {piece} rendered at {img.size}, not {home.HOME_SIZE}")
+    return img if piece == "title" else img.convert("RGB")
+
+
+def write_home():
+    home.HOME_OUT_DIR.mkdir(parents=True, exist_ok=True)
+    for piece in home.PIECES:
+        save_png(home_png(piece), home.HOME_OUT_DIR / f"{piece}.png")
+
+
 def load_committed_parts():
     """Fill the parts cache from the committed layers/<id>.svg, so the icon can be
     rendered without re-tracing anything. layer_svg() wrote each file as
@@ -436,12 +458,13 @@ def build():
         save_png(img, REVIEW_DIR / name)
     write_icon()
     write_splash()
+    write_home()
     return layer_pngs
 
 
 def outputs():
     files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT,
-             launch.SPLASH_OUT]
+             launch.SPLASH_OUT] + [home.HOME_OUT_DIR / f"{p}.png" for p in home.PIECES]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files
@@ -526,7 +549,14 @@ def main():
                          "needs only CairoSVG, Pillow and NumPy)")
     ap.add_argument("--splash-only", action="store_true",
                     help="only render the launch splash, from the committed layer SVGs")
+    ap.add_argument("--home-only", action="store_true",
+                    help="only render the title screen's wireframe art, from the committed layer SVGs")
     args = ap.parse_args()
+    if args.home_only:
+        load_committed_parts()
+        write_home()
+        print(f"wrote {home.HOME_OUT_DIR.relative_to(HERE.parents[1])}/")
+        return 0
     if args.splash_only:
         load_committed_parts()
         write_splash()

@@ -5,8 +5,9 @@ is one flattened raster. This folder rebuilds it as **one vector layer per objec
 same art can make the launch splash, the app icon and the home screen without redrawing it
 (#481). The app icon source, `Assets/Art/app-icon-source.png`, is cropped from these
 layers by the build (#483, below), and so is the launch splash,
-`Assets/Art/Splash/splash-1920x1200.png` (#482, below); otherwise nothing here is used
-by the game, and using the art is the job of the home-screen issue.
+`Assets/Art/Splash/splash-1920x1200.png` (#482, below), and so is the title screen's
+wireframe art under `docs/specs/ui/images/title-screen/` (#484, below); otherwise nothing
+here is used by the game.
 
 The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapted.
 
@@ -21,6 +22,7 @@ The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapt
 | `review/` | `original-vs-composite.png`, `no-frogs.png`, `no-frogs-no-title.png`, `no-frogs-no-log.png`, `no-frogs-no-log-no-title.png`, `layer-sheet.png`, `title-vs-original.png`, `app-icon-masks.png` (the app icon as a circle, a squircle and a rounded square). |
 | `icon.py` | The app icon's crop: the window (`ICON_CROP`), its size (`ICON_SIZE`) and the layers it hides (`ICON_HIDDEN`). |
 | `launch.py` | The launch splash's window (`SPLASH_VIEW`) and size (`SPLASH_SIZE`). |
+| `home.py` | The title screen's wireframe art: which layers each of its three pieces hides (`PIECES`), in the launch splash's window. |
 | `build_splash.py` | The one script that writes all of the above, the app icon source and the launch splash, then self-checks. |
 | `cutout.py`, `tracing.py`, `sky.py`, `title.py` | Its stages: cut-out and completion, VTracer tracing, the fitted sky and glow, the vector title. |
 | `fonts/Fredoka-Variable.ttf`, `fonts/OFL.txt` | The title's font and its licence (SIL Open Font License 1.1). |
@@ -130,6 +132,7 @@ python3 art-source/splash/build_splash.py                  # about 2 minutes
 python3 art-source/splash/build_splash.py --check-rebuild  # also builds again and compares
 python3 art-source/splash/build_splash.py --icon-only      # only the app icon, from the committed
                                                            # layer SVGs; seconds, no tracing
+python3 art-source/splash/build_splash.py --home-only      # only the title screen's art, likewise
 ```
 
 Self-checks: every layer PNG is the full canvas and at least 1920 × 1200; the sky is opaque;
@@ -168,3 +171,21 @@ just that, from the committed layers, in seconds.
 
 `.github/scripts/tests/test_launch_splash.py` checks those, and that the committed file
 matches the committed composite brought down to the same size.
+
+## The title screen's wireframe art
+
+The title (home) screen is to sit on this picture without its frogs (Derek, #484). Its
+wireframe draws the real art, so `build_splash.py` renders it from the vectors, at the
+launch splash's window and 1920 × 1200, in three pieces the mockups stack
+(`docs/specs/ui/images/title-screen/`); `--home-only` renders just those, in seconds.
+
+| Piece | Hides | |
+| --- | --- | --- |
+| `scene.png` | the frogs and their hop arcs, the title and its glow | opaque |
+| `scene-no-log.png` | the same, and the log | opaque |
+| `title.png` | everything but the title and its glow | transparent around them |
+
+They are pieces, not one picture per option, because the open questions on
+`docs/specs/ui/title-screen.md` (drawn title or text, log or not, scrim or not) cross.
+`.github/scripts/tests/test_title_screen_art.py` checks what each piece holds, and that
+the committed scene matches the committed layer PNGs stacked.
