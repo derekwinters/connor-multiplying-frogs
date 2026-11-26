@@ -1,7 +1,7 @@
 """The Android app-icon set is generated from one committed picture.
 
-Connor's artwork is committed once, unmodified, at Assets/Art/app-icon-source.png
-and every icon Android wants is derived from it by generate_app_icons.py. These
+Connor's artwork is committed once, at Assets/Art/app-icon-source.png (a crop of
+his splash art, rendered by art-source/splash/build_splash.py - #483), and every icon Android wants is derived from it by generate_app_icons.py. These
 tests pin the sizes Android asks for, where the picture sits inside the adaptive
 icon's mask in each of the two modes, and that the committed files are what the
 generator produces — so an icon that drifted from its source is caught here.
@@ -10,7 +10,7 @@ The geometry tests need nothing but the standard library. The rendering tests
 need Pillow; where it is not installed they are reported as skipped, by name,
 rather than passing quietly.
 
-See docs/engineering/tech-stack.md ("The app icon") and issues #169 and #448.
+See docs/engineering/tech-stack.md ("The app icon") and issues #169, #448 and #483.
 """
 
 import importlib.util
@@ -64,8 +64,11 @@ class SizesAndroidAsksFor(unittest.TestCase):
         # 5 densities x (foreground, background, legacy, round) + the store image.
         self.assertEqual(len(icons.outputs()), 21)
 
-    def test_every_size_is_a_downscale_of_the_608_source(self):
-        self.assertTrue(all(size <= 608 for _, size in icons.outputs()))
+    def test_every_size_is_a_downscale_of_the_committed_source(self):
+        import struct
+        with open(REPO_ROOT / icons.SOURCE, "rb") as f:
+            width, height = struct.unpack(">II", f.read(24)[16:24])
+        self.assertTrue(all(size <= min(width, height) for _, size in icons.outputs()))
 
 
 class WhereThePictureSits(unittest.TestCase):

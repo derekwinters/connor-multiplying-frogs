@@ -8,7 +8,12 @@ Reads `Assets/Art/splash-source.png` (read-only) and writes, under art-source/sp
     objects/<id>.png                   each notable object cropped on its own (its vector is
                                        layers/<id>.svg; no cropped SVG is kept, as it would
                                        only repeat that file's paths)
-    review/*.png                       the images for reviewing the rebuild
+    review/*.png                       the images for reviewing the rebuild, and the app
+                                       icon in three launcher shapes (app-icon-masks.png)
+    ../../Assets/Art/app-icon-source.png
+                                       the app icon: a square crop of the big frog on the
+                                       log, title hidden (window and hidden layers in
+                                       icon.py; #483)
 
 Every coordinate is a pixel of the original (1586 x 992): all SVGs share
 `viewBox="0 0 1586 992"`, so any set of layers stacks straight back together. Layer and
@@ -21,6 +26,7 @@ by building a second time from scratch (every cut-out and trace recomputed) and 
     pip install vtracer opencv-python-headless scipy cairosvg pillow numpy fonttools skia-pathops
     python3 art-source/splash/build_splash.py                  # build + self-checks
     python3 art-source/splash/build_splash.py --check-rebuild  # ... and a second build to compare
+    python3 art-source/splash/build_splash.py --icon-only      # only the app icon, from the committed layers
 
 See README.md in this folder for the layers and how each is made.
 """
@@ -40,6 +46,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import cutout as cu  # noqa: E402
+import icon  # noqa: E402
 import sky  # noqa: E402
 import title as ti  # noqa: E402
 import tracing as tr  # noqa: E402
@@ -187,7 +194,7 @@ def layer_svg(oid):
     return svg_doc(defs, wrapped, title=f"Multiplying Frogs splash - {label(oid)}")
 
 
-def stack_svg(ids, title="Multiplying Frogs splash"):
+def stack_svg(ids, title="Multiplying Frogs splash", view=(0, 0, cu.W, cu.H)):
     """The given objects stacked in family order, one Inkscape layer per family."""
     defs, body = [], []
     for fam, members in FAMILIES:
@@ -207,7 +214,7 @@ def stack_svg(ids, title="Multiplying Frogs splash"):
         if inner:
             body.append(f'<g id="layer-{fam}" inkscape:groupmode="layer" inkscape:label="{fam}">\n'
                         + "".join(inner) + "</g>\n")
-    return svg_doc("".join(defs), "".join(body), title=title)
+    return svg_doc("".join(defs), "".join(body), view=view, title=title)
 
 
 def render(svg, width):
@@ -324,6 +331,62 @@ def reviews(layer_pngs):
 
 
 # --------------------------------------------------------------------------
+# The app icon (#483): a square crop of the big frog on the log, no title
+# --------------------------------------------------------------------------
+def icon_svg():
+    x, y, side = icon.ICON_CROP
+    return stack_svg(icon.icon_ids(object_ids()), title="Multiplying Frogs app icon",
+                     view=(x, y, side, side))
+
+
+def icon_png():
+    """The icon, rendered from the vectors and flattened onto the opaque sky."""
+    return render(icon_svg(), icon.ICON_SIZE).convert("RGB")
+
+
+MASK_TILE = 300               # px: each shape on the icon review sheet
+MASK_GAP = 30
+MASK_BG = (40, 44, 53)        # a dark launcher background
+
+
+def icon_masks(img):
+    """The icon as three launchers cut it - a circle, a squircle and a rounded square -
+    side by side on a dark background, for review."""
+    n = MASK_TILE * 4
+    yy, xx = np.mgrid[0:n, 0:n]
+    u, v = np.abs((xx + 0.5) / n * 2 - 1), np.abs((yy + 0.5) / n * 2 - 1)
+    r = 0.4
+    shapes = [u * u + v * v <= 1,
+              u ** 4 + v ** 4 <= 1,
+              np.maximum(u - (1 - r), 0) ** 2 + np.maximum(v - (1 - r), 0) ** 2 <= r * r]
+    pic = img.convert("RGB").resize((MASK_TILE, MASK_TILE), Image.LANCZOS)
+    sheet = Image.new("RGB", (MASK_GAP + 3 * (MASK_TILE + MASK_GAP), MASK_TILE + 2 * MASK_GAP), MASK_BG)
+    for i, m in enumerate(shapes):
+        mask = Image.fromarray((m * 255).astype(np.uint8)).resize((MASK_TILE, MASK_TILE), Image.LANCZOS)
+        sheet.paste(pic, (MASK_GAP + i * (MASK_TILE + MASK_GAP), MASK_GAP), mask)
+    return sheet
+
+
+def write_icon():
+    img = icon_png()
+    save_png(img, icon.ICON_OUT)
+    save_png(icon_masks(img), REVIEW_DIR / "app-icon-masks.png")
+
+
+def load_committed_parts():
+    """Fill the parts cache from the committed layers/<id>.svg, so the icon can be
+    rendered without re-tracing anything. layer_svg() wrote each file as
+    svg_doc(defs, <g layer>body</g>), so this reads back exactly the same parts."""
+    import re
+    for oid in object_ids():
+        text = (LAYERS_DIR / f"{oid}.svg").read_text(encoding="utf-8")
+        m = re.search(r"<defs>\n(.*?)</defs>\n<g id=\"layer-[^\"]+\"[^>]*>\n(.*)</g>\n</svg>\n\Z", text, re.S)
+        if not m:
+            raise SystemExit(f"layers/{oid}.svg is not in the shape build_splash.py writes")
+        _PARTS[oid] = (m.group(1), m.group(2))
+
+
+# --------------------------------------------------------------------------
 # Build
 # --------------------------------------------------------------------------
 def build():
@@ -348,18 +411,19 @@ def build():
         save_png(standalone_png(oid), OBJECTS_DIR / f"{oid}.png")
     for name, img in reviews(layer_pngs).items():
         save_png(img, REVIEW_DIR / name)
+    write_icon()
     return layer_pngs
 
 
 def outputs():
-    files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png")]
+    files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files
 
 
 def digests():
-    return {str(p.relative_to(HERE)): hashlib.sha256(p.read_bytes()).hexdigest() for p in outputs()}
+    return {str(p.relative_to(HERE.parents[1])): hashlib.sha256(p.read_bytes()).hexdigest() for p in outputs()}
 
 
 def clear_caches():
@@ -413,6 +477,11 @@ def check(layer_pngs):
     for gid in JUMP_LABELS:
         if f'<g id="{gid}" ' not in comp:
             problems.append(f"composite: no group {gid}")
+    with Image.open(icon.ICON_OUT) as img:
+        if img.size != (icon.ICON_SIZE, icon.ICON_SIZE) or icon.ICON_SIZE < 1024:
+            problems.append(f"app icon source is {img.size}")
+    if any(f'id="{oid}"' in icon_svg() for oid in icon.ICON_HIDDEN):
+        problems.append("app icon: a hidden layer is in it")
     for oid in STANDALONE:
         img = Image.open(OBJECTS_DIR / f"{oid}.png")
         if max(img.size) < OBJECT_LONG - 1:
@@ -424,7 +493,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check-rebuild", action="store_true",
                     help="build a second time from scratch and require byte-identical files")
+    ap.add_argument("--icon-only", action="store_true",
+                    help="only render the app icon, from the committed layer SVGs (seconds, "
+                         "needs only CairoSVG, Pillow and NumPy)")
     args = ap.parse_args()
+    if args.icon_only:
+        load_committed_parts()
+        write_icon()
+        print(f"wrote {icon.ICON_OUT.relative_to(HERE.parents[1])}")
+        return 0
     print("building ...", flush=True)
     layer_pngs = build()
     problems = check(layer_pngs)

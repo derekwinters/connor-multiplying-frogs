@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Generate the Android app-icon set from Connor's artwork.
 
-The one picture is committed unmodified at Assets/Art/app-icon-source.png.
+The one picture is committed at Assets/Art/app-icon-source.png: a square crop of the
+big frog on the log from Connor's splash art, rendered by
+art-source/splash/build_splash.py (#483).
 Everything Android wants is derived from it here, so the icon is changed by
 changing the picture (or the mode) and rerunning this — never by editing a
 generated file.

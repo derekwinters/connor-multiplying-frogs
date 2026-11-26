@@ -157,18 +157,44 @@ each build — but it needs an editor session to generate honestly.
 
 ### The app icon
 
-**Connor's frog picture is the app icon.** Derek's decision in
+**The app icon is a close crop of Connor's splash art: the big frog sitting on
+the log, with no title.** Derek's call on 2026-11-24
+([#483](https://github.com/derekwinters/connor-multiplying-frogs/issues/483)):
+*"The app icon will be a cropped version of this image, without the title text,
+zoomed in to the frog on the log in center of the image."* It supersedes the
+separate 608 × 608 frog-on-a-log drawing chosen on
 [#169](https://github.com/derekwinters/connor-multiplying-frogs/issues/169).
-The picture is committed once, byte-for-byte as it was drawn, and every file
-Android wants is generated from it. Nobody edits a generated icon by hand: change
-the picture, or the mode below, and regenerate.
+Every file Android wants is generated from that one source. Nobody edits a
+generated icon by hand: change the crop, or the mode below, and regenerate.
 
 | | |
 | --- | --- |
-| Source | `Assets/Art/app-icon-source.png` — 608 × 608, unmodified |
+| Source | `Assets/Art/app-icon-source.png` — 1024 × 1024, rendered from [the splash art's](#the-splash-art) vector layers |
+| Made by | `art-source/splash/build_splash.py`; the window, size and hidden layers are named constants in `art-source/splash/icon.py` |
+| Its tests | `.github/scripts/tests/test_app_icon_crop.py` |
 | Generated into | `Assets/Art/AppIcon/` |
 | Generator | `.github/scripts/generate_app_icons.py` (needs Pillow) |
-| Its tests | `.github/scripts/tests/test_generate_app_icons.py` |
+| Generator's tests | `.github/scripts/tests/test_generate_app_icons.py` |
+
+**How the source is made.** The splash art's layers are stacked without the
+title and its glow, and without the three small jumping frogs and their hop
+arcs (one frog and one arc would otherwise poke into the frame); the unused
+splashes are not in the stack anyway. That stack is cut to `ICON_CROP`, a
+640 × 640 square of the 1586 × 992 splash canvas centred left-right on the big
+frog, from just above its eyes to just below the log, and rendered straight from
+the vectors at `ICON_SIZE`, 1024 px. So it is a fresh render, not an upscale, and
+it is over twice the largest icon Android asks for. The tests check that the
+whole big frog, and a good band of the log, fall inside the circle a round
+launcher cuts, and that the committed source matches the committed layer PNGs
+stacked and cropped the same way.
+
+```bash
+python3 art-source/splash/build_splash.py --icon-only   # seconds: from the committed layer SVGs
+python3 .github/scripts/generate_app_icons.py           # then regenerate every icon
+```
+
+A full `build_splash.py` run writes the icon source too, with the rest of the
+splash art.
 
 What it generates, at mdpi, hdpi, xhdpi, xxhdpi and xxxhdpi:
 
@@ -189,8 +215,8 @@ guaranteed to survive every shape. The generator's `--mode` decides what that
 does to the picture:
 
 - **`fill`** — the default, and what is committed. The picture spans the whole
-  72 dp viewport. A round launcher trims the scenery in the corners; the frog in
-  the middle stays whole. Nothing is added around it: the background layer is
+  72 dp viewport. A round launcher trims the scenery in the corners — the ends of
+  the log, the sky and the water; the frog in the middle stays whole. Nothing is added around it: the background layer is
   the picture too. Derek's call, 2026-10-11.
 - **`shrink`** — the whole picture is scaled into the 66 dp safe circle on a
   plain cream background (`#F5F2EA`), so no launcher ever trims anything, at the
@@ -216,7 +242,7 @@ nothing but Python.
 **Not done yet: putting the icons into the build.** The icon slots in
 `PlayerSettings` are set the same way as everything else in this section, by
 code at build time, and that waits on a committed `ProjectSettings` (#104). It is
-tracked on #169. Until then the APK still carries Unity's default icon. The
+tracked on [#459](https://github.com/derekwinters/connor-multiplying-frogs/issues/459). Until then the APK still carries Unity's default icon. The
 generated PNGs also have no committed `.meta` files yet — see
 [Unity serialization](unity-serialization.md) for why those are not
 hand-written.
@@ -415,8 +441,9 @@ pinning its GUID is part of
 app icon and the home screen can each be made from the same art without redrawing it
 ([#481](https://github.com/derekwinters/connor-multiplying-frogs/issues/481)). The
 picture is committed once, byte-for-byte as supplied, and the layers are rebuilt from it
-by one script. Nothing the game builds uses them yet; putting the art on a screen is
-each screen's own issue.
+by one script. The [app icon](#the-app-icon) is cropped from them by the same script;
+nothing else the game builds uses them yet, and putting the art on a screen is each
+screen's own issue.
 
 | | |
 | --- | --- |
