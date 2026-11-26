@@ -9,68 +9,86 @@ using CoreScreen = Frogs.Core.Screen;
 // or `ButtonKind` in this file always means the shared component's.
 using Button = Frogs.Unity.UI.Button;
 using ButtonKind = Frogs.Unity.UI.ButtonKind;
+using RoundedRectSprite = Frogs.Unity.UI.RoundedRectSprite;
 using ScreenColours = Frogs.Unity.UI.ScreenColours;
 
 namespace Frogs.Unity.Views
 {
     /// <summary>
-    /// The title screen — docs/specs/ui/title-screen.md — built to its
-    /// current wireframe: `RESUME` and `NEW` side by side in the `action`
-    /// row (not the single `Play` the screen used to have; see the spec
-    /// page's "The invariant this page used to carry"). Composes the shared
-    /// <see cref="Button"/> (#214) the same way <c>ScreenRouterAdapter</c>
-    /// composes its screen roots: built entirely through the typed Unity API
-    /// when the component first needs itself, no committed prefab.
+    /// The title screen — docs/specs/ui/title-screen.md — built to the
+    /// wireframe #484 settled: Connor's splash picture, frogs, log and drawn
+    /// title and all, full-bleed behind everything, and a wooden sign in the
+    /// grass bottom-right that says `START` (#520). `START` is the control
+    /// that used to read `NEW`: it goes to game setup and does nothing else.
+    /// `RESUME` is still a real shared <see cref="Button"/> behind the
+    /// saved-game query, hidden whenever there is no save, which is always
+    /// today. Built entirely through the typed Unity API when the component
+    /// first needs itself, no committed prefab.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public sealed class TitleScreenView : MonoBehaviour
     {
         // docs/specs/ui/title-screen.md#named-constants.
         public const float SafeMargin = 48f;
-        public const float TitleBaselineY = 300f;
-        public const float TitleSize = 160f;
-        public const float TitleButtonWidth = 560f;
-        public const float TitleButtonHeight = 160f;
-        public const float TitleButtonGap = 48f;
-        public const float TitleButtonBottomOffset = 120f;
-        public const float TitleButtonLabelSize = 64f;
+        public const float TitleSignWidth = 320f;
+        public const float TitleSignHeight = 128f;
+        public const float TitleSignBottomOffset = 94f;
+        public const float TitleSignTilt = 3f;
+        public const float TitleSignCornerRadius = 18f;
+        public const float TitleSignOutlineWidth = 7f;
+        public const float TitleSignGrainWidth = 4f;
+        public const float TitleSignGrainSpacing = 32f;
+        public const float TitleSignPostWidth = 32f;
+        public const float TitleSignPostDrop = 114f;
+        public const float TitleSignPostOutlineWidth = 6f;
+        public const float TitleSignPostCornerRadius = 8f;
+        public const float TitleSignLabelSize = 72f;
+        public const float TitleSignLabelOutlineWidth = 7f;
+        public const float TitleSignLabelTracking = 2f;
+
+        // Open question 9, settled 2026-11-26 ("Press down"): the plank
+        // shrinks to this while held.
+        public const float TitleSignPressScale = 0.95f;
+
         public const float VersionLabelSize = 28f;
 
-        // Declared so the no-bare-literal checklist item is satisfiable, per
-        // the spec's own noted gap: this value has no agreed shape or
-        // geometry anywhere on the page, and the committed mockup draws no
-        // visible scrim. Deliberately not applied to any element here — see
-        // this issue's PR under "Deviations and Decisions".
-        public const float TitleScrimOpacity = 0.35f;
-
-        // docs/specs/ui/title-screen.md#behaviour: "art and title fade in
-        // over TitleFadeDuration (0.3 s)." Added to the spec's Named
-        // constants table in the same PR that declares this field — it had
-        // previously been stated only in that section's prose.
+        // docs/specs/ui/title-screen.md#behaviour: the art — the drawn title
+        // with it — fades in over TitleFadeDuration.
         public const float TitleFadeDuration = 0.3f;
+
+        // docs/specs/ui/title-screen.md#sign-colours: painted from the art,
+        // not from the UI palette.
+        public static readonly Color TitleSignBark = new Color32(0x9C, 0x54, 0x0C, 0xFF);
+        public static readonly Color TitleSignBarkShade = new Color32(0x84, 0x3C, 0x0C, 0xFF);
+        public static readonly Color TitleSignGrain = new Color32(0x54, 0x24, 0x0C, 0x8C); // at 55%: round(0.55 * 255) = 140
+        public static readonly Color TitleSignOutline = new Color32(0x06, 0x0B, 0x04, 0xFF);
+        public static readonly Color TitleSignLabelFill = new Color32(0xF8, 0xFA, 0xF6, 0xFF);
+
+        /// <summary>The art, for <see cref="Resources.Load(string)"/>: Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png, written by art-source/splash/build_splash.py --home-only.</summary>
+        public const string ArtResource = "TitleScreen/title-screen-1920x1200";
+
+        /// <summary>The sign's font, for <see cref="Resources.Load(string)"/>: Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf, the static weight-700 instance of the title's variable font.</summary>
+        public const string SignFontResource = "Fredoka/Fredoka-Bold";
 
         // The one canvas every screen is measured in —
         // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
         const float CanvasWidth = 1920f;
         const float CanvasHeight = 1200f;
 
-        const string TitleLabel = "Multiplying Frogs";
         const string ResumeLabel = "RESUME";
-        const string NewLabel = "NEW";
 
-        // No imported font — matches Button.cs's own choice, for the same
-        // reason (no external assets).
+        // The version string keeps the built-in font it always had (open
+        // question 10 leaves it as it is).
         const string BuiltinLabelFontName = "LegacyRuntime.ttf";
 
         const string VersionPrefix = "v";
 
-        // Chrome colours copied verbatim from the committed mockup's CSS
-        // custom properties — the same line Button.cs draws for its own
-        // colours: not a shared-components.md geometry/opacity constant, so
-        // not declared as a named spec constant.
-        static readonly Color ArtPlaceholderColor = new Color32(0xED, 0xF1, 0xEF, 0xFF); // mockups' --bg
-        static readonly Color InkColor = new Color32(0x1E, 0x24, 0x22, 0xFF); // mockups' --ink
-        static readonly Color VersionColor = new Color32(0x6C, 0x78, 0x73, 0xFF); // mockups' --line
+        // Copied verbatim from the committed mockup's CSS (--line), as it was
+        // before #520; restyling it is open question 10.
+        static readonly Color VersionColor = new Color32(0x6C, 0x78, 0x73, 0xFF);
+
+        static Sprite s_postOutlineSprite;
+        static Sprite s_postFillSprite;
 
         RectTransform _rect;
         RectTransform _contentRect;
@@ -80,12 +98,14 @@ namespace Frogs.Unity.Views
         CanvasGroup _backdropCanvasGroup;
         RectTransform _artRect;
         Image _artImage;
-        RectTransform _titleRect;
-        Text _titleText;
+        Vector2 _fittedTo = new Vector2(-1f, -1f);
 
-        RectTransform _actionRect;
         Button _resumeButton;
-        Button _newButton;
+
+        RectTransform _signRect;
+        RectTransform _postRect;
+        Image _postFill;
+        TitleSignButton _startButton;
 
         RectTransform _footprintRect;
         Text _versionText;
@@ -106,7 +126,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The paint that reaches every edge of the screen, whatever the device's aspect ratio.</summary>
+        /// <summary>The paint that reaches every edge of the screen, whatever the device's aspect ratio, under the art.</summary>
         public Image BackgroundImage
         {
             get
@@ -116,7 +136,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred.</summary>
+        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred: the sign, `RESUME` and the footprint.</summary>
         public RectTransform ContentRect
         {
             get
@@ -126,7 +146,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>Wraps `art` and `title` — the two elements that fade in together on entering, and nothing else.</summary>
+        /// <summary>Wraps `art` — the drawn title is part of it — the one thing that fades in on entering.</summary>
         public CanvasGroup BackdropCanvasGroup
         {
             get
@@ -136,7 +156,7 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The `art` region: a flat-coloured rectangle filling the canvas.</summary>
+        /// <summary>The `art` region: the whole splash composite, drawn title included.</summary>
         public Image ArtImage
         {
             get
@@ -146,43 +166,14 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The `art` region's <see cref="RectTransform"/>.</summary>
+        /// <summary>The `art` region's <see cref="RectTransform"/>: the screen covered, cropped from the centre.</summary>
         public RectTransform ArtRect
         {
             get
             {
                 EnsureInitialized();
+                FitArt();
                 return _artRect;
-            }
-        }
-
-        /// <summary>The `title` region: "Multiplying Frogs", as text, not a logo image.</summary>
-        public Text TitleText
-        {
-            get
-            {
-                EnsureInitialized();
-                return _titleText;
-            }
-        }
-
-        /// <summary>The `title` region's <see cref="RectTransform"/>.</summary>
-        public RectTransform TitleRect
-        {
-            get
-            {
-                EnsureInitialized();
-                return _titleRect;
-            }
-        }
-
-        /// <summary>The `action` region: the row `RESUME` and `NEW` sit in, centred as a whole.</summary>
-        public RectTransform ActionRect
-        {
-            get
-            {
-                EnsureInitialized();
-                return _actionRect;
             }
         }
 
@@ -196,13 +187,33 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>`NEW` — primary; navigates to game setup and decides nothing else.</summary>
-        public Button NewButton
+        /// <summary>`START` — the sign's plank; navigates to game setup and decides nothing else.</summary>
+        public TitleSignButton StartButton
         {
             get
             {
                 EnsureInitialized();
-                return _newButton;
+                return _startButton;
+            }
+        }
+
+        /// <summary>The sign's post: drawing only, behind the plank, not part of the tap target.</summary>
+        public RectTransform PostRect
+        {
+            get
+            {
+                EnsureInitialized();
+                return _postRect;
+            }
+        }
+
+        /// <summary>The post's wood, inside its outline.</summary>
+        public Image PostFillImage
+        {
+            get
+            {
+                EnsureInitialized();
+                return _postFill;
             }
         }
 
@@ -233,14 +244,22 @@ namespace Frogs.Unity.Views
 
         void Update()
         {
+            FitArt();
             AdvanceFade(Time.deltaTime);
         }
 
+        void OnRectTransformDimensionsChange()
+        {
+            if (_initialized)
+            {
+                FitArt();
+            }
+        }
+
         /// <summary>
-        /// Wires the screen to the router `NEW` navigates through, and to the
+        /// Wires the screen to the router `START` navigates through, and to the
         /// query that decides whether `RESUME` is laid out at all. Call once,
-        /// after the view exists — the same shape as <see cref="Button.SetKind"/>
-        /// being called right after <c>AddComponent</c>.
+        /// after the view exists.
         /// </summary>
         public void Initialize(ScreenRouter router, ISavedGameQuery savedGameQuery = null)
         {
@@ -253,28 +272,22 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// Re-reads <see cref="ISavedGameQuery.HasSavedGame"/> and lays
-        /// `RESUME` out (or hides it) accordingly — docs/specs/ui/title-screen.md's
-        /// Anchors section: "if hidden, the row contains one button and
-        /// centres it." Called once during initialisation; public so a
-        /// caller can re-check after a save is written or cleared elsewhere,
-        /// once that exists.
+        /// Re-reads <see cref="ISavedGameQuery.HasSavedGame"/> and shows or
+        /// hides `RESUME` accordingly. Called once during initialisation;
+        /// public so a caller can re-check after a save is written or cleared
+        /// elsewhere, once that exists.
         /// </summary>
         public void RefreshResumeVisibility()
         {
             EnsureInitialized();
 
-            var hasSavedGame = _savedGameQuery.HasSavedGame();
-            _resumeButton.SetHidden(!hasSavedGame);
-            LayoutActionRow();
+            _resumeButton.SetHidden(!_savedGameQuery.HasSavedGame());
         }
 
         /// <summary>
         /// Advances the entering fade by <paramref name="deltaSeconds"/>,
-        /// clamped to <see cref="TitleFadeDuration"/>. A public method of its
-        /// own, rather than reachable only through <see cref="Update"/>, so
-        /// an EditMode test can simulate elapsed time directly — the same
-        /// reasoning as <c>ScreenRouterAdapter.HandleBackButton</c>.
+        /// clamped to <see cref="TitleFadeDuration"/>. Public so an EditMode
+        /// test can simulate elapsed time directly.
         /// </summary>
         public void AdvanceFade(float deltaSeconds)
         {
@@ -285,17 +298,10 @@ namespace Frogs.Unity.Views
         }
 
         /// <summary>
-        /// The line `footprint` shows — asserted the same way
-        /// <c>HelloWorldProbeTests</c> asserts <c>HelloWorldProbe.Describe</c>:
-        /// against this static, total formatting method taking the build-name
-        /// string as a parameter, not against a live <c>Application.version</c>
-        /// at test time. Total in the same sense <c>Describe</c> is: it never
-        /// throws, because a build (or an editor session, mid-test, with no
-        /// stamp applied yet — <c>PlayerSettings.bundleVersion</c> is only
-        /// ever set at build time, per <c>BuildStampApplier</c>) that cannot
-        /// read its own version has a broken stamp, and a title screen that
-        /// cannot construct itself over that is a worse way to report it
-        /// than a quiet fallback string.
+        /// The line `footprint` shows, from the build name. Total: it never
+        /// throws, because a title screen that cannot construct itself over a
+        /// broken build stamp is a worse way to report it than a quiet
+        /// fallback string.
         /// </summary>
         public static string FormatVersionLabel(string applicationVersion)
         {
@@ -311,9 +317,8 @@ namespace Frogs.Unity.Views
 
         // Unity does not guarantee Awake() has run before another
         // component's Awake() or a test reaches this one right after
-        // AddComponent — the same reasoning as ScreenRouterAdapter and
-        // Button's own EnsureInitialized. Every public entry point funnels
-        // through this idempotent guard instead of trusting Awake's timing.
+        // AddComponent. Every public entry point funnels through this
+        // idempotent guard instead of trusting Awake's timing.
         void EnsureInitialized()
         {
             if (_initialized)
@@ -325,6 +330,7 @@ namespace Frogs.Unity.Views
 
             BuildHierarchy();
             RefreshResumeVisibility();
+            FitArt();
         }
 
         void BuildHierarchy()
@@ -336,27 +342,25 @@ namespace Frogs.Unity.Views
             }
 
             // The root fills the whole canvas, which on a device that is not
-            // 16:10 is larger than the 1920 x 1200 reference — see
-            // docs/specs/ui/shared-components.md#the-canvas-every-component-is-measured-in.
-            // Only the background hangs off it. Everything laid out in
-            // reference pixels hangs off `Content` instead.
+            // 16:10 is larger than the 1920 x 1200 reference.
             StretchToFill(_rect);
 
+            // Back to front: the background paint, the art over it, then
+            // everything laid out in reference pixels.
             BuildBackground();
+            BuildBackdrop();
             BuildContent();
 
-            BuildBackdrop();
-            BuildAction();
+            BuildResume();
+            BuildSign();
             BuildFootprint();
         }
 
         void BuildBackground()
         {
-            // The paint that reaches the edge of the screen on any aspect
-            // ratio. It sits *under* the backdrop rather than being part of
-            // it, because the backdrop fades in and this must not: the first
-            // frame of the title screen is this colour, not whatever is
-            // behind the canvas.
+            // Under the art rather than part of it, because the art fades in
+            // and this must not: the first frame is this colour, not whatever
+            // is behind the canvas.
             var backgroundGO = new GameObject("Background", typeof(RectTransform), typeof(Image));
             _background = backgroundGO.GetComponent<Image>();
             _background.color = ScreenColours.Background;
@@ -367,16 +371,45 @@ namespace Frogs.Unity.Views
             StretchToFill(backgroundRect);
         }
 
+        void BuildBackdrop()
+        {
+            // The backdrop is the one thing that fades in on entering: the art,
+            // with the drawn title that is part of it. The sign does not
+            // animate — docs/specs/ui/title-screen.md#behaviour.
+            var backdropGO = new GameObject("Backdrop", typeof(RectTransform), typeof(CanvasGroup));
+            _backdropRect = (RectTransform)backdropGO.transform;
+            _backdropRect.SetParent(_rect, worldPositionStays: false);
+            StretchToFill(_backdropRect);
+
+            _backdropCanvasGroup = backdropGO.GetComponent<CanvasGroup>();
+            _backdropCanvasGroup.alpha = 0f;
+            _backdropCanvasGroup.interactable = false;
+            _backdropCanvasGroup.blocksRaycasts = false;
+
+            // art — the whole splash composite, the one element allowed to
+            // run to the screen edge. Centred on the screen, at its own 16:10
+            // shape, scaled to cover; see FitArt.
+            var artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
+            _artImage = artGO.GetComponent<Image>();
+            _artImage.sprite = Resources.Load<Sprite>(ArtResource);
+            _artImage.color = Color.white;
+            _artImage.type = Image.Type.Simple;
+            _artImage.raycastTarget = false;
+
+            _artRect = _artImage.rectTransform;
+            _artRect.SetParent(_backdropRect, worldPositionStays: false);
+            _artRect.anchorMin = new Vector2(0.5f, 0.5f);
+            _artRect.anchorMax = new Vector2(0.5f, 0.5f);
+            _artRect.pivot = new Vector2(0.5f, 0.5f);
+            _artRect.anchoredPosition = Vector2.zero;
+            _artRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+        }
+
         void BuildContent()
         {
-            // The reference canvas, centred — exactly the rect the root used
-            // to be, so every child below keeps the anchors and offsets it
-            // already had and nothing on the title screen moves.
-            //
-            // The splash art is in here rather than on the background, so it
-            // keeps the shape it is drawn at. An illustration stretched to
-            // whatever proportions a device happens to have is the one thing a
-            // 1:1 mockup cannot describe.
+            // The reference canvas, centred. The sign, RESUME and the version
+            // keep their distance from this — the safe area — not from the
+            // screen edge.
             var contentGO = new GameObject("Content", typeof(RectTransform));
             _contentRect = (RectTransform)contentGO.transform;
             _contentRect.SetParent(_rect, worldPositionStays: false);
@@ -387,94 +420,108 @@ namespace Frogs.Unity.Views
             _contentRect.anchoredPosition = Vector2.zero;
         }
 
-        void BuildBackdrop()
+        void BuildResume()
         {
-            // Backdrop — art and title, the two elements that fade in
-            // together on entering. docs/specs/ui/title-screen.md#behaviour:
-            // "Neither button animates."
-            var backdropGO = new GameObject("Backdrop", typeof(RectTransform), typeof(CanvasGroup));
-            _backdropRect = (RectTransform)backdropGO.transform;
-            _backdropRect.SetParent(_contentRect, worldPositionStays: false);
-            StretchToFill(_backdropRect);
+            // RESUME (secondary). Hidden whenever there is no saved game,
+            // which is always today. Its Clicked is deliberately left
+            // unwired: it can never be tapped yet, and what it would restore
+            // is the save format's business (ADR-0004).
+            //
+            // NOT AGREED: where RESUME goes and how it looks when it can be
+            // shown is open question 8 on docs/specs/ui/title-screen.md, for
+            // the save-system issue. The row it used to share with NEW is
+            // gone with its constants, so it is given no layout of its own
+            // here — it keeps the shared Button's default size, at the
+            // reference canvas's centre — rather than a position nobody chose.
+            var resumeGO = new GameObject("Resume", typeof(RectTransform));
+            resumeGO.transform.SetParent(_contentRect, worldPositionStays: false);
 
-            _backdropCanvasGroup = backdropGO.GetComponent<CanvasGroup>();
-            _backdropCanvasGroup.alpha = 0f;
-            _backdropCanvasGroup.interactable = false;
-            _backdropCanvasGroup.blocksRaycasts = false;
-
-            // art — the whole canvas, behind everything, a flat placeholder
-            // block. That block is the deliverable for a shape-only POC; the
-            // real splash illustration is #168, unscheduled — see this
-            // issue's PR.
-            var artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
-            _artImage = artGO.GetComponent<Image>();
-            _artImage.color = ArtPlaceholderColor;
-            _artImage.raycastTarget = false;
-            _artRect = _artImage.rectTransform;
-            _artRect.SetParent(_backdropRect, worldPositionStays: false);
-            StretchToFill(_artRect);
-
-            // title — text, not a logo image, centred horizontally, its
-            // baseline TitleBaselineY from the top.
-            var titleGO = new GameObject("Title", typeof(RectTransform), typeof(Text));
-            _titleText = titleGO.GetComponent<Text>();
-            _titleText.text = TitleLabel;
-            _titleText.font = Resources.GetBuiltinResource<Font>(BuiltinLabelFontName);
-            _titleText.fontSize = (int)TitleSize;
-            _titleText.alignment = TextAnchor.UpperCenter;
-            _titleText.color = InkColor;
-            _titleText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            _titleText.verticalOverflow = VerticalWrapMode.Overflow;
-            _titleText.raycastTarget = false;
-
-            _titleRect = _titleText.rectTransform;
-            _titleRect.SetParent(_backdropRect, worldPositionStays: false);
-            _titleRect.anchorMin = new Vector2(0.5f, 1f);
-            _titleRect.anchorMax = new Vector2(0.5f, 1f);
-            _titleRect.pivot = new Vector2(0.5f, 1f);
-            _titleRect.sizeDelta = Vector2.zero;
-            _titleRect.anchoredPosition = new Vector2(0f, -TitleBaselineY);
+            _resumeButton = resumeGO.AddComponent<Button>();
+            _resumeButton.SetKind(ButtonKind.Secondary);
+            _resumeButton.SetLabelText(ResumeLabel);
         }
 
-        void BuildAction()
+        void BuildSign()
         {
-            // action — RESUME (secondary) and NEW (primary), side by side,
-            // the row centred as a whole — docs/specs/ui/title-screen.md's
-            // settled open question 1.
-            var actionGO = new GameObject("Action", typeof(RectTransform));
-            _actionRect = (RectTransform)actionGO.transform;
-            _actionRect.SetParent(_contentRect, worldPositionStays: false);
-            StretchToFill(_actionRect);
+            // start — the sign: a post, and the plank in front of it.
+            var signGO = new GameObject("Sign", typeof(RectTransform));
+            _signRect = (RectTransform)signGO.transform;
+            _signRect.SetParent(_contentRect, worldPositionStays: false);
+            StretchToFill(_signRect);
 
-            _resumeButton = CreateActionButton("Resume", ButtonKind.Secondary, ResumeLabel);
+            // The plank's centre, measured from the canvas's bottom-right
+            // corner: its right edge on the right safe area, its bottom edge
+            // TitleSignBottomOffset up from the bottom safe area.
+            var plankCentre = new Vector2(
+                -(SafeMargin + (TitleSignWidth / 2f)),
+                SafeMargin + TitleSignBottomOffset + (TitleSignHeight / 2f));
 
-            // RESUME's Clicked is deliberately left unwired: it is always
-            // hidden today (no saved game ever exists — see
-            // ISavedGameQuery), so it can never be tapped, and what it would
-            // restore is the save format's business
-            // (ADR-0004), not settled here. Wiring a handler now would be
-            // guessing at a mechanism that does not exist yet.
-            _newButton = CreateActionButton("New", ButtonKind.Primary, NewLabel);
-            _newButton.Clicked += HandleNewClicked;
+            BuildPost(plankCentre);
+
+            var plankGO = new GameObject("Plank", typeof(RectTransform));
+            var plankRect = (RectTransform)plankGO.transform;
+            plankRect.SetParent(_signRect, worldPositionStays: false);
+            plankRect.anchorMin = new Vector2(1f, 0f);
+            plankRect.anchorMax = new Vector2(1f, 0f);
+            plankRect.pivot = new Vector2(0.5f, 0.5f);
+            plankRect.anchoredPosition = plankCentre;
+
+            // Built now rather than whenever Awake gets to it, so the plank has
+            // its size from the first frame (it sets its own).
+            _startButton = plankGO.AddComponent<TitleSignButton>();
+            _startButton.Clicked += HandleStartClicked;
+
+            // Anticlockwise about its own centre: Unity's positive z.
+            _startButton.RectTransform.localRotation = Quaternion.Euler(0f, 0f, TitleSignTilt);
         }
 
-        Button CreateActionButton(string name, ButtonKind kind, string label)
+        void BuildPost(Vector2 plankCentre)
         {
-            var buttonGO = new GameObject(name, typeof(RectTransform));
-            buttonGO.transform.SetParent(_actionRect, worldPositionStays: false);
+            // Centred under the plank, upright, from behind it down to
+            // TitleSignPostDrop below its bottom edge. It starts at the plank's
+            // centre: everything above the plank's bottom edge is hidden behind
+            // the plank, whatever the tilt, so where exactly it starts is never
+            // seen.
+            var plankBottom = plankCentre.y - (TitleSignHeight / 2f);
+            var postBottom = plankBottom - TitleSignPostDrop;
+            var postHeight = plankCentre.y - postBottom;
 
-            var button = buttonGO.AddComponent<Button>();
-            button.SetKind(kind);
-            button.SetSize(TitleButtonWidth, TitleButtonHeight);
-            button.SetLabelSize(TitleButtonLabelSize);
-            button.SetLabelText(label);
+            var postGO = new GameObject("Post", typeof(RectTransform), typeof(Image));
+            var outline = postGO.GetComponent<Image>();
+            outline.sprite = PostOutlineSprite;
+            outline.type = Image.Type.Sliced;
+            outline.color = TitleSignOutline;
+            outline.raycastTarget = false;
 
-            return button;
+            _postRect = outline.rectTransform;
+            _postRect.SetParent(_signRect, worldPositionStays: false);
+            _postRect.anchorMin = new Vector2(1f, 0f);
+            _postRect.anchorMax = new Vector2(1f, 0f);
+            _postRect.pivot = new Vector2(0.5f, 0f);
+            _postRect.sizeDelta = new Vector2(TitleSignPostWidth, postHeight);
+            _postRect.anchoredPosition = new Vector2(plankCentre.x, postBottom);
+
+            // The mockup's `border:6px solid` on a `border-radius:8px` box:
+            // the fill's corners are 8 - 6 = 2 px.
+            var fillGO = new GameObject("Wood", typeof(RectTransform), typeof(Image));
+            _postFill = fillGO.GetComponent<Image>();
+            _postFill.sprite = PostFillSprite;
+            _postFill.type = Image.Type.Sliced;
+            _postFill.color = TitleSignBarkShade;
+            _postFill.raycastTarget = false;
+
+            var fillRect = _postFill.rectTransform;
+            fillRect.SetParent(_postRect, worldPositionStays: false);
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = new Vector2(TitleSignPostOutlineWidth, TitleSignPostOutlineWidth);
+            fillRect.offsetMax = new Vector2(-TitleSignPostOutlineWidth, -TitleSignPostOutlineWidth);
         }
 
         void BuildFootprint()
         {
             // footprint — version string, bottom-left, small and quiet.
+            // Unchanged by #520.
             var footprintGO = new GameObject("Footprint", typeof(RectTransform));
             _footprintRect = (RectTransform)footprintGO.transform;
             _footprintRect.SetParent(_contentRect, worldPositionStays: false);
@@ -500,41 +547,58 @@ namespace Frogs.Unity.Views
             versionRect.anchoredPosition = new Vector2(SafeMargin, SafeMargin);
         }
 
-        void HandleNewClicked()
+        void HandleStartClicked()
         {
-            // NEW does exactly one thing: ask the router to go to game
+            // START does exactly what NEW did: ask the router to go to game
             // setup. No player roster, no Core call, no game-start side
             // effect — docs/specs/ui/title-screen.md's Elements section.
             _router?.NavigateToScreen(CoreScreen.GameSetup);
         }
 
-        // The row is centred as a whole, not per button —
-        // docs/specs/ui/title-screen.md's Anchors section. With RESUME
-        // hidden, that falls out for free: NEW alone, centred, exactly
-        // where the old single Play button sat.
-        void LayoutActionRow()
+        // Covers the screen with the art, cropped from the centre outwards:
+        // the art keeps its 16:10 shape and is scaled until it reaches every
+        // edge. The canvas is never smaller than the reference (the
+        // CanvasScaler expands), so the scale is never below 1 — and a root
+        // that has not been laid out yet still gets the art at its drawn size.
+        void FitArt()
         {
-            var halfSpan = (TitleButtonWidth / 2f) + (TitleButtonGap / 2f);
-            var y = SafeMargin + TitleButtonBottomOffset;
-
-            if (_resumeButton.IsHidden)
+            var screen = _rect.rect.size;
+            if (screen == _fittedTo)
             {
-                PositionActionButton(_newButton, 0f, y);
+                return;
             }
-            else
+
+            _fittedTo = screen;
+
+            var scale = Mathf.Max(1f, Mathf.Max(screen.x / CanvasWidth, screen.y / CanvasHeight));
+            _artRect.sizeDelta = new Vector2(CanvasWidth * scale, CanvasHeight * scale);
+        }
+
+        static Sprite PostOutlineSprite
+        {
+            get
             {
-                PositionActionButton(_resumeButton, -halfSpan, y);
-                PositionActionButton(_newButton, halfSpan, y);
+                if (s_postOutlineSprite == null)
+                {
+                    s_postOutlineSprite = RoundedRectSprite.CreateRoundedRect(Mathf.RoundToInt(TitleSignPostCornerRadius));
+                }
+
+                return s_postOutlineSprite;
             }
         }
 
-        static void PositionActionButton(Button button, float x, float y)
+        static Sprite PostFillSprite
         {
-            var rect = button.RectTransform;
-            rect.anchorMin = new Vector2(0.5f, 0f);
-            rect.anchorMax = new Vector2(0.5f, 0f);
-            rect.pivot = new Vector2(0.5f, 0f);
-            rect.anchoredPosition = new Vector2(x, y);
+            get
+            {
+                if (s_postFillSprite == null)
+                {
+                    s_postFillSprite = RoundedRectSprite.CreateRoundedRect(
+                        Mathf.RoundToInt(TitleSignPostCornerRadius - TitleSignPostOutlineWidth));
+                }
+
+                return s_postFillSprite;
+            }
         }
 
         static void StretchToFill(RectTransform rect)

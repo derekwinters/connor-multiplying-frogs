@@ -65,7 +65,9 @@ one — [open question 8](#open-questions).
 - `art` is Connor's splash picture, rebuilt as layers under
   [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
   with every layer it uses shown: the same picture as the launch splash. The
-  unused splashes on the lily pads are not in it.
+  unused splashes on the lily pads are not in it. The game draws it from
+  `Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png`, the
+  same render the mockup loads.
 - `start`: the plank's **right edge is on the right safe area**, and its
   **bottom edge is `TitleSignBottomOffset` up from the bottom safe area**. At
   1920 × 1200 that puts the plank at 1552–1872 px across and 930–1058 px down,
@@ -103,6 +105,7 @@ one — [open question 8](#open-questions).
 | `START` label size | `TitleSignLabelSize` | 72 px |
 | `START` label outline, outside the glyph | `TitleSignLabelOutlineWidth` | 7 px |
 | `START` label letter spacing | `TitleSignLabelTracking` | 2 px |
+| Sign plank's size while held, of its own | `TitleSignPressScale` | 0.95 |
 | Version string size | `VersionLabelSize` | 28 px |
 | Entering fade, art (the drawn title is part of it) | `TitleFadeDuration` | 0.3 s |
 
@@ -110,6 +113,16 @@ The `START` label is set in **Fredoka Bold** (weight 700), the font the title is
 rebuilt in (`art-source/splash/fonts/`, SIL Open Font License), so the one word
 on the sign is lettered the way the two words above it are: a light fill
 inside a dark outline. It is centred on the plank.
+
+In the game, weight 700 is a **static Fredoka Bold** instanced from that variable
+font, committed with its licence at `Assets/Fonts/Fredoka/Resources/Fredoka/`:
+Unity's legacy font importer cannot choose a variable font's weight, and would draw
+its default, Light. How it is made is in
+[the tech stack](../../engineering/tech-stack.md#the-title-screens-art-and-font).
+
+`TitleSignPressScale` is the answer to [open question 9](#open-questions), added
+to this table by [#520](https://github.com/derekwinters/connor-multiplying-frogs/issues/520),
+the PR that declared it in code.
 
 ### Sign colours
 
@@ -153,8 +166,8 @@ dropped the scrim. These constants no longer place anything, and are
 | `TitleButtonLabelSize` | 64 px | The sign's label is `TitleSignLabelSize` |
 | `TitleScrimOpacity` | 0.35 | No scrim ([open question 5](#open-questions)); it never had a shape, and the built screen never applied it |
 
-`TitleScreenView` still declares all eight today. Taking them out is the
-implementation issue's job, in the same PR that builds the sign.
+[#520](https://github.com/derekwinters/connor-multiplying-frogs/issues/520),
+the PR that built the sign, took all eight out of `TitleScreenView`.
 
 ### What became of the `Play*` constants
 
@@ -217,8 +230,13 @@ kept as history, because the settings dialog still points here.
 - Entering: the art — the drawn title with it — fades in over
   `TitleFadeDuration` (0.3 s). The sign does not animate — a control that moves
   is a control that gets missed.
-- What the sign does when it is pressed is not drawn: [open question
-  9](#open-questions).
+- **Pressed, the plank shrinks.** While a finger is held on it, the plank — its
+  wood, outline and word — draws at `TitleSignPressScale` of its size, about its
+  own centre, and springs back when the finger lifts or slides off. Nothing else
+  changes: no colour, no movement, and the post stays as it is. The tap target
+  does not shrink with it. It acts on release, over the plank, like the
+  [shared Button](shared-components.md#button)
+  ([open question 9](#open-questions), settled).
 - The hardware back button on this screen exits the app. It is the only screen
   where back exits.
 - Nothing auto-advances. The title screen waits indefinitely.
@@ -302,10 +320,19 @@ when [open question 1](#open-questions) was settled.
   left to the issue that builds the save system, which will need its own
   wireframe for it. Until then `RESUME` is hidden, and both invariants above
   read true with it hidden.
-- **9. What does the sign do when it is pressed? Open.** The shared Button
-  moves down by `ButtonPressOffset` and darkens its fill; the sign is not drawn
-  pressed, and nothing here says whether it does the same, something else, or
-  nothing. The build should ask rather than pick one.
+- **9. What does the sign do when it is pressed? Settled: press down — the plank
+  shrinks slightly while held.** Derek's call, 2026-11-26, on
+  [#521](https://github.com/derekwinters/connor-multiplying-frogs/issues/521).
+  The options were *press down* (the plank shrinks to about 95% while held),
+  *wobble* (it tips a few degrees and springs back) and *darken* (the wood goes a
+  shade darker, like the shared Button's fill). He chose press down, and the
+  number is the one that option named: `TitleSignPressScale`, 0.95. It is
+  applied at once, with no animation, as the shared Button's pressed state is.
+
+  The option was worded *"like the other buttons do"*. The other buttons do not
+  shrink: the [shared Button](shared-components.md#button) moves down by
+  `ButtonPressOffset` and darkens. The sign follows the option's own
+  description — it shrinks, and does not darken or move — and only that.
 - **10. The version string on the art: how does it stay legible? Open.** It is
   drawn as it was on the placeholder — `#6C7873` grey at `VersionLabelSize` —
   and on the bright green grass it is hard to read. It is meant to stay small

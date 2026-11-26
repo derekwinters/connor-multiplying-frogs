@@ -550,6 +550,32 @@ build** rather than shipping Unity's splash. As with the icons, the picture is l
 path, so no committed `.meta` is needed, and the settings are read back after they are
 set.
 
+### The title screen's art and font
+
+**The title screen is drawn on the same picture, and letters its `START` sign in the
+title's font** ([#520](https://github.com/derekwinters/connor-multiplying-frogs/issues/520);
+the layout is [the title screen's spec](../specs/ui/title-screen.md)). Both are game
+files, loaded at runtime by path from a `Resources` folder, so nothing refers to them by
+GUID and neither has a committed `.meta`.
+
+| | |
+| --- | --- |
+| Picture | `Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png` — the home build step's render, the same bytes as the mockup's `full.png`, and the same picture as the launch splash |
+| Font | `Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf`, with its `OFL.txt` beside it — the game's first font that is not Unity's built-in one |
+| Made by | `art-source/splash/build_splash.py --home-only` (`art-source/splash/home.py`) |
+| Its tests | `.github/scripts/tests/test_title_screen_art.py` |
+| Import settings | `TitleScreenArtImport`, in `Assets/Editor/` — the picture as the launch splash's (a single sprite, full size, no mipmaps); the font as a dynamic font with its data included |
+| Its EditMode tests | `Assets/Tests/EditMode/TitleScreenViewTests.cs` |
+
+**The font is a static Bold, not the variable font.** The title is set in Fredoka at
+weight 700, from `art-source/splash/fonts/Fredoka-Variable.ttf` (SIL Open Font License).
+Unity's legacy font importer (`TrueTypeFontImporter`) has no setting that chooses a
+variable font's axes, and the legacy `Text` component's bold is a synthetic one, so the
+variable file imported as it is would draw Fredoka's default instance, Light (300). The
+home build step instead instances the variable font at `wght` 700, `wdth` 100 with
+fontTools, keeping the source's timestamp so every run writes the same bytes, and the
+tests regenerate it and compare.
+
 ### What is explicitly not a target
 
 iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —

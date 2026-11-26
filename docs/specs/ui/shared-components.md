@@ -191,8 +191,7 @@ shrink the button below the floor; a long one raises it above.
 
 The widths a screen page states are floors in the same way. When a page gives a
 button its own width — [game setup](game-setup.md)'s controls, the
-[settings dialog](settings-dialog.md)'s `SettingsActionWidth`,
-[title screen](title-screen.md)'s `TitleButtonWidth` — that is the width the
+[settings dialog](settings-dialog.md)'s `SettingsActionWidth` — that is the width the
 button has unless its own words need more, in which case they win. A screen 12 px
 wider than its table says is a smaller problem than a label hanging over the
 edge of the button it belongs to, and the second one is what
