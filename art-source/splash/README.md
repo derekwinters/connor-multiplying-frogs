@@ -22,7 +22,7 @@ The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapt
 | `review/` | `original-vs-composite.png`, `no-frogs.png`, `no-frogs-no-title.png`, `no-frogs-no-log.png`, `no-frogs-no-log-no-title.png`, `layer-sheet.png`, `title-vs-original.png`, `app-icon-masks.png` (the app icon as a circle, a squircle and a rounded square). |
 | `icon.py` | The app icon's crop: the window (`ICON_CROP`), its size (`ICON_SIZE`) and the layers it hides (`ICON_HIDDEN`). |
 | `launch.py` | The launch splash's window (`SPLASH_VIEW`) and size (`SPLASH_SIZE`). |
-| `home.py` | The title screen's wireframe art: which layers each of its three pieces hides (`PIECES`), in the launch splash's window. |
+| `home.py` | The title screen's wireframe art: which layers each of its four pieces hides (`PIECES`), in the launch splash's window, and the glow tail it fades (`GLOW_TAIL`). |
 | `build_splash.py` | The one script that writes all of the above, the app icon source and the launch splash, then self-checks. |
 | `cutout.py`, `tracing.py`, `sky.py`, `title.py` | Its stages: cut-out and completion, VTracer tracing, the fitted sky and glow, the vector title. |
 | `fonts/Fredoka-Variable.ttf`, `fonts/OFL.txt` | The title's font and its licence (SIL Open Font License 1.1). |
@@ -176,7 +176,7 @@ matches the committed composite brought down to the same size.
 
 The title (home) screen is to sit on this picture without its frogs (Derek, #484). Its
 wireframe draws the real art, so `build_splash.py` renders it from the vectors, at the
-launch splash's window and 1920 × 1200, in three pieces the mockups stack
+launch splash's window and 1920 × 1200, in four pieces the mockups stack
 (`docs/specs/ui/images/title-screen/`); `--home-only` renders just those, in seconds.
 
 | Piece | Hides | |
@@ -184,6 +184,12 @@ launch splash's window and 1920 × 1200, in three pieces the mockups stack
 | `scene.png` | the frogs and their hop arcs, the title and its glow | opaque |
 | `scene-no-log.png` | the same, and the log | opaque |
 | `title.png` | everything but the title and its glow | transparent around them |
+| `full.png` | nothing: the whole composite, frogs and all | opaque |
+
+In all of them the glow's tail is faded out (`GLOW_TAIL` in `home.py`): below FROGS the
+fitted haze runs on in a faint pale V down to the water, where the big frog's head
+stands in the original. Behind the frog it cannot be seen; without the frog it can.
+The layer, the composite, the launch splash and the icon keep it as it is.
 
 They are pieces, not one picture per option, because the open questions on
 `docs/specs/ui/title-screen.md` (drawn title or text, log or not, scrim or not) cross.

@@ -17,7 +17,7 @@ Reads `Assets/Art/splash-source.png` (read-only) and writes, under art-source/sp
     ../../Assets/Art/Splash/splash-1920x1200.png
                                        the launch splash: the whole composite at the
                                        tablet's 1920 x 1200 (window in launch.py; #482)
-    ../../docs/specs/ui/images/title-screen/{scene,scene-no-log,title}.png
+    ../../docs/specs/ui/images/title-screen/{scene,scene-no-log,title,full}.png
                                        the title screen's wireframe art: the splash
                                        without the frogs, in pieces (home.py; #484)
 
@@ -401,11 +401,37 @@ def write_splash():
     save_png(splash_png(), launch.SPLASH_OUT)
 
 
+def fade_glow_tail(svg):
+    """Fade out the glow's tail below the title (home.GLOW_TAIL) with a mask on the
+    glow's group. The mask is white shapes whose opacity is what is kept - everything
+    outside the tail's column, the column above y0, and a band fading from white to
+    clear between y0 and y1 - because CairoSVG masks by alpha, not by luminance (white
+    with opacity means the same in both), so the cut has no hard edge."""
+    if '<g id="title-glow" ' not in svg:
+        return svg
+    x0, x1, y0, y1 = home.GLOW_TAIL
+    w, h = cu.W, cu.H
+    mask = (f'<linearGradient id="home-glow-tail-fade" gradientUnits="userSpaceOnUse" '
+            f'x1="0" y1="{y0}" x2="0" y2="{y1}">'
+            f'<stop offset="0" stop-color="#fff" stop-opacity="1"/>'
+            f'<stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>\n'
+            f'<mask id="home-glow-tail" maskUnits="userSpaceOnUse" x="0" y="0" width="{w}" height="{h}">'
+            f'<rect x="0" y="0" width="{x0}" height="{h}" fill="#fff"/>'
+            f'<rect x="{x1}" y="0" width="{w - x1}" height="{h}" fill="#fff"/>'
+            f'<rect x="{x0}" y="0" width="{x1 - x0}" height="{y0}" fill="#fff"/>'
+            f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{y1 - y0}" '
+            f'fill="url(#home-glow-tail-fade)"/></mask>\n')
+    svg = svg.replace("<defs>\n", "<defs>\n" + mask, 1)
+    return svg.replace('<g id="title-glow" ', '<g id="title-glow" mask="url(#home-glow-tail)" ', 1)
+
+
 def home_png(piece):
     """One piece of the title screen's wireframe art (#484), rendered from the vectors.
-    The scenes are opaque, as the sky is; the title is transparent around it."""
-    svg = stack_svg(home.piece_ids(piece, object_ids()),
-                    title=f"Multiplying Frogs title screen - {piece}", view=home.HOME_VIEW)
+    The scenes and the full picture are opaque, as the sky is; the title is transparent
+    around it. The glow's tail is faded out of every piece (fade_glow_tail)."""
+    svg = fade_glow_tail(stack_svg(home.piece_ids(piece, object_ids()),
+                                   title=f"Multiplying Frogs title screen - {piece}",
+                                   view=home.HOME_VIEW))
     img = render(svg, home.HOME_SIZE[0])
     if img.size != home.HOME_SIZE:
         raise SystemExit(f"title screen {piece} rendered at {img.size}, not {home.HOME_SIZE}")

@@ -9,7 +9,13 @@ comparison mockups stack them:
 
 - `scene`         everything but the frogs (and their hop arcs), the title and its glow;
 - `scene-no-log`  the same without the log;
-- `title`         the drawn title and its glow, on its own, transparent elsewhere.
+- `title`         the drawn title and its glow, on its own, transparent elsewhere;
+- `full`          the whole composite - frogs, hop lines, log and title (Derek asked
+                  to see it with all the frogs too).
+
+The title's glow has a faint V-shaped tail running down from under FROGS to the water,
+where the big frog's head stands in the original; with the frog gone it shows. The
+home pieces fade it out (home.GLOW_TAIL), and that is pinned here too.
 
 These tests pin:
 
@@ -53,7 +59,8 @@ COMPOSITE = [
 ]
 FROGS_AND_ARCS = {"frog-left", "frog-centre-left", "frog-right", "frog-big",
                   "arc-left", "arc-centre-left", "arc-right"}
-PIECES = ("scene", "scene-no-log", "title")
+PIECES = ("scene", "scene-no-log", "title", "full")
+CANVAS = (1586, 992)
 
 
 def png_size(path):
@@ -78,11 +85,11 @@ class ThePieces(unittest.TestCase):
     def ids(self, piece):
         return home.piece_ids(piece, COMPOSITE)
 
-    def test_there_are_three(self):
+    def test_there_are_four(self):
         self.assertEqual(tuple(home.PIECES), PIECES)
 
-    def test_no_frog_and_no_hop_is_in_any(self):
-        for piece in PIECES:
+    def test_no_frog_and_no_hop_is_in_any_but_the_full_picture(self):
+        for piece in ("scene", "scene-no-log", "title"):
             with self.subTest(piece=piece):
                 self.assertFalse(FROGS_AND_ARCS & set(self.ids(piece)))
 
@@ -101,6 +108,16 @@ class ThePieces(unittest.TestCase):
 
     def test_the_title_is_the_title_and_its_glow(self):
         self.assertEqual(self.ids("title"), ["title-glow", "title"])
+
+    def test_the_full_picture_is_the_whole_composite(self):
+        self.assertEqual(self.ids("full"), COMPOSITE)
+
+
+class TheGlowTail(unittest.TestCase):
+    def test_it_is_a_band_inside_the_canvas(self):
+        x0, x1, y0, y1 = home.GLOW_TAIL
+        self.assertTrue(0 <= x0 < x1 <= CANVAS[0])
+        self.assertTrue(0 <= y0 < y1 <= CANVAS[1])
 
 
 class TheCommittedFiles(unittest.TestCase):
@@ -128,6 +145,30 @@ class WhatTheyShow(unittest.TestCase):
         a = np.asarray(Image.open(OUT_DIR / "title.png").convert("RGBA"))[..., 3]
         self.assertEqual(a[-1].max(), 0, "the bottom row is clear")
         self.assertGreater(a.max(), 0, "something is drawn")
+
+    def test_the_glow_has_no_tail_below_the_title(self):
+        import numpy as np
+        from PIL import Image
+
+        # The tail as the committed glow layer draws it: canvas x 700-900, y 480-600.
+        s = TABLET[0] / CANVAS[0]
+        a = np.asarray(Image.open(OUT_DIR / "title.png").convert("RGBA"))[..., 3]
+        tail = a[int(480 * s):int(600 * s), int(700 * s):int(900 * s)]
+        self.assertEqual(int(tail.max()), 0)
+        glow = np.asarray(Image.open(LAYERS / "title-glow.png"))[..., 3]
+        g = glow.shape[1] / CANVAS[0]
+        self.assertGreater(int(glow[int(480 * g):int(600 * g), int(700 * g):int(900 * g)].max()), 0,
+                           "the layer itself still has it: only the home pieces fade it")
+
+    def test_the_full_picture_is_the_launch_splash(self):
+        import numpy as np
+        from PIL import Image
+
+        self.assertEqual(Image.open(OUT_DIR / "full.png").mode, "RGB")
+        got = np.asarray(Image.open(OUT_DIR / "full.png").convert("RGB"), dtype=float)
+        want = np.asarray(Image.open(launch.SPLASH_OUT).convert("RGB"), dtype=float)
+        # The same render, but for the glow's faded tail, most of it behind the big frog.
+        self.assertLess(np.abs(got - want).mean(), 1.0)
 
     def test_the_scene_is_its_layers_stacked(self):
         import numpy as np

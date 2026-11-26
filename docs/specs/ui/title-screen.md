@@ -37,7 +37,7 @@ else on this page.
 
 | Region | Job |
 | --- | --- |
-| `art` | The splash picture **without its frogs** — the whole canvas, behind everything |
+| `art` | The splash picture — the whole canvas, behind everything. With or without its frogs is [open question 6](#open-questions) |
 | `title` | The game's name |
 | `action` | The button row: `RESUME` and `NEW`, side by side |
 | `footprint` | Version string, bottom-left; small and quiet |
@@ -48,12 +48,10 @@ else on this page.
   element allowed to run to the screen edge, because it is a picture and a
   margin around a picture is a border nobody asked for.
 - `art` is Connor's splash picture, rebuilt as layers under
-  [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
-  with the four frogs and their dashed hop lines hidden — Derek, on
-  [#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484):
-  *"this same image, but without the frogs, to not crowd out the buttons and
-  stuff on the home screen."* What else is hidden with them — the drawn title,
-  the log — is [open questions 3 and 4](#open-questions).
+  [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash).
+  Whether its four frogs and their dashed hop lines are hidden is
+  [open question 6](#open-questions); if they are, what else goes with them —
+  the drawn title, the log — is [open questions 3 and 4](#open-questions).
 - `title` is centred horizontally, its baseline at `TitleBaselineY` from the
   top. It is not vertically centred — the art has a subject in the middle of it
   and the title sits above that.
@@ -179,23 +177,32 @@ genuinely new number.
 
 ## Mockup
 
+**Seen while drawing the art mockups, not changed here:** the version string is
+`#6C7873` grey at 28 px, chosen for the flat pale placeholder. On the art it
+sits on the bright green grass in the bottom-left corner and is hard to read in
+every one of the six drawings. It is still meant to be small and quiet, and how
+to keep it legible is a separate question from this wireframe's.
+
 - **The agreed picture:** [`mockups/title-screen.html`](mockups/title-screen.html) —
   `NEW` primary, `RESUME` secondary, with the art as a placeholder block.
-- **The art, four ways — not agreed yet**
+- **The art, six ways — not agreed yet**
   ([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)),
-  one file per answer to [open questions 3, 4 and 5](#open-questions):
+  one file per answer to [open questions 3 to 7](#open-questions):
 
-  | | Title | Log | Scrim | Mockup |
-  | --- | --- | --- | --- | --- |
-  | A | Drawn, from the art | Kept | No | [`title-screen-art-a-drawn-title-log.html`](mockups/title-screen-art-a-drawn-title-log.html) |
-  | B | Drawn, from the art | Hidden | No | [`title-screen-art-b-drawn-title-no-log.html`](mockups/title-screen-art-b-drawn-title-no-log.html) |
-  | C | Text, as today | Hidden | No | [`title-screen-art-c-text-title-no-log.html`](mockups/title-screen-art-c-text-title-no-log.html) |
-  | D | Drawn, from the art | Kept | Yes, 0.35 | [`title-screen-art-d-drawn-title-log-scrim.html`](mockups/title-screen-art-d-drawn-title-log-scrim.html) |
+  | | Frogs | Title | Log | Scrim | `NEW` row | Mockup |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | A | None | Drawn, from the art | Kept | No | As agreed | [`title-screen-art-a-drawn-title-log.html`](mockups/title-screen-art-a-drawn-title-log.html) |
+  | B | None | Drawn, from the art | Hidden | No | As agreed | [`title-screen-art-b-drawn-title-no-log.html`](mockups/title-screen-art-b-drawn-title-no-log.html) |
+  | C | None | Text, as today | Hidden | No | As agreed | [`title-screen-art-c-text-title-no-log.html`](mockups/title-screen-art-c-text-title-no-log.html) |
+  | D | None | Drawn, from the art | Kept | Yes, 0.35 | As agreed | [`title-screen-art-d-drawn-title-log-scrim.html`](mockups/title-screen-art-d-drawn-title-log-scrim.html) |
+  | E | All four | Drawn, from the art | Kept | No | As agreed | [`title-screen-art-e-all-frogs.html`](mockups/title-screen-art-e-all-frogs.html) |
+  | F | All four | Drawn, from the art | Kept | No | **Moved down**, proposed | [`title-screen-art-f-all-frogs-button-low.html`](mockups/title-screen-art-f-all-frogs-button-low.html) |
 
-  Each changes only the `art` and `title` regions. The button row, the version
-  string and every constant are the agreed ones, untouched. When the questions
-  are answered, the chosen drawing's art goes into `title-screen.html` and the
-  other three files are deleted, as the last pair on this page was.
+  A to E change only the `art` and `title` regions; the button row, the
+  version string and every constant are the agreed ones. F also moves the row
+  — [open question 7](#open-questions). When the questions are answered, the
+  chosen drawing goes into `title-screen.html` and the other files are
+  deleted, as the last pair on this page was.
 
 It used to be one of a pair, drawn to ask which of the two buttons should be
 primary — see "The invariant this page used to carry" and
@@ -211,10 +218,10 @@ re-centred, which is exactly what [the settled open question
 2](#open-questions) below says happens, and it needs no picture of its own to
 be unambiguous.
 
-The four art mockups draw the same no-save state that exists today: `RESUME`
+The six art mockups draw the same no-save state that exists today: `RESUME`
 hidden, `NEW` alone and centred. The both-buttons state fits the same way — the
 row is 1168 px wide with 376 px clear either side and its bottom edge does not
-move — so it is not drawn four more times. One thing it would show that `NEW`
+move — so it is not drawn six more times. One thing it would show that `NEW`
 alone does not: `RESUME` is secondary, and the shared secondary style is
 outlined with **no fill**, which was drawn against a flat pale background. Over
 the art its label sits straight on the picture. That is for whoever builds the
@@ -222,7 +229,7 @@ save system to look at; nothing on this page changes because of it.
 
 `title-screen.html` draws the art as a placeholder block, as it always has. The
 art mockups draw the real picture, and still need no network: the build that
-makes the splash layers also renders the frog-less art, in three stackable
+makes the splash layers also renders the art, in four stackable
 pieces, into [`images/title-screen/`](images/title-screen/scene.png) —
 
 | Piece | What it is |
@@ -230,6 +237,13 @@ pieces, into [`images/title-screen/`](images/title-screen/scene.png) —
 | `scene.png` | Everything but the frogs, their hop lines, the drawn title and its glow; opaque |
 | `scene-no-log.png` | The same without the log |
 | `title.png` | The drawn title and its glow, transparent around them |
+| `full.png` | The whole picture: all four frogs and their hop lines, the log, the drawn title; opaque |
+
+In every piece the title's glow has its tail faded out. As rebuilt, the glow
+runs on below FROGS in a faint pale V down to the water, where the big frog's
+head stands in Connor's drawing — invisible behind the frog, plain to see
+without it. The fade is done only for these pieces; the layer itself, the
+launch splash and the app icon are unchanged.
 
 — and each mockup loads them from there, stacked the way the screen would stack
 them: scene, scrim, title, buttons. Pieces rather than one picture per option
@@ -291,6 +305,31 @@ title has to have something on either side of it. To rebuild them:
     black at 0.35 over the whole scene, under the drawn title and its glow —
     as a picture of the question, not as a proposed shape. If the scrim is
     kept, its extent and colour are still to be agreed.
+- **6. Frogs on the home screen: all, or none? Open.**
+  Derek's first ask, on
+  [#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484),
+  was none — *"without the frogs, to not crowd out the buttons"* — and A to D
+  draw that. Seeing them, he said *"Let's see it with all the frogs. It's too
+  empty right now."* E and F draw all four, with their hop lines.
+  - *None* (A–D): questions 3, 4 and 5 then choose between A, B, C and D.
+  - *All* (E, F): the drawn title and the log come with the frogs, and
+    question 7 decides where `NEW` goes.
+- **7. With all the frogs, where does the button row go? Open — a proposal.**
+  The big frog sits on the log in the middle of the picture, 706–1213 px across
+  and 465–1031 px down, with its eyes and mouth above about 740 px. The `NEW`
+  row, 680–1240 px across, is right in front of it.
+  - *As agreed* (E): `TitleButtonBottomOffset` 120 px, the row 872–1032 px down.
+    It covers the frog's tummy and feet; its face is clear.
+  - *Moved down — proposed* (F): `TitleButtonBottomOffset` **0 px**, the row's
+    bottom edge on the bottom safe area, 992–1152 px down. It covers the frog's
+    feet and the log, and leaves its face and most of its tummy showing. This
+    is as low as the row can go: below the log does not fit, because under the
+    log's centre (bottom edge 1145 px) there are 7 px of grass inside the safe
+    area and the button is 160 px tall.
+
+  The proposed number is drawn so it can be judged; it is not in the constants
+  table, which keeps 120 px until this is answered. With a saved game the row
+  is 1168 px wide and reaches across the whole frog either way.
 - **Is there a `How to play` button here?** Proposed: still no — but for a
   different reason than before, because half of the old reason has gone.
 

@@ -16,6 +16,8 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Title screen on the art, B — drawn title, no log *(not agreed)* | [`title-screen-art-b-drawn-title-no-log.html`](title-screen-art-b-drawn-title-no-log.html) | [Title screen](../title-screen.md) |
 | Title screen on the art, C — text title, no log *(not agreed)* | [`title-screen-art-c-text-title-no-log.html`](title-screen-art-c-text-title-no-log.html) | [Title screen](../title-screen.md) |
 | Title screen on the art, D — drawn title, log kept, scrim *(not agreed)* | [`title-screen-art-d-drawn-title-log-scrim.html`](title-screen-art-d-drawn-title-log-scrim.html) | [Title screen](../title-screen.md) |
+| Title screen on the art, E — all the frogs *(not agreed)* | [`title-screen-art-e-all-frogs.html`](title-screen-art-e-all-frogs.html) | [Title screen](../title-screen.md) |
+| Title screen on the art, F — all the frogs, button moved down *(not agreed)* | [`title-screen-art-f-all-frogs-button-low.html`](title-screen-art-f-all-frogs-button-low.html) | [Title screen](../title-screen.md) |
 | Game setup, at rest with names | [`game-setup-names-set.html`](game-setup-names-set.html) | [Game setup](../game-setup.md) |
 | Game setup, naming a frog | [`game-setup-name-edit-inline.html`](game-setup-name-edit-inline.html) | [Game setup](../game-setup.md) |
 | Game setup, naming a frog — the alternative | [`game-setup-name-edit-pencil.html`](game-setup-name-edit-pencil.html) | [Game setup](../game-setup.md) |
@@ -133,13 +135,14 @@ That question is
 `title-screen.html` is the agreed picture and the losing comparison file is
 deleted, per [issue #216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216).
 
-It has four again, and they are live: the `title-screen-art-` files draw the
-screen on the real splash picture with its frogs hidden
-([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)),
-one per combination of the
-[three open questions](../title-screen.md#open-questions) — drawn or text
-title, log kept or hidden, scrim or not. Once those are answered the winner's
-art goes into `title-screen.html` and the four are deleted.
+It has six again, and they are live: the `title-screen-art-` files draw the
+screen on the real splash picture
+([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)).
+A to D hide the frogs, one per combination of drawn or text title, log kept or
+hidden, scrim or not; E and F keep all the frogs, with the button row where it
+is agreed and moved down. See the
+[open questions](../title-screen.md#open-questions). Once those are answered
+the winner goes into `title-screen.html` and the rest are deleted.
 
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
