@@ -97,7 +97,7 @@ and no way for the two to drift apart.
 | `actions/cache` | `55cc8345863c7cc4c66a329aec7e433d2d1c52a9` | Unity's `Library/` |
 | `actions/download-artifact` | `3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c` | the release attach step |
 | `googleapis/release-please-action` | `45996ed1f6d02564a971a2fa1b5860e934307cf7` | `release-please` |
-| `game-ci/unity-builder` | `d829bfc901f2347c8fe18898f06712b66916ef42` | APK builds |
+| `game-ci/unity-builder` | `eb1b9fba120c6e62c9fb7a7a81d6c107ce004c45` (v6.0.0) | APK builds — and its CLI is [pinned separately](#game-ci-cli) |
 | `game-ci/unity-test-runner` | `0ff419b913a3630032cbe0de48a0099b5a9f0ed9` | the EditMode suite |
 
 `docs-publish` uses no Pages actions: `mike` commits the built site to
@@ -171,6 +171,55 @@ That is the intended way pins move. Treat those PRs as real changes — read the
 upstream release notes, don't merge on autopilot — but do not let them sit. A
 year of ignored Dependabot PRs is worse than no pinning at all, because it looks
 deliberate.
+
+### The game-ci CLI is pinned too {#game-ci-cli}
+
+Pinning `game-ci/unity-builder` to a SHA is not the whole pin. From v6 the
+action no longer builds by itself: its first act is to install a separate
+binary, [`game-ci/cli`](https://github.com/game-ci/cli), and which release of
+that binary it installs is the action's **`cliVersion`** input. Left unset, it
+defaults to `latest`.
+
+`latest` is not a version. To turn it into one the action asks the GitHub API
+for `game-ci/cli`'s newest release — on every run, before Unity starts — and it
+makes that call **without a token** unless `GITHUB_TOKEN` is in the step's
+environment. GitHub-hosted runners share IP addresses, so an anonymous call
+competes for a 60-requests-per-hour limit that other repositories' traffic uses
+up. That is what failed the Debug APK job on #479 (`GitHub API returned 403`)
+and on the v0.7.0 release PR #452 (`fetch failed`), and the release build after
+a release PR merges would have been exposed to the same thing (#480).
+
+So every `unity-builder` step in `pr-build.yml`, `rc-build.yml` and
+`release-build.yml` carries two things:
+
+| Where | What | Why |
+| --- | --- | --- |
+| `with:` | `cliVersion: v0.1.77` | A fixed tag means no lookup at all. `v0.1.77` is the release the passing builds ran. |
+| `env:` | `GITHUB_TOKEN: ${{ github.token }}` | A backstop: any GitHub API call the action makes — today's download, or a lookup a later version adds — is authenticated rather than anonymous. |
+
+The token is the job's own short-lived `github.token`, not a new secret. It is
+added alongside the existing `UNITY_*` entries, not instead of them.
+
+**`check_unity_builder_cli.py` enforces both.** It runs in the `Gate tests` job
+next to the pin check, unfiltered for the same reason, and fails the PR on any
+`unity-builder` step whose `cliVersion` is missing, empty or `latest`, or whose
+`env:` does not pass `GITHUB_TOKEN`. Its tests also assert that all five steps
+name the *same* CLI version, so a partial update fails rather than leaving the
+device and emulator builds on different CLIs.
+
+#### Moving the CLI pin
+
+**Dependabot does not move `cliVersion`.** It updates the SHA in a `uses:` line
+and nothing else; a `with:` input is just a string to it. So the CLI version
+moves only by hand:
+
+1. Pick the release from [`game-ci/cli`'s releases](https://github.com/game-ci/cli/releases)
+   and read its notes. When Dependabot bumps `unity-builder` itself, check
+   whether that release expects a newer CLI — that is the usual reason to move
+   this.
+2. Change `cliVersion` on **all five** steps in one PR.
+3. Watch `pr-build` on that PR. A CLI release that breaks the build shows up
+   there, on a PR, rather than on the next release.
 
 ## Build workflows
 
@@ -860,7 +909,7 @@ Two jobs, on **every** pull request with no path filter.
 
 | Job | Does |
 | --- | --- |
-| `gate-tests` | runs the CI scripts' own unit tests |
+| `gate-tests` | runs the CI scripts' own unit tests, the [action-pin check](#the-check-that-enforces-it), and the [game-ci CLI check](#game-ci-cli) |
 | `Docs` | builds the site if docs changed; runs the reconciliation gate if they didn't |
 
 **No path filter, deliberately.** A path-gated workflow is *absent* on PRs that

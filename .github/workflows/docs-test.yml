@@ -55,6 +55,11 @@ jobs:
       - name: Every action is pinned to a commit SHA
         run: python3 .github/scripts/check_action_pins.py
 
+      # Next to the pin check, for the same reason: unfiltered, so it sees the
+      # release workflows that no PR triggers. See docs/engineering/ci-cd.md.
+      - name: Every unity-builder step pins the game-ci CLI
+        run: python3 .github/scripts/check_unity_builder_cli.py
+
   build:
     name: Docs
     runs-on: ubuntu-latest
