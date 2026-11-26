@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1301,10 +1331,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#colour-in-these-mockups-is-mostly-a-placeholder" class="md-nav__link">
+  <a href="#colour-in-these-mockups-is-mostly-a-placeholder-except-where-it-is-the-pond-style" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Colour in these mockups is mostly a placeholder
+        Colour in these mockups is mostly a placeholder — except where it is the Pond style
       
     </span>
   </a>
@@ -2038,10 +2068,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#colour-in-these-mockups-is-mostly-a-placeholder" class="md-nav__link">
+  <a href="#colour-in-these-mockups-is-mostly-a-placeholder-except-where-it-is-the-pond-style" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Colour in these mockups is mostly a placeholder
+        Colour in these mockups is mostly a placeholder — except where it is the Pond style
       
     </span>
   </a>
@@ -2336,11 +2366,20 @@ the frogs and a wooden sign reading <code>START</code>, so <code>title-screen.ht
 drawing and the other nine are deleted.</p>
 <p>Each row arrives with its screen's <code>Wireframe:</code> issue. See
 <a href="../../../engineering/ui-design-process/">UI design process</a>.</p>
-<h3 id="colour-in-these-mockups-is-mostly-a-placeholder">Colour in these mockups is mostly a placeholder<a class="headerlink" href="#colour-in-these-mockups-is-mostly-a-placeholder" title="Link to this section">&para;</a></h3>
+<h3 id="colour-in-these-mockups-is-mostly-a-placeholder-except-where-it-is-the-pond-style">Colour in these mockups is mostly a placeholder — except where it is the Pond style<a class="headerlink" href="#colour-in-these-mockups-is-mostly-a-placeholder-except-where-it-is-the-pond-style" title="Link to this section">&para;</a></h3>
 <p>The four frog colours exist so the frogs can be told apart in a picture, and the
 single green accent marks the primary action. Neither is a palette decision —
 that is an <code>area:art</code> call and it lands with the frog sprites. See
 <a href="../shared-components/#frog-colours">frog colours</a>.</p>
+<p><strong>The dialogs, game over and the board's lane chips are now the exception.</strong>
+Since <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/524">#524</a>
+they are drawn in the <a href="../style-guide/">Pond style</a>, whose palette <em>is</em> a
+decision — Derek's — and the files say so in their header comment. Those are
+<code>end-game-confirm.html</code>, <code>settings-dialog.html</code>, both <code>answer-result-</code> files,
+both <code>player-won-</code> files, <code>game-over.html</code>, the five agreed
+<code>working-out-grid-</code> files, and the lane chips in both <code>game-board</code> files.
+Everything else in this folder is still drawn in the grey wireframe palette, and
+its colours are still placeholders.</p>
 <p>The game board is the first exception. Its water, logs and lily pads are a
 decision Derek made — a pond is blue, its logs brown, its lily pads green — and
 they are written down as
@@ -2370,6 +2409,14 @@ no network. So is the title's font, which letters <code>START</code> the way the
 lettered: a committed copy, with its licence, loaded by <code>@font-face</code> from the
 same folder, never from a font service. It is not a licence to paste
 screenshots into mockups.</p>
+<p>The <a href="../style-guide/">Pond style</a>'s frogs are the second case. Wherever a
+restyled screen names a player it shows that player's 3D frog, so the frog is
+the subject; its four renders are committed under
+<a href="../images/frogs/frog-green.png"><code>../images/frogs/</code></a> and loaded by relative
+path. The restyled files also load the title's Fredoka from its committed copy,
+for the same reason the title screen does. Nunito, the style's second face, is
+not committed yet, so those files name it and fall back to the system
+sans-serif for sentences.</p>
 <p><strong>Is not:</strong> a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it
 does instead of how it looks, and it stops being cheap to change — which was the

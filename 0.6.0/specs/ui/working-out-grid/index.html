@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1153,6 +1183,17 @@
   
     <nav class="md-nav" aria-label="Named constants">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#what-focus-looks-like" class="md-nav__link">
@@ -2244,6 +2285,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-focus-looks-like" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2626,12 +2678,12 @@ the screen is built to.</p>
 <tr>
 <td>Digit cell outline</td>
 <td><code>GridCellBorderWidth</code></td>
-<td>3 px</td>
+<td>4 px <code>Ink</code></td>
 </tr>
 <tr>
 <td>Digit cell corner radius</td>
 <td><code>GridCellRadius</code></td>
-<td>10 px</td>
+<td>18 px</td>
 </tr>
 <tr>
 <td>Carry strip height</td>
@@ -2651,7 +2703,7 @@ the screen is built to.</p>
 <tr>
 <td>Carry box corner radius</td>
 <td><code>GridCarryBoxRadius</code></td>
-<td>8 px</td>
+<td>10 px</td>
 </tr>
 <tr>
 <td>Rule line thickness</td>
@@ -2721,12 +2773,17 @@ the screen is built to.</p>
 <tr>
 <td>Card readout pill corner radius</td>
 <td><code>GridCardReadoutRadius</code></td>
-<td>20 px</td>
+<td>48 px — fully round</td>
 </tr>
 <tr>
 <td>Card readout pill outline</td>
 <td><code>GridCardReadoutBorderWidth</code></td>
-<td>3 px</td>
+<td>4 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Card readout pill fill</td>
+<td><code>LilyWash</code></td>
+<td><code>#EEF8DC</code></td>
 </tr>
 <tr>
 <td>Card readout label</td>
@@ -2746,7 +2803,12 @@ the screen is built to.</p>
 <tr>
 <td>Fill of the cell the caret is in</td>
 <td><code>GridFocusFill</code></td>
-<td><code>#8CB89E</code></td>
+<td><code>Lime</code>, <code>#87BD01</code></td>
+</tr>
+<tr>
+<td>Fill of the answer row's cells</td>
+<td><code>GridAnswerFill</code></td>
+<td><code>LilyWash</code>, <code>#EEF8DC</code></td>
 </tr>
 <tr>
 <td>Keypad, down from the panel's top edge</td>
@@ -2766,12 +2828,17 @@ the screen is built to.</p>
 <tr>
 <td>Key corner radius</td>
 <td><code>KeypadKeyRadius</code></td>
-<td>20 px</td>
+<td>30 px</td>
 </tr>
 <tr>
 <td>Key outline</td>
 <td><code>KeypadKeyBorderWidth</code></td>
-<td>3 px</td>
+<td>5 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Key shadow</td>
+<td><code>ShadowKey</code></td>
+<td>8 px down, <code>Ink</code> at 30 %, no blur</td>
 </tr>
 <tr>
 <td>Digit key label</td>
@@ -2873,14 +2940,78 @@ Growing the section therefore costs <code>GridAdditionRowHeight</code> + <code>G
 64 px per row instead of the 112 px it would cost at full size, and the first
 grown row <em>shrinks</em> the grid rather than stretching it — see
 <a href="#mockup">Mockup</a> for the whole sum.</p>
-<p><strong><code>GridFocusFill</code> is the one colour on that table</strong>, and it is there because it
-is the one colour that carries a rule rather than a picture's paint. The rest of
-this screen's palette is the mockups' — ink, line, faint, paper, accent — copied
-into the shell and named nowhere. This one has to clear a bar, and a bar needs
-somewhere to be written down.</p>
+<p><strong><code>GridFocusFill</code> is the one colour on that table that carries a rule</strong> rather
+than a picture's paint. The rest of this screen's palette used to be the
+mockups' — ink, line, faint, paper, accent — copied into the shell and named
+nowhere; since the <a href="../style-guide/">Pond style</a> it is the style guide's named
+palette, and the two fills above (<code>LilyWash</code>, and <code>Ink</code> on every outline) are
+its constants. <code>GridFocusFill</code> is the palette's <code>Lime</code> too, and it stays on
+this page because it has to clear a bar, and a bar needs somewhere to be
+written down.</p>
+<h3 id="what-the-pond-style-changed-here">What the Pond style changed here<a class="headerlink" href="#what-the-pond-style-changed-here" title="Link to this section">&para;</a></h3>
+<p>Every box keeps its size; only its outline, corner, fill and face moved. Digits
+— the printed card, the player's own, the keypad's and the printed products —
+are set in <code>FontDisplay</code>, because every number in a sum is
+(<a href="../style-guide/#ps-5">PS-5</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cells: 3 px grey outline, 10 px corners</td>
+<td>4 px <code>Ink</code> outline, 18 px corners</td>
+</tr>
+<tr>
+<td>Carry boxes: 8 px corners, faint dashes</td>
+<td>10 px corners, dashes in a soft sage <code>#A9B89C</code></td>
+</tr>
+<tr>
+<td>Card readout pill: 3 px faint outline, 20 px corners, no fill</td>
+<td>4 px <code>Ink</code> outline, fully round, <code>LilyWash</code></td>
+</tr>
+<tr>
+<td>Keys: 3 px grey outline, 20 px corners, flat</td>
+<td>5 px <code>Ink</code> outline, 30 px corners, an 8 px solid <code>ShadowKey</code></td>
+</tr>
+<tr>
+<td>Header chip: swatch and name, 256 px wide</td>
+<td>The active <a href="../shared-components/#player-chip">dialog chip</a>: frog and name, as wide as the name needs</td>
+</tr>
+<tr>
+<td><code>Work it out</code> in the grey line colour</td>
+<td><code>FontDisplay</code> medium, <code>InkSoft</code></td>
+</tr>
+<tr>
+<td><code>GridFocusFill</code> <code>#8CB89E</code>, sage</td>
+<td><code>Lime</code> <code>#87BD01</code> — see below</td>
+</tr>
+<tr>
+<td>The focused cell outlined in accent green <code>#2E7D4F</code></td>
+<td>The same <code>Ink</code> outline as its neighbours</td>
+</tr>
+<tr>
+<td>Answer-row tint <code>#F3F8F5</code></td>
+<td><code>GridAnswerFill</code>, <code>LilyWash</code> <code>#EEF8DC</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The focus moved last, and by a decision rather than a drawing.</strong> The
+Pond-style drawing gave the focused cell a pale lime <code>#D8F08A</code> with a 7 px
+outline and tinted the answer row <code>#EEF8DC</code>. That pale lime fails the bar
+<a href="#what-focus-looks-like">below</a> — 1.25 : 1 on white, 1.14 : 1 on the new tint,
+against a 1.9 : 1 floor — and the old sage <code>#8CB89E</code> fails it against the new
+tint too (ΔE 28.1, under 30). Derek kept the bar
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/525">#525</a>,
+option 1): the focus fill is the palette's own lime, darkened 5 % to <code>#87BD01</code>
+so it clears the bar on both fills; the answer row takes the drawing's
+<code>#EEF8DC</code>; and the focused cell keeps its neighbours' outline, with no 7 px.</p>
 <h3 id="what-focus-looks-like">What focus looks like<a class="headerlink" href="#what-focus-looks-like" title="Link to this section">&para;</a></h3>
-<p><strong>The cell the caret is in is filled with <code>GridFocusFill</code></strong>, and keeps the
-accent outline it already had. Nothing else about it changes: not
+<p><strong>The cell the caret is in is filled with <code>GridFocusFill</code></strong>, and keeps the same
+<code>Ink</code> outline its neighbours have. Nothing else about it changes: not
 <code>GridCellSize</code>, not <code>GridCarryBoxSize</code>, not <code>GridCellBorderWidth</code> or
 <code>GridAnswerBorderWidth</code>. A filled box among empty boxes reads from across a
 room; a box that is bigger or thicker than its neighbours is a different layout,
@@ -2892,8 +3023,10 @@ the quietest option available: the 3 px outline swapped from <code>#6C7873</code
 hairline, and on the tablet Derek could not see it — knowing it was there. A
 player who cannot tell which box the next digit lands in taps a box before every
 digit, which is what he did.</p>
-<p>The fill is the accent green the outline already uses, laid over paper at 55 %,
-taken to where it clears the bar the project already sets for two colours being
+<p>The fill was first the accent green the outline used, laid over paper at 55 %
+(<code>#8CB89E</code>); since the <a href="../style-guide/">Pond style</a> it is the palette's <code>Lime</code>,
+<code>#87BD01</code>. Either way it is taken to where it clears the bar the project already
+sets for two colours being
 <strong>clearly separable</strong> — a luminance contrast of at least <strong>1.9 : 1</strong> <em>and</em> a CIE
 L*a*b* distance (ΔE*ab) of at least <strong>30</strong>, both measures, for the reasons
 <a href="../game-board/#keeping-the-frogs-visible"><code>game-board.md</code></a> gives.</p>
@@ -2904,24 +3037,33 @@ answer row's own tint. As <em>contrast : 1 / ΔE</em>:</p>
 <thead>
 <tr>
 <th></th>
-<th>Paper, <code>#FFFFFF</code> — every cell but the answer row's</th>
-<th>The answer row's tint, <code>#F3F8F5</code></th>
+<th><code>White</code>, <code>#FFFFFF</code> — every cell but the answer row's</th>
+<th><code>GridAnswerFill</code>, <code>#EEF8DC</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>GridFocusFill</code></td>
-<td>2.22 / 36.2</td>
-<td>2.07 / 32.5</td>
+<td><code>GridFocusFill</code>, <code>#87BD01</code></td>
+<td>2.26 / 86.3</td>
+<td>2.05 / 71.2</td>
 </tr>
 </tbody>
 </table>
 <p>Both clear it, the answer row being the tighter of the two, which is the pair
-the treatment was always going to be decided by. Two more ratios worth recording
-because they are what a darker tint would cost: a digit on the focused fill is
-<strong>7.11 : 1</strong> (<code>#1E2422</code> ink, against a 4.5 : 1 text bar), and the accent outline
-against the fill inside it is <strong>2.27 : 1 / 30.4</strong>, so the box still reads as a
+the treatment was always going to be decided by. One more ratio worth recording,
+because it is what a darker fill would cost: an <code>Ink</code> (<code>#1A2614</code>) digit on the
+focused fill is <strong>6.99 : 1</strong>, against a 4.5 : 1 text bar. The <code>Ink</code> outline round
+the focused cell is the same ratio against its fill, so the box still reads as a
 box rather than as a blob.</p>
+<p>The numbers are this page's own method, the same as
+<a href="../game-board/#keeping-the-frogs-visible">keeping the frogs visible</a>: WCAG
+relative luminance for contrast, CIE L*a*b* (D65) for ΔE. For the record, the
+sage it replaces measured 2.22 / 36.2 on white and 2.07 / 32.5 on the old tint
+<code>#F3F8F5</code>, with a digit on it at 7.11 : 1.</p>
+<p><code>#87BD01</code> is <strong>the</strong> lime. The palette has one, and the Settings name-tab and
+every other lime highlight use the same <code>Lime</code> constant — it is not a second,
+grid-only green. It is the splash's <code>#8EC701</code> darkened 5 %: the splash lime
+itself is only 1.85 : 1 against the answer row's tint, under the bar.</p>
 <h3 id="how-many-columns-and-rows">How many columns and rows<a class="headerlink" href="#how-many-columns-and-rows" title="Link to this section">&para;</a></h3>
 <p>The card decides the columns. The card and the player between them decide the
 rows.</p>
@@ -3265,6 +3407,12 @@ over one example, because the card that would break a bound is the one nobody
 thought to write down.</p>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
 <p>Three, all at 1920 × 1200.</p>
+<p><strong>Five of the six files are redrawn in the <a href="../style-guide/">Pond style</a></strong> — the
+three below and the two agreed <code>Help me</code> drawings. Their grids, keypads and
+annotations are where they were; only the look moved. The <code>Help me</code> comparison
+file, <code>working-out-grid-help-12x34-operator-column.html</code>, is left in the old
+look: it is the record of a choice already made, not a drawing anyone builds
+from.</p>
 <ul>
 <li><strong>The widest card, as dealt:</strong> <a href="../mockups/working-out-grid-331x41.html"><code>mockups/working-out-grid-331x41.html</code></a></li>
 <li><strong>The easy pile, as dealt:</strong> <a href="../mockups/working-out-grid-68x5.html"><code>mockups/working-out-grid-68x5.html</code></a></li>
@@ -3287,7 +3435,7 @@ second name for the pile. It is corrected here rather than left to be found by
 whoever compares a screenshot against the drawing
 (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/416">#416</a>).</p>
 <p><strong>All three draw the focused cell</strong>, filled with <code>GridFocusFill</code>. They always
-drew one — an answer cell with the accent outline — and until
+drew one — an answer cell that, before the Pond style, had the accent outline — and until
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/304">#304</a> that
 outline was the whole of it, in the drawings as in the shell. The cell is in the
 same place in each; what changed is that you can now see which one it is. A
@@ -3598,6 +3746,18 @@ anyone has said yet.</p>
   only words on this screen that are not a number. Whichever way it goes it
   changes what the player sees, so it is Connor's or Derek's rather than an
   agent's.</li>
+</ul>
+<p>Question 14 arrived with the <a href="../style-guide/">Pond style</a>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/524">#524</a>).</p>
+<ul>
+<li><strong>14. Which focus fill does the Pond-style grid use? Settled: the palette's
+  lime, <code>#87BD01</code>, under the same bar.</strong>
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/525">#525</a>)
+  The design drawing's pale lime and 7 px outline failed the separability bar
+  that <a href="#what-focus-looks-like">what focus looks like</a> sets. Derek kept the bar
+  and took the first of the four options: a pond-palette fill that clears it —
+  the splash lime darkened 5 % — with the drawing's <code>#EEF8DC</code> answer tint and
+  the focused cell's outline the same as its neighbours'.</li>
 </ul>
 
 

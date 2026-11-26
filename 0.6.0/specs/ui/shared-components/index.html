@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.6.0/specs/ui/shared-components/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../style-guide/">
       
       
         <link rel="next" href="../title-screen/">
@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1283,6 +1313,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="3. Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-constants-this-component-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The constants this component used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2756,6 +2803,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="3. Named constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-constants-this-component-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The constants this component used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2980,11 +3044,13 @@ which is where it was decided and why.</p>
 paints, it paints to all four edges, and the scene camera clears to the app's
 background rather than to the engine's default sky — so even a frame drawn
 before any screen has painted is the game's own colour.</p>
-<p>The app's background is the mockups' <code>--bg</code>, <code>#EDF1EF</code>. The title screen, game
-setup and game over paint it, and it is what the camera clears to.</p>
-<p><strong>The game board is the exception, and the only one.</strong> It paints
+<p>The app's background is the mockups' <code>--bg</code>, <code>#EDF1EF</code>. The title screen and
+game setup paint it, and it is what the camera clears to.</p>
+<p><strong>The game board and game over are the exceptions.</strong> They paint
 <a href="../game-board/#colours"><code>PondWater</code></a> instead, to the same four edges by the same
-rule, because that screen is a pond rather than a page. A screen may have a
+rule, because those screens are a pond rather than a page. Game over joined the
+board in the <a href="../style-guide/">Pond style</a>: it used to paint <code>--bg</code>, and now its
+standings sit on the same water the frogs just swam in. A screen may have a
 background of its own; what it may not do is leave any of the screen unpainted.</p>
 <p>A dialog is the one screen that paints no background at all: what it lays over
 the screen underneath is the <a href="#dialog">scrim</a>, and the scrim reaches the edges
@@ -3021,7 +3087,12 @@ a player is most likely to be reaching for.
 and never allowed past the button's own edge.
 <strong>Invariant:</strong> an outline kind is a ring. Whatever is behind the button — the
 panel, the screen — shows through the middle of it, because <em>no fill</em> means no
-fill.</p>
+fill.
+<strong>Invariant:</strong> every kind is outlined, and a press always reads as the button
+going <em>in</em>: the primary kind sinks into its lip, and nothing about a press makes
+a button bigger, brighter or blurred.</p>
+<p>How a button <strong>looks</strong> — its colours, outline, lip, shadows and font — is the
+<a href="../style-guide/">style guide</a>'s. This page keeps its sizes and its behaviour.</p>
 <h4 id="3-named-constants_1">3. Named constants<a class="headerlink" href="#3-named-constants_1" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3055,7 +3126,7 @@ fill.</p>
 <tr>
 <td>Corner radius</td>
 <td><code>ButtonRadius</code></td>
-<td>24 px</td>
+<td>30 px</td>
 </tr>
 <tr>
 <td>Label size</td>
@@ -3075,12 +3146,17 @@ fill.</p>
 <tr>
 <td>Press travel</td>
 <td><code>ButtonPressOffset</code></td>
-<td>4 px</td>
+<td>8 px</td>
 </tr>
 <tr>
-<td>Border width, outlined kinds</td>
+<td>Border width, every kind</td>
 <td><code>ButtonBorderWidth</code></td>
-<td>4 px</td>
+<td>5 px</td>
+</tr>
+<tr>
+<td>Depth of the primary kind's solid lip</td>
+<td><code>ButtonLipDepth</code></td>
+<td>10 px</td>
 </tr>
 <tr>
 <td>Opacity while disabled</td>
@@ -3123,23 +3199,23 @@ to its words.</p>
 <tbody>
 <tr>
 <td>Default (primary)</td>
-<td>Filled accent, light label</td>
+<td><code>Leaf</code> fill, <code>White</code> label, <code>ButtonBorderWidth</code> <code>Ink</code> outline, standing on a <code>ButtonLipDepth</code> solid lip of <code>LeafLip</code> that is outlined in <code>Ink</code> too</td>
 </tr>
 <tr>
 <td>Default (secondary)</td>
-<td>Outlined, <code>ButtonBorderWidth</code> 4 px, dark label, no fill</td>
+<td>A ring: <code>ButtonBorderWidth</code> <code>Ink</code> outline, <code>Ink</code> label, no fill, a 6 px solid shadow of <code>Ink</code> at 25 %</td>
 </tr>
 <tr>
 <td>Default (destructive)</td>
-<td>Outlined in the warning colour, warning-coloured label</td>
+<td>A ring in <code>Berry</code>: <code>Berry</code> outline and label, no fill, a 6 px solid shadow of <code>Berry</code> at 25 %</td>
 </tr>
 <tr>
 <td>Pressed</td>
-<td>Moves down by <code>ButtonPressOffset</code>; fill darkens</td>
+<td>Moves down by <code>ButtonPressOffset</code> and its lip or shadow shrinks by the same amount, so it sinks in rather than moving; a primary's fill goes to <code>LeafPressed</code></td>
 </tr>
 <tr>
 <td>Disabled</td>
-<td><code>ButtonDisabledOpacity</code> opacity, no press response</td>
+<td><code>ButtonDisabledOpacity</code> opacity of the kind's own default look, no shadow, no press response</td>
 </tr>
 <tr>
 <td>Hidden</td>
@@ -3147,6 +3223,18 @@ to its words.</p>
 </tr>
 </tbody>
 </table>
+<p>Every colour named in this table is a constant of the
+<a href="../style-guide/#the-palette">style guide's palette</a>, and the labels are set in
+<code>FontDisplay</code> (Fredoka) at <code>WeightDisplay</code> (semibold) — which answers
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/422">#422</a>.</p>
+<p><strong>The table used to read</strong> <em>filled accent, light label</em> for primary, <em>outlined,
+4 px, dark label</em> for secondary, <em>outlined in the warning colour</em> for
+destructive, and <em>moves down 4 px, fill darkens</em> for pressed. Those were
+placeholder looks, written before the game had any art to take a look from.
+The <a href="../style-guide/">Pond style</a> is that look: the outline and the lip come
+from the splash's lettering, the press travel doubled so the press reads at
+arm's length, and the primary's lip is what it sinks into. Sizes,
+<code>ButtonMinWidth</code>, the gaps and the label size did not move.</p>
 <p><strong>Outlined means see-through, and it has to be drawn as a ring.</strong> The three
 kinds are two images stacked — a border shape, and a fill inset by
 <code>ButtonBorderWidth</code> — and while the border was drawn as a solid rounded rect the
@@ -3167,8 +3255,9 @@ disagrees with this page's own States table. This page is the component's
 contract; the mockups are drawings of screens built from it — see
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md">CLAUDE.md</a>
 on which document wins being a decision, not an assumption. This page wins: disabled is the kind's own default appearance at
-<code>ButtonDisabledOpacity</code>, not a distinct grey style. The mockups should be
-redrawn to match the next time they are touched.</p>
+<code>ButtonDisabledOpacity</code>, not a distinct grey style. The mockups restyled in the
+<a href="../style-guide/">Pond style</a> draw it that way; the ones not yet restyled still
+draw the grey and should be redrawn to match the next time they are touched.</p>
 <h4 id="5-behaviour_1">5. Behaviour<a class="headerlink" href="#5-behaviour_1" title="Link to this section">&para;</a></h4>
 <p>Acts on <strong>release</strong>, not on press, so a finger that lands wrong can slide off
 and cancel. A disabled button does nothing at all — it does not explain itself,
@@ -3197,7 +3286,14 @@ destructive</em> button does, and never what its most destructive one does —
 except the four dialogs whose pages make back inert (roll and card,
 working-out grid, answer result, <a href="../player-won/">a player has won</a>), where back
 does nothing. All four sit inside a single turn's own chain, where a stray press
-should not fast-forward past something the game stopped to show.</p>
+should not fast-forward past something the game stopped to show.
+<strong>Invariant:</strong> the scrim lets the board read as water. It is <code>DeepPond</code>, never
+black, and never so dark the pond underneath is lost.
+<strong>Invariant:</strong> a dialog opens without moving across the screen. It fades and
+grows in place; it never slides, bounces or overshoots.</p>
+<p>A dialog panel is <code>Paper</code>, outlined in <code>Ink</code> at <code>OutlinePanel</code> (6 px), dropping a
+solid <code>ShadowPanel</code> — see the <a href="../style-guide/">style guide</a>. Its title is set in
+<code>FontDisplay</code> and its sentences in <code>FontBody</code>.</p>
 <h4 id="3-named-constants_2">3. Named constants<a class="headerlink" href="#3-named-constants_2" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3209,14 +3305,19 @@ should not fast-forward past something the game stopped to show.</p>
 </thead>
 <tbody>
 <tr>
+<td>Backdrop colour</td>
+<td><code>DialogScrimColour</code></td>
+<td><code>DeepPond</code>, <code>#092E4A</code></td>
+</tr>
+<tr>
 <td>Backdrop dim</td>
 <td><code>DialogScrimOpacity</code></td>
-<td>0.66</td>
+<td>0.60</td>
 </tr>
 <tr>
 <td>Corner radius</td>
 <td><code>DialogRadius</code></td>
-<td>32 px</td>
+<td>44 px</td>
 </tr>
 <tr>
 <td>Padding inside the panel</td>
@@ -3253,10 +3354,22 @@ should not fast-forward past something the game stopped to show.</p>
 <td><code>DialogFadeDuration</code></td>
 <td>0.15 s</td>
 </tr>
+<tr>
+<td>The panel's scale when it starts to open</td>
+<td><code>DialogOpenScale</code></td>
+<td>0.94</td>
+</tr>
 </tbody>
 </table>
 <p><code>DialogMaxWidth</code> and <code>DialogMaxHeight</code> are the canvas inset by 48 px on every
 side. A dialog is allowed to be the whole screen, and the working-out grid is.</p>
+<p><strong>Three values moved with the <a href="../style-guide/">Pond style</a></strong>, and none of them
+moves anything on screen: the scrim was black at 0.66 and is now <code>DeepPond</code> at
+0.60, so the board behind still reads as water rather than as a hole; the
+corner went from 32 px to 44 px, to match the splash's chunky rounding; and the
+open gained the 94 %-to-full grow, on top of the fade it already had. The old
+<em>"cross-fade, no slide, no bounce"</em> row said what opening is not; it still does,
+and now also says what it is.</p>
 <h4 id="4-states_2">4. States<a class="headerlink" href="#4-states_2" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3271,8 +3384,12 @@ side. A dialog is allowed to be the whole screen, and the working-out grid is.</
 <td>Panel at full opacity, scrim at <code>DialogScrimOpacity</code></td>
 </tr>
 <tr>
-<td>Opening / closing</td>
-<td>Scrim and panel cross-fade over <code>DialogFadeDuration</code>; no slide, no bounce</td>
+<td>Opening</td>
+<td>Scrim and panel fade in over <code>DialogFadeDuration</code>, and the panel grows from <code>DialogOpenScale</code> to full size over the same time, easing out; no slide, no bounce, no overshoot</td>
+</tr>
+<tr>
+<td>Closing</td>
+<td>Scrim and panel fade out over <code>DialogFadeDuration</code>; the panel does not shrink</td>
 </tr>
 <tr>
 <td>Stacked</td>
@@ -3293,37 +3410,77 @@ tap.</p>
 <hr />
 <h3 id="player-chip">Player chip<a class="headerlink" href="#player-chip" title="Link to this section">&para;</a></h3>
 <h4 id="1-what-it-is_3">1. What it is<a class="headerlink" href="#1-what-it-is_3" title="Link to this section">&para;</a></h4>
-<p>A frog's identity, wherever the game has to say <em>which frog</em> — its colour, its
-name, and how far up its lane it is.</p>
-<p>Used by: <a href="../game-board/">game board</a>, <a href="../roll-and-card/">roll and card</a>,
-<a href="../answer-result/">answer result</a>.</p>
+<p>A frog's identity, wherever the game has to say <em>which frog</em> — its frog and its
+name, and, on the board, how far up its lane it is.</p>
+<p>Since the <a href="../style-guide/">Pond style</a> it comes in <strong>two forms</strong>, because the two
+places it sits have different things around it:</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Where</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Lane chip</strong></td>
+<td>The <a href="../game-board/">game board</a>'s lanes</td>
+<td>The name, lettered in the frog's colour with a thin <code>Ink</code> outline, and the pad count under it. <strong>No frog</strong> — the frog is already sitting in the lane beside it.</td>
+</tr>
+<tr>
+<td><strong>Dialog chip</strong></td>
+<td>Inside a dialog: <a href="../answer-result/">answer result</a>, <a href="../working-out-grid/">working-out grid</a></td>
+<td>The frog's render, standing free, and the name beside it. Nothing else.</td>
+</tr>
+</tbody>
+</table>
+<p>Used by: <a href="../game-board/">game board</a> (lane chip),
+<a href="../working-out-grid/">working-out grid</a> and <a href="../answer-result/">answer result</a>
+(dialog chip), and <a href="../roll-and-card/">roll and card</a>, which keeps its current
+drawing until it is <a href="../roll-and-card/#pending-redesign">redesigned</a>.</p>
 <h4 id="2-invariants_3">2. Invariants<a class="headerlink" href="#2-invariants_3" title="Link to this section">&para;</a></h4>
 <p><strong>Invariant:</strong> a frog is identified by its colour <strong>and</strong> a word, always
 together, and never by colour alone. The word is the frog's name: its colour's
 name by default, or whatever was typed on
 <a href="../game-setup/">game setup</a> instead. Colour alone excludes a colour-blind
 player from knowing whose turn it is, in a game where four players share one
-screen.
+screen. On a dialog chip the colour is the frog standing beside the name; on a
+lane chip it is the name's own lettering, with the frog in the lane beside it.
+<strong>Invariant:</strong> a frog is never shown as a coloured dot. Where a chip shows a
+frog, it is that player's frog render in their colour, standing free — no
+circle, no disc behind it (<a href="../style-guide/#ps-10">PS-10</a>).
 <strong>Invariant:</strong> the chip for the player whose turn it is is visibly different
-from every other chip on screen, by something other than colour.
+from every other chip on screen, by something other than colour: a thicker
+outline, <code>OutlineChipActive</code>. It is never given a second ring.
 <strong>Invariant:</strong> nothing is ever appended to a frog's name. The chip shows the
-name and only the name — not <code>Blue frog</code>, not <code>Blue (you)</code>.
-<strong>Invariant:</strong> the chip never refuses or alters a name it is given; if a name
-does not fit, the chip truncates it with an ellipsis. A readout is not where a
-limit is enforced. The limit is <code>PlayerNameMaxLength</code>, and
+name and only the name — not <code>Blue frog</code>, not <code>Blue (you)</code>, and on a dialog chip
+not <code>pad 3 → 4</code> either.
+<strong>Invariant:</strong> the chip never refuses or alters a name it is given. A readout is
+not where a limit is enforced. The limit is <code>PlayerNameMaxLength</code>, and
 <a href="../game-setup/#where-playernamemaxlength-comes-from-and-why-a-count-is-not-enough">game setup</a>
-is where it is enforced.</p>
+is where it is enforced.
+<strong>Invariant:</strong> a <strong>dialog chip</strong> grows to fit the whole name and never cuts it
+off. Its text size is fixed; the chip gets wider instead.
+<strong>Invariant:</strong> a <strong>lane chip</strong> is <code>PlayerChipWidth</code> wide, always, because its
+width is part of the board's lane arithmetic. If a name does not fit its name
+column it is truncated with an ellipsis — the rule this chip has always had,
+kept by Derek on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/526">#526</a>.
+<strong>Invariant:</strong> a lane chip's name column is a fixed <code>LaneChipNameColumn</code>
+(208 px), active or not. The active chip's thicker outline takes its extra width
+out of the padding, never out of the name.</p>
 <p>The identification invariant was previously worded as colour <strong>and its
 colour's name</strong> — literally the colour word. That letter cannot survive a
 rename: a chip reading <code>Connor</code> beside a blue swatch says "Blue" nowhere. Its
 purpose survives intact, because a typed name is also a word, and the reason
 the rule exists is that a colour-blind player needs something other than the
-swatch to read. So the rule now requires a word rather than that specific word.</p>
+colour to read. So the rule now requires a word rather than that specific word.</p>
 <p><strong>Two frogs may end up with the same word</strong>, which is the one case where the
 identifying word stops identifying. Nothing prevents it. They are two children
 sitting next to each other who chose the same name on purpose, and they can
-sort it out; the swatch still tells them apart, and colour-plus-word is still
-what the chip shows.</p>
+sort it out; the frogs' colours still tell them apart, and colour-plus-word is
+still what the chip shows.</p>
 <h4 id="3-named-constants_3">3. Named constants<a class="headerlink" href="#3-named-constants_3" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
@@ -3335,114 +3492,247 @@ what the chip shows.</p>
 </thead>
 <tbody>
 <tr>
-<td>Chip height</td>
+<td>Chip height, both forms</td>
 <td><code>PlayerChipHeight</code></td>
 <td>96 px</td>
 </tr>
 <tr>
-<td>Chip width on the board</td>
+<td>Corner radius, both forms</td>
+<td><code>PlayerChipRadius</code></td>
+<td>48 px — half the height, fully round</td>
+</tr>
+<tr>
+<td>Outline, both forms</td>
+<td><code>OutlineChip</code></td>
+<td>4 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Outline of the active chip</td>
+<td><code>OutlineChipActive</code></td>
+<td>7 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Fill of the active chip</td>
+<td><code>ActiveFill</code></td>
+<td><code>#F2FADF</code></td>
+</tr>
+<tr>
+<td><strong>Lane chip</strong> width</td>
 <td><code>PlayerChipWidth</code></td>
 <td>256 px</td>
 </tr>
 <tr>
-<td>Frog swatch diameter</td>
-<td><code>PlayerSwatchDiameter</code></td>
-<td>64 px</td>
+<td>Lane chip fill</td>
+<td><code>Paper</code></td>
+<td><code>#FFFDF4</code></td>
 </tr>
 <tr>
-<td>Gap between swatch and label</td>
-<td><code>PlayerChipSwatchGap</code></td>
-<td>24 px</td>
+<td>Lane chip padding, each side, inside the outline</td>
+<td><code>LaneChipPaddingX</code></td>
+<td>20 px (17 px on the active chip, so the 3 px of thicker outline comes out of the padding)</td>
 </tr>
 <tr>
-<td>Label size</td>
-<td><code>PlayerChipLabelSize</code></td>
-<td>32 px</td>
+<td>Lane chip name size</td>
+<td><code>LaneChipNameSize</code></td>
+<td>34 px, <code>FontDisplay</code> semibold, 0.03 em letter spacing, in the frog's colour</td>
 </tr>
 <tr>
-<td>Pad-count text size</td>
+<td>Lane chip name outline</td>
+<td><code>LaneChipNameOutline</code></td>
+<td>5 px <code>Ink</code> stroke behind the letters</td>
+</tr>
+<tr>
+<td>Lane chip pad-count size</td>
 <td><code>PlayerChipPadCountSize</code></td>
-<td>24 px</td>
+<td>24 px, <code>FontBody</code> extra-bold, <code>Moss</code></td>
 </tr>
 <tr>
-<td>Corner radius</td>
-<td><code>PlayerChipRadius</code></td>
-<td>20 px</td>
+<td>Room a lane chip's name has</td>
+<td><code>LaneChipNameColumn</code></td>
+<td>208 px, fixed</td>
 </tr>
 <tr>
-<td>Ring drawn around the active chip</td>
-<td><code>PlayerChipActiveRing</code></td>
-<td>6 px</td>
+<td><strong>Dialog chip</strong> width</td>
+<td>—</td>
+<td>grows to fit: <code>PlayerChipLabelPaddingX</code> + <code>PlayerChipFrogSize</code> + <code>PlayerChipFrogGap</code> + the name + <code>PlayerChipLabelPaddingX</code>, plus the outline</td>
 </tr>
 <tr>
-<td>Horizontal padding inside the chip</td>
+<td>Dialog chip fill</td>
+<td><code>White</code></td>
+<td><code>#FFFFFF</code> (<code>ActiveFill</code> when active)</td>
+</tr>
+<tr>
+<td>Dialog chip padding, each side</td>
 <td><code>PlayerChipLabelPaddingX</code></td>
 <td>20 px</td>
 </tr>
 <tr>
-<td>Room the name actually has</td>
-<td><code>PlayerChipLabelColumn</code></td>
-<td>128 px</td>
+<td>The frog in a dialog chip</td>
+<td><code>PlayerChipFrogSize</code></td>
+<td>108 × 80 px</td>
+</tr>
+<tr>
+<td>Gap between the frog and the name</td>
+<td><code>PlayerChipFrogGap</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>Dialog chip name size</td>
+<td><code>PlayerChipLabelSize</code></td>
+<td>32 px, <code>FontDisplay</code> semibold, <code>Ink</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>PlayerChipLabelSize</code> was 40 px on this page; the committed mockups' shared
-stylesheet — repeated across all eleven files — draws the name at 32 px and the
-pad-count line separately at 24 px, and <code>game-board.html</code>'s five instantiated
-chips (covering all three states below) all render at those two sizes. The
-mockups are what Connor approved when each screen's wireframe was signed off,
-so they win: <code>PlayerChipLabelSize</code> is corrected to 32 px, and
-<code>PlayerChipPadCountSize</code> — a value this table previously had no name for at
-all — is added at 24 px.</p>
-<p><code>PlayerChipLabelPaddingX</code> and <code>PlayerChipLabelColumn</code> distil the next
-paragraph's own arithmetic into the names the code declares them under — the
-same move <a href="../game-setup/#named-constants">game setup</a> made for
-<code>SeatBadgeInset</code>. The padding was already stated in prose here, and the column
-is what truncation is measured against, so it cannot stay a number that only
-exists inside a sentence.</p>
-<p><strong>The label column is 128 px, and it is tighter than it looks.</strong>
-<code>PlayerChipWidth</code> 256 less 20 px padding either side, less
-<code>PlayerSwatchDiameter</code> 64, less <code>PlayerChipSwatchGap</code> 24, leaves 128 px for the
-name and the pad count. The pad count fits easily at 24 px. The name often does
-not: <code>Orange</code> renders at 132 px at <code>PlayerChipLabelSize</code> 32 and overflows by
-4 px — the game's own longest default name, overflowing before anybody has
-typed anything. This is why the chip truncates rather than refuses, per the
-invariant above, and why <code>PlayerNameMaxLength</code> is derived from the setup seat
-instead of from here. Widening the chip is not free: <code>PlayerChipWidth</code> is part
-of the <a href="../game-board/">game board</a>'s lane arithmetic, so it is a board layout
-change and would need its own wireframe.</p>
+<p><strong><code>LaneChipNameColumn</code> is 208 px, and it is the same 208 px on the active
+chip.</strong> <code>PlayerChipWidth</code> 256 − 2 × <code>OutlineChip</code> 4 − 2 × <code>LaneChipPaddingX</code> 20
+= 208. On the active chip the outline is 7 px, so the padding is 17 px:
+256 − 2 × 7 − 2 × 17 = 208.</p>
+<p>The design drawing put the name at 40 px with 24 px padding and said ten
+letters fit in 208 px. Counting the outline, that column was really 200 px, and
+at 40 px an ordinary ten-letter name came to 205–208 px. Derek settled it on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/526">#526</a>:
+34 px, 20 px padding, a fixed 208 px column, and the ellipsis for anything that
+still does not fit.</p>
+<p>Measured with the committed <code>Fredoka-Variable.ttf</code> at 34 px, SemiBold (600),
+with 0.03 em between letters:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Width</th>
+<th>In 208 px?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Orange</code>, the longest default</td>
+<td>118 px</td>
+<td>fits</td>
+</tr>
+<tr>
+<td><code>Maximilian</code></td>
+<td>174 px</td>
+<td>fits</td>
+</tr>
+<tr>
+<td><code>Christophe</code></td>
+<td>176 px</td>
+<td>fits</td>
+</tr>
+<tr>
+<td><code>Alexandria</code></td>
+<td>177 px</td>
+<td>fits</td>
+</tr>
+<tr>
+<td><code>Gwendolynn</code></td>
+<td>198 px</td>
+<td>fits</td>
+</tr>
+<tr>
+<td><code>mmmmmmmmmm</code></td>
+<td>282 px</td>
+<td>truncates</td>
+</tr>
+<tr>
+<td><code>WWWWWWWWWW</code></td>
+<td>333 px</td>
+<td>truncates</td>
+</tr>
+</tbody>
+</table>
+<p>So every ordinary ten-letter name fits whole, and only a name built from the
+widest letters reaches the ellipsis.</p>
+<p><strong>A dialog chip has no column to overflow.</strong> It is as wide as its contents. The
+widest it can be is with a ten-character name of wide letters: about 305 px of
+name at 32 px, so 20 + 108 + 24 + 305 + 20 + 8 = <strong>485 px</strong> — inside every
+dialog that holds one. A typical name comes to about 330 px of chip.</p>
+<h5 id="the-constants-this-component-used-to-carry">The constants this component used to carry<a class="headerlink" href="#the-constants-this-component-used-to-carry" title="Link to this section">&para;</a></h5>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PlayerSwatchDiameter</code> 64 px</td>
+<td><code>PlayerChipFrogSize</code> 108 × 80 px</td>
+<td>The frog replaces the dot (<a href="../style-guide/#ps-10">PS-10</a>)</td>
+</tr>
+<tr>
+<td><code>PlayerChipSwatchGap</code> 24 px</td>
+<td><code>PlayerChipFrogGap</code> 24 px</td>
+<td>Renamed with the thing it is a gap to; same value</td>
+</tr>
+<tr>
+<td><code>PlayerChipRadius</code> 20 px</td>
+<td><code>PlayerChipRadius</code> 48 px</td>
+<td>Chips are fully round in the Pond style</td>
+</tr>
+<tr>
+<td><code>PlayerChipActiveRing</code> 6 px</td>
+<td><code>OutlineChipActive</code> 7 px</td>
+<td>Active is a thicker outline, not a ring drawn round the chip</td>
+</tr>
+<tr>
+<td><code>PlayerChipLabelColumn</code> 128 px</td>
+<td><code>LaneChipNameColumn</code> 208 px (lane); none (dialog)</td>
+<td>The lane chip lost its swatch, so the name has the whole inside; the dialog chip grows instead</td>
+</tr>
+<tr>
+<td><code>PlayerChipLabelSize</code> 32 px on the board</td>
+<td><code>LaneChipNameSize</code> 34 px</td>
+<td>The lane chip's name is the only thing in it now, and can be a little bigger — 34 px is the size at which ordinary ten-letter names fit (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/526">#526</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>The old label-column arithmetic is worth keeping as the reason the lane chip
+changed shape: with a 64 px swatch in it, the name had 128 px, and <code>Orange</code> at
+32 px overflowed by 4 px — the game's own longest default name, overflowing
+before anybody had typed anything. Dropping the swatch on the board, where the
+frog is already in the lane, gives the name the whole chip.</p>
+<p><code>PlayerChipLabelSize</code> itself was 40 px on this page once before, and was
+corrected to 32 px to match the mockups' shared stylesheet. It stays 32 px — on
+the dialog chip, which is where it now applies.</p>
 <h4 id="4-states_3">4. States<a class="headerlink" href="#4-states_3" title="Link to this section">&para;</a></h4>
 <table>
 <thead>
 <tr>
 <th>State</th>
-<th>Appearance</th>
+<th>Lane chip</th>
+<th>Dialog chip</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Default</td>
-<td>Swatch, name, pad count</td>
+<td>Name in the frog's colour, pad count <code>3 of 8</code> under it, <code>Paper</code> fill, <code>OutlineChip</code></td>
+<td>Frog and name, <code>White</code> fill, <code>OutlineChip</code></td>
 </tr>
 <tr>
 <td>Active (this player's turn)</td>
-<td><code>PlayerChipActiveRing</code> ring, label at full weight</td>
+<td><code>OutlineChipActive</code> and <code>ActiveFill</code></td>
+<td><code>OutlineChipActive</code> and <code>ActiveFill</code></td>
 </tr>
 <tr>
 <td>Home (frog has finished)</td>
 <td>Pad count replaced by <code>Home!</code></td>
+<td>No change — a dialog chip carries no pad count</td>
 </tr>
 </tbody>
 </table>
-<p>The Default row said "colour name" until names became editable. It is the same
-row: the chip has always drawn the frog's name, and until
+<p>The Default row said "colour name" until names became editable, and "swatch"
+until the <a href="../style-guide/">Pond style</a>. It is the same row: the chip has always
+drawn the frog's name, and until
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/310">#310</a> a
 frog's name was always its colour's.</p>
 <p><strong>Active still has callers, checked rather than assumed.</strong>
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/326">#326</a>
 removed the one Active chip in the game board's <em>header</em> and asked whether the
-state still earns its place on this component. It does, in four places, and
-three of them are not the board:</p>
+state still earns its place on this component. It does:</p>
 <table>
 <thead>
 <tr>
@@ -3457,7 +3747,7 @@ three of them are not the board:</p>
 </tr>
 <tr>
 <td><a href="../roll-and-card/">Roll and card</a></td>
-<td>the <code>whose</code> region, beside <code>rolled</code></td>
+<td>the <code>whose</code> region, beside <code>rolled</code> — until it is redesigned</td>
 </tr>
 <tr>
 <td><a href="../working-out-grid/">Working-out grid</a></td>
@@ -3465,25 +3755,21 @@ three of them are not the board:</p>
 </tr>
 <tr>
 <td><a href="../answer-result/">Answer result</a></td>
-<td><strong>none</strong> — it draws a <code>pad 7 → 8</code> chip, not an Active one</td>
+<td><strong>none</strong> — a Default dialog chip for the frog that just answered</td>
 </tr>
 </tbody>
 </table>
-<p>So the board's header was never the state's only caller, and dropping it there
-changes nothing here. What is worth noticing is the last row: the four screens
-of a single turn were already not uniform about this, which is part of why
-removing the header chip from the board does not make the turn sequence
-inconsistent — it was never consistent, and the chip's job differs by screen. On
-the board the lane chip makes a header chip redundant; in the two dialogs there
-are no lanes, so nothing else there carries the colour.</p>
-<p>The Active row dropped "filled background": the mockups' <code>.chip.act</code> rule
-gives the ring and the bold weight but leaves the base chip background
-unchanged, and the chip invariant only requires the active chip be visibly
-different by something other than colour, which the ring and weight already
-satisfy without a fill.</p>
+<p>On the board the lane chip makes a header chip redundant; in the dialogs there
+are no lanes, so the chip is what carries the frog there.</p>
+<p>The Active row used to be <em>"<code>PlayerChipActiveRing</code> ring, label at full
+weight"</em>, and before that it dropped a "filled background" the mockups never
+drew. The Pond style brings a fill back on purpose — the pale <code>ActiveFill</code> — and
+replaces the ring with a heavier outline, so the active chip is told apart by
+outline weight first and fill second, and neither is a colour that names a
+frog.</p>
 <p>The Home row dropped "a small home marker after the name": no committed
 mockup has ever drawn one — the only rendered Home chip
-(<code>game-board.html</code>'s Blue) is just the swatch, the colour name, and <code>Home!</code>.
+(<code>game-board.html</code>'s Blue) is just the name and <code>Home!</code>.
 Building a marker now would mean inventing a visual for it, which
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/blob/main/CLAUDE.md">rule 8</a>
 (wireframe before UI code) exists to prevent. A marker, if wanted later, needs
@@ -3494,11 +3780,9 @@ Frog seat element, with its own constants and states, and its mockup draws
 that element's numbers, not this one's. See that page for the setup screen.</p>
 <p><a href="../game-over/">Game over</a> does not use this chip either, for the same
 reason: it specifies its own <strong>Standings row</strong> element — its own constants
-(<code>StandingsSwatchDiameter</code> 88 px against this chip's <code>PlayerSwatchDiameter</code>
-64 px, <code>StandingsNameSize</code> 52 px, no <code>PlayerChip*</code> constant anywhere on that
-page) and its mockup draws <code>.row</code> markup, not <code>.chip</code>. It stays listed under
-<a href="#frog-colours">Frog colours</a> below, since it legitimately reuses that
-element's four colour constants for its own swatch.</p>
+(<code>StandingsFrogSize</code> 150 × 120 px, <code>StandingsNameSize</code> 52 px, no
+<code>PlayerChip*</code> constant anywhere on that page). It shows the same frog renders
+this chip does, under its own size.</p>
 <h4 id="5-behaviour_3">5. Behaviour<a class="headerlink" href="#5-behaviour_3" title="Link to this section">&para;</a></h4>
 <p>The chip is a readout on every screen that uses it. It has no button state in
 v0.2 — no tap handler, on any screen, in any state.</p>

@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1063,6 +1093,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pending-redesign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pending redesign
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#invariants" class="md-nav__link">
@@ -2064,6 +2105,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pending-redesign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pending redesign
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#invariants" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2179,6 +2231,18 @@
 <h1 id="roll-and-card">Roll and card<a class="headerlink" href="#roll-and-card" title="Link to this section">&para;</a></h1>
 <p>You pressed <code>Roll</code>. This is the die landing, the pile it sends you to, and the
 card you drew.</p>
+<h2 id="pending-redesign">Pending redesign<a class="headerlink" href="#pending-redesign" title="Link to this section">&para;</a></h2>
+<p><strong>This screen is not restyled in the <a href="../style-guide/">Pond style</a>, on purpose.</strong>
+It is being redesigned rather than repainted: the
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/400">turn panel</a>
+puts the easy, medium and hard piles on screen and flips the card over after
+the roll, and its wireframe
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>)
+is drawn in the Pond style from the start. Until that lands, this page and its
+mockup describe the screen as it is built today, in the old look. Its
+<a href="../shared-components/#button">button</a> and <a href="../shared-components/#dialog">dialog</a>
+are shared components, so if they are restyled first this screen picks that up
+without being redrawn.</p>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
 <p><strong>Invariant:</strong> the die face shown is the roll, and the pile shown is the pile
 that roll maps to. The mapping is fixed and is the classroom board's — 1 or 2 →

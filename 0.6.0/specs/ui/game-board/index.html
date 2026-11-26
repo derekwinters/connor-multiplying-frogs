@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3753,10 +3783,12 @@ not take — a small colour swatch in front of the words — it would have survi
 with the same 24 px value and a new meaning, which is the kind of survival that
 leaves a constant meaning two things a year apart. Words alone need no gap,
 because there is nothing to gap.</p>
-<p><code>PlayerChipWidth</code> is untouched: the lane chips still use it, and so do
+<p><code>PlayerChipWidth</code> is untouched: the lane chips still use it. Only this screen's
+header stopped drawing one. (The chips in
 <a href="../roll-and-card/">roll and card</a> and the
-<a href="../working-out-grid/">working-out grid</a>. Only this screen's header stopped
-drawing one.</p>
+<a href="../working-out-grid/">working-out grid</a> used it too until the
+<a href="../style-guide/">Pond style</a> made the dialog chip grow to fit its name; the lane
+chip is now its only user.)</p>
 <h3 id="the-invariant-this-page-used-to-carry">The invariant this page used to carry<a class="headerlink" href="#the-invariant-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/325">#325</a>
 this section carried one invariant covering all three bands, and it ended with a
@@ -4051,7 +4083,8 @@ change harder to judge. Whether they now read as a frame or as leftovers is
 front of these words is gone. Derek's reason is the whole argument: <em>"it's
 already selected in the lanes section too"</em> — the active frog's own lane
 chip, directly below in the pond, carries the same name, the same colour and
-the same Active ring. The header chip was the third statement of a thing the
+the same Active state (a ring then; a heavier outline since the
+<a href="../style-guide/">Pond style</a>). The header chip was the third statement of a thing the
 screen said twice already.</p>
 <p>It used to read <code>Green frog's turn</code>, and the reason given was that frogs
 have no other name. They do now, so the justification went with the word:
@@ -4104,8 +4137,21 @@ rather than being the same on every pad.</p>
   the approved 3D frog model, whose legs move when it hops — see
   <a href="#the-frog-piece">the frog piece</a>.</p>
 </li>
-<li><strong>Pad count</strong> — on the chip: <code>3 of 8</code>, so progress is readable in words as
-  well as by looking.</li>
+<li><strong>Lane chip</strong> — the <a href="../shared-components/#player-chip">player chip</a>'s lane
+  form, <code>PlayerChipWidth</code> wide in the <code>chip</code> gutter. Since the
+  <a href="../style-guide/">Pond style</a> it holds the frog's <strong>name only</strong> — no swatch,
+  no frog, because the frog is already sitting in the lane beside it — at
+  <code>LaneChipNameSize</code> (34 px), lettered in the frog's own colour with a thin
+  <code>Ink</code> outline round the letters, the way the splash letters its title. The
+  outline is what keeps the orange and the green names readable on the chip's
+  pale <code>Paper</code>. The active frog's chip has the heavier <code>OutlineChipActive</code> and
+  the <code>ActiveFill</code> wash, taking its thicker outline out of the padding so the
+  name column stays a fixed 208 px. Every ordinary ten-letter name fits; one
+  that still does not — <code>WWWWWWWWWW</code> — is truncated, as it always was. Derek's
+  call on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/526">#526</a>.</li>
+<li><strong>Pad count</strong> — on the chip, under the name: <code>3 of 8</code>, so progress is readable
+  in words as well as by looking. It stays when the swatch goes, because on the
+  board it is the only place progress is written in words.</li>
 </ul>
 <h2 id="the-frog-piece">The frog piece<a class="headerlink" href="#the-frog-piece" title="Link to this section">&para;</a></h2>
 <p>Derek asked for <em>"a 3D model of a frog for this game. The legs of the frog
@@ -4377,7 +4423,11 @@ chosen. Whether it is right on the tablet is Derek's and Connor's to judge.</p>
 </ul>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
 <p><a href="../mockups/game-board.html"><code>mockups/game-board.html</code></a> — the reference canvas, and
-the one to build from. Beside it,
+the one to build from. Both board files draw the lane chips in the
+<a href="../style-guide/">Pond style</a>; the header, the <code>Roll</code> bar and the pond are drawn
+as they were, because the Pond style restyles only the chips on this screen.
+<code>Roll</code> is a shared <a href="../shared-components/#button">button</a> and takes the new look
+from that component when it is built, without this screen being redrawn. Beside it,
 <a href="../mockups/game-board-wide.html"><code>mockups/game-board-wide.html</code></a> draws the same
 board at 2560 × 1200.</p>
 <p><strong>Two files, and no live comparisons.</strong> Both questions this screen was carrying

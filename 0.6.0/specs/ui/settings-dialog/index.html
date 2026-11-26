@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1245,6 +1275,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-name-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The name-tab
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2178,6 +2225,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-name-tab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The name-tab
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2299,7 +2363,7 @@ to do something.</p>
 <tbody>
 <tr>
 <td><code>title</code></td>
-<td><code>Settings</code></td>
+<td><code>Settings</code>, on a lime name-tab straddling the panel's top edge</td>
 </tr>
 <tr>
 <td><code>actions</code></td>
@@ -2321,7 +2385,10 @@ a corner and this is a section with a heading in it — see
 <a href="#the-constants-this-page-used-to-carry">the constants this page used to carry</a>.</p>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <p>A centred <a href="../shared-components/#dialog">dialog</a>, <code>SettingsDialogWidth</code> by
-<code>SettingsDialogHeight</code>. Actions are a single left-aligned column at full inner
+<code>SettingsDialogHeight</code>. The <code>title</code> is a name-tab: its left edge
+<code>SettingsTabInset</code> in from the panel's outer left edge, its top edge
+<code>SettingsTabRise</code> above the panel's outer top edge, so it sits half on the
+panel and half above it. Actions are a single left-aligned column at full inner
 width; the primary button is bottom-right; the <code>about</code> block is left-aligned at
 the panel's inner left edge, <code>SettingsAboutTopOffset</code> down from the panel's top.</p>
 <p><code>End the game</code> is separated from everything below it by
@@ -2415,6 +2482,46 @@ anchored to the thing it belongs to.</p>
 <td>164 px</td>
 </tr>
 <tr>
+<td>Name-tab, in from the panel's outer left edge</td>
+<td><code>SettingsTabInset</code></td>
+<td>56 px</td>
+</tr>
+<tr>
+<td>Name-tab, risen above the panel's outer top edge</td>
+<td><code>SettingsTabRise</code></td>
+<td>46 px</td>
+</tr>
+<tr>
+<td>Name-tab padding, top and bottom</td>
+<td><code>SettingsTabPaddingY</code></td>
+<td>8 px</td>
+</tr>
+<tr>
+<td>Name-tab padding, left and right</td>
+<td><code>SettingsTabPaddingX</code></td>
+<td>32 px</td>
+</tr>
+<tr>
+<td>Name-tab label size</td>
+<td><code>SettingsTabLabelSize</code></td>
+<td>52 px, <code>FontDisplay</code> semibold, line box 1.2</td>
+</tr>
+<tr>
+<td>Name-tab outline</td>
+<td><code>OutlinePanel</code></td>
+<td>6 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Name-tab corner radius</td>
+<td><code>SettingsTabRadius</code></td>
+<td>24 px</td>
+</tr>
+<tr>
+<td>Name-tab fill</td>
+<td><code>Lime</code></td>
+<td><code>#87BD01</code> — the palette's one lime, the same as the grid's focus</td>
+</tr>
+<tr>
 <td>Gap below <code>about</code>, before the actions column</td>
 <td><code>SettingsAboutSectionGap</code></td>
 <td>72 px</td>
@@ -2429,10 +2536,17 @@ why it is a round number rather than a rounded one:</p>
 <p>It is named anyway rather than left to be recomputed. The block's height is what
 sets <code>SettingsDialogHeight</code>, and a number that three other numbers depend on is
 a number worth being able to say out loud.</p>
-<p><code>SettingsAboutTopOffset</code> is not a free number: it is <code>DialogPadding</code> (56) + the
-title's line box (68) + <code>DialogTitleGap</code> (40). It is stated as a single offset
-because that is how the block is positioned, and derived here so a change to
-<code>DialogTitleGap</code> is visibly a change to this too.</p>
+<p><code>SettingsAboutTopOffset</code> was derived, not free: <code>DialogPadding</code> (56) + the
+title's line box (68) + <code>DialogTitleGap</code> (40). Since the
+<a href="../style-guide/">Pond style</a> moved the title onto the name-tab, nothing in the
+panel sits above <code>about</code> any more, so that sum no longer describes anything on
+screen. The value is <strong>kept at 164 px</strong> anyway, because every size and position
+on this page stays as it was unless the style decision named it, and moving
+<code>about</code> up would move the whole top half of the dialog — a layout change, which
+is <a href="#open-questions">open question 6</a>.</p>
+<p>The name-tab is about 90 px tall — 6 + 8 + 62 + 8 + 6 — and with
+<code>SettingsTabRise</code> 46 px of it above the panel, it reaches 44 px down into it,
+well clear of <code>about</code> at 164.</p>
 <p>The title's line box is 68 px — <code>DialogTitleSize</code> 56 at <code>SettingsAboutLineHeight</code>
 1.2, rounded up to a whole pixel. It is written down because <code>DialogTitleGap</code> is
 measured from it, and a line box left to a font's default is a gap that is 40 px
@@ -2515,19 +2629,29 @@ of this table's numbers at the same time, so the code and this page now agree.</
   board state that was there.
 - <strong><code>about</code></strong> — three lines, left-aligned, stacked, <code>SettingsAboutLineGap</code>
   apart. Not a button, not tappable, no state:
-    1. <strong><code>Multiplying Frogs</code></strong> at <code>SettingsAboutNameSize</code>, bold. The same words
+    1. <strong><code>Multiplying Frogs</code></strong> at <code>SettingsAboutNameSize</code>, in <code>FontDisplay</code>
+       semibold. The same words
        the title screen already draws — <code>TitleScreenView</code>'s own <code>TitleLabel</code>,
        at a smaller size. This is the game saying its own name, not a second
        wordmark. Note that <code>SettingsDialogView</code> has a <code>TitleLabel</code> of its own
        and it is the string <code>Settings</code>; these two are not the same constant and
        must not be made to share one.
-    2. <strong><code>Designed by Connor</code></strong> at <code>SettingsAboutCreditSize</code>. Derek's wording,
+    2. <strong><code>Designed by Connor</code></strong> at <code>SettingsAboutCreditSize</code>, in <code>FontBody</code>,
+       <code>InkSoft</code>. Derek's wording,
        and the default answer; see <a href="#open-questions">open question 3</a>, which is
        Connor's to settle because the line is about him.
-    3. <strong>The version</strong> at <code>VersionLabelSize</code>, in the mockup's <code>--line</code> grey,
+    3. <strong>The version</strong> at <code>VersionLabelSize</code>, in <code>FontBody</code>, <code>Reed</code> — the
+       quietest colour in the <a href="../style-guide/#the-palette">palette</a> —
        from <code>/VERSION</code> via <code>AppVersion</code>. The same value doing the same job as
        the title screen's own version readout, under the identical name — not a
        second constant for the same number.</p>
+<h3 id="the-name-tab">The name-tab<a class="headerlink" href="#the-name-tab" title="Link to this section">&para;</a></h3>
+<p>The <code>title</code> used to sit inside the panel at <code>DialogTitleSize</code>, top-left of the
+padding box, like every other dialog's. In the <a href="../style-guide/">Pond style</a> it
+is lettered on a <code>Lime</code> tab that straddles the panel's top edge, like a name
+tab on a folder. It is this dialog's one decorative element
+(<a href="../style-guide/#ps-12">PS-12</a>) and Derek's choice for it. It is still the
+title: it says <code>Settings</code>, it is not a button, and it does nothing when touched.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
 <li>Opened by the gear on the board, or by the hardware back button on the board.</li>
@@ -2566,7 +2690,11 @@ belongs here, and it is still the reason this dialog is a list rather than two
 buttons in a row.</p>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
 <p><a href="../mockups/settings-dialog.html"><code>mockups/settings-dialog.html</code></a> — the agreed
-picture, with <code>about</code> under the title.</p>
+picture, with <code>about</code> under the title, redrawn in the Pond style with the title
+on its name-tab. The redraw also draws <code>How to play</code> <strong>enabled</strong>: the old file
+still drew it disabled, from before
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>
+enabled it.</p>
 <p>It was one of a pair. Both files were the same 900 × 970 canvas with the same
 stylesheet and the same three lines of text, differing in exactly one thing:
 whether <code>about</code> sat under the title or in the footprint at the bottom-left.
@@ -2648,7 +2776,14 @@ The footprint placement lifted it 260 px to make room for a band underneath.</p>
   right one and is worth keeping: a disabled button that becomes live later is
   less confusing than a button that appears from nowhere. The button has been
   sitting in this layout since the dialog was first drawn, in exactly the place
-  it will work from.</p>
+  it will work from.
+- <strong>6. Should <code>about</code> move up into the space the title left?</strong> With the title on
+  the name-tab, the panel has about 120 px of empty paper between the tab and
+  <code>about</code>, where the title used to be. The Pond-style design drawing closed it
+  up, on a panel drawn 1000 × 860; this page kept every size and position,
+  because they were not part of the style decision. Closing it up moves <code>about</code>
+  and <code>SettingsDialogHeight</code>, so it is a layout question for Connor and a
+  wireframe of its own, not a restyle.</p>
 
 
 

@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1312,6 +1342,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2116,6 +2163,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2216,7 +2280,8 @@ resume the game that just ended.</p>
 </table>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <p>A full screen, not a dialog — the game is over, so there is nothing behind it
-worth dimming.</p>
+worth dimming. It paints <a href="../game-board/#colours"><code>PondWater</code></a> to every edge,
+the same water as the board.</p>
 <ul>
 <li><code>headline</code> centred, pinned below the top safe area.</li>
 <li><code>standings</code> a centred column of <code>StandingsRowWidth</code>, one row per frog, with
@@ -2266,7 +2331,7 @@ worth dimming.</p>
 <td>40 px</td>
 </tr>
 <tr>
-<td>Gap between a row's place/swatch/name/progress</td>
+<td>Gap between a row's place/frog/name/progress</td>
 <td><code>StandingsRowInnerGap</code></td>
 <td>32 px</td>
 </tr>
@@ -2278,17 +2343,32 @@ worth dimming.</p>
 <tr>
 <td>Row corner radius</td>
 <td><code>StandingsRowRadius</code></td>
-<td>24 px</td>
+<td>32 px</td>
 </tr>
 <tr>
 <td>Ordinary row border</td>
 <td><code>StandingsRowBorder</code></td>
-<td>3 px</td>
+<td>5 px <code>Ink</code></td>
 </tr>
 <tr>
 <td>Winner row border</td>
 <td><code>StandingsWinnerBorder</code></td>
-<td>6 px</td>
+<td>8 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Row fill</td>
+<td><code>Paper</code></td>
+<td><code>#FFFDF4</code></td>
+</tr>
+<tr>
+<td>Winner row fill</td>
+<td><code>ActiveFill</code></td>
+<td><code>#F2FADF</code></td>
+</tr>
+<tr>
+<td>Row shadow</td>
+<td><code>ShadowChip</code></td>
+<td>8 px down, <code>Ink</code> at 30 %, no blur</td>
 </tr>
 <tr>
 <td>Place number column width</td>
@@ -2301,12 +2381,12 @@ worth dimming.</p>
 <td>56 px</td>
 </tr>
 <tr>
-<td>Frog swatch in a row</td>
-<td><code>StandingsSwatchDiameter</code></td>
-<td>88 px</td>
+<td>The frog in a row</td>
+<td><code>StandingsFrogSize</code></td>
+<td>150 × 120 px</td>
 </tr>
 <tr>
-<td>Colour name size</td>
+<td>Name size</td>
 <td><code>StandingsNameSize</code></td>
 <td>52 px</td>
 </tr>
@@ -2344,10 +2424,14 @@ name and another for a typed one is a rule with an edge case in it. Nothing
 appends anything to a name. See
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/310">#310</a>
 question 4.
-- <strong>Standings row × 2–4</strong> — place number, frog swatch, name, and how far
-  it got: <code>Home — 8 of 8</code> for a finisher, <code>6 of 8</code> for everyone else. The winner
-  row is drawn heavier; every row is otherwise identical, because second place
-  and last place are the same kind of fact.
+- <strong>Standings row × 2–4</strong> — place number, that player's frog, name, and how
+  far it got: <code>Home — 8 of 8</code> for a finisher, <code>6 of 8</code> for everyone else. The
+  frog is the player's own render, standing free
+  (<a href="../style-guide/#ps-10">PS-10</a>). The place, the name and the numbers are in
+  <code>FontDisplay</code>; the progress readout is in <code>FontBody</code>, in <code>Moss</code>. The winner
+  row has <code>StandingsWinnerBorder</code> and the <code>ActiveFill</code> wash; every row is
+  otherwise identical, because second place and last place are the same kind of
+  fact.
 - <strong><code>Play again</code></strong> — primary <a href="../shared-components/#button">button</a>. Starts a new
   game with <strong>the same frogs, in the same turn order, under the same names</strong>,
   straight to the <a href="../game-board/">game board</a> with everyone back on their Start
@@ -2363,6 +2447,42 @@ remembers anything. It is worth it: the overwhelmingly common case is the same
 four children going again, and making them re-tap their colours every time is a
 tax on the thing they most want to do. Changing who is playing is one extra tap
 through the title screen.</p>
+<h3 id="what-the-pond-style-changed-here">What the Pond style changed here<a class="headerlink" href="#what-the-pond-style-changed-here" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Painted the app's <code>--bg</code> grey</td>
+<td>Paints <code>PondWater</code></td>
+<td>The screen sits on the pond, like the board (<a href="../style-guide/">style guide</a>)</td>
+</tr>
+<tr>
+<td><code>StandingsSwatchDiameter</code> 88 px: a colour dot</td>
+<td><code>StandingsFrogSize</code> 150 × 120 px: the frog's render</td>
+<td>Frogs replace every colour dot (<a href="../style-guide/#ps-10">PS-10</a>)</td>
+</tr>
+<tr>
+<td><code>StandingsRowBorder</code> 3 px grey, <code>StandingsWinnerBorder</code> 6 px, radius 24 px, white rows</td>
+<td>5 px and 8 px <code>Ink</code>, radius 32 px, <code>Paper</code> rows, the winner's tinted <code>ActiveFill</code>, a solid shadow</td>
+<td>The Pond style's outlines and corners; the winner row is told apart by a thicker outline and a tint, never by colour alone</td>
+</tr>
+</tbody>
+</table>
+<p><code>Back to the title</code> stays a ring — no fill, the water showing through — as
+<a href="../shared-components/#button">every secondary button is</a>. The design drawing
+filled it with <code>Paper</code> on the water; that would have been a fourth button kind,
+and the ring rule is the one <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/323">#323</a>
+fixed, so the ring stands.</p>
+<p>The row's widths still add up inside <code>StandingsRowWidth</code>: 40 + 80 + 32 + 150 +
+32 = 334 px before the name, leaving 826 px for a name at 52 px and the
+progress readout. The frog's 120 px fits inside the row's 140 px less its
+borders.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
 <li>
@@ -2400,6 +2520,10 @@ End log, the hop finishes, and this screen follows — see
 <p><a href="../mockups/game-over.html"><code>mockups/game-over.html</code></a> — four frogs, one home, drawn
 in the state where the game was ended before the others finished, which is the
 one that has to look fair.</p>
+<p>Redrawn in the <a href="../style-guide/">Pond style</a>. Its headline now reads
+<code>Blue wins!</code>, the wording <a href="#elements">Elements</a> has specified since
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/310">#310</a>;
+the old drawing still said <code>Blue frog wins!</code>.</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Is finishing order the right ranking for frogs that did not finish?</strong>

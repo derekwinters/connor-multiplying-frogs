@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1200,6 +1230,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2116,6 +2163,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2216,6 +2280,10 @@ it would be the same information twice.
 <td>The frog that just got home, drawn large</td>
 </tr>
 <tr>
+<td><code>rays</code></td>
+<td>Pale sun rays behind the frog — this dialog's one decoration</td>
+</tr>
+<tr>
 <td><code>headline</code></td>
 <td><code>Blue wins!</code>, or <code>Pink is home!</code></td>
 </tr>
@@ -2232,6 +2300,8 @@ it would be the same information twice.
 about and everything else follows it:</p>
 <ul>
 <li><code>frog</code> — horizontally centred, <code>DialogPadding</code> from the panel's top edge.</li>
+<li><code>rays</code> — centred on the frog's centre, behind everything else in the panel,
+  and clipped by the panel's own edge.</li>
 <li><code>headline</code> — <code>WonHeadlineGap</code> below the frog, horizontally centred, one line.</li>
 <li><code>controls</code> — bottom-right at <code>DialogPadding</code>, where
   <a href="../shared-components/#dialog">the shared dialog</a> puts a button row.</li>
@@ -2258,13 +2328,23 @@ about and everything else follows it:</p>
 </tr>
 <tr>
 <td>The frog, drawn large</td>
-<td><code>WonFrogDiameter</code></td>
-<td>220 px</td>
+<td><code>WonFrogSize</code></td>
+<td>220 × 220 px</td>
 </tr>
 <tr>
-<td>Frog outline</td>
-<td><code>WonFrogOutline</code></td>
-<td>8 px</td>
+<td>The sun rays, across</td>
+<td><code>WonRaysDiameter</code></td>
+<td>520 px</td>
+</tr>
+<tr>
+<td>How many rays</td>
+<td><code>WonRaysCount</code></td>
+<td>15, each 12° wide with a 12° gap</td>
+</tr>
+<tr>
+<td>The rays' colour</td>
+<td><code>SunRays</code></td>
+<td><code>#E6F5C2</code></td>
 </tr>
 <tr>
 <td>Gap between the frog and the headline</td>
@@ -2284,11 +2364,11 @@ about and everything else follows it:</p>
 </tbody>
 </table>
 <p>The arithmetic down the panel, against a 634 px padding box:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>DialogPadding 56 + WonFrogDiameter 220        -&gt; frog     56 .. 276
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>DialogPadding 56 + WonFrogSize 220             -&gt; frog     56 .. 276
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>WonHeadlineGap 40 + WonHeadlineLineBox 92     -&gt; headline 316 .. 408
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ButtonHeight 112, DialogPadding 56 up         -&gt; button   466 .. 578
 </code></pre></div>
-<p><strong><code>WonFrogDiameter</code> is deliberately not the board's <code>FrogPieceDiameter</code></strong>
+<p><strong><code>WonFrogSize</code> is deliberately not the board's <code>FrogPieceDiameter</code></strong>
 (88 px). This is the one screen in the game that draws a frog big, and that is
 what it is for: the board says a frog moved, and this says a frog arrived. A
 constant that happened to equal the board's would be re-used by someone later
@@ -2299,13 +2379,19 @@ from it, and a line box that varies by renderer is a gap that varies by
 renderer.</p>
 <h2 id="elements">Elements<a class="headerlink" href="#elements" title="Link to this section">&para;</a></h2>
 <ul>
-<li><strong><code>frog</code></strong> — the frog that just got home, at <code>WonFrogDiameter</code> in its own
-  colour, with the <code>PieceEdge</code> outline at <code>WonFrogOutline</code>. Not a
+<li><strong><code>frog</code></strong> — the frog that just got home: that player's frog render, in its
+  own colour, at <code>WonFrogSize</code>, standing free with no circle behind it
+  (<a href="../style-guide/#ps-10">PS-10</a>). Not a
   <a href="../shared-components/#player-chip">player chip</a>: a chip carries a name and a
   pad count, and both are wrong here — the name is in the headline and the pad
   count is now <code>8 of 8</code> for everyone this dialog appears for.</li>
+<li><strong><code>rays</code></strong> — <code>WonRaysCount</code> pale <code>SunRays</code> wedges, <code>WonRaysDiameter</code> across,
+  behind the frog. Static: they do not turn, pulse or fade separately from the
+  dialog's own open. They are the one decorative element this dialog is allowed
+  (<a href="../style-guide/#ps-12">PS-12</a>), and they sit behind the frog, never behind
+  the headline's words.</li>
 <li>
-<p><strong><code>headline</code></strong> — at <code>WonHeadlineSize</code>, and its wording is the one thing on
+<p><strong><code>headline</code></strong> — at <code>WonHeadlineSize</code>, in <code>FontDisplay</code> semibold, and its wording is the one thing on
   this page that depends on game state:</p>
 <table>
 <thead>
@@ -2362,6 +2448,38 @@ ways.</p>
 <p>The second case is the one <code>Game.IsOver</code> has just become true for.</p>
 </li>
 </ul>
+<h3 id="what-the-pond-style-changed-here">What the Pond style changed here<a class="headerlink" href="#what-the-pond-style-changed-here" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WonFrogDiameter</code> 220 px: a disc in the frog's colour, outlined in <code>PieceEdge</code> at <code>WonFrogOutline</code> 8 px</td>
+<td><code>WonFrogSize</code> 220 × 220 px: the frog's own render</td>
+<td>The frog replaces every colour dot (<a href="../style-guide/#ps-10">PS-10</a>). The slot keeps its 220 px height, so the arithmetic down the panel is unchanged.</td>
+</tr>
+<tr>
+<td>No decoration</td>
+<td><code>rays</code> behind the frog</td>
+<td>Derek's choice of this dialog's one decoration</td>
+</tr>
+<tr>
+<td><code>WonFrogOutline</code></td>
+<td><em>(gone)</em></td>
+<td>The frog stands free, with nothing drawn round it (<a href="../style-guide/#ps-10">PS-10</a>); the render already has its own dark edge</td>
+</tr>
+</tbody>
+</table>
+<p>The design drawing showed the frog larger, in a 330 × 270 box on a 660 px
+panel. The panel and its arithmetic are this page's and were not on the list
+of things that change, so the frog keeps the 220 px slot it already had.
+<code>PlayerWonDialogView</code> still declares <code>WonFrogDiameter</code> and <code>WonFrogOutline</code>;
+the build issue for this restyle replaces them.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
 <li><strong>Entry.</strong> Opens once the winning hop has finished — the seam

@@ -829,6 +829,8 @@
       
         
       
+        
+      
     
     
     
@@ -884,6 +886,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../style-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Style guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -1175,6 +1205,17 @@
   
     <nav class="md-nav" aria-label="Elements">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#the-three-consequence-sentences" class="md-nav__link">
@@ -2137,6 +2178,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-the-pond-style-changed-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Pond style changed here
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-three-consequence-sentences" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2250,7 +2302,7 @@ turn on.</p>
 </tr>
 <tr>
 <td><code>chip</code></td>
-<td>The player chip, showing the move as <code>pad 3 → 4</code></td>
+<td>The <a href="../shared-components/#player-chip">dialog chip</a>: the frog that answered, and its name</td>
 </tr>
 <tr>
 <td><code>controls</code></td>
@@ -2292,9 +2344,19 @@ about are two dialogs a child reads as two different things happening.</p>
 <td>180 px</td>
 </tr>
 <tr>
-<td>Mark ring width, wrong state</td>
-<td><code>ResultMarkRingWidth</code></td>
-<td>8 px</td>
+<td>Mark outline, both states</td>
+<td><code>ResultMarkOutline</code></td>
+<td>6 px <code>Ink</code></td>
+</tr>
+<tr>
+<td>Mark fill, right</td>
+<td><code>ResultMarkRightFill</code></td>
+<td><code>Leaf</code></td>
+</tr>
+<tr>
+<td>Mark fill, wrong</td>
+<td><code>ResultMarkWrongFill</code></td>
+<td><code>Berry</code></td>
 </tr>
 <tr>
 <td>Mark glyph size</td>
@@ -2345,7 +2407,7 @@ about are two dialogs a child reads as two different things happening.</p>
 </table>
 <p><code>mark</code>, <code>chip</code> and <code>controls</code> are all <code>DialogPadding</code> from the panel's edges —
 the shared <a href="../shared-components/#dialog">Dialog</a>'s own padding, not a constant
-of this page's. <code>ResultMarkRingWidth</code> and the four rows that place <code>verdict</code>,
+of this page's. <code>ResultMarkOutline</code> and the four rows that place <code>verdict</code>,
 <code>consequence</code> and <code>chip</code> are numbers the two committed mockups already draw;
 they are on this table so the layout is built from names rather than measured
 off the picture.</p>
@@ -2366,8 +2428,8 @@ whatever <code>FrogHopDuration</code> is set to.</p>
 <tbody>
 <tr>
 <td>Mark</td>
-<td>Filled tick</td>
-<td>Outlined cross</td>
+<td>White tick on a <code>Leaf</code> badge</td>
+<td>White cross on a <code>Berry</code> badge</td>
 </tr>
 <tr>
 <td>Verdict</td>
@@ -2381,8 +2443,8 @@ whatever <code>FrogHopDuration</code> is set to.</p>
 </tr>
 <tr>
 <td>Chip</td>
-<td><code>pad 3 → 4</code></td>
-<td><code>pad 3 → 2</code></td>
+<td>Green's frog and <code>Green</code></td>
+<td>Green's frog and <code>Green</code></td>
 </tr>
 <tr>
 <td>Button</td>
@@ -2391,12 +2453,35 @@ whatever <code>FrogHopDuration</code> is set to.</p>
 </tr>
 </tbody>
 </table>
-<p>The chip's move reads <code>pad &lt;before&gt; → &lt;after&gt;</code> in all three situations,
-including the floor case where nothing moved (<code>pad 0 → 0</code>). Neither mockup draws
-that one; extending the pattern rather than writing a separate sentence for it
-is a presentation call under
-<a href="../../../adr/0001-rules-sacred-presentation-ours/">ADR-0001</a>, and the numbers are
-the lane positions Core reports either way.</p>
+<p>The verdict, being a sum, is set in <code>FontDisplay</code>; the consequence is a sentence
+and is set in <code>FontBody</code> in <code>InkSoft</code> — see the <a href="../style-guide/">style guide</a>.</p>
+<h3 id="what-the-pond-style-changed-here">What the Pond style changed here<a class="headerlink" href="#what-the-pond-style-changed-here" title="Link to this section">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Is now</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The chip read <code>pad &lt;before&gt; → &lt;after&gt;</code> — <code>pad 3 → 4</code>, <code>pad 3 → 2</code>, and <code>pad 0 → 0</code> on the floor</td>
+<td>The chip holds the frog and the name only</td>
+<td>The consequence sentence directly above it already says what happened, in words. Derek's call on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/524">#524</a>.</td>
+</tr>
+<tr>
+<td>Right: filled tick on the accent green. Wrong: an outlined cross in the warning colour, <code>ResultMarkRingWidth</code> 8 px</td>
+<td>Both are filled badges with the same 6 px <code>Ink</code> outline: <code>Leaf</code> with a white tick, <code>Berry</code> with a white cross</td>
+<td>One outlined badge for both, as everything in the Pond style is outlined. The wrong colour is <strong>red</strong> (<code>Berry</code>) — decided, not orange.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The colour-alone invariant still holds without the filled/outlined
+difference.</strong> That difference was a second, non-colour cue on top of the glyph.
+What remains is the glyph — a tick or a cross — plus the verdict, the sentence
+and the hop, which is the three-way statement the invariant asks for. Nothing
+is signalled by the badge's colour that is not also said in words.</p>
 <p>The wrong state leads with <em>Not this time</em> rather than with the number, because
 the first thing a child reads should not be the size of their mistake. The
 correct answer is in the next line, where it teaches instead of stings.</p>
