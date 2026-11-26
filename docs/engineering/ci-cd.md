@@ -694,6 +694,17 @@ Two jobs, deliberately separate because they cost wildly different amounts:
 
 See [Testing](testing.md) for what belongs in each.
 
+**EditMode runs in the Android editor.** The job sets `customImage` to GameCI's
+Android image for the same editor version the APKs are built with
+(`unityci/editor:ubuntu-6000.0.81f1-android-3`) and passes
+`-buildTarget Android`. The app is only built for Android, and some of what
+builds it only exists there: `UnityEditor.Android`, which puts the app icon into
+the build, needs Android Build Support and the Android target. In GameCI's
+default image `UNITY_ANDROID` is undefined and those tests compile to nothing,
+so the suite would go green having checked nothing (#459).
+`.github/scripts/tests/test_editmode_android_target.py` keeps the step that way,
+and `AppIconTests` fails outright if the target is not Android.
+
 The Core job also runs two static checks first. Both cost nothing and both fail
 for reasons the test output would never explain:
 

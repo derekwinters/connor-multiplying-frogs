@@ -239,13 +239,42 @@ regenerating, fails it. It and the other rendering tests are skipped — by name
 in the test output — where Pillow is not installed; the geometry tests need
 nothing but Python.
 
-**Not done yet: putting the icons into the build.** The icon slots in
-`PlayerSettings` are set the same way as everything else in this section, by
-code at build time, and that waits on a committed `ProjectSettings` (#104). It is
-tracked on [#459](https://github.com/derekwinters/connor-multiplying-frogs/issues/459). Until then the APK still carries Unity's default icon. The
-generated PNGs also have no committed `.meta` files yet — see
-[Unity serialization](unity-serialization.md) for why those are not
-hand-written.
+**The build puts the icons in, every time.** Nothing is set by hand and no
+`ProjectSettings` file is involved — CI builds without one. `AppIcons`, in
+`Assets/Editor/`, is called from `ProjectBootstrap.ApplyToBuild()`, which the
+build pre-processor runs before every build, the same way the app's name and
+orientation get there. It fills Unity's Android icon slots through
+`PlayerSettings.SetPlatformIcons`:
+
+| Slots | Filled with |
+| --- | --- |
+| Adaptive, mdpi – xxxhdpi | `adaptive-background-<density>.png` then `adaptive-foreground-<density>.png`, the two layers |
+| Round, mdpi – xxxhdpi | `round-<density>.png` |
+| Legacy, mdpi – xxxhdpi | `legacy-<density>.png` |
+| ldpi, all three kinds | the mdpi files, scaled down by Unity — no ldpi file is drawn |
+| The default icon | `legacy-xxxhdpi.png`, so Unity's logo has nowhere to show through |
+
+Which file goes in which slot is decided from the slot's width by
+`AppIconSet` in Core, so it is tested without an editor. A slot whose width is
+no Android density fails the build rather than getting the nearest file.
+
+**A missing icon fails the build.** So does a file Unity cannot import, or a
+slot that does not keep what it was given — every slot is read back after it is
+set. The alternative is an APK with Unity's icon, which is what v0.6.0 shipped.
+
+**No committed `.meta` is needed.** The icons are loaded by path, as Unity's
+reference for `PlatformIcon.SetTextures` asks, and assigned in the same session
+the build runs in, so nothing refers to a GUID. A texture not yet imported on a
+fresh CI `Library` is imported synchronously before it is loaded. The import
+settings are code, `AppIconImport`, not a hand-written `.meta`: no scaling to a
+power of two, no mipmaps, uncompressed, so the texture Unity holds is exactly the
+file the generator drew. `AppIconTests` reads the slots and the import settings
+back.
+
+**The tests need the Android editor.** Unity's `UnityEditor.Android` API only
+exists with Android Build Support and Android as the active target, so the
+EditMode suite runs in GameCI's Android image with `-buildTarget Android` — see
+[CI/CD](ci-cd.md#ci-tests-the-two-suites).
 
 ### The frog model
 
