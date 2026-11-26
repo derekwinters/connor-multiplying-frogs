@@ -191,12 +191,12 @@ the screen is built to.
 | --- | --- | --- |
 | Digit cell, square | `GridCellSize` | 104 px |
 | Gap between cells and between rows | `GridCellGap` | 8 px |
-| Digit cell outline | `GridCellBorderWidth` | 3 px |
-| Digit cell corner radius | `GridCellRadius` | 10 px |
+| Digit cell outline | `GridCellBorderWidth` | 4 px `Ink` |
+| Digit cell corner radius | `GridCellRadius` | 18 px |
 | Carry strip height | `GridCarryRowHeight` | 56 px |
 | Carry box inside the strip | `GridCarryBoxSize` | 56 × 52 px |
 | Carry box outline | `GridCarryBoxBorderWidth` | 3 px |
-| Carry box corner radius | `GridCarryBoxRadius` | 8 px |
+| Carry box corner radius | `GridCarryBoxRadius` | 10 px |
 | Rule line thickness | `GridRuleThickness` | 6 px |
 | Addition row height, once the section is grown | `GridAdditionRowHeight` | 56 px |
 | Answer row height | `GridAnswerRowHeight` | 128 px |
@@ -210,17 +210,20 @@ the screen is built to.
 | `Work it out` | `GridPromptSize` | 44 px |
 | Card readout pill height | `GridCardReadoutHeight` | 96 px |
 | Card readout pill padding, each side | `GridCardReadoutPaddingX` | 32 px |
-| Card readout pill corner radius | `GridCardReadoutRadius` | 20 px |
-| Card readout pill outline | `GridCardReadoutBorderWidth` | 3 px |
+| Card readout pill corner radius | `GridCardReadoutRadius` | 48 px — fully round |
+| Card readout pill outline | `GridCardReadoutBorderWidth` | 4 px `Ink` |
+| Card readout pill fill | `LilyWash` | `#EEF8DC` |
 | Card readout label | `GridCardReadoutLabelSize` | 40 px |
 | Addition rows a card is dealt | `GridAdditionRowsAtStart` | 2 rows |
 | Most addition rows the section can hold | `GridAdditionRowsMax` | 6 rows |
-| Fill of the cell the caret is in | `GridFocusFill` | `#8CB89E` |
+| Fill of the cell the caret is in | `GridFocusFill` | `Lime`, `#87BD01` |
+| Fill of the answer row's cells | `GridAnswerFill` | `LilyWash`, `#EEF8DC` |
 | Keypad, down from the panel's top edge | `KeypadTop` | 216 px |
 | Keypad key, square | `KeypadKeySize` | 140 px |
 | Gap between keys | `KeypadKeyGap` | 16 px |
-| Key corner radius | `KeypadKeyRadius` | 20 px |
-| Key outline | `KeypadKeyBorderWidth` | 3 px |
+| Key corner radius | `KeypadKeyRadius` | 30 px |
+| Key outline | `KeypadKeyBorderWidth` | 5 px `Ink` |
+| Key shadow | `ShadowKey` | 8 px down, `Ink` at 30 %, no blur |
 | Digit key label | `KeypadKeyLabelSize` | 56 px |
 | Backspace glyph | `KeypadBackspaceLabelSize` | 40 px |
 | `clear` label | `KeypadClearLabelSize` | 32 px |
@@ -285,16 +288,49 @@ Growing the section therefore costs `GridAdditionRowHeight` + `GridCellGap` =
 grown row *shrinks* the grid rather than stretching it — see
 [Mockup](#mockup) for the whole sum.
 
-**`GridFocusFill` is the one colour on that table**, and it is there because it
-is the one colour that carries a rule rather than a picture's paint. The rest of
-this screen's palette is the mockups' — ink, line, faint, paper, accent — copied
-into the shell and named nowhere. This one has to clear a bar, and a bar needs
-somewhere to be written down.
+**`GridFocusFill` is the one colour on that table that carries a rule** rather
+than a picture's paint. The rest of this screen's palette used to be the
+mockups' — ink, line, faint, paper, accent — copied into the shell and named
+nowhere; since the [Pond style](style-guide.md) it is the style guide's named
+palette, and the two fills above (`LilyWash`, and `Ink` on every outline) are
+its constants. `GridFocusFill` is the palette's `Lime` too, and it stays on
+this page because it has to clear a bar, and a bar needs somewhere to be
+written down.
+
+### What the Pond style changed here
+
+Every box keeps its size; only its outline, corner, fill and face moved. Digits
+— the printed card, the player's own, the keypad's and the printed products —
+are set in `FontDisplay`, because every number in a sum is
+([PS-5](style-guide.md#ps-5)).
+
+| Was | Is now |
+| --- | --- |
+| Cells: 3 px grey outline, 10 px corners | 4 px `Ink` outline, 18 px corners |
+| Carry boxes: 8 px corners, faint dashes | 10 px corners, dashes in a soft sage `#A9B89C` |
+| Card readout pill: 3 px faint outline, 20 px corners, no fill | 4 px `Ink` outline, fully round, `LilyWash` |
+| Keys: 3 px grey outline, 20 px corners, flat | 5 px `Ink` outline, 30 px corners, an 8 px solid `ShadowKey` |
+| Header chip: swatch and name, 256 px wide | The active [dialog chip](shared-components.md#player-chip): frog and name, as wide as the name needs |
+| `Work it out` in the grey line colour | `FontDisplay` medium, `InkSoft` |
+| `GridFocusFill` `#8CB89E`, sage | `Lime` `#87BD01` — see below |
+| The focused cell outlined in accent green `#2E7D4F` | The same `Ink` outline as its neighbours |
+| Answer-row tint `#F3F8F5` | `GridAnswerFill`, `LilyWash` `#EEF8DC` |
+
+**The focus moved last, and by a decision rather than a drawing.** The
+Pond-style drawing gave the focused cell a pale lime `#D8F08A` with a 7 px
+outline and tinted the answer row `#EEF8DC`. That pale lime fails the bar
+[below](#what-focus-looks-like) — 1.25 : 1 on white, 1.14 : 1 on the new tint,
+against a 1.9 : 1 floor — and the old sage `#8CB89E` fails it against the new
+tint too (ΔE 28.1, under 30). Derek kept the bar
+([#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525),
+option 1): the focus fill is the palette's own lime, darkened 5 % to `#87BD01`
+so it clears the bar on both fills; the answer row takes the drawing's
+`#EEF8DC`; and the focused cell keeps its neighbours' outline, with no 7 px.
 
 ### What focus looks like
 
-**The cell the caret is in is filled with `GridFocusFill`**, and keeps the
-accent outline it already had. Nothing else about it changes: not
+**The cell the caret is in is filled with `GridFocusFill`**, and keeps the same
+`Ink` outline its neighbours have. Nothing else about it changes: not
 `GridCellSize`, not `GridCarryBoxSize`, not `GridCellBorderWidth` or
 `GridAnswerBorderWidth`. A filled box among empty boxes reads from across a
 room; a box that is bigger or thicker than its neighbours is a different layout,
@@ -308,8 +344,10 @@ hairline, and on the tablet Derek could not see it — knowing it was there. A
 player who cannot tell which box the next digit lands in taps a box before every
 digit, which is what he did.
 
-The fill is the accent green the outline already uses, laid over paper at 55 %,
-taken to where it clears the bar the project already sets for two colours being
+The fill was first the accent green the outline used, laid over paper at 55 %
+(`#8CB89E`); since the [Pond style](style-guide.md) it is the palette's `Lime`,
+`#87BD01`. Either way it is taken to where it clears the bar the project already
+sets for two colours being
 **clearly separable** — a luminance contrast of at least **1.9 : 1** *and* a CIE
 L\*a\*b\* distance (ΔE\*ab) of at least **30**, both measures, for the reasons
 [`game-board.md`](game-board.md#keeping-the-frogs-visible) gives.
@@ -318,16 +356,27 @@ It has to clear that bar twice over, because a focused cell lands on two
 different fills depending on where the caret is: the ordinary cell fill, and the
 answer row's own tint. As *contrast : 1 / ΔE*:
 
-| | Paper, `#FFFFFF` — every cell but the answer row's | The answer row's tint, `#F3F8F5` |
+| | `White`, `#FFFFFF` — every cell but the answer row's | `GridAnswerFill`, `#EEF8DC` |
 | --- | --- | --- |
-| `GridFocusFill` | 2.22 / 36.2 | 2.07 / 32.5 |
+| `GridFocusFill`, `#87BD01` | 2.26 / 86.3 | 2.05 / 71.2 |
 
 Both clear it, the answer row being the tighter of the two, which is the pair
-the treatment was always going to be decided by. Two more ratios worth recording
-because they are what a darker tint would cost: a digit on the focused fill is
-**7.11 : 1** (`#1E2422` ink, against a 4.5 : 1 text bar), and the accent outline
-against the fill inside it is **2.27 : 1 / 30.4**, so the box still reads as a
+the treatment was always going to be decided by. One more ratio worth recording,
+because it is what a darker fill would cost: an `Ink` (`#1A2614`) digit on the
+focused fill is **6.99 : 1**, against a 4.5 : 1 text bar. The `Ink` outline round
+the focused cell is the same ratio against its fill, so the box still reads as a
 box rather than as a blob.
+
+The numbers are this page's own method, the same as
+[keeping the frogs visible](game-board.md#keeping-the-frogs-visible): WCAG
+relative luminance for contrast, CIE L\*a\*b\* (D65) for ΔE. For the record, the
+sage it replaces measured 2.22 / 36.2 on white and 2.07 / 32.5 on the old tint
+`#F3F8F5`, with a digit on it at 7.11 : 1.
+
+`#87BD01` is **the** lime. The palette has one, and the Settings name-tab and
+every other lime highlight use the same `Lime` constant — it is not a second,
+grid-only green. It is the splash's `#8EC701` darkened 5 %: the splash lime
+itself is only 1.85 : 1 against the answer row's tint, under the bar.
 
 ### How many columns and rows
 
@@ -666,6 +715,13 @@ thought to write down.
 
 Three, all at 1920 × 1200.
 
+**Five of the six files are redrawn in the [Pond style](style-guide.md)** — the
+three below and the two agreed `Help me` drawings. Their grids, keypads and
+annotations are where they were; only the look moved. The `Help me` comparison
+file, `working-out-grid-help-12x34-operator-column.html`, is left in the old
+look: it is the record of a choice already made, not a drawing anyone builds
+from.
+
 - **The widest card, as dealt:** [`mockups/working-out-grid-331x41.html`](mockups/working-out-grid-331x41.html)
 - **The easy pile, as dealt:** [`mockups/working-out-grid-68x5.html`](mockups/working-out-grid-68x5.html)
 - **The widest card, grown to the cap:** [`mockups/working-out-grid-331x41-grown.html`](mockups/working-out-grid-331x41-grown.html)
@@ -688,7 +744,7 @@ whoever compares a screenshot against the drawing
 ([#416](https://github.com/derekwinters/connor-multiplying-frogs/issues/416)).
 
 **All three draw the focused cell**, filled with `GridFocusFill`. They always
-drew one — an answer cell with the accent outline — and until
+drew one — an answer cell that, before the Pond style, had the accent outline — and until
 [#304](https://github.com/derekwinters/connor-multiplying-frogs/issues/304) that
 outline was the whole of it, in the drawings as in the shell. The cell is in the
 same place in each; what changed is that you can now see which one it is. A
@@ -965,3 +1021,15 @@ Question 13 arrived with the built button
   only words on this screen that are not a number. Whichever way it goes it
   changes what the player sees, so it is Connor's or Derek's rather than an
   agent's.
+
+Question 14 arrived with the [Pond style](style-guide.md)
+([#524](https://github.com/derekwinters/connor-multiplying-frogs/issues/524)).
+
+- **14. Which focus fill does the Pond-style grid use? Settled: the palette's
+  lime, `#87BD01`, under the same bar.**
+  ([#525](https://github.com/derekwinters/connor-multiplying-frogs/issues/525))
+  The design drawing's pale lime and 7 px outline failed the separability bar
+  that [what focus looks like](#what-focus-looks-like) sets. Derek kept the bar
+  and took the first of the four options: a pond-palette fill that clears it —
+  the splash lime darkened 5 % — with the drawing's `#EEF8DC` answer tint and
+  the focused cell's outline the same as its neighbours'.

@@ -95,6 +95,7 @@ nav:
       - Reference material: specs/reference/index.md
       - UI:
           - specs/ui/index.md
+          - Style guide: specs/ui/style-guide.md
           - Shared components: specs/ui/shared-components.md
           - Title screen: specs/ui/title-screen.md
           - Game setup: specs/ui/game-setup.md

@@ -755,10 +755,12 @@ with the same 24 px value and a new meaning, which is the kind of survival that
 leaves a constant meaning two things a year apart. Words alone need no gap,
 because there is nothing to gap.
 
-`PlayerChipWidth` is untouched: the lane chips still use it, and so do
+`PlayerChipWidth` is untouched: the lane chips still use it. Only this screen's
+header stopped drawing one. (The chips in
 [roll and card](roll-and-card.md) and the
-[working-out grid](working-out-grid.md). Only this screen's header stopped
-drawing one.
+[working-out grid](working-out-grid.md) used it too until the
+[Pond style](style-guide.md) made the dialog chip grow to fit its name; the lane
+chip is now its only user.)
 
 ### The invariant this page used to carry
 
@@ -998,7 +1000,8 @@ change harder to judge. Whether they now read as a frame or as leftovers is
     front of these words is gone. Derek's reason is the whole argument: *"it's
     already selected in the lanes section too"* — the active frog's own lane
     chip, directly below in the pond, carries the same name, the same colour and
-    the same Active ring. The header chip was the third statement of a thing the
+    the same Active state (a ring then; a heavier outline since the
+    [Pond style](style-guide.md)). The header chip was the third statement of a thing the
     screen said twice already.
 
     It used to read `Green frog's turn`, and the reason given was that frogs
@@ -1050,8 +1053,21 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   "frogs never interact" true in the picture as well as in the state. It is
   the approved 3D frog model, whose legs move when it hops — see
   [the frog piece](#the-frog-piece).
-- **Pad count** — on the chip: `3 of 8`, so progress is readable in words as
-  well as by looking.
+- **Lane chip** — the [player chip](shared-components.md#player-chip)'s lane
+  form, `PlayerChipWidth` wide in the `chip` gutter. Since the
+  [Pond style](style-guide.md) it holds the frog's **name only** — no swatch,
+  no frog, because the frog is already sitting in the lane beside it — at
+  `LaneChipNameSize` (34 px), lettered in the frog's own colour with a thin
+  `Ink` outline round the letters, the way the splash letters its title. The
+  outline is what keeps the orange and the green names readable on the chip's
+  pale `Paper`. The active frog's chip has the heavier `OutlineChipActive` and
+  the `ActiveFill` wash, taking its thicker outline out of the padding so the
+  name column stays a fixed 208 px. Every ordinary ten-letter name fits; one
+  that still does not — `WWWWWWWWWW` — is truncated, as it always was. Derek's
+  call on [#526](https://github.com/derekwinters/connor-multiplying-frogs/issues/526).
+- **Pad count** — on the chip, under the name: `3 of 8`, so progress is readable
+  in words as well as by looking. It stays when the swatch goes, because on the
+  board it is the only place progress is written in words.
 
 ## The frog piece
 
@@ -1276,7 +1292,11 @@ How the model and its texture are imported is
 ## Mockup
 
 [`mockups/game-board.html`](mockups/game-board.html) — the reference canvas, and
-the one to build from. Beside it,
+the one to build from. Both board files draw the lane chips in the
+[Pond style](style-guide.md); the header, the `Roll` bar and the pond are drawn
+as they were, because the Pond style restyles only the chips on this screen.
+`Roll` is a shared [button](shared-components.md#button) and takes the new look
+from that component when it is built, without this screen being redrawn. Beside it,
 [`mockups/game-board-wide.html`](mockups/game-board-wide.html) draws the same
 board at 2560 × 1200.
 

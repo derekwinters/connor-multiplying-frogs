@@ -31,6 +31,15 @@ Every one of these is designed at **1920 × 1200, landscape** — the target is 
 kids' Android tablet, and that is the one canvas every layout is drawn against.
 See [target platform](../../engineering/tech-stack.md#target-platform).
 
+## The style guide
+
+How everything on these screens **looks** — the palette, the outlines and
+shadows, the corners, the two fonts, the dialog's motion and the frogs that
+stand beside every name — is specified once in the
+[style guide](style-guide.md). Screen pages say where things are and how big;
+the style guide says what they are drawn in, and a screen page that needs a
+colour names one of its constants rather than writing a hex value.
+
 ## Shared components
 
 Reusable atomic pieces — a primary button, a player chip, a confirm dialog —

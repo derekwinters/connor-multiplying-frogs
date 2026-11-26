@@ -3,6 +3,20 @@
 You pressed `Roll`. This is the die landing, the pile it sends you to, and the
 card you drew.
 
+## Pending redesign
+
+**This screen is not restyled in the [Pond style](style-guide.md), on purpose.**
+It is being redesigned rather than repainted: the
+[turn panel](https://github.com/derekwinters/connor-multiplying-frogs/issues/400)
+puts the easy, medium and hard piles on screen and flips the card over after
+the roll, and its wireframe
+([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402))
+is drawn in the Pond style from the start. Until that lands, this page and its
+mockup describe the screen as it is built today, in the old look. Its
+[button](shared-components.md#button) and [dialog](shared-components.md#dialog)
+are shared components, so if they are restyled first this screen picks that up
+without being redrawn.
+
 ## Invariants
 
 **Invariant:** the die face shown is the roll, and the pile shown is the pile

@@ -139,12 +139,22 @@ drawing and the other nine are deleted.
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
 
-### Colour in these mockups is mostly a placeholder
+### Colour in these mockups is mostly a placeholder — except where it is the Pond style
 
 The four frog colours exist so the frogs can be told apart in a picture, and the
 single green accent marks the primary action. Neither is a palette decision —
 that is an `area:art` call and it lands with the frog sprites. See
 [frog colours](../shared-components.md#frog-colours).
+
+**The dialogs, game over and the board's lane chips are now the exception.**
+Since [#524](https://github.com/derekwinters/connor-multiplying-frogs/issues/524)
+they are drawn in the [Pond style](../style-guide.md), whose palette *is* a
+decision — Derek's — and the files say so in their header comment. Those are
+`end-game-confirm.html`, `settings-dialog.html`, both `answer-result-` files,
+both `player-won-` files, `game-over.html`, the five agreed
+`working-out-grid-` files, and the lane chips in both `game-board` files.
+Everything else in this folder is still drawn in the grey wireframe palette, and
+its colours are still placeholders.
 
 The game board is the first exception. Its water, logs and lily pads are a
 decision Derek made — a pond is blue, its logs brown, its lily pads green — and
@@ -179,6 +189,15 @@ no network. So is the title's font, which letters `START` the way the title is
 lettered: a committed copy, with its licence, loaded by `@font-face` from the
 same folder, never from a font service. It is not a licence to paste
 screenshots into mockups.
+
+The [Pond style](../style-guide.md)'s frogs are the second case. Wherever a
+restyled screen names a player it shows that player's 3D frog, so the frog is
+the subject; its four renders are committed under
+[`../images/frogs/`](../images/frogs/frog-green.png) and loaded by relative
+path. The restyled files also load the title's Fredoka from its committed copy,
+for the same reason the title screen does. Nunito, the style's second face, is
+not committed yet, so those files name it and fall back to the system
+sans-serif for sentences.
 
 **Is not:** a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it

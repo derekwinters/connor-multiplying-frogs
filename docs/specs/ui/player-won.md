@@ -34,6 +34,7 @@ it would be the same information twice.
 | Region | Job |
 | --- | --- |
 | `frog` | The frog that just got home, drawn large |
+| `rays` | Pale sun rays behind the frog — this dialog's one decoration |
 | `headline` | `Blue wins!`, or `Pink is home!` |
 | `controls` | The one button, which hands on |
 
@@ -46,6 +47,8 @@ Measured from the panel's top down, because the frog is the thing this screen is
 about and everything else follows it:
 
 - `frog` — horizontally centred, `DialogPadding` from the panel's top edge.
+- `rays` — centred on the frog's centre, behind everything else in the panel,
+  and clipped by the panel's own edge.
 - `headline` — `WonHeadlineGap` below the frog, horizontally centred, one line.
 - `controls` — bottom-right at `DialogPadding`, where
   [the shared dialog](shared-components.md#dialog) puts a button row.
@@ -56,8 +59,10 @@ about and everything else follows it:
 | --- | --- | --- |
 | Dialog width | `WonDialogWidth` | 900 px |
 | Dialog height | `WonDialogHeight` | 640 px |
-| The frog, drawn large | `WonFrogDiameter` | 220 px |
-| Frog outline | `WonFrogOutline` | 8 px |
+| The frog, drawn large | `WonFrogSize` | 220 × 220 px |
+| The sun rays, across | `WonRaysDiameter` | 520 px |
+| How many rays | `WonRaysCount` | 15, each 12° wide with a 12° gap |
+| The rays' colour | `SunRays` | `#E6F5C2` |
 | Gap between the frog and the headline | `WonHeadlineGap` | 40 px |
 | Headline size | `WonHeadlineSize` | 76 px |
 | Headline line box | `WonHeadlineLineBox` | 92 px |
@@ -65,12 +70,12 @@ about and everything else follows it:
 The arithmetic down the panel, against a 634 px padding box:
 
 ```text
-DialogPadding 56 + WonFrogDiameter 220        -> frog     56 .. 276
+DialogPadding 56 + WonFrogSize 220             -> frog     56 .. 276
 WonHeadlineGap 40 + WonHeadlineLineBox 92     -> headline 316 .. 408
 ButtonHeight 112, DialogPadding 56 up         -> button   466 .. 578
 ```
 
-**`WonFrogDiameter` is deliberately not the board's `FrogPieceDiameter`**
+**`WonFrogSize` is deliberately not the board's `FrogPieceDiameter`**
 (88 px). This is the one screen in the game that draws a frog big, and that is
 what it is for: the board says a frog moved, and this says a frog arrived. A
 constant that happened to equal the board's would be re-used by someone later
@@ -83,12 +88,18 @@ renderer.
 
 ## Elements
 
-- **`frog`** — the frog that just got home, at `WonFrogDiameter` in its own
-  colour, with the `PieceEdge` outline at `WonFrogOutline`. Not a
+- **`frog`** — the frog that just got home: that player's frog render, in its
+  own colour, at `WonFrogSize`, standing free with no circle behind it
+  ([PS-10](style-guide.md#ps-10)). Not a
   [player chip](shared-components.md#player-chip): a chip carries a name and a
   pad count, and both are wrong here — the name is in the headline and the pad
   count is now `8 of 8` for everyone this dialog appears for.
-- **`headline`** — at `WonHeadlineSize`, and its wording is the one thing on
+- **`rays`** — `WonRaysCount` pale `SunRays` wedges, `WonRaysDiameter` across,
+  behind the frog. Static: they do not turn, pulse or fade separately from the
+  dialog's own open. They are the one decorative element this dialog is allowed
+  ([PS-12](style-guide.md#ps-12)), and they sit behind the frog, never behind
+  the headline's words.
+- **`headline`** — at `WonHeadlineSize`, in `FontDisplay` semibold, and its wording is the one thing on
   this page that depends on game state:
 
     | When | Reads |
@@ -116,6 +127,20 @@ renderer.
     ways.
 
     The second case is the one `Game.IsOver` has just become true for.
+
+### What the Pond style changed here
+
+| Was | Is now | Why |
+| --- | --- | --- |
+| `WonFrogDiameter` 220 px: a disc in the frog's colour, outlined in `PieceEdge` at `WonFrogOutline` 8 px | `WonFrogSize` 220 × 220 px: the frog's own render | The frog replaces every colour dot ([PS-10](style-guide.md#ps-10)). The slot keeps its 220 px height, so the arithmetic down the panel is unchanged. |
+| No decoration | `rays` behind the frog | Derek's choice of this dialog's one decoration |
+| `WonFrogOutline` | *(gone)* | The frog stands free, with nothing drawn round it ([PS-10](style-guide.md#ps-10)); the render already has its own dark edge |
+
+The design drawing showed the frog larger, in a 330 × 270 box on a 660 px
+panel. The panel and its arithmetic are this page's and were not on the list
+of things that change, so the frog keeps the 220 px slot it already had.
+`PlayerWonDialogView` still declares `WonFrogDiameter` and `WonFrogOutline`;
+the build issue for this restyle replaces them.
 
 ## Behaviour
 

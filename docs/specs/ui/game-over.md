@@ -28,7 +28,8 @@ resume the game that just ended.
 ## Anchors
 
 A full screen, not a dialog — the game is over, so there is nothing behind it
-worth dimming.
+worth dimming. It paints [`PondWater`](game-board.md#colours) to every edge,
+the same water as the board.
 
 - `headline` centred, pinned below the top safe area.
 - `standings` a centred column of `StandingsRowWidth`, one row per frog, with
@@ -47,15 +48,18 @@ worth dimming.
 | Standings column top offset | `StandingsColumnTop` | 250 px |
 | Row height | `StandingsRowHeight` | 140 px |
 | Row inner horizontal padding | `StandingsRowPadding` | 40 px |
-| Gap between a row's place/swatch/name/progress | `StandingsRowInnerGap` | 32 px |
+| Gap between a row's place/frog/name/progress | `StandingsRowInnerGap` | 32 px |
 | Gap between rows | `StandingsRowGap` | 24 px |
-| Row corner radius | `StandingsRowRadius` | 24 px |
-| Ordinary row border | `StandingsRowBorder` | 3 px |
-| Winner row border | `StandingsWinnerBorder` | 6 px |
+| Row corner radius | `StandingsRowRadius` | 32 px |
+| Ordinary row border | `StandingsRowBorder` | 5 px `Ink` |
+| Winner row border | `StandingsWinnerBorder` | 8 px `Ink` |
+| Row fill | `Paper` | `#FFFDF4` |
+| Winner row fill | `ActiveFill` | `#F2FADF` |
+| Row shadow | `ShadowChip` | 8 px down, `Ink` at 30 %, no blur |
 | Place number column width | `StandingsPlaceWidth` | 80 px |
 | Place number size | `StandingsPlaceSize` | 56 px |
-| Frog swatch in a row | `StandingsSwatchDiameter` | 88 px |
-| Colour name size | `StandingsNameSize` | 52 px |
+| The frog in a row | `StandingsFrogSize` | 150 × 120 px |
+| Name size | `StandingsNameSize` | 52 px |
 | Progress readout size | `StandingsProgressSize` | 44 px |
 | Rows' entry-reveal duration (total) | `StandingsRevealDuration` | 0.4 s |
 
@@ -82,10 +86,14 @@ and is not the number this readout means.
     appends anything to a name. See
     [#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310)
     question 4.
-- **Standings row × 2–4** — place number, frog swatch, name, and how far
-  it got: `Home — 8 of 8` for a finisher, `6 of 8` for everyone else. The winner
-  row is drawn heavier; every row is otherwise identical, because second place
-  and last place are the same kind of fact.
+- **Standings row × 2–4** — place number, that player's frog, name, and how
+  far it got: `Home — 8 of 8` for a finisher, `6 of 8` for everyone else. The
+  frog is the player's own render, standing free
+  ([PS-10](style-guide.md#ps-10)). The place, the name and the numbers are in
+  `FontDisplay`; the progress readout is in `FontBody`, in `Moss`. The winner
+  row has `StandingsWinnerBorder` and the `ActiveFill` wash; every row is
+  otherwise identical, because second place and last place are the same kind of
+  fact.
 - **`Play again`** — primary [button](shared-components.md#button). Starts a new
   game with **the same frogs, in the same turn order, under the same names**,
   straight to the [game board](game-board.md) with everyone back on their Start
@@ -100,6 +108,25 @@ remembers anything. It is worth it: the overwhelmingly common case is the same
 four children going again, and making them re-tap their colours every time is a
 tax on the thing they most want to do. Changing who is playing is one extra tap
 through the title screen.
+
+### What the Pond style changed here
+
+| Was | Is now | Why |
+| --- | --- | --- |
+| Painted the app's `--bg` grey | Paints `PondWater` | The screen sits on the pond, like the board ([style guide](style-guide.md)) |
+| `StandingsSwatchDiameter` 88 px: a colour dot | `StandingsFrogSize` 150 × 120 px: the frog's render | Frogs replace every colour dot ([PS-10](style-guide.md#ps-10)) |
+| `StandingsRowBorder` 3 px grey, `StandingsWinnerBorder` 6 px, radius 24 px, white rows | 5 px and 8 px `Ink`, radius 32 px, `Paper` rows, the winner's tinted `ActiveFill`, a solid shadow | The Pond style's outlines and corners; the winner row is told apart by a thicker outline and a tint, never by colour alone |
+
+`Back to the title` stays a ring — no fill, the water showing through — as
+[every secondary button is](shared-components.md#button). The design drawing
+filled it with `Paper` on the water; that would have been a fourth button kind,
+and the ring rule is the one [#323](https://github.com/derekwinters/connor-multiplying-frogs/issues/323)
+fixed, so the ring stands.
+
+The row's widths still add up inside `StandingsRowWidth`: 40 + 80 + 32 + 150 +
+32 = 334 px before the name, leaving 826 px for a name at 52 px and the
+progress readout. The frog's 120 px fits inside the row's 140 px less its
+borders.
 
 ## Behaviour
 
@@ -125,6 +152,11 @@ through the title screen.
 [`mockups/game-over.html`](mockups/game-over.html) — four frogs, one home, drawn
 in the state where the game was ended before the others finished, which is the
 one that has to look fair.
+
+Redrawn in the [Pond style](style-guide.md). Its headline now reads
+`Blue wins!`, the wording [Elements](#elements) has specified since
+[#310](https://github.com/derekwinters/connor-multiplying-frogs/issues/310);
+the old drawing still said `Blue frog wins!`.
 
 ## Open questions
 

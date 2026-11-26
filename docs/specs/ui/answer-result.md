@@ -26,7 +26,7 @@ turn on.
 | `mark` | The tick or the cross |
 | `verdict` | The headline — the sum, or that it was wrong |
 | `consequence` | One sentence: what the frog does |
-| `chip` | The player chip, showing the move as `pad 3 → 4` |
+| `chip` | The [dialog chip](shared-components.md#player-chip): the frog that answered, and its name |
 | `controls` | The hand-on button |
 
 ## Anchors
@@ -47,7 +47,9 @@ about are two dialogs a child reads as two different things happening.
 | Dialog width | `ResultDialogWidth` | 1100 px |
 | Dialog height | `ResultDialogHeight` | 620 px |
 | Mark diameter | `ResultMarkSize` | 180 px |
-| Mark ring width, wrong state | `ResultMarkRingWidth` | 8 px |
+| Mark outline, both states | `ResultMarkOutline` | 6 px `Ink` |
+| Mark fill, right | `ResultMarkRightFill` | `Leaf` |
+| Mark fill, wrong | `ResultMarkWrongFill` | `Berry` |
 | Mark glyph size | `ResultMarkGlyphSize` | 110 px |
 | Verdict size | `ResultVerdictSize` | 76 px |
 | Verdict top, from the panel's top edge | `ResultVerdictTop` | 70 px |
@@ -60,7 +62,7 @@ about are two dialogs a child reads as two different things happening.
 
 `mark`, `chip` and `controls` are all `DialogPadding` from the panel's edges —
 the shared [Dialog](shared-components.md#dialog)'s own padding, not a constant
-of this page's. `ResultMarkRingWidth` and the four rows that place `verdict`,
+of this page's. `ResultMarkOutline` and the four rows that place `verdict`,
 `consequence` and `chip` are numbers the two committed mockups already draw;
 they are on this table so the layout is built from names rather than measured
 off the picture.
@@ -75,18 +77,27 @@ whatever `FrogHopDuration` is set to.
 
 | | **Right** | **Wrong** |
 | --- | --- | --- |
-| Mark | Filled tick | Outlined cross |
+| Mark | White tick on a `Leaf` badge | White cross on a `Berry` badge |
 | Verdict | `331 × 41 = 13,571` | `Not this time` |
 | Consequence | `Right! Green hops forward one lily pad.` | `331 × 41 = 13,571. Green hops back one lily pad.` |
-| Chip | `pad 3 → 4` | `pad 3 → 2` |
+| Chip | Green's frog and `Green` | Green's frog and `Green` |
 | Button | `Blue's turn` | `Blue's turn` |
 
-The chip's move reads `pad <before> → <after>` in all three situations,
-including the floor case where nothing moved (`pad 0 → 0`). Neither mockup draws
-that one; extending the pattern rather than writing a separate sentence for it
-is a presentation call under
-[ADR-0001](../../adr/0001-rules-sacred-presentation-ours.md), and the numbers are
-the lane positions Core reports either way.
+The verdict, being a sum, is set in `FontDisplay`; the consequence is a sentence
+and is set in `FontBody` in `InkSoft` — see the [style guide](style-guide.md).
+
+### What the Pond style changed here
+
+| Was | Is now | Why |
+| --- | --- | --- |
+| The chip read `pad <before> → <after>` — `pad 3 → 4`, `pad 3 → 2`, and `pad 0 → 0` on the floor | The chip holds the frog and the name only | The consequence sentence directly above it already says what happened, in words. Derek's call on [#524](https://github.com/derekwinters/connor-multiplying-frogs/issues/524). |
+| Right: filled tick on the accent green. Wrong: an outlined cross in the warning colour, `ResultMarkRingWidth` 8 px | Both are filled badges with the same 6 px `Ink` outline: `Leaf` with a white tick, `Berry` with a white cross | One outlined badge for both, as everything in the Pond style is outlined. The wrong colour is **red** (`Berry`) — decided, not orange. |
+
+**The colour-alone invariant still holds without the filled/outlined
+difference.** That difference was a second, non-colour cue on top of the glyph.
+What remains is the glyph — a tick or a cross — plus the verdict, the sentence
+and the hop, which is the three-way statement the invariant asks for. Nothing
+is signalled by the badge's colour that is not also said in words.
 
 The wrong state leads with *Not this time* rather than with the number, because
 the first thing a child reads should not be the size of their mistake. The
