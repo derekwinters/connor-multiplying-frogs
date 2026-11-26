@@ -180,12 +180,12 @@ genuinely new number.
 **Seen while drawing the art mockups, not changed here:** the version string is
 `#6C7873` grey at 28 px, chosen for the flat pale placeholder. On the art it
 sits on the bright green grass in the bottom-left corner and is hard to read in
-every one of the six drawings. It is still meant to be small and quiet, and how
+every one of the ten drawings. It is still meant to be small and quiet, and how
 to keep it legible is a separate question from this wireframe's.
 
 - **The agreed picture:** [`mockups/title-screen.html`](mockups/title-screen.html) —
   `NEW` primary, `RESUME` secondary, with the art as a placeholder block.
-- **The art, six ways — not agreed yet**
+- **The art, ten ways — not agreed yet**
   ([#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)),
   one file per answer to [open questions 3 to 7](#open-questions):
 
@@ -197,10 +197,15 @@ to keep it legible is a separate question from this wireframe's.
   | D | None | Drawn, from the art | Kept | Yes, 0.35 | As agreed | [`title-screen-art-d-drawn-title-log-scrim.html`](mockups/title-screen-art-d-drawn-title-log-scrim.html) |
   | E | All four | Drawn, from the art | Kept | No | As agreed | [`title-screen-art-e-all-frogs.html`](mockups/title-screen-art-e-all-frogs.html) |
   | F | All four | Drawn, from the art | Kept | No | **Moved down**, proposed | [`title-screen-art-f-all-frogs-button-low.html`](mockups/title-screen-art-f-all-frogs-button-low.html) |
+  | G | All four | Drawn, from the art | Kept | No | **A lily pad**, proposed | [`title-screen-art-g-lilypad.html`](mockups/title-screen-art-g-lilypad.html) |
+  | H | All four | Drawn, from the art | Kept | No | **A wooden sign**, proposed | [`title-screen-art-h-sign.html`](mockups/title-screen-art-h-sign.html) |
+  | I | All four | Drawn, from the art | Kept | No | **The log**, proposed | [`title-screen-art-i-log.html`](mockups/title-screen-art-i-log.html) |
+  | J | All four | Drawn, from the art | Kept | No | **A pond-corner button**, proposed | [`title-screen-art-j-pond-corner.html`](mockups/title-screen-art-j-pond-corner.html) |
 
   A to E change only the `art` and `title` regions; the button row, the
-  version string and every constant are the agreed ones. F also moves the row
-  — [open question 7](#open-questions). When the questions are answered, the
+  version string and every constant are the agreed ones. F to J also change
+  where `NEW` sits, and G to J what it looks like —
+  [open question 7](#open-questions). When the questions are answered, the
   chosen drawing goes into `title-screen.html` and the other files are
   deleted, as the last pair on this page was.
 
@@ -218,10 +223,10 @@ re-centred, which is exactly what [the settled open question
 2](#open-questions) below says happens, and it needs no picture of its own to
 be unambiguous.
 
-The six art mockups draw the same no-save state that exists today: `RESUME`
+The ten art mockups draw the same no-save state that exists today: `RESUME`
 hidden, `NEW` alone and centred. The both-buttons state fits the same way — the
 row is 1168 px wide with 376 px clear either side and its bottom edge does not
-move — so it is not drawn six more times. One thing it would show that `NEW`
+move — so it is not drawn ten more times. One thing it would show that `NEW`
 alone does not: `RESUME` is secondary, and the shared secondary style is
 outlined with **no fill**, which was drawn against a flat pale background. Over
 the art its label sits straight on the picture. That is for whoever builds the
@@ -238,6 +243,8 @@ pieces, into [`images/title-screen/`](images/title-screen/scene.png) —
 | `scene-no-log.png` | The same without the log |
 | `title.png` | The drawn title and its glow, transparent around them |
 | `full.png` | The whole picture: all four frogs and their hop lines, the log, the drawn title; opaque |
+| `lily-pad.png` | One traced lily pad on its own (`pad-centre-left`), for option G |
+| `fonts/Fredoka-Variable.ttf` | The title's font, with its licence (`OFL.txt`), so G to J can letter `NEW` like the title |
 
 In every piece the title's glow has its tail faded out. As rebuilt, the glow
 runs on below FROGS in a faint pale V down to the water, where the big frog's
@@ -327,9 +334,39 @@ title has to have something on either side of it. To rebuild them:
     log's centre (bottom edge 1145 px) there are 7 px of grass inside the safe
     area and the button is 160 px tall.
 
-  The proposed number is drawn so it can be judged; it is not in the constants
-  table, which keeps 120 px until this is answered. With a saved game the row
-  is 1168 px wide and reaches across the whole frog either way.
+  Derek on E and F: *"I don't like the button yet. Other ideas."* So four more,
+  each still the single `NEW` control — `RESUME` hidden, and still going to
+  game setup — changing only how `NEW` looks and where it sits. Each is clear of
+  every frog, and each letters `NEW` in the title's font, Fredoka Bold, cream
+  with the title's dark outline:
+  - *A lily pad* (G): one of the art's own traced pads, scaled up to 440 × 137
+    px, floating on the open water bottom-left at 48–488 px across and
+    930–1067 px down, in front of the pad with the water lily. The pad is the
+    tap target. Label 76 px.
+  - *A wooden sign* (H): a plank on a post standing in the grass
+    bottom-right, in the log's bark colours and the art's dark outline. Plank
+    320 × 128 px, its right edge on the safe margin, 930–1058 px down, tilted
+    3°; post 32 px wide, down to 1172 px. The plank is the tap target. Label
+    72 px.
+  - *The log* (I): `NEW` lettered on the front of the log, under the big
+    frog's feet, about 1040–1130 px down, centred; the log is the button. Its
+    tap target is the log's box, **1103 × 283 px** (475–1578 across, 873–1156
+    down) — by far the biggest of any option. Whether a tap on the big frog
+    sitting on the log counts as a tap on the log is part of this question.
+    Label 84 px.
+  - *A pond-corner button* (J): an ordinary primary button at the shared
+    minimum, `ButtonMinWidth` × `ButtonHeight` = 320 × 112 px, on the water
+    bottom-left with its left edge on the safe margin, 960–1072 px down, above
+    the version string. Label `ButtonLabelSize`, 44 px, in Fredoka.
+
+  Every target above is over `MinTouchTarget` (96 px) both ways, as the
+  [shared Button](shared-components.md#button) requires. G, H and I are not
+  the shared Button component at all; choosing one of them would make `NEW`
+  the first control in the game drawn as part of the picture, and its sizes
+  would become this page's constants. None of the numbers above is in the
+  constants table, which keeps 120 px and the `TitleButton` sizes until this
+  is answered. With a saved game, E and F's row is 1168 px wide and reaches
+  across the whole frog; where `RESUME` would go in G to J is not drawn.
 - **Is there a `How to play` button here?** Proposed: still no — but for a
   different reason than before, because half of the old reason has gone.
 

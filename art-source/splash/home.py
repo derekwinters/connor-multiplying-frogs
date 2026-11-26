@@ -54,3 +54,11 @@ def piece_ids(piece, ids):
     if hidden is None:
         return [oid for oid in ids if oid in TITLE]
     return [oid for oid in ids if oid not in hidden]
+
+# The button ideas after E and F (Derek: "I don't like the button yet. Other ideas.").
+# The lily-pad option draws this traced pad, scaled up, as the button: the cleanest of
+# the five (the front ones were partly under a water lily or a splash). The build copies
+# its cut-out (objects/<id>.png) and the title's font, with its licence, next to the
+# pieces, unchanged, so the mockups can set NEW in the title's lettering offline.
+LILY_PAD = "pad-centre-left"
+FONT_FILES = ("Fredoka-Variable.ttf", "OFL.txt")

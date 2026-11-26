@@ -442,6 +442,10 @@ def write_home():
     home.HOME_OUT_DIR.mkdir(parents=True, exist_ok=True)
     for piece in home.PIECES:
         save_png(home_png(piece), home.HOME_OUT_DIR / f"{piece}.png")
+    shutil.copyfile(OBJECTS_DIR / f"{home.LILY_PAD}.png", home.HOME_OUT_DIR / "lily-pad.png")
+    (home.HOME_OUT_DIR / "fonts").mkdir(exist_ok=True)
+    for name in home.FONT_FILES:
+        shutil.copyfile(HERE / "fonts" / name, home.HOME_OUT_DIR / "fonts" / name)
 
 
 def load_committed_parts():
@@ -490,7 +494,8 @@ def build():
 
 def outputs():
     files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT,
-             launch.SPLASH_OUT] + [home.HOME_OUT_DIR / f"{p}.png" for p in home.PIECES]
+             launch.SPLASH_OUT] + [home.HOME_OUT_DIR / f"{p}.png" for p in home.PIECES] + \
+            [home.HOME_OUT_DIR / "lily-pad.png"] + [home.HOME_OUT_DIR / "fonts" / n for n in home.FONT_FILES]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files

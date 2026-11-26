@@ -191,6 +191,12 @@ fitted haze runs on in a faint pale V down to the water, where the big frog's he
 stands in the original. Behind the frog it cannot be seen; without the frog it can.
 The layer, the composite, the launch splash and the icon keep it as it is.
 
+For the button ideas drawn after those (#484: a lily-pad button, a sign, the log, a
+corner button), the same step also copies, unchanged, the traced lily pad
+`objects/pad-centre-left.png` (`LILY_PAD`) as `lily-pad.png` and the title's font with
+its licence into `fonts/`, so the mockups can draw a pad and letter NEW in Fredoka
+without the network.
+
 They are pieces, not one picture per option, because the open questions on
 `docs/specs/ui/title-screen.md` (drawn title or text, log or not, scrim or not) cross.
 `.github/scripts/tests/test_title_screen_art.py` checks what each piece holds, and that

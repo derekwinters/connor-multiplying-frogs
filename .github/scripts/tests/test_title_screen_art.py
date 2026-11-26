@@ -120,6 +120,23 @@ class TheGlowTail(unittest.TestCase):
         self.assertTrue(0 <= y0 < y1 <= CANVAS[1])
 
 
+class TheButtonIdeas(unittest.TestCase):
+    """Derek on E and F: "I don't like the button yet. Other ideas." The lily-pad option
+    draws a pad from the art, and the label options set NEW in the title's font, so
+    the build copies both next to the pieces, unchanged, for the mockups to load."""
+
+    def test_the_lily_pad_is_the_traced_centre_left_pad(self):
+        self.assertEqual(home.LILY_PAD, "pad-centre-left")
+        got = (OUT_DIR / "lily-pad.png").read_bytes()
+        self.assertEqual(got, (SPLASH / "objects" / f"{home.LILY_PAD}.png").read_bytes())
+
+    def test_the_font_and_its_licence_are_the_titles(self):
+        for name in ("Fredoka-Variable.ttf", "OFL.txt"):
+            with self.subTest(name=name):
+                self.assertEqual((OUT_DIR / "fonts" / name).read_bytes(),
+                                 (SPLASH / "fonts" / name).read_bytes())
+
+
 class TheCommittedFiles(unittest.TestCase):
     def test_each_is_a_1920_by_1200_png(self):
         for piece in PIECES:
