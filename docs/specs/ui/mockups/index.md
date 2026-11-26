@@ -129,6 +129,13 @@ That question is
 `title-screen.html` is the agreed picture and the losing comparison file is
 deleted, per [issue #216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216).
 
+It then had ten more, drawn by
+[#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484) to
+put the screen on Connor's real splash picture: with and without the frogs, the
+log, the drawn title and a scrim, and five kinds of button. Derek picked all
+the frogs and a wooden sign reading `START`, so `title-screen.html` is that
+drawing and the other nine are deleted.
+
 Each row arrives with its screen's `Wireframe:` issue. See
 [UI design process](../../../engineering/ui-design-process.md).
 
@@ -161,6 +168,17 @@ SVG is inline, static, has no script and fetches nothing, so every reason the
 "is not" list below exists still holds. It is not a licence to reach for SVG
 because it is easier — the test is whether the shape is expressible as a styled
 box at all.
+
+**A committed image is allowed where the subject is the art itself.**
+`title-screen.html` is the only current case: the screen *is* Connor's picture
+with a sign standing in it, which a placeholder block cannot show. The picture
+is rendered by the splash build into
+[`../images/title-screen/full.png`](../images/title-screen/full.png),
+committed, and loaded by relative path — the file still opens on the sofa with
+no network. So is the title's font, which letters `START` the way the title is
+lettered: a committed copy, with its licence, loaded by `@font-face` from the
+same folder, never from a font service. It is not a licence to paste
+screenshots into mockups.
 
 **Is not:** a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it

@@ -1,63 +1,79 @@
 <!doctype html>
 <!--
-  Multiplying Frogs — Title screen — OPTION A: NEW is primary
+  Multiplying Frogs - Title screen - THE AGREED PICTURE
   Device: kids' Android tablet, held landscape.
   Canvas: 1920 x 1200, drawn 1:1. Open this on the tablet.
 
-  One of a PAIR. The other is title-screen-resume-primary.html, which is this
-  same layout with the primary and secondary styles swapped between the two
-  buttons. Nothing else differs. Neither is agreed yet — the pair is how the
-  spec page's open question 1 ("which of RESUME and NEW is primary?") gets
-  answered, and the winner becomes this file.
+  Settled on #484 (Derek, 2026-11-26): the whole splash picture - all four frogs,
+  their hop lines, the log and the drawn title - with no scrim, and a wooden sign in
+  the grass bottom-right reading START. "I like the sign but I want it to say start."
+  START is the control that used to read NEW (and before that Play): it goes to game
+  setup. It is the only control drawn, because RESUME is hidden whenever there is no
+  saved game, which is every build today. Where RESUME goes once a save system exists
+  is left to that issue; see the spec page's open questions.
 
-  Drawn in the state where A SAVE EXISTS, so both buttons are live. What the
-  screen looks like when there is nothing to resume is open question 2 on
-  docs/specs/ui/title-screen.md and is not drawn here.
+  The art is docs/specs/ui/images/title-screen/full.png, rendered from the splash's
+  vector layers by art-source/splash/build_splash.py --home-only. START is lettered
+  in the title's font, Fredoka Bold, loaded from the committed copy in
+  images/title-screen/fonts/ (SIL Open Font License, OFL.txt beside it). No network.
 
-  Shapes, sizes and positions only. The colours are placeholders so the frogs
-  can be told apart in a picture; the palette is an area:art decision.
-  Numbers here are the numbers in the spec page's constants table.
+  Every number below is a constant in docs/specs/ui/title-screen.md:
+    plank   TitleSignWidth 320 x TitleSignHeight 128; right edge on the right safe
+            area (1920 - SafeMargin 48 = 1872); bottom edge TitleSignBottomOffset 94
+            up from the bottom safe area (1200 - 48 - 94 = 1058, so top 930);
+            TitleSignTilt 3 degrees anticlockwise about its centre;
+            TitleSignCornerRadius 18; TitleSignOutlineWidth 7; grain lines
+            TitleSignGrainWidth 4 every TitleSignGrainSpacing 32.
+    post    TitleSignPostWidth 32, centred under the plank, from behind it down to
+            TitleSignPostDrop 114 below the plank's bottom edge (1172);
+            TitleSignPostOutlineWidth 6, corner radius 8.
+    label   START, Fredoka Bold (700), TitleSignLabelSize 72, cream fill, a
+            TitleSignLabelOutlineWidth 7 dark outline outside the glyph (a 14 px
+            stroke painted under the fill), TitleSignLabelTracking 2, centred on the
+            plank.
+    version VersionLabelSize 28, bottom-left safe area corner.
+  The colours are the spec page's sign colours table.
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Multiplying Frogs — Title screen — Option A: NEW primary</title>
+<title>Multiplying Frogs - Title screen</title>
 <style>
+  @font-face{font-family:"Fredoka";font-weight:300 700;
+             src:url("../images/title-screen/fonts/Fredoka-Variable.ttf") format("truetype")}
   :root{
-    --ink:#1E2422; --line:#6C7873; --faint:#B9C0BD; --paper:#FFFFFF;
-    --bg:#EDF1EF; --accent:#2E7D4F; --warn:#B03A2E;
-    --green:#3E933E; --blue:#4273B8; --orange:#D38231; --pink:#D41C78;
+    --line:#6C7873;
+    --outline:#060B04;            /* TitleSignOutline: the title's dark outline */
+    --cream:#F8FAF6;              /* TitleSignLabelFill: the title glow's white */
+    --bark:#9C540C;               /* TitleSignBark */
+    --bark-mid:#843C0C;           /* TitleSignBarkShade, and the post */
+    --grain:rgba(84,36,12,.55);   /* TitleSignGrain */
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#20262A;display:flex;justify-content:center;align-items:flex-start}
-  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;
-         background:var(--bg);color:var(--ink);
+  .frame{width:1920px;height:1200px;position:relative;overflow:hidden;background:#5BC8F8;
          font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .abs{position:absolute}
-  .mid{display:flex;align-items:center;justify-content:center}
-  .hatch{background:repeating-linear-gradient(45deg,#DCE3E0 0 14px,#E8EDEB 14px 28px)}
-
-  /* The action row. TitleButtonBottomOffset (120px) up from the bottom safe
-     area (SafeMargin, 48px) = 168px from the canvas edge. Centred as a row:
-     TitleButtonWidth 560 x2 + TitleButtonGap 48 = 1168, so 376px either side. */
-  .action{position:absolute;left:50%;transform:translateX(-50%);bottom:168px;
-          display:flex;gap:48px}
-  .tbtn{width:560px;height:160px;border-radius:24px;display:flex;align-items:center;
-        justify-content:center;font-size:64px;font-weight:800}
-  .tbtn.p{background:var(--accent);color:#fff}
-  .tbtn.s{border:4px solid var(--line);color:var(--ink)}
+  .art{left:0;top:0;width:1920px;height:1200px;display:block}
+  .post{left:1696px;top:1040px;width:32px;height:132px;background:var(--bark-mid);
+        border:6px solid var(--outline);border-radius:8px}
+  .plank{left:1552px;top:930px;width:320px;height:128px;border-radius:18px;
+         background:
+           repeating-linear-gradient(180deg,transparent 0 28px,var(--grain) 28px 32px),
+           linear-gradient(180deg,var(--bark) 0%,var(--bark-mid) 100%);
+         border:7px solid var(--outline);transform:rotate(-3deg)}
+  .label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+         font-family:"Fredoka",system-ui,sans-serif;font-weight:700;font-size:72px;line-height:1;
+         letter-spacing:2px;color:var(--cream);
+         -webkit-text-stroke:14px var(--outline);paint-order:stroke fill}
 </style>
 </head>
 <body>
 <div class="frame">
-    <div class="abs hatch" style="inset:0"></div>
-    <div class="abs mid" style="inset:0;font-size:34px;color:#8F9C97">SPLASH ART — issue #168 — fills the canvas</div>
-    <div class="abs" style="left:0;right:0;top:180px;text-align:center;font-size:160px;font-weight:800;letter-spacing:-2px">Multiplying Frogs</div>
-    <div class="action">
-      <div class="tbtn s">RESUME</div>
-      <div class="tbtn p">NEW</div>
-    </div>
-    <div class="abs" style="left:48px;bottom:48px;font-size:28px;color:#6C7873">v0.1.0</div>
+    <img class="abs art" src="../images/title-screen/full.png" alt="MULTIPLYING FROGS">
+    <div class="abs post"></div>
+    <div class="abs plank"><div class="label">START</div></div>
+    <div class="abs" style="left:48px;bottom:48px;font-size:28px;color:var(--line)">v0.1.0</div>
 </div>
 </body>
 </html>

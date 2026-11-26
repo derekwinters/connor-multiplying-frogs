@@ -346,7 +346,7 @@ Named here so that nothing below is read as settled by omission.
   [game over](ui/game-over.md#open-questions)'s question, above.
 - **Starting, saving and resuming a session.** How a game is set up, whether a
   half-finished game survives the app closing, and what the title screen's
-  `RESUME` and `NEW` buttons do — including which is emphasised and what
+  `RESUME` and `START` controls do — including which is emphasised and what
   `RESUME` does with no save — are the
   [title screen](ui/title-screen.md#open-questions)'s and
   [product scope](product-scope.md)'s, not rules of the classroom game. A

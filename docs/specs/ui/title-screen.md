@@ -1,14 +1,20 @@
 # Title screen
 
 The first thing you see. It says what the game is and gives you the way into a
-game: carry on with the one you left, or start a new one.
+game: carry on with the one you left, or start a new one. It is Connor's splash
+picture, frogs and all, with a wooden sign in the grass that says START.
 
 ## Invariants
 
 **Invariant:** the only interactive elements on this screen are `RESUME` and
-`NEW`. There is never a third. How many of the two are on screen when there is
-no saved game is settled — [open question 2](#open-questions), `Hidden` — and
-nothing is ever *added* beyond these two.
+`START`. There is never a third. How many of the two are on screen when there
+is no saved game is settled — [open question 2](#open-questions), `Hidden` —
+and nothing is ever *added* beyond these two. The art, the drawn title and the
+frogs are a picture: tapping them does nothing.
+**Invariant:** `START` is the control that used to read `NEW`, and before that
+`Play`. Its visible label is `START` (Derek's call, 2026-11-26), and it does
+exactly what they did: it goes to [game setup](game-setup.md). Changing the
+word and the look changed nothing about where it goes.
 **Invariant:** nothing on this screen can start a game with the wrong number of
 players. Choosing who is playing happens on [game setup](game-setup.md), always,
 including when you have played five games in a row. **`RESUME` is not an
@@ -20,101 +26,135 @@ made somewhere else.
 **Invariant:** the version string is present and is read from `/VERSION`, never
 typed into a layout.
 
-### The invariant this page used to carry
+### The invariants this page used to carry
 
-Until this wireframe, the first invariant on this page read:
+Until [#228](https://github.com/derekwinters/connor-multiplying-frogs/issues/228),
+the first invariant on this page read:
 
 > **Invariant:** there is exactly one interactive element on this screen —
 > `Play`.
 
-That stopped being true when [#228](https://github.com/derekwinters/connor-multiplying-frogs/issues/228)
-settled that a saved game is re-entered from the title screen. `Play` does not
-exist on this screen any more: it is `NEW`, and it has a neighbour. The old
-wording is quoted here so the change is visible, and it is not true anywhere
-else on this page.
+That stopped being true when #228 settled that a saved game is re-entered from
+the title screen. `Play` became `NEW`, with `RESUME` as its neighbour.
+
+Until [#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484),
+it read *"the only interactive elements on this screen are `RESUME` and
+`NEW`."* `NEW` is now `START`, drawn as a sign — the same control under the
+word Derek chose for it. The old wordings are quoted here so the changes are
+visible, and they are not true anywhere else on this page.
 
 ## Regions
 
 | Region | Job |
 | --- | --- |
-| `art` | The splash illustration — the whole canvas, behind everything |
-| `title` | The game's name |
-| `action` | The button row: `RESUME` and `NEW`, side by side |
+| `art` | The whole splash picture — every frog with its hop line, the log, and the drawn title — over the whole canvas, behind everything |
+| `start` | The `START` sign: a plank on a post, standing in the grass bottom-right |
 | `footprint` | Version string, bottom-left; small and quiet |
+
+There is no separate `title` region any more. The game's name is the drawn
+MULTIPLYING FROGS that is part of the art ([open question
+3](#open-questions)), so it is wherever the picture puts it: across the top,
+roughly 50–520 px down. `RESUME` has no region either until a save system needs
+one — [open question 8](#open-questions).
 
 ## Anchors
 
 - `art` fills the canvas, cropped from the centre outwards. It is the one
   element allowed to run to the screen edge, because it is a picture and a
   margin around a picture is a border nobody asked for.
-- `title` is centred horizontally, its baseline at `TitleBaselineY` from the
-  top. It is not vertically centred — the art has a subject in the middle of it
-  and the title sits above that.
-- `action` is a **single horizontal row, centred horizontally as a row**, its
-  bottom edge `TitleButtonBottomOffset` up from the bottom safe area, so both
-  buttons are under the thumbs of a tablet held two-handed. Within the row,
-  `RESUME` is on the left and `NEW` on the right, separated by
-  `TitleButtonGap`.
-- The row is centred **as a whole**, not per button. That is what makes the
-  no-save case fall out for free: [open question 2](#open-questions) settled
-  on `Hidden`, so the row contains one button and centres it, which is exactly
-  where `Play` used to sit.
+- `art` is Connor's splash picture, rebuilt as layers under
+  [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
+  with every layer it uses shown: the same picture as the launch splash. The
+  unused splashes on the lily pads are not in it.
+- `start`: the plank's **right edge is on the right safe area**, and its
+  **bottom edge is `TitleSignBottomOffset` up from the bottom safe area**. At
+  1920 × 1200 that puts the plank at 1552–1872 px across and 930–1058 px down,
+  on the grass and water right of the log's cut end, clear of every frog. The
+  plank is tilted `TitleSignTilt` about its own centre. The post is centred
+  under the plank, runs from behind it, and ends `TitleSignPostDrop` below the
+  plank's bottom edge, in the grass at 1172 px.
+- The tap target is **the plank**, 320 × 128 px — over `MinTouchTarget` (96
+  px) both ways, as the [shared Button](shared-components.md#button) requires.
+  The post is part of the drawing, not of the target.
 - `footprint` is pinned to the bottom-left safe area corner.
 - On a screen that is not 16:10, the art crops and everything else keeps its
-  distance from the **safe area**, not the screen edge.
+  distance from the **safe area**, not the screen edge. The sign is anchored
+  to the safe area like everything else, so on a much wider or taller screen
+  it can drift a little off the grass it stands on in the art; that is the
+  same trade every anchored element on every screen makes.
 
 ## Named constants
 
 | Element | Constant | Value |
 | --- | --- | --- |
 | Safe margin, every screen edge | `SafeMargin` | 48 px |
-| Title baseline from the top | `TitleBaselineY` | 300 px |
-| Title size | `TitleSize` | 160 px |
-| Width of each button in the `action` row | `TitleButtonWidth` | 560 px |
-| Height of each button in the `action` row | `TitleButtonHeight` | 160 px |
-| Gap between `RESUME` and `NEW` | `TitleButtonGap` | 48 px |
-| Button row up from the safe area | `TitleButtonBottomOffset` | 120 px |
-| Label size on both buttons | `TitleButtonLabelSize` | 64 px |
+| Sign plank width | `TitleSignWidth` | 320 px |
+| Sign plank height | `TitleSignHeight` | 128 px |
+| Sign plank's bottom edge up from the bottom safe area | `TitleSignBottomOffset` | 94 px |
+| Sign tilt, anticlockwise, about the plank's centre | `TitleSignTilt` | 3° |
+| Sign plank corner radius | `TitleSignCornerRadius` | 18 px |
+| Sign plank outline | `TitleSignOutlineWidth` | 7 px |
+| Sign plank grain line width | `TitleSignGrainWidth` | 4 px |
+| Sign plank grain line spacing | `TitleSignGrainSpacing` | 32 px |
+| Sign post width | `TitleSignPostWidth` | 32 px |
+| Sign post below the plank's bottom edge | `TitleSignPostDrop` | 114 px |
+| Sign post outline | `TitleSignPostOutlineWidth` | 6 px |
+| Sign post corner radius | `TitleSignPostCornerRadius` | 8 px |
+| `START` label size | `TitleSignLabelSize` | 72 px |
+| `START` label outline, outside the glyph | `TitleSignLabelOutlineWidth` | 7 px |
+| `START` label letter spacing | `TitleSignLabelTracking` | 2 px |
 | Version string size | `VersionLabelSize` | 28 px |
-| Scrim behind the title, over the art | `TitleScrimOpacity` | 0.35 |
-| Entering fade, art and title | `TitleFadeDuration` | 0.3 s |
+| Entering fade, art (the drawn title is part of it) | `TitleFadeDuration` | 0.3 s |
 
-`TitleFadeDuration` is stated in [Behaviour](#behaviour) — *"art and title fade
-in over `TitleFadeDuration` (0.3 s)"* — and is added here in the same PR that
-declares it in code
+The `START` label is set in **Fredoka Bold** (weight 700), the font the title is
+rebuilt in (`art-source/splash/fonts/`, SIL Open Font License), so the one word
+on the sign is lettered the way the two words above it are: a light fill
+inside a dark outline. It is centred on the plank.
+
+### Sign colours
+
+The sign is painted from the art, not from the UI palette: its wood from the
+log it stands beside, its outline from the title's outline, its lettering from
+the title glow's white.
+
+| Element | Constant | Value |
+| --- | --- | --- |
+| Plank wood, top | `TitleSignBark` | `#9C540C` |
+| Plank wood, bottom, and the post | `TitleSignBarkShade` | `#843C0C` |
+| Plank grain lines | `TitleSignGrain` | `#54240C` at 55% |
+| Plank, post and label outline | `TitleSignOutline` | `#060B04` |
+| `START` label fill | `TitleSignLabelFill` | `#F8FAF6` |
+
+The plank's wood runs from `TitleSignBark` at the top to `TitleSignBarkShade`
+at the bottom. The colours were sampled from the log layer and from
+`art-source/splash/title.py` and `sky.py`.
+
+`TitleFadeDuration` is stated in [Behaviour](#behaviour) and was added to this
+table in the same PR that declared it in code
 ([#216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216)),
 per [named constants are the origin, not an
-afterthought](../../engineering/ui-design-process.md#the-named-constants-are-the-origin-not-an-afterthought):
-a value the code needs but this table didn't have was a sign the row was
-missed, not a number free to invent.
+afterthought](../../engineering/ui-design-process.md#the-named-constants-are-the-origin-not-an-afterthought).
 
-`TitleButtonHeight` is larger than the shared `ButtonHeight` of 112 px, and
-`TitleButtonWidth` larger than the shared `ButtonMinWidth` of 320 px. These are
-the first buttons a child touches and there is nothing else on the screen
-competing with them for space; they are allowed to be the biggest buttons in the
-game. Both buttons take the same width and the same height, deliberately: they
-are two peer choices, and a size difference would have been a second,
-accidental way of saying which one matters — which
-[open question 1](#open-questions) settles on purpose, through `ButtonKind`
-alone, instead.
+### What became of the title, button-row and scrim constants
 
-`TitleButtonGap` is **not** the shared `ButtonGap` of 32 px. That value is sized
-for the shared 112 px button; scaled to a 160 px one the same proportion lands
-just under 48 px, and 48 px is already this page's `SafeMargin` and game
-setup's `SeatGap` at a comparable scale. At 32 px two 560 px buttons read as one
-split control rather than two choices.
+[#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484)
+replaced the text title with the drawn one, the button row with the sign, and
+dropped the scrim. These constants no longer place anything, and are
+**removed**:
 
-The row is `TitleButtonWidth` × 2 + `TitleButtonGap` = 1168 px wide, centred in
-the 1824 px between the safe margins, leaving 328 px either side. The row is
-deliberately not full-bleed, for the same reason game setup's seat row is not.
+| Was | Value | Why it went |
+| --- | --- | --- |
+| `TitleBaselineY` | 300 px | The text title is gone; the drawn title is where the art puts it |
+| `TitleSize` | 160 px | The same |
+| `TitleButtonWidth` | 560 px | The button row is gone; the sign is `TitleSignWidth` |
+| `TitleButtonHeight` | 160 px | The same; the sign is `TitleSignHeight` |
+| `TitleButtonGap` | 48 px | It separated `RESUME` from `NEW` in the row; where `RESUME` goes now is [open question 8](#open-questions) |
+| `TitleButtonBottomOffset` | 120 px | The sign is anchored by `TitleSignBottomOffset` and the right safe area |
+| `TitleButtonLabelSize` | 64 px | The sign's label is `TitleSignLabelSize` |
+| `TitleScrimOpacity` | 0.35 | No scrim ([open question 5](#open-questions)); it never had a shape, and the built screen never applied it |
 
-`TitleButtonLabelSize` is 64 px rather than the shared `ButtonLabelSize` of
-44 px, in the same proportion as the buttons themselves are oversized
-(44 × 160 ÷ 112 ≈ 63). This is not a new decision — 64 px is what the committed
-mockup has drawn since this screen was first agreed. It is given a name here
-because there are now two labels of very different lengths (`RESUME` and `NEW`)
-sharing one button size, and a label size that only exists inside a mockup is a
-label size the next redraw gets wrong.
+`TitleScreenView` still declares all eight today. Taking them out is the
+implementation issue's job, in the same PR that builds the sign.
 
 ### What became of the `Play*` constants
 
@@ -133,8 +173,20 @@ any more, and a constant named after a button that does not exist is a constant
 somebody will eventually apply to the wrong one. `TitleButtonGap` is the one
 genuinely new number.
 
+The three `TitleButton*` names were themselves removed by #484 — see
+[above](#what-became-of-the-title-button-row-and-scrim-constants). The table is
+kept as history, because the settings dialog still points here.
+
 ## Elements
 
+- **`START`** — this screen's primary action, drawn as a wooden sign
+  (settled, [open questions 1 and 7](#open-questions)). Renamed from `NEW`,
+  which was renamed from `Play`, and it goes exactly where they went: [game
+  setup](game-setup.md). Never disabled; there is no state of this screen that
+  would justify greying it out. It is the one primary action, so the shared
+  [Button](shared-components.md#button) rule — *"exactly one primary button
+  is visible at a time"* — still holds, though it is drawn as part of the
+  picture rather than in the shared Button's primary style.
 - **`RESUME`** — secondary (settled, [open question 1](#open-questions)).
   Goes back into the saved game, on the
   [game board](game-board.md). It restores a roster; it never chooses one. What
@@ -142,28 +194,31 @@ genuinely new number.
   ([ADR-0004](../../adr/0004-core-owns-the-save-format.md)) and is not settled
   here.
   - **Hidden when there is no game to resume** (settled, [open question
-    2](#open-questions)) — not laid out at all, and because that is the only
-    state that exists in this v0.2 proof of concept, `RESUME` is hidden in
-    practice on every build of this screen today.
+    2](#open-questions)) — not laid out at all. That is the only state that
+    exists today, so `RESUME` is hidden on every build of this screen.
+  - **Where it goes and what it looks like when it can be shown is not
+    drawn** — [open question 8](#open-questions), for the issue that builds
+    the save system.
   - Nothing on this screen writes, reads, or deletes a save. The save
     round-trip does not exist yet — it is out of the shape-only proof of
-    concept ([#198](https://github.com/derekwinters/connor-multiplying-frogs/issues/198))
-    — and this wireframe draws the button without implying the mechanism behind
-    it.
-- **`NEW`** — primary (settled, [open question 1](#open-questions)). Renamed
-  from `Play`, and it goes exactly where `Play` went: [game
-  setup](game-setup.md). Never disabled; there is no state of this screen that
-  would justify greying it out.
-- **Title** — text, not a logo image, until an `area:art` issue supplies one.
-  The wireframe reserves the space a wordmark would occupy.
+    concept ([#198](https://github.com/derekwinters/connor-multiplying-frogs/issues/198)).
+- **Title** — the drawn MULTIPLYING FROGS in the art (settled, [open question
+  3](#open-questions)). Not text, not a separate element, not a control.
 - **Version** — `v0.1.0`, from `/VERSION`. It exists so that a screenshot from a
   tablet says which build it came from, which is the difference between a
-  reproducible bug and a story about one.
+  reproducible bug and a story about one. Drawn `#6C7873` at
+  `VersionLabelSize`, a grey chosen for the old flat pale placeholder; on the
+  art it sits on bright green grass and is hard to read. It is still meant to
+  be small and quiet; keeping it legible is
+  [open question 10](#open-questions), not redesigned here.
 
 ## Behaviour
 
-- Entering: art and title fade in over `TitleFadeDuration` (0.3 s). Neither
-  button animates — a button that moves is a button that gets missed.
+- Entering: the art — the drawn title with it — fades in over
+  `TitleFadeDuration` (0.3 s). The sign does not animate — a control that moves
+  is a control that gets missed.
+- What the sign does when it is pressed is not drawn: [open question
+  9](#open-questions).
 - The hardware back button on this screen exits the app. It is the only screen
   where back exits.
 - Nothing auto-advances. The title screen waits indefinitely.
@@ -171,54 +226,90 @@ genuinely new number.
 ## Mockup
 
 - **The agreed picture:** [`mockups/title-screen.html`](mockups/title-screen.html) —
-  `NEW` primary, `RESUME` secondary.
+  the whole splash picture with the `START` sign bottom-right, in the no-save
+  state that exists today (`RESUME` hidden).
 
-It used to be one of a pair, drawn to ask which of the two buttons should be
-primary — see "The invariant this page used to carry" and
-[open question 1, settled](#open-questions) below. The losing comparison file,
-`title-screen-resume-primary.html` (`RESUME` primary), is deleted: the question
-it existed to ask is answered, and a mockup nobody can build to is not worth
-keeping around to confuse the next reader.
+It loads its art from [`images/title-screen/full.png`](images/title-screen/full.png),
+the whole composite rendered from the splash's vector layers at 1920 × 1200 by
+`python3 art-source/splash/build_splash.py --home-only`, and sets `START` in
+the title's font from a committed copy beside it
+(`images/title-screen/fonts/`, with its licence). Neither needs the network.
 
-The mockup draws the state where **a save exists**, so both buttons are live.
-The no-save state — `RESUME` hidden, `NEW` alone and centred — is not drawn
-separately: it is the same layout with one button removed and the row
-re-centred, which is exactly what [the settled open question
-2](#open-questions) below says happens, and it needs no picture of its own to
-be unambiguous.
-
-The splash illustration attached to
-[issue #168](https://github.com/derekwinters/connor-multiplying-frogs/issues/168)
-is the art this screen is built around. The mockup draws its region as a
-placeholder block rather than embedding the image, because a mockup that needs
-a network fetch is a mockup that does not open on the sofa — and because the
-wireframe is deciding *where the art goes*, not what it is.
+[#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484) got
+here through ten comparison drawings: four without the frogs (drawn or text
+title, log kept or hidden, with or without a scrim), two with all the frogs and
+the old 560 × 160 `NEW` button where it was agreed and moved down, and four
+other kinds of button — a lily pad, this wooden sign, `NEW` lettered on the
+log, and a small button in the pond corner. Derek picked the sign. The other
+nine files, and the art pieces only they used, are deleted: the questions they
+existed to ask are answered, and a mockup nobody can build to only confuses the
+next reader. The same happened before to `title-screen-resume-primary.html`,
+when [open question 1](#open-questions) was settled.
 
 ## Open questions
 
-- **1. Which of `RESUME` and `NEW` is the primary button? Settled: `NEW`.**
+- **1. Which of `RESUME` and `NEW` is the primary button? Settled: `NEW`** —
+  now `START`.
   Derek's call, recorded on
   [issue #216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216#issuecomment-5241023983):
   `NEW` is primary, `RESUME` is secondary. `NEW` inherits `Play`'s emphasis and
   is the button that is always there — the shared
   [Button](shared-components.md#button) invariant, *"exactly one primary button
-  is visible at a time,"* is satisfied by `NEW` alone. The losing comparison
-  mockup (`RESUME` primary) is deleted; see [Mockup](#mockup) above.
+  is visible at a time,"* is satisfied by it alone. It is `START` now
+  ([open question 7](#open-questions)); that changes its word and look, not its
+  rank.
 - **2. What does `RESUME` do when there is no game to resume? Settled: Hidden.**
   Derek's call, same comment as above: not laid out at all, the component's
-  existing `Hidden` state — *"not laid out at all — buttons do not leave gaps
-  behind."* Because the `action` row is centred as a row, this makes the
-  screen show a single centred `NEW` exactly where `Play` used to sit, with no
-  extra layout to build. In practice this is the *only* state the row is ever
-  in: the save/resume system does not exist anywhere in this v0.2 shape-only
-  proof of concept
+  existing `Hidden` state. In practice this is the *only* state `RESUME` is ever
+  in: the save/resume system does not exist anywhere yet
   ([#198](https://github.com/derekwinters/connor-multiplying-frogs/issues/198)
   excludes it from scope), so there is never a saved game for `RESUME` to
   report. [#216](https://github.com/derekwinters/connor-multiplying-frogs/issues/216)
   builds the hidden/shown check as a real query a future save-system issue can
-  answer honestly, not as `RESUME` being removed outright — the `Disabled` and
-  `Absent` options this question used to weigh are not chosen; `RESUME` stays
-  a real button that is simply always hidden today.
+  answer honestly, not as `RESUME` being removed outright; `RESUME` stays a
+  real button that is simply always hidden today.
+- **3. The title: the drawn lettering, or the text? Settled: drawn.**
+  Derek's call, 2026-11-26, on
+  [#484](https://github.com/derekwinters/connor-multiplying-frogs/issues/484).
+  The art's own MULTIPLYING FROGS (rebuilt as vectors, spelled correctly, in
+  Fredoka) is the title, and the text title is gone with `TitleBaselineY` and
+  `TitleSize`. It matches the launch splash.
+- **4. The log: keep it, or hide it? Settled: kept.**
+  Derek's call, 2026-11-26. With all the frogs in
+  ([open question 6](#open-questions)) the big frog sits on it, so it was never
+  going to be empty.
+- **5. The scrim: still wanted? Settled: no.**
+  Derek's call, 2026-11-26: no scrim and no dark band. `TitleScrimOpacity`
+  is removed. It never had an extent or a colour, and the one drawing of it
+  darkened the whole picture.
+- **6. Frogs on the home screen: all, or none? Settled: all.**
+  Derek's call, 2026-11-26. His first ask was none — *"without the frogs, to
+  not crowd out the buttons"* — and four drawings showed that. Seeing them, he
+  said *"Let's see it with all the frogs. It's too empty right now."* All four
+  frogs, with their hop lines.
+- **7. With all the frogs, what is the button and where does it go?
+  Settled: a wooden sign in the grass, bottom-right, reading `START`.**
+  Derek's call, 2026-11-26: *"I like the sign but I want it to say start."*
+  The old 560 × 160 button sat in front of the big frog wherever it went, and
+  of the four other kinds drawn — a lily pad, a sign, the log itself, a small
+  corner button — he picked the sign, and chose the word on it. Its numbers are
+  the `TitleSign*` constants above; they are the numbers the comparison drawing
+  had, with only the word changed.
+- **8. Where does `RESUME` go when it can be shown? Open — for the save-system
+  issue.** The row it shared with `NEW` is gone, and nothing on this page says
+  where `RESUME` sits beside the sign, or what it looks like on the picture.
+  It does not need an answer until there is a saved game to resume, so it is
+  left to the issue that builds the save system, which will need its own
+  wireframe for it. Until then `RESUME` is hidden, and both invariants above
+  read true with it hidden.
+- **9. What does the sign do when it is pressed? Open.** The shared Button
+  moves down by `ButtonPressOffset` and darkens its fill; the sign is not drawn
+  pressed, and nothing here says whether it does the same, something else, or
+  nothing. The build should ask rather than pick one.
+- **10. The version string on the art: how does it stay legible? Open.** It is
+  drawn as it was on the placeholder — `#6C7873` grey at `VersionLabelSize` —
+  and on the bright green grass it is hard to read. It is meant to stay small
+  and quiet. Not redesigned here.
 - **Is there a `How to play` button here?** Proposed: still no — but for a
   different reason than before, because half of the old reason has gone.
 
@@ -232,12 +323,11 @@ wireframe is deciding *where the art goes*, not what it is.
   game they have not started.
 
   What is left in the way is this page's own first invariant: *"the only
-  interactive elements on this screen are `RESUME` and `NEW`. There is never a
-  third."* Adding the button is a change to that invariant, and changing it is
-  a decision about what this screen is, not a consequence of the other screen
-  existing. It should be its own issue. If it is taken, the button goes beneath
-  the `RESUME`/`NEW` row as a secondary one, and it opens the same screen the
-  gear does.
+  interactive elements on this screen are `RESUME` and `START`. There is never
+  a third."* Adding the button is a change to that invariant, and changing it
+  is a decision about what this screen is, not a consequence of the other
+  screen existing. It should be its own issue, with its own wireframe for
+  where the button sits on the picture.
 - **Does the title screen come back after a game, or does `Play again` restart
   directly?** Both exist on [game over](game-over.md); this screen does not care
   which is used.
