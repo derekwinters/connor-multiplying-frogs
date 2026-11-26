@@ -1808,6 +1808,34 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#game-ci-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The game-ci CLI is pinned too
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The game-ci CLI is pinned too">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#moving-the-cli-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Moving the CLI pin
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2720,6 +2748,34 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#game-ci-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The game-ci CLI is pinned too
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The game-ci CLI is pinned too">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#moving-the-cli-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Moving the CLI pin
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3493,8 +3549,8 @@ and no way for the two to drift apart.</p>
 </tr>
 <tr>
 <td><code>game-ci/unity-builder</code></td>
-<td><code>d829bfc901f2347c8fe18898f06712b66916ef42</code></td>
-<td>APK builds</td>
+<td><code>eb1b9fba120c6e62c9fb7a7a81d6c107ce004c45</code> (v6.0.0)</td>
+<td>APK builds — and its CLI is <a href="#game-ci-cli">pinned separately</a></td>
 </tr>
 <tr>
 <td><code>game-ci/unity-test-runner</code></td>
@@ -3590,6 +3646,64 @@ before it can merge.</p>
 upstream release notes, don't merge on autopilot — but do not let them sit. A
 year of ignored Dependabot PRs is worse than no pinning at all, because it looks
 deliberate.</p>
+<h3 id="game-ci-cli">The game-ci CLI is pinned too<a class="headerlink" href="#game-ci-cli" title="Link to this section">&para;</a></h3>
+<p>Pinning <code>game-ci/unity-builder</code> to a SHA is not the whole pin. From v6 the
+action no longer builds by itself: its first act is to install a separate
+binary, <a href="https://github.com/game-ci/cli"><code>game-ci/cli</code></a>, and which release of
+that binary it installs is the action's <strong><code>cliVersion</code></strong> input. Left unset, it
+defaults to <code>latest</code>.</p>
+<p><code>latest</code> is not a version. To turn it into one the action asks the GitHub API
+for <code>game-ci/cli</code>'s newest release — on every run, before Unity starts — and it
+makes that call <strong>without a token</strong> unless <code>GITHUB_TOKEN</code> is in the step's
+environment. GitHub-hosted runners share IP addresses, so an anonymous call
+competes for a 60-requests-per-hour limit that other repositories' traffic uses
+up. That is what failed the Debug APK job on #479 (<code>GitHub API returned 403</code>)
+and on the v0.7.0 release PR #452 (<code>fetch failed</code>), and the release build after
+a release PR merges would have been exposed to the same thing (#480).</p>
+<p>So every <code>unity-builder</code> step in <code>pr-build.yml</code>, <code>rc-build.yml</code> and
+<code>release-build.yml</code> carries two things:</p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>What</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>with:</code></td>
+<td><code>cliVersion: v0.1.77</code></td>
+<td>A fixed tag means no lookup at all. <code>v0.1.77</code> is the release the passing builds ran.</td>
+</tr>
+<tr>
+<td><code>env:</code></td>
+<td><code>GITHUB_TOKEN: ${{ github.token }}</code></td>
+<td>A backstop: any GitHub API call the action makes — today's download, or a lookup a later version adds — is authenticated rather than anonymous.</td>
+</tr>
+</tbody>
+</table>
+<p>The token is the job's own short-lived <code>github.token</code>, not a new secret. It is
+added alongside the existing <code>UNITY_*</code> entries, not instead of them.</p>
+<p><strong><code>check_unity_builder_cli.py</code> enforces both.</strong> It runs in the <code>Gate tests</code> job
+next to the pin check, unfiltered for the same reason, and fails the PR on any
+<code>unity-builder</code> step whose <code>cliVersion</code> is missing, empty or <code>latest</code>, or whose
+<code>env:</code> does not pass <code>GITHUB_TOKEN</code>. Its tests also assert that all five steps
+name the <em>same</em> CLI version, so a partial update fails rather than leaving the
+device and emulator builds on different CLIs.</p>
+<h4 id="moving-the-cli-pin">Moving the CLI pin<a class="headerlink" href="#moving-the-cli-pin" title="Link to this section">&para;</a></h4>
+<p><strong>Dependabot does not move <code>cliVersion</code>.</strong> It updates the SHA in a <code>uses:</code> line
+and nothing else; a <code>with:</code> input is just a string to it. So the CLI version
+moves only by hand:</p>
+<ol>
+<li>Pick the release from <a href="https://github.com/game-ci/cli/releases"><code>game-ci/cli</code>'s releases</a>
+   and read its notes. When Dependabot bumps <code>unity-builder</code> itself, check
+   whether that release expects a newer CLI — that is the usual reason to move
+   this.</li>
+<li>Change <code>cliVersion</code> on <strong>all five</strong> steps in one PR.</li>
+<li>Watch <code>pr-build</code> on that PR. A CLI release that breaks the build shows up
+   there, on a PR, rather than on the next release.</li>
+</ol>
 <h2 id="build-workflows">Build workflows<a class="headerlink" href="#build-workflows" title="Link to this section">&para;</a></h2>
 <h3 id="pr-build-two-debug-apks-for-every-pr"><code>pr-build</code> — two debug APKs for every PR<a class="headerlink" href="#pr-build-two-debug-apks-for-every-pr" title="Link to this section">&para;</a></h3>
 <p>Every PR produces installable debug APKs, so "does it still build" is answered
@@ -4440,7 +4554,7 @@ the <em>pass</em>.</p>
 <tbody>
 <tr>
 <td><code>gate-tests</code></td>
-<td>runs the CI scripts' own unit tests</td>
+<td>runs the CI scripts' own unit tests, the <a href="#the-check-that-enforces-it">action-pin check</a>, and the <a href="#game-ci-cli">game-ci CLI check</a></td>
 </tr>
 <tr>
 <td><code>Docs</code></td>
