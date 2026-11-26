@@ -2840,8 +2840,10 @@ which leaves exactly 96 px — it sits directly beside the card readout pill and
 would look wrong at a different height, and 96 px is the floor a touch target
 may not go below. A 112 px button there would overhang the band by 16 px. This
 is the same kind of screen-local override as the title screen's
-<a href="../title-screen/#named-constants"><code>TitleButtonHeight</code></a>, in the opposite
-direction.</p>
+<code>TitleButtonHeight</code> was, in the opposite direction, until
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/484">#484</a> replaced
+that screen's buttons with a sign
+(<a href="../title-screen/#what-became-of-the-title-button-row-and-scrim-constants">removed constants</a>).</p>
 <p><code>GridHelpItemSize</code> is 32 px, not <code>GridSmallDigitSize</code> (28 px). The items are
 not digits in boxes — they are labels in the margin, read at arm's length,
 and they are the one thing on this screen a stuck player is looking <em>for</em>.

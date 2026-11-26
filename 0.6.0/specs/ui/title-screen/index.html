@@ -2362,7 +2362,9 @@ one — <a href="#open-questions">open question 8</a>.</p>
 <li><code>art</code> is Connor's splash picture, rebuilt as layers under
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash"><code>art-source/splash/</code></a>,
   with every layer it uses shown: the same picture as the launch splash. The
-  unused splashes on the lily pads are not in it.</li>
+  unused splashes on the lily pads are not in it. The game draws it from
+  <code>Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png</code>, the
+  same render the mockup loads.</li>
 <li><code>start</code>: the plank's <strong>right edge is on the right safe area</strong>, and its
   <strong>bottom edge is <code>TitleSignBottomOffset</code> up from the bottom safe area</strong>. At
   1920 × 1200 that puts the plank at 1552–1872 px across and 930–1058 px down,
@@ -2471,6 +2473,11 @@ one — <a href="#open-questions">open question 8</a>.</p>
 <td>2 px</td>
 </tr>
 <tr>
+<td>Sign plank's size while held, of its own</td>
+<td><code>TitleSignPressScale</code></td>
+<td>0.95</td>
+</tr>
+<tr>
 <td>Version string size</td>
 <td><code>VersionLabelSize</code></td>
 <td>28 px</td>
@@ -2486,6 +2493,14 @@ one — <a href="#open-questions">open question 8</a>.</p>
 rebuilt in (<code>art-source/splash/fonts/</code>, SIL Open Font License), so the one word
 on the sign is lettered the way the two words above it are: a light fill
 inside a dark outline. It is centred on the plank.</p>
+<p>In the game, weight 700 is a <strong>static Fredoka Bold</strong> instanced from that variable
+font, committed with its licence at <code>Assets/Fonts/Fredoka/Resources/Fredoka/</code>:
+Unity's legacy font importer cannot choose a variable font's weight, and would draw
+its default, Light. How it is made is in
+<a href="../../../engineering/tech-stack/#the-title-screens-art-and-font">the tech stack</a>.</p>
+<p><code>TitleSignPressScale</code> is the answer to <a href="#open-questions">open question 9</a>, added
+to this table by <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/520">#520</a>,
+the PR that declared it in code.</p>
 <h3 id="sign-colours">Sign colours<a class="headerlink" href="#sign-colours" title="Link to this section">&para;</a></h3>
 <p>The sign is painted from the art, not from the UI palette: its wood from the
 log it stands beside, its outline from the title's outline, its lettering from
@@ -2590,8 +2605,8 @@ dropped the scrim. These constants no longer place anything, and are
 </tr>
 </tbody>
 </table>
-<p><code>TitleScreenView</code> still declares all eight today. Taking them out is the
-implementation issue's job, in the same PR that builds the sign.</p>
+<p><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/520">#520</a>,
+the PR that built the sign, took all eight out of <code>TitleScreenView</code>.</p>
 <h3 id="what-became-of-the-play-constants">What became of the <code>Play*</code> constants<a class="headerlink" href="#what-became-of-the-play-constants" title="Link to this section">&para;</a></h3>
 <p><a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/216">#216</a>
 builds this screen from named constants and names three of them that no longer
@@ -2673,8 +2688,13 @@ kept as history, because the settings dialog still points here.</p>
 <li>Entering: the art — the drawn title with it — fades in over
   <code>TitleFadeDuration</code> (0.3 s). The sign does not animate — a control that moves
   is a control that gets missed.</li>
-<li>What the sign does when it is pressed is not drawn: <a href="#open-questions">open question
-  9</a>.</li>
+<li><strong>Pressed, the plank shrinks.</strong> While a finger is held on it, the plank — its
+  wood, outline and word — draws at <code>TitleSignPressScale</code> of its size, about its
+  own centre, and springs back when the finger lifts or slides off. Nothing else
+  changes: no colour, no movement, and the post stays as it is. The tap target
+  does not shrink with it. It acts on release, over the plank, like the
+  <a href="../shared-components/#button">shared Button</a>
+  (<a href="#open-questions">open question 9</a>, settled).</li>
 <li>The hardware back button on this screen exits the app. It is the only screen
   where back exits.</li>
 <li>Nothing auto-advances. The title screen waits indefinitely.</li>
@@ -2756,17 +2776,25 @@ when <a href="#open-questions">open question 1</a> was settled.</p>
   left to the issue that builds the save system, which will need its own
   wireframe for it. Until then <code>RESUME</code> is hidden, and both invariants above
   read true with it hidden.</li>
-<li><strong>9. What does the sign do when it is pressed? Open.</strong> The shared Button
-  moves down by <code>ButtonPressOffset</code> and darkens its fill; the sign is not drawn
-  pressed, and nothing here says whether it does the same, something else, or
-  nothing. The build should ask rather than pick one.</li>
-<li><strong>10. The version string on the art: how does it stay legible? Open.</strong> It is
+<li><strong>9. What does the sign do when it is pressed? Settled: press down — the plank
+  shrinks slightly while held.</strong> Derek's call, 2026-11-26, on
+  <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/521">#521</a>.
+  The options were <em>press down</em> (the plank shrinks to about 95% while held),
+  <em>wobble</em> (it tips a few degrees and springs back) and <em>darken</em> (the wood goes a
+  shade darker, like the shared Button's fill). He chose press down, and the
+  number is the one that option named: <code>TitleSignPressScale</code>, 0.95. It is
+  applied at once, with no animation, as the shared Button's pressed state is.</li>
+</ul>
+<p>The option was worded <em>"like the other buttons do"</em>. The other buttons do not
+  shrink: the <a href="../shared-components/#button">shared Button</a> moves down by
+  <code>ButtonPressOffset</code> and darkens. The sign follows the option's own
+  description — it shrinks, and does not darken or move — and only that.
+- <strong>10. The version string on the art: how does it stay legible? Open.</strong> It is
   drawn as it was on the placeholder — <code>#6C7873</code> grey at <code>VersionLabelSize</code> —
   and on the bright green grass it is hard to read. It is meant to stay small
-  and quiet. Not redesigned here.</li>
-<li><strong>Is there a <code>How to play</code> button here?</strong> Proposed: still no — but for a
-  different reason than before, because half of the old reason has gone.</li>
-</ul>
+  and quiet. Not redesigned here.
+- <strong>Is there a <code>How to play</code> button here?</strong> Proposed: still no — but for a
+  different reason than before, because half of the old reason has gone.</p>
 <p>This question used to end <em>"it needs its own wireframe for the screen it
   opens"</em>. That screen now exists:
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/324">#324</a>

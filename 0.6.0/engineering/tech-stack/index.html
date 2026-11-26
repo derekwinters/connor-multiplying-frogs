@@ -1803,6 +1803,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-title-screens-art-and-font" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The title screen's art and font
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-is-explicitly-not-a-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2542,6 +2553,17 @@
     <span class="md-ellipsis">
       
         The launch splash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-title-screens-art-and-font" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The title screen's art and font
       
     </span>
   </a>
@@ -3664,6 +3686,54 @@ defaults. A missing picture, or one Unity did not import as a sprite, <strong>fa
 build</strong> rather than shipping Unity's splash. As with the icons, the picture is loaded by
 path, so no committed <code>.meta</code> is needed, and the settings are read back after they are
 set.</p>
+<h3 id="the-title-screens-art-and-font">The title screen's art and font<a class="headerlink" href="#the-title-screens-art-and-font" title="Link to this section">&para;</a></h3>
+<p><strong>The title screen is drawn on the same picture, and letters its <code>START</code> sign in the
+title's font</strong> (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/520">#520</a>;
+the layout is <a href="../../specs/ui/title-screen/">the title screen's spec</a>). Both are game
+files, loaded at runtime by path from a <code>Resources</code> folder, so nothing refers to them by
+GUID and neither has a committed <code>.meta</code>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Picture</td>
+<td><code>Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png</code> — the home build step's render, the same bytes as the mockup's <code>full.png</code>, and the same picture as the launch splash</td>
+</tr>
+<tr>
+<td>Font</td>
+<td><code>Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf</code>, with its <code>OFL.txt</code> beside it — the game's first font that is not Unity's built-in one</td>
+</tr>
+<tr>
+<td>Made by</td>
+<td><code>art-source/splash/build_splash.py --home-only</code> (<code>art-source/splash/home.py</code>)</td>
+</tr>
+<tr>
+<td>Its tests</td>
+<td><code>.github/scripts/tests/test_title_screen_art.py</code></td>
+</tr>
+<tr>
+<td>Import settings</td>
+<td><code>TitleScreenArtImport</code>, in <code>Assets/Editor/</code> — the picture as the launch splash's (a single sprite, full size, no mipmaps); the font as a dynamic font with its data included</td>
+</tr>
+<tr>
+<td>Its EditMode tests</td>
+<td><code>Assets/Tests/EditMode/TitleScreenViewTests.cs</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The font is a static Bold, not the variable font.</strong> The title is set in Fredoka at
+weight 700, from <code>art-source/splash/fonts/Fredoka-Variable.ttf</code> (SIL Open Font License).
+Unity's legacy font importer (<code>TrueTypeFontImporter</code>) has no setting that chooses a
+variable font's axes, and the legacy <code>Text</code> component's bold is a synthetic one, so the
+variable file imported as it is would draw Fredoka's default instance, Light (300). The
+home build step instead instances the variable font at <code>wght</code> 700, <code>wdth</code> 100 with
+fontTools, keeping the source's timestamp so every run writes the same bytes, and the
+tests regenerate it and compare.</p>
 <h3 id="what-is-explicitly-not-a-target">What is explicitly not a target<a class="headerlink" href="#what-is-explicitly-not-a-target" title="Link to this section">&para;</a></h3>
 <p>iOS, desktop, console, web. Not "not yet" in a way that shapes decisions today —
 if a choice is easier because Android is the only target, take the easier
