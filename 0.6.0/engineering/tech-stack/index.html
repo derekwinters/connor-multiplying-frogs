@@ -3100,13 +3100,60 @@ of the generator produces, so an icon edited by hand, or a source changed withou
 regenerating, fails it. It and the other rendering tests are skipped — by name,
 in the test output — where Pillow is not installed; the geometry tests need
 nothing but Python.</p>
-<p><strong>Not done yet: putting the icons into the build.</strong> The icon slots in
-<code>PlayerSettings</code> are set the same way as everything else in this section, by
-code at build time, and that waits on a committed <code>ProjectSettings</code> (#104). It is
-tracked on <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/459">#459</a>. Until then the APK still carries Unity's default icon. The
-generated PNGs also have no committed <code>.meta</code> files yet — see
-<a href="../unity-serialization/">Unity serialization</a> for why those are not
-hand-written.</p>
+<p><strong>The build puts the icons in, every time.</strong> Nothing is set by hand and no
+<code>ProjectSettings</code> file is involved — CI builds without one. <code>AppIcons</code>, in
+<code>Assets/Editor/</code>, is called from <code>ProjectBootstrap.ApplyToBuild()</code>, which the
+build pre-processor runs before every build, the same way the app's name and
+orientation get there. It fills Unity's Android icon slots through
+<code>PlayerSettings.SetPlatformIcons</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Slots</th>
+<th>Filled with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Adaptive, mdpi – xxxhdpi</td>
+<td><code>adaptive-background-&lt;density&gt;.png</code> then <code>adaptive-foreground-&lt;density&gt;.png</code>, the two layers</td>
+</tr>
+<tr>
+<td>Round, mdpi – xxxhdpi</td>
+<td><code>round-&lt;density&gt;.png</code></td>
+</tr>
+<tr>
+<td>Legacy, mdpi – xxxhdpi</td>
+<td><code>legacy-&lt;density&gt;.png</code></td>
+</tr>
+<tr>
+<td>ldpi, all three kinds</td>
+<td>the mdpi files, scaled down by Unity — no ldpi file is drawn</td>
+</tr>
+<tr>
+<td>The default icon</td>
+<td><code>legacy-xxxhdpi.png</code>, so Unity's logo has nowhere to show through</td>
+</tr>
+</tbody>
+</table>
+<p>Which file goes in which slot is decided from the slot's width by
+<code>AppIconSet</code> in Core, so it is tested without an editor. A slot whose width is
+no Android density fails the build rather than getting the nearest file.</p>
+<p><strong>A missing icon fails the build.</strong> So does a file Unity cannot import, or a
+slot that does not keep what it was given — every slot is read back after it is
+set. The alternative is an APK with Unity's icon, which is what v0.6.0 shipped.</p>
+<p><strong>No committed <code>.meta</code> is needed.</strong> The icons are loaded by path, as Unity's
+reference for <code>PlatformIcon.SetTextures</code> asks, and assigned in the same session
+the build runs in, so nothing refers to a GUID. A texture not yet imported on a
+fresh CI <code>Library</code> is imported synchronously before it is loaded. The import
+settings are code, <code>AppIconImport</code>, not a hand-written <code>.meta</code>: no scaling to a
+power of two, no mipmaps, uncompressed, so the texture Unity holds is exactly the
+file the generator drew. <code>AppIconTests</code> reads the slots and the import settings
+back.</p>
+<p><strong>The tests need the Android editor.</strong> Unity's <code>UnityEditor.Android</code> API only
+exists with Android Build Support and Android as the active target, so the
+EditMode suite runs in GameCI's Android image with <code>-buildTarget Android</code> — see
+<a href="../ci-cd/#ci-tests-the-two-suites">CI/CD</a>.</p>
 <h3 id="the-frog-model">The frog model<a class="headerlink" href="#the-frog-model" title="Link to this section">&para;</a></h3>
 <p><strong>The frog piece is a 3D model built in Blender</strong>, approved by Derek for
 <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/461">#461</a>.
