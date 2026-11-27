@@ -709,6 +709,20 @@ Mockup: [`pile-card.html`](mockups/pile-card.html) — the three backs in both
 orientations, the drawn card picked up, and the front carrying `331 × 41` at its
 full covering size.
 
+> **How the spec is changing (#402).** This card was merged at `S = 225`,
+> `L = 405`, `G = 27` (#401). It is now **`S = 200`, `L = 360`, `G = 24`**, and
+> everything on its back is 8/9 of what it was. The reason is on the
+> [turn panel](turn-panel.md#the-horizontal-arithmetic): beside a 405 px card,
+> `Help me`'s printed products on a Hard card ran onto the card
+> ([#529](https://github.com/derekwinters/connor-multiplying-frogs/issues/529)).
+> Derek chose a smaller card and a slimmer keypad to make room, rather than
+> moving or shrinking the products. Nothing about the card's design changed:
+> the same pond, pads, dice, log, front, motion and timings, and the same 9/5
+> scale on the turn-over. The line weights (outlines, the name's stroke) and
+> the shadows are the [Pond style](style-guide.md)'s and keep their values;
+> the sizes and positions are scaled. The old values are kept below for the
+> record.
+
 The design was settled by Derek with interactive prototypes after the issue was
 written, and it differs from the issue in two ways, both his decisions:
 
@@ -798,9 +812,9 @@ card's **outer** edge, outline included.
 
 | Element | Constant | Value |
 | --- | --- | --- |
-| Short side, `S` | `PileCardShortSide` | 225 |
-| Long side, `L` | `PileCardLongSide` | 405 |
-| Gap between piles, `G` | `PileCardGap` | 27 |
+| Short side, `S` | `PileCardShortSide` | 200 (was 225) |
+| Long side, `L` | `PileCardLongSide` | 360 (was 405) |
+| Gap between piles, `G` | `PileCardGap` | 24 (was 27) |
 | Scale of the turned-over card | `PileCardRevealScale` | `L / S` = 9/5 = 1.8 |
 | Corner radius | `PileCardRadius` | 26 (46.8 px once turned over) |
 | Outline | `PileCardBorderWidth` | 6, `Ink` (10.8 px once turned over) |
@@ -816,26 +830,26 @@ beside the die**. The other layout, which #402 still draws for comparison, has
 | Element | Constant | Value |
 | --- | --- | --- |
 | Water fill | `PondWater` and `PileCardWaterTileSize` | The pond-water texture, one tile 256 across, from the card's top-left corner, over `#9FD8F2` |
-| Lily pad, square | `PileCardPadSize` | 128 |
-| Gap between the two pads | `PileCardPadGap` | 41 |
-| Left edge to the first pad | `PileCardPadLeft` | 54 — `(L − 2 × 128 − 41) / 2`, so the pair is centred |
+| Lily pad, square | `PileCardPadSize` | 114 (was 128) |
+| Gap between the two pads | `PileCardPadGap` | 36 (was 41) |
+| Left edge to the first pad | `PileCardPadLeft` | 48 (was 54) — `(L − 2 × 114 − 36) / 2`, so the pair is centred |
 | Top edge to both pads | `PileCardPadTop` | 2 — the outline clips the top of each pad, as if it runs under the card's edge |
 | The pads' turn | `PileCardPadTurn` | Easy 15° anticlockwise, Medium 20° clockwise, Hard 30° anticlockwise |
 | Pad outline | `PileCardPadOutline` | 3, `Ink`, round the pad's own shape |
 | Pad shadow | `ShadowPileCardPad` | 6 straight down, `Ink` at 30 % |
-| One die picture, square | `PileCardDieFaceSize` | 62, `White`, centred on its pad |
-| Gap between the two die pictures | `PileCardDieFaceGap` | 107 — `PileCardPadGap` + `PileCardPadSize` − `PileCardDieFaceSize`, because each is centred on its pad |
-| Die picture corner | `PileCardDieFaceRadius` | 12 |
+| One die picture, square | `PileCardDieFaceSize` | 56 (was 62), `White`, centred on its pad, 29 in from the pad's edge |
+| Gap between the two die pictures | `PileCardDieFaceGap` | 94 (was 107) — `PileCardPadGap` + `PileCardPadSize` − `PileCardDieFaceSize`, because each is centred on its pad |
+| Die picture corner | `PileCardDieFaceRadius` | 11 (was 12) |
 | Die picture outline | `PileCardDieFaceOutline` | 4, `Ink` |
-| One pip | `PileCardDiePipDiameter` | 11, `Ink` |
-| Pip centre to pip centre | `PileCardDiePipPitch` | 14; the outer pips' centres are 17 from the die picture's edge, so 17 + 14 + 14 + 17 = 62 |
-| Log body | `PileCardLogWidth` × `PileCardLogHeight` | 256 × 58 |
-| Bottom edge to the log | `PileCardLogBottom` | 18 |
-| Log corner | `PileCardLogRadius` | 22 |
+| One pip | `PileCardDiePipDiameter` | 10 (was 11), `Ink` |
+| Pip centre to pip centre | `PileCardDiePipPitch` | 12 (was 14); the outer pips' centres are 16 from the die picture's edge, so 16 + 12 + 12 + 16 = 56 |
+| Log body | `PileCardLogWidth` × `PileCardLogHeight` | 228 × 52 (was 256 × 58) |
+| Bottom edge to the log | `PileCardLogBottom` | 16 (was 18) |
+| Log corner | `PileCardLogRadius` | 20 (was 22) |
 | Log outline | `PileCardLogOutline` | 5, `Ink` |
-| The log's cut end | `PileCardLogEndWidth` | An ellipse 34 wide and as tall as the log, outlined like it, standing 5 past the log's right end. The log and its end together are 261 wide, so the log starts 72 from the card's left edge and the pair is centred. |
+| The log's cut end | `PileCardLogEndWidth` | An ellipse 30 wide (was 34) and as tall as the log, outlined like it, standing 4 past the log's right end (was 5). The log and its end together are 232 wide, so the log starts 64 from the card's left edge (was 72) and the pair is centred. |
 | Log shadow | `ShadowPileCardLog` | 6 straight down, `Ink` at 30 % |
-| Pile name | `PileCardNameSize` | 38, `FontDisplay` semibold, 0.03 em letter spacing, `LogCarve` |
+| Pile name | `PileCardNameSize` | 34 (was 38), `FontDisplay` semibold, 0.03 em letter spacing, `LogCarve` |
 | The ink round the name | `PileCardNameOutline` | 6 `Ink` stroke drawn behind the letters, so 3 shows outside them |
 
 The pads are the lily-pad renders committed at
@@ -863,14 +877,25 @@ The pips sit on a three-by-three grid, numbered 0 to 8 across from the top
 left, and are the same as the panel's die: 1 → centre; 2 → top left, bottom
 right; 3 → those and the centre; 4 → the four corners; 5 → the corners and the
 centre; 6 → the left and right columns. A pip is
-`PileCardDiePipDiameter` / `PileCardDieFaceSize` = 11 / 62 ≈ 0.18 of its die
+`PileCardDiePipDiameter` / `PileCardDieFaceSize` = 10 / 56 ≈ 0.18 of its die
 picture, the same proportion as the panel's die in the agreed prototype
 (46 / 260), so the card's dice read as small copies of it.
+
+**What did not scale.** The card's outline (6), corner (26), its shadows, the
+pads' outline (3) and shadow (6), the die pictures' outline (4), the log's
+outline (5) and shadow (6), and the name's stroke (6) keep their values. They
+are line weights and shadow depths, which the [Pond style](style-guide.md)
+keeps the same across components, and 8/9 of them is not a whole pixel. The
+water tile stays 256, because it is the texture's scale, not the card's. On
+the 200 px card the pads end 116 down and the log starts 132 down, so there
+are 16 between them, where there were 19.
 
 ##### The front
 
 The front is the back's other side: `S` wide and `L` tall once it has turned,
-which is `405 × 729` on screen. Positions are from the turned-over card's outer
+which is `360 × 648` on screen (was `405 × 729`). Its constants are in card
+units and are **unchanged**; on the smaller card they leave less white round
+the problem, not a smaller problem. Positions are from the turned-over card's outer
 edge.
 
 | Element | Constant | Card units | On screen |
@@ -889,13 +914,15 @@ edge.
 | Pile name | `RevealedCardNameSize` | 20, with a 3 stroke behind | 36 px, 5.4 px |
 | Shadow | — | none: the turned-over card lies flat | — |
 
-The log and its end together are 137 wide, so the log starts 44 from the left
-edge and the pair is centred.
+The log and its end together are 137 wide, so the log starts 31.5 from the
+left edge (56.7 px on screen) and the pair is centred. It started 44 on the
+225 card.
 
 **The problem gets bigger when it is turned over, not smaller.** At 108 px,
 `331` is 165 px wide and `× 41` 178 px, measured in the committed Fredoka, so
-the widest problem in the game sits right-aligned, its left edge 137 px in
-from the card's left edge. Every problem fits: no pile deals anything wider than three digits over
+the widest problem in the game sits right-aligned, its left edge
+360 − 90 − 178 = **92 px** in from the card's left edge (137 px on the 405 px
+front). Every problem fits: no pile deals anything wider than three digits over
 `×` and two.
 
 ##### The motion
@@ -927,21 +954,26 @@ L² / S = 3S + 2G,  that is,  L² = 3S² + 2GS
 **`S` and `G` were chosen; `L` follows.** The prototype Derek agreed had
 `S = 223`, `L = 400`, `G = 24`, which is close but not exact:
 `3 × 223² + 2 × 24 × 223 = 159 891`, not `400² = 160 000`, so its revealed card
-was 717.49 px long against a 717 px footprint. The nearest set that comes out exactly in
-whole pixels is `S = 225`, `G = 27`:
+was 717.49 px long against a 717 px footprint. The set first merged was the
+nearest that comes out exactly in whole pixels, `S = 225`, `G = 27`, `L = 405`.
+The turn panel then needed the card about 45 px narrower (#402), and the set
+it uses is the same shape at 8/9 the size, `S = 200`, `G = 24`:
 
 ```
-3S² + 2GS = 3 × 225² + 2 × 27 × 225
-          = 3 × 50 625 + 12 150
-          = 151 875 + 12 150
-          = 164 025
-          = 405²,  so L = 405
+3S² + 2GS = 3 × 200² + 2 × 24 × 200
+          = 3 × 40 000 + 9 600
+          = 120 000 + 9 600
+          = 129 600
+          = 360²,  so L = 360
 ```
 
-Check: the column is `3 × 225 + 2 × 27 = 729` tall and `405` wide. The card
-turned and grown by `405 / 225 = 9/5` is `225 × 9/5 = 405` wide and
-`405 × 9/5 = 729` tall — exactly the column. The drawn card's centre moves by
-`S + G = 252` (down for Easy, none for Medium, up for Hard).
+Check: the column is `3 × 200 + 2 × 24 = 648` tall and `360` wide. The card
+turned and grown by `360 / 200 = 9/5` is `200 × 9/5 = 360` wide and
+`360 × 9/5 = 648` tall — exactly the column. The drawn card's centre moves by
+`S + G = 224` (down for Easy, none for Medium, up for Hard).
+
+Its `G` is the prototype's 24 again. The old set was
+`3 × 225² + 2 × 27 × 225 = 164 025 = 405²`, a 405 × 729 column.
 
 Choosing `S` and `G` rather than `L` keeps the scale a simple fraction, which is
 what makes every number on the front exact: 9/5 times a whole number is never
@@ -954,6 +986,12 @@ die, turning over into one **landscape** front — so Derek can compare. It was
 not chosen: its cards are less than a third of the area, and the die pictures
 come out at 38 with 7 px pips. If #402 picks it after all, these replace the
 chosen values; otherwise nothing here is built.
+
+**It was not resized with the chosen card.** Its row is 405 wide, the old
+column's width. At 9/5 no whole-number set gives a 360 px row (it would need
+`S` ≈ 111.1), so it is left as it was drawn, for the comparison only. If it
+were ever chosen, its numbers would be worked out again against the panel as
+it is then.
 
 | Element | Constant | Value |
 | --- | --- | --- |

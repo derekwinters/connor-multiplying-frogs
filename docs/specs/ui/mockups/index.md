@@ -22,6 +22,7 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Turn panel, Ready, piles above the die (the comparison) | [`turn-panel-ready-piles-above.html`](turn-panel-ready-piles-above.html) | [Turn panel](../turn-panel.md) |
 | Turn panel, Rolling | [`turn-panel-rolling.html`](turn-panel-rolling.html) | [Turn panel](../turn-panel.md) |
 | Turn panel, Solving, `331 × 41` | [`turn-panel-solving.html`](turn-panel-solving.html) | [Turn panel](../turn-panel.md) |
+| Turn panel, Solving, `331 × 41`, `Help me` pressed | [`turn-panel-solving-help.html`](turn-panel-solving-help.html) | [Turn panel](../turn-panel.md) |
 | Roll and card (retired) | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |

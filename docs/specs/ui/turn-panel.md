@@ -20,8 +20,21 @@ Wireframed on
 The layout, the header words and the timings below were agreed by Derek in an
 interactive prototype before this page was written. This page records those
 decisions, with the prototype's positions worked out again against the
-[pile card](shared-components.md#pile-card)'s merged numbers so that every sum
+[pile card](shared-components.md#pile-card)'s numbers so that every sum
 comes out exactly.
+
+> **How the spec is changing (#529).** The first version of this page put a
+> 405 px card beside the grid, and on a Hard card `Help me`'s printed products
+> had nowhere to go: they needed about 154 px left of the grid and there were
+> 95. That was
+> [#529](https://github.com/derekwinters/connor-multiplying-frogs/issues/529).
+> Derek chose **layout D** from four drawn options: a **smaller pile card**,
+> 200 × 360 instead of 225 × 405, and **slimmer keypad keys**, 124 px instead
+> of 140. Together they free 93 px across, and the products now fit beside the
+> grid at full size with the grid and the card untouched. The card's numbers
+> are the [pile card](shared-components.md#pile-card)'s and the keys are the
+> [working-out grid](working-out-grid.md#named-constants)'s; both pages say
+> what changed. The sums below are layout D's.
 
 **This page owns the panel**: its regions, where they sit, the die, the
 `Roll` button, the phases and the motion between them. It does **not** own two
@@ -68,8 +81,14 @@ pile it came from.
 **Invariant:** the grid is never made smaller to fit beside the card. If
 something does not fit at the
 [working-out grid](working-out-grid.md)'s own sizes, that is reported, not
-shrunk away. The one thing that does not fit is
-[open question 1](#open-questions).
+shrunk away. Everything fits: the widest card, with `Help me` pressed and all
+six products printed, overlaps nothing.
+**Invariant:** the grid does not move across when `Help me` is pressed. The
+room the printed products need on the grid's left is kept beside it from the
+moment it comes in, whether or not the button is ever pressed. (The grid does
+still re-centre **down** the panel when the button grows its addition section,
+which is the [working-out grid](working-out-grid.md#behaviour)'s existing
+rule for a grown section.)
 
 ## Requirements
 
@@ -161,19 +180,27 @@ the pile card measures its own numbers. The content runs from `DialogPadding`
   This is the same 216 px as `KeypadTop`, so the top of the cards lines up
   with the top of the keypad in Solving. Its footprint is the pile card's: in
   the chosen layout, a column `PileCardLongSide` wide and
-  3 × `PileCardShortSide` + 2 × `PileCardGap` tall, **405 × 729**. The cards
-  sit `PileCardGap` (27 px) apart, Easy at the top, Medium, then Hard.
+  3 × `PileCardShortSide` + 2 × `PileCardGap` tall, **360 × 648**. The cards
+  sit `PileCardGap` (24 px) apart, Easy at the top, Medium, then Hard.
 - **The stage** runs from the right edge of `piles` to the content's right
   edge. `die` and `roll` are centred in it across, one above the other,
   `TurnPanelDieRollGap` apart. As a group they are centred down the height of
   `piles`.
-- **`keypad`** is the grid page's, unchanged. It is pinned to the content's
-  right edge, `KeypadTop` (216 px) down, `KeypadWidth` (452 px) wide, with
-  `Check it` `KeypadSubmitGap` below it.
-- **`grid`** is centred, the grid page's way, in the space left over. Across,
-  that space now runs from the right edge of `piles` to the keypad's left edge.
-  It used to run from `DialogPadding`. Down, it runs from the bottom of the
-  header band to the panel's last usable pixel, unchanged at 908 px.
+- **`keypad`** is the grid page's. It is pinned to the content's right edge,
+  `KeypadTop` (216 px) down, `KeypadWidth` (404 px) wide, with `Check it`
+  `KeypadSubmitGap` below it. Its keys are `KeypadKeySize` (124 px), slimmer
+  than the 140 px they were, for layout D.
+- **`grid`** is centred in the space left over, together with the room its
+  printed products need. Across, that space runs from the right edge of
+  `piles` to the keypad's left edge, 948 px. What is centred in it is one
+  block: `GridHelpColumnWidth` (128 px) for the `help` column, `GridHelpGap`
+  (32 px), then the grid. The block is the same whether or not `Help me` has
+  been pressed, so the grid's left edge is too. Down, the grid alone is centred
+  from the bottom of the header band to the panel's last usable pixel,
+  unchanged at 908 px.
+- **`help`** is the grid page's right-aligned column, its right edge
+  `GridHelpGap` left of the grid. On a Hard card its widest line, `40 × 300`,
+  is 122.5 px, inside the 128 px kept for it.
 - **`hint`** has its right edge at the content's right edge and its bottom
   `TurnPanelSkipHintBottom` above the panel's bottom edge. That is in the
   panel's padding, below everything else. The hint only shows while the stage
@@ -204,24 +231,41 @@ from the panel's outer left edge.
 **Ready and Rolling**, piles beside the die:
 
 ```
-1712 = 405 (piles) + 1307 (stage)
-1307 = 523 + 260 (DieFaceSize) + 524                    die at 56 + 405 + 523 = 984
-1307 = 443 + 420 (TurnPanelRollButtonWidth) + 444       Roll at 56 + 405 + 443 = 904
+1712 = 360 (piles) + 1352 (stage)
+1352 = 546 + 260 (DieFaceSize) + 546                    die at 56 + 360 + 546 = 962
+1352 = 466 + 420 (TurnPanelRollButtonWidth) + 466       Roll at 56 + 360 + 466 = 882
 ```
 
-**Solving**, card and grid and keypad. The grid width is
+**Solving**, card, products, grid and keypad. The grid width is
 `n × GridCellSize + (n − 1) × GridCellGap` for `n` columns, operator column
-included:
+included. The 160 is `GridHelpColumnWidth` (128) + `GridHelpGap` (32), and it
+is in every row whether or not `Help me` has been pressed:
 
 ```
-1712 = 405 (revealed card) + 855 (grid's space) + 452 (KeypadWidth)
- 855 = 95  + 664 (331 × 41, 6 columns) + 96            grid at 56 + 405 + 95 = 556
- 855 = 151 + 552 (a Medium card, 5 columns) + 152
- 855 = 207 + 440 (68 × 5, 4 columns) + 208
+1712 = 360 (revealed card) + 948 (grid's space) + 404 (KeypadWidth)
+ 948 = 62  + 160 + 664 (331 × 41, 6 columns) + 62        grid at 56 + 360 + 62 + 160 = 638
+ 948 = 118 + 160 + 552 (a Medium card, 5 columns) + 118  grid at 694
+ 948 = 174 + 160 + 440 (68 × 5, 4 columns) + 174         grid at 750
 ```
 
-The revealed card is exactly the pile column. It is 225 × 9/5 = 405 wide and
-405 × 9/5 = 729 tall: the
+On `331 × 41` with `Help me` pressed, the products' right edge is at
+638 − 32 = 606, and `40 × 300`, 122.5 px in the committed Fredoka at
+`GridHelpItemSize`, starts at 483.5. That is 67.5 px clear of the card's right
+edge at 416, and the grid ends 62 px short of the keypad.
+
+The same row in canvas pixels, which is what the mockups are drawn in (add the
+panel's 48):
+
+| | Left | Right |
+| --- | --- | --- |
+| The turned-over card | 104 | 464 |
+| `help`, the 128 px kept for it | 526 | 654 |
+| `40 × 300`, the widest product | 531.5 | 654 |
+| The grid, `331 × 41` | 686 | 1350 |
+| The keypad and `Check it` | 1412 | 1816 |
+
+The revealed card is exactly the pile column. It is 200 × 9/5 = 360 wide and
+360 × 9/5 = 648 tall: the
 [pile card's own check](shared-components.md#the-proportions-are-derived-not-chosen).
 
 **The header**, Solving, with the `Green` chip:
@@ -238,37 +282,36 @@ is still over 700 px.
 
 ```
 1104 = 140 (header band) + 908 (grid's space) + 56 (DialogPadding)
-piles:  216 + 729 = 945, leaving 103 above the last usable pixel at 1048
-stage:  729 = 120 + 260 (die) + 100 (TurnPanelDieRollGap) + 128 (Roll) + 121
-        die at 216 + 120 = 336, Roll at 336 + 260 + 100 = 696
+piles:  216 + 648 = 864, leaving 184 above the last usable pixel at 1048
+stage:  648 = 80 + 260 (die) + 100 (TurnPanelDieRollGap) + 128 (Roll) + 80
+        die at 216 + 80 = 296, Roll at 296 + 260 + 100 = 656
 grid:   908 = 88 + 732 (331 × 41 as dealt) + 88        grid at 140 + 88 = 228
-keypad: 216 + 608 (4 keys, 3 gaps) + 24 + 128 (Check it) = 976
+        908 = 8 + 892 (after Help me, six rows) + 8     grid at 140 + 8 = 148
+help:   first addition row at 148 + 302 = 450, then every 64 px: 450 … 770
+keypad: 216 + 544 (4 keys of 124, 3 gaps of 16) + 24 + 128 (Check it) = 912
 ```
 
 The grid's vertical sums are unchanged from the
 [working-out grid](working-out-grid.md#mockup), up to the six-row cap's
-892 px in 908. `Roll`'s 10 px lip ends at 834, well inside the pile column's
-945.
+892 px in 908. The 302 above the first addition row is the carry strip, the
+multiplicand and multiplier rows, the rule and four 8 px gaps. `Roll`'s 10 px
+lip ends at 794, inside the pile column's 864.
 
-### What fits beside the card, and what does not
+### What fits beside the card
 
-**The grid and the keypad fit at full size.** The widest card's grid is
-664 px and there are 855 px for it. Nothing in the grid was shrunk, moved
+**Everything, at full size.** The widest card's grid is 664 px, the widest
+product is 122.5 px, and with `GridHelpGap` between them they need 818 of the
+948 px between the card and the keypad. Nothing in the grid was shrunk, moved
 inside, or changed size to make room for the card.
 
-**`Help me`'s printed products do not, on a Hard card.** On the grid page they
-print in a right-aligned column `GridHelpGap` (32 px) left of the grid. That
-space came from 296 px spare on the grid's left. Beside the card there are
-95 px. The widest product on a Hard card is `40 × 300`, which is 122 px in the
-committed Fredoka at `GridHelpItemSize`, so the column needs 154 px. It would
-run about 60 px onto the turned-over card. Easy and Medium cards fit: the widest
-Medium product, `90 × 90`, needs 134 px of 151. Moving the grid does not
-rescue it, because the spare on `331 × 41` is 191 px in total.
-
-This page does not shrink the grid or the products to make it fit, and does
-not pick a place for them. It is [open question 1](#open-questions). The
-Solving mockup draws the card as dealt, before `Help me` is pressed, which is
-the state that fits.
+It did not fit at first. Beside a 405 px card, with 140 px keys, the grid had
+855 px and was centred in it, leaving 95 px on its left, and the product column
+needs 154. Derek chose layout D on
+[#529](https://github.com/derekwinters/connor-multiplying-frogs/issues/529):
+the card loses 45 px across (405 → 360) and the keypad loses 48 (452 → 404),
+which gives the grid's space 93 px more, 855 → 948. He chose it from four
+drawn layouts. The products, `GridHelpGap`, the grid and the card's design all
+keep their sizes; only the card's scale and the keys changed.
 
 ## Named constants
 
@@ -285,12 +328,12 @@ restated here.
 | Panel height | `TurnPanelHeight` | 1104 px, which is `DialogMaxHeight` |
 | Padding | `DialogPadding` | 56 px (shared) |
 | The piles' top, down from the panel's top edge | `TurnPanelPileTop` | 216 px, the same as `KeypadTop` |
-| Gap between the three face-down cards | `PileCardGap` | 27 px. The pile card owns it; see below |
+| Gap between the three face-down cards | `PileCardGap` | 24 px. The pile card owns it; see below |
 | `Roll the die` and `Work it out` | `GridPromptSize` | 44 px, `FontDisplay` medium, `InkSoft` (the grid page's) |
 
 **The issue's `PileRowGap` is not declared.** The gap between the cards is
 `PileCardGap`. That is the `G` in `L² = 3S² + 2GS`, so it cannot change
-without changing the card. A second name for the same 27 px is how the two
+without changing the card. A second name for the same 24 px is how the two
 would drift apart.
 
 ### The die
@@ -475,7 +518,7 @@ prototype shows it too, and nothing here hides it.
 
 ## Mockup
 
-Four, all at 1920 × 1200, static HTML and CSS with no script.
+Five, all at 1920 × 1200, static HTML and CSS with no script.
 
 - **Ready, piles beside the die, the chosen layout:**
   [`mockups/turn-panel-ready-piles-beside.html`](mockups/turn-panel-ready-piles-beside.html)
@@ -486,6 +529,10 @@ Four, all at 1920 × 1200, static HTML and CSS with no script.
 - **Solving**, `331 × 41` turned over across the piles, with the grid and
   keypad as dealt:
   [`mockups/turn-panel-solving.html`](mockups/turn-panel-solving.html)
+- **Solving, `Help me` pressed**: the same card after `Help me`, the button
+  disabled, the addition section grown to six rows and all six products printed
+  between the card and the grid, which has not moved across:
+  [`mockups/turn-panel-solving-help.html`](mockups/turn-panel-solving-help.html)
 
 ### Beside or above: settled, beside
 
@@ -496,15 +543,20 @@ are kept so the comparison stays visible:
 
 | | Beside, chosen | Above |
 | --- | --- | --- |
-| The backs | Three landscape cards, 405 × 225, in a column | Three portrait cards, 125 × 225, in a row |
-| Turned over | One portrait card, 405 × 729 | One landscape card, 405 × 225 |
-| Die pictures on a back | 62 px, 11 px pips | 38 px, 7 px pips |
+| The backs | Three landscape cards, 360 × 200, in a column | Three portrait cards, 125 × 225, in a row |
+| Turned over | One portrait card, 360 × 648 | One landscape card, 405 × 225 |
+| Die pictures on a back | 56 px, 10 px pips | 38 px, 7 px pips |
 | Where the problem goes | Stacked, at 108 px | One line, on a card a third the height |
 
 The two pictures differ only where the piles force them to. The header, panel,
 die, `Roll` and every size are the same. In **above** the row takes the top of
-the same 405 px left column, and the die and `Roll` move down into that column
-beneath it, because the row now sits where the stage's top half would be. The
+a 405 px left column, and the die and `Roll` move down into that column
+beneath it, because the row now sits where the stage's top half would be.
+**Above was not redrawn for layout D.** Its row is still the old column's
+405 px, wider than the chosen column's 360, because no whole-number set of its
+cards makes a 360 px row (see the
+[pile card](shared-components.md#if-the-piles-sit-above-the-die)). It is kept
+as the comparison it was. The
 die is centred in the column (72 + 260 + 73 = 405), `TurnPanelDieRollGap`
 below the row, and `Roll` narrows to the column's 405 px, so it does not stick
 out past the content's edge. The row's sum is the
@@ -517,13 +569,14 @@ front.
 
 ## Open questions
 
-1. **Where do `Help me`'s printed products go on a Hard card?**
+None is open. The one this page raised is answered:
+
+1. **Where do `Help me`'s printed products go on a Hard card? Answered:
+   layout D.**
    ([#529](https://github.com/derekwinters/connor-multiplying-frogs/issues/529))
-   The column they print in needs 154 px left of the grid, and beside the
-   turned-over card there are 95 px. See
-   [what fits beside the card](#what-fits-beside-the-card-and-what-does-not).
-   It is not decided here, and the build of the Solving phase (#406) is
-   blocked on it.
+   Derek chose a smaller pile card and slimmer keys so the products fit beside
+   the grid where the grid page always put them. See
+   [what fits beside the card](#what-fits-beside-the-card).
 
 The two questions [roll and card](roll-and-card.md#open-questions) carried are
 both answered by this panel:
