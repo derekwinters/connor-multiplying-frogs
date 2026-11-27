@@ -17,8 +17,8 @@ namespace Frogs.Unity.Views
     /// <summary>
     /// The title screen — docs/specs/ui/title-screen.md — built to the
     /// wireframe #484 settled: Connor's splash picture, frogs, log and drawn
-    /// title and all, fitted whole inside the screen's safe area with its own
-    /// edges carried out to the screen's edges (#533), and a wooden sign in the
+    /// title and all, fitted whole inside the screen's safe area in front of
+    /// the same pond carried on to the screen's edges (#533), and a wooden sign in the
     /// grass bottom-right that says `START` (#520). `START` is the control
     /// that used to read `NEW`: it goes to game setup and does nothing else.
     /// `RESUME` is still a real shared <see cref="Button"/> behind the
@@ -68,6 +68,14 @@ namespace Frogs.Unity.Views
         /// <summary>The art, for <see cref="Resources.Load(string)"/>: Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png, written by art-source/splash/build_splash.py --home-only.</summary>
         public const string ArtResource = "TitleScreen/title-screen-1920x1200";
 
+        /// <summary>The extended scene, for <see cref="Resources.Load(string)"/>: Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png, the same layers rendered past the art's frame by art-source/splash/build_splash.py --home-only (#533).</summary>
+        public const string SceneResource = "TitleScreen/title-scene-2880x1440";
+
+        // The extended scene's size in the art's reference pixels, with the art's
+        // 1920 x 1200 in its middle — docs/specs/ui/title-screen.md's Anchors.
+        public const float TitleSceneWidth = 2880f;
+        public const float TitleSceneHeight = 1440f;
+
         /// <summary>The sign's font, for <see cref="Resources.Load(string)"/>: Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf, the static weight-700 instance of the title's variable font.</summary>
         public const string SignFontResource = "Fredoka/Fredoka-Bold";
 
@@ -97,7 +105,8 @@ namespace Frogs.Unity.Views
 
         RectTransform _backdropRect;
         CanvasGroup _backdropCanvasGroup;
-        RawImage _bleedImage;
+        RectTransform _sceneRect;
+        Image _sceneImage;
         RectTransform _artRect;
         Image _artImage;
 
@@ -178,19 +187,14 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>
-        /// The `bleed` region: the art's texture over the whole canvas, its
-        /// edges clamped, mapped so the art's own span lands exactly on
-        /// <see cref="ArtRect"/> and the strips the fit leaves carry the art's
-        /// edge pixels out to the screen's edges.
-        /// </summary>
-        public RawImage BleedImage
+        /// <summary>The `scene` region: the same pond carried on past the art's frame, behind the art, reaching every edge of the screen.</summary>
+        public Image SceneImage
         {
             get
             {
                 EnsureInitialized();
                 FitArt();
-                return _bleedImage;
+                return _sceneImage;
             }
         }
 
@@ -337,8 +341,13 @@ namespace Frogs.Unity.Views
             _contentRect.localScale = new Vector3(fit.Scale, fit.Scale, 1f);
             _contentRect.anchoredPosition = artCentre;
 
-            var uv = fit.BleedUv(canvas.x, canvas.y);
-            _bleedImage.uvRect = new Rect(uv.X, uv.Y, uv.Width, uv.Height);
+            // The scene behind it, at the art's scale and centred on it, so its
+            // middle is exactly the art.
+            var scene = fit.Scene(canvas.x, canvas.y, TitleSceneWidth, TitleSceneHeight);
+            _sceneRect.sizeDelta = new Vector2(scene.Width, scene.Height);
+            _sceneRect.anchoredPosition = new Vector2(
+                scene.X + (scene.Width / 2f) - (canvas.x / 2f),
+                scene.Y + (scene.Height / 2f) - (canvas.y / 2f));
         }
 
         /// <summary>
@@ -471,20 +480,24 @@ namespace Frogs.Unity.Views
             _backdropCanvasGroup.interactable = false;
             _backdropCanvasGroup.blocksRaycasts = false;
 
-            // bleed — the art's own texture over the whole canvas, sampled
-            // with its edges clamped (TitleScreenArtImport sets the clamp), so
-            // what the fitted art leaves of the screen is the art's edge
-            // pixels carried outwards: sky, reeds, water and grass to the
-            // sides of a wide phone, sky above and grass below on a 4:3
-            // screen. Its UV rectangle is set by FitArt.
-            var bleedGO = new GameObject("Bleed", typeof(RectTransform), typeof(RawImage));
-            _bleedImage = bleedGO.GetComponent<RawImage>();
+            // scene — the same pond carried on past the art's frame, rendered
+            // from the same layers (#533), so on a screen that is not 16:10 the
+            // room round the fitted art is more of the picture. Placed by FitArt.
+            var sceneGO = new GameObject("Scene", typeof(RectTransform), typeof(Image));
+            _sceneImage = sceneGO.GetComponent<Image>();
+            _sceneImage.sprite = Resources.Load<Sprite>(SceneResource);
+            _sceneImage.color = Color.white;
+            _sceneImage.type = Image.Type.Simple;
+            _sceneImage.raycastTarget = false;
+
+            _sceneRect = _sceneImage.rectTransform;
+            _sceneRect.SetParent(_backdropRect, worldPositionStays: false);
+            _sceneRect.anchorMin = new Vector2(0.5f, 0.5f);
+            _sceneRect.anchorMax = new Vector2(0.5f, 0.5f);
+            _sceneRect.pivot = new Vector2(0.5f, 0.5f);
+            _sceneRect.sizeDelta = new Vector2(TitleSceneWidth, TitleSceneHeight);
+
             var artSprite = Resources.Load<Sprite>(ArtResource);
-            _bleedImage.texture = artSprite != null ? artSprite.texture : null;
-            _bleedImage.color = Color.white;
-            _bleedImage.raycastTarget = false;
-            _bleedImage.rectTransform.SetParent(_backdropRect, worldPositionStays: false);
-            StretchToFill(_bleedImage.rectTransform);
 
             // art — the whole splash composite, fitted whole inside the
             // safe area at its own 16:10 shape; see FitArt.

@@ -87,22 +87,63 @@ namespace Frogs.Core.Tests
             Assert.That(fit.Art.Y, Is.EqualTo(-ArtHeight / 2f).Within(Tolerance));
         }
 
+        // The extended scene behind the art: the same pond, wider and taller, with the
+        // art's 1920 x 1200 in its middle (art-source/splash/beyond.py).
+        const float SceneWidth = 2880f;
+        const float SceneHeight = 1440f;
+
         [Test]
-        public void TheBleed_MapsTheWholeCanvasOntoTheArtsTexture_SoTheArtsOwnSpanIsZeroToOne()
+        public void OnAWidePhone_TheSceneIsDrawnAtTheArtsScale_CentredOnTheArt_SoTheyLineUp()
         {
-            // The bleed is one texture-mapped quad over the whole canvas,
-            // sampling the art with its edges clamped: its UV rectangle is
-            // the canvas measured in art widths and heights from the art's
-            // bottom-left corner. Between 0 and 1 it is exactly the art;
-            // outside, the art's edge pixels carried out to the screen edge.
             var fit = TitleArtFit.Fit(WidePhoneCanvasWidth, ArtHeight, WholeCanvas(WidePhoneCanvasWidth, ArtHeight), ArtWidth, ArtHeight);
 
-            var uv = fit.BleedUv(WidePhoneCanvasWidth, ArtHeight);
+            var scene = fit.Scene(WidePhoneCanvasWidth, ArtHeight, SceneWidth, SceneHeight);
 
-            Assert.That(uv.X, Is.EqualTo(-340f / ArtWidth).Within(Tolerance));
-            Assert.That(uv.Y, Is.EqualTo(0f).Within(Tolerance));
-            Assert.That(uv.Width, Is.EqualTo(WidePhoneCanvasWidth / ArtWidth).Within(Tolerance));
-            Assert.That(uv.Height, Is.EqualTo(1f).Within(Tolerance));
+            Assert.That(scene.Width, Is.EqualTo(SceneWidth).Within(Tolerance));
+            Assert.That(scene.Height, Is.EqualTo(SceneHeight).Within(Tolerance));
+            Assert.That(scene.X, Is.EqualTo(340f - 480f).Within(Tolerance), "its middle is exactly where the art is");
+            Assert.That(scene.Y, Is.EqualTo(-120f).Within(Tolerance));
+        }
+
+        [Test]
+        public void OnAFourByThreeScreen_TheSceneFillsTheExtraHeight_AtTheArtsScale()
+        {
+            var fit = TitleArtFit.Fit(ArtWidth, FourByThreeCanvasHeight, WholeCanvas(ArtWidth, FourByThreeCanvasHeight), ArtWidth, ArtHeight);
+
+            var scene = fit.Scene(ArtWidth, FourByThreeCanvasHeight, SceneWidth, SceneHeight);
+
+            Assert.That(scene.Width, Is.EqualTo(SceneWidth).Within(Tolerance));
+            Assert.That(scene.X, Is.EqualTo(-480f).Within(Tolerance));
+            Assert.That(scene.Y, Is.EqualTo(0f).Within(Tolerance));
+        }
+
+        [Test]
+        public void OnAScreenWiderThanTheScene_ItIsScaledUpAboutTheArtsCentre_JustEnoughToCover()
+        {
+            // 8:3, wider than the scene's 2.4:1: at the art's scale it would stop short.
+            var fit = TitleArtFit.Fit(3200f, ArtHeight, WholeCanvas(3200f, ArtHeight), ArtWidth, ArtHeight);
+
+            var scene = fit.Scene(3200f, ArtHeight, SceneWidth, SceneHeight);
+
+            Assert.That(scene.Width, Is.EqualTo(3200f).Within(Tolerance));
+            Assert.That(scene.Height, Is.EqualTo(1600f).Within(Tolerance));
+            Assert.That(scene.X, Is.EqualTo(0f).Within(Tolerance));
+            Assert.That(scene.Y + (scene.Height / 2f), Is.EqualTo(600f).Within(Tolerance), "still centred on the art");
+        }
+
+        [Test]
+        public void WhenACutOutShrinksTheArt_TheSceneStillCoversTheScreen()
+        {
+            var safeArea = new LayoutRect(120f, 0f, 1800f, FourByThreeCanvasHeight);
+            var fit = TitleArtFit.Fit(ArtWidth, FourByThreeCanvasHeight, safeArea, ArtWidth, ArtHeight);
+
+            var scene = fit.Scene(ArtWidth, FourByThreeCanvasHeight, SceneWidth, SceneHeight);
+
+            Assert.That(scene.X, Is.LessThanOrEqualTo(0f));
+            Assert.That(scene.Y, Is.LessThanOrEqualTo(0f));
+            Assert.That(scene.X + scene.Width, Is.GreaterThanOrEqualTo(ArtWidth - Tolerance));
+            Assert.That(scene.Y + scene.Height, Is.GreaterThanOrEqualTo(FourByThreeCanvasHeight - Tolerance));
+            Assert.That(scene.X + (scene.Width / 2f), Is.EqualTo(fit.Art.X + (fit.Art.Width / 2f)).Within(Tolerance));
         }
 
         [Test]

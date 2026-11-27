@@ -29,7 +29,8 @@ typed into a layout.
 fitted *inside* the device's safe area and never cropped, so the drawn title,
 the big frog on the log and the `START` sign are all visible on a 2.17:1 phone,
 on the 16:10 tablet and on a 4:3 screen alike. A wider or taller screen adds
-[`bleed`](#regions) around the picture; it never cuts into it.
+more of the same pond — [`scene`](#regions) — around the picture; it never
+cuts into it.
 **Invariant:** the sign and the version string are laid out on the fitted
 picture, not on the screen. Wherever the picture lands and at whatever size,
 each of them is on the same spot of it as on the 16:10 mockup — the sign on the
@@ -57,7 +58,7 @@ visible, and they are not true anywhere else on this page.
 | Region | Job |
 | --- | --- |
 | `art` | The whole splash picture — every frog with its hop line, the log, and the drawn title — fitted whole inside the screen's safe area, behind the sign and the version string |
-| `bleed` | Where the screen is wider or taller than 16:10: the picture's own edge carried out to the screen's edges, behind `art` |
+| `scene` | Where the screen is wider or taller than 16:10: the same pond carried on past the picture's frame — more sky, water, reeds and grass — to the screen's edges, behind `art` |
 | `start` | The `START` sign: a plank on a post, standing in the grass bottom-right |
 | `footprint` | Version string, bottom-left; small and quiet |
 
@@ -78,15 +79,20 @@ one — [open question 8](#open-questions).
   stretched out of its 16:10 shape. The device's safe area is the screen less
   what the system reports as cut-outs and rounded corners (Unity's
   `Screen.safeArea`).
-- `bleed` fills the rest of the screen, to all four edges: each strip beside
-  or above and below the picture continues the picture's own edge outwards —
-  every row of the picture's left and right edge carried out sideways, every
-  column of its top and bottom edge carried out up and down. On a wide phone
-  that is sky, reeds, water and grass running out to the sides; on a 4:3
-  screen, sky above and grass below. It is drawn from the art, fades in with
-  it, and is never tappable. The art and its bleed together are the one
-  element allowed to run to the screen edge, because they are a picture and a
-  margin around a picture is a border nobody asked for.
+- `scene` fills the rest of the screen, to all four edges. It is the same
+  picture made wider and taller, 2880 × 1440 (`TitleSceneWidth` ×
+  `TitleSceneHeight`) with the 1920 × 1200 art exactly in its middle: the
+  splash's background layers are drawn on past the frame (the sky's gradient,
+  the reed clumps and far banks mirrored at the edge, the pond and the front
+  grass carried round from the other side), so a wide phone sees more pond
+  beside the picture and a 4:3 screen more sky above and grass below. It is
+  drawn at the art's own scale and centred on it, so the two line up and no
+  join shows; only on a screen wider than 2.4:1 or taller than 4:3, or when a
+  cut-out has shrunk the art, is it scaled up about the art's centre, just
+  enough to reach every edge. It fades in with the art and is never tappable.
+  The art and its scene together are the one element allowed to run to the
+  screen edge, because they are a picture and a margin around a picture is a
+  border nobody asked for.
 - `art` is Connor's splash picture, rebuilt as layers under
   [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
   with every layer it uses shown: the same picture as the launch splash. The
@@ -107,7 +113,7 @@ one — [open question 8](#open-questions).
   The post is part of the drawing, not of the target.
 - `footprint` is pinned to the art's bottom-left corner, `SafeMargin` in from
   each edge — at 1920 × 1200, the bottom-left safe area corner. It stays on the
-  picture rather than going out into `bleed`, by the
+  picture rather than going out into `scene`, by the
   [shared rule](shared-components.md#what-fills-a-screen-that-is-not-1610)
   that the extra space a wider screen gives is background and nothing else.
 - When the art is scaled down to fit a cut-out, the sign and the version string
@@ -133,6 +139,18 @@ feet — and left the version string on a lily pad, because the picture had
 grown under it. The picture is fitted, not cropped, and the sign and the
 version string are placed on it, so they cannot drift off it.
 
+What fills the room beside the fitted picture was Derek's call on
+[PR #535](https://github.com/derekwinters/connor-multiplying-frogs/pull/535).
+Two fills were drawn first and turned down: the picture's edge pixels
+stretched outwards (*"The streaks look bad"*) and a blurred copy of it
+(*"Can't we just extend the scene instead of adding blurry edges"*). He chose
+the extended scene, built into the splash's layers rather than painted onto
+the flat picture (*"That's part of all the assets right?"*). Its known flaws,
+accepted with it: each reed clump past the frame is a mirror image of the one
+inside it; where a mirror meets the shoreline there is a small notch; and on
+a 4:3 screen a faint lighter column shows above the title, where its glow is
+mirrored upwards.
+
 ## Named constants
 
 | Element | Constant | Value |
@@ -155,6 +173,8 @@ version string are placed on it, so they cannot drift off it.
 | `START` label letter spacing | `TitleSignLabelTracking` | 2 px |
 | Sign plank's size while held, of its own | `TitleSignPressScale` | 0.95 |
 | Version string size | `VersionLabelSize` | 28 px |
+| Extended scene width, in the art's reference pixels | `TitleSceneWidth` | 2880 px |
+| Extended scene height, likewise | `TitleSceneHeight` | 1440 px |
 | Entering fade, art (the drawn title is part of it) | `TitleFadeDuration` | 0.3 s |
 
 The `START` label is set in **Fredoka Bold** (weight 700), the font the title is

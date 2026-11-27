@@ -35,6 +35,7 @@ by building a second time from scratch (every cut-out and trace recomputed) and 
     python3 art-source/splash/build_splash.py --icon-only      # only the app icon, from the committed layers
     python3 art-source/splash/build_splash.py --splash-only    # only the launch splash, likewise
     python3 art-source/splash/build_splash.py --home-only      # only the title screen's art, likewise
+                                                               # (and its extended scene)
 
 See README.md in this folder for the layers and how each is made.
 """
@@ -53,6 +54,7 @@ from PIL import Image, ImageDraw
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import beyond  # noqa: E402
 import cutout as cu  # noqa: E402
 import home  # noqa: E402
 import icon  # noqa: E402
@@ -177,6 +179,8 @@ def object_svg_parts(oid):
         defs += "".join(sdefs)
     else:
         defs, inner = traced_body(oid)
+    # the background past the frame (#533): drawn only outside it, so nothing inside changes
+    defs, inner = beyond.extend(oid, defs, inner)
     body = f'<g id="{oid}" inkscape:label="{label(oid)}">\n{inner}</g>\n'
     return defs, body
 
@@ -256,6 +260,7 @@ def object_view(oid):
 
 def standalone_svg(oid):
     defs, body = parts(oid)
+    body = beyond.within_frame(oid, body)
     return svg_doc(defs, body, view=object_view(oid), title=f"Multiplying Frogs splash - {label(oid)}")
 
 
@@ -412,6 +417,18 @@ def home_png():
     return img
 
 
+def scene_png():
+    """The title screen's extended scene (#533): the same stack as home_png(), in the wider
+    window home.SCENE_VIEW, so the background layers' drawing past the frame (beyond.py)
+    fills the margin; opaque."""
+    svg = stack_svg(home.home_ids(object_ids()), title="Multiplying Frogs title screen, extended",
+                    view=home.SCENE_VIEW)
+    img = render(svg, home.SCENE_SIZE[0]).convert("RGB")
+    if img.size != home.SCENE_SIZE:
+        raise SystemExit(f"the title screen's scene rendered at {img.size}, not {home.SCENE_SIZE}")
+    return img
+
+
 def write_home():
     """The title screen's art, and the title's font and licence beside it for the mockup;
     then the game's copies (#520): the same art under Assets/, and a static Fredoka Bold
@@ -426,6 +443,8 @@ def write_home():
     home.ASSETS_FONT_DIR.mkdir(parents=True, exist_ok=True)
     (home.ASSETS_FONT_DIR / "Fredoka-Bold.ttf").write_bytes(home.bold_font_bytes())
     shutil.copyfile(HERE / "fonts" / "OFL.txt", home.ASSETS_FONT_DIR / "OFL.txt")
+    # the extended scene behind it on screens that are not 16:10 (#533)
+    save_png(scene_png(), home.ASSETS_SCENE_OUT)
 
 
 def load_committed_parts():
@@ -475,7 +494,7 @@ def build():
 def outputs():
     files = [COMPOSITE.with_suffix(".svg"), COMPOSITE.with_suffix(".png"), icon.ICON_OUT,
              launch.SPLASH_OUT, home.HOME_OUT] + [home.HOME_OUT.parent / "fonts" / n for n in home.FONT_FILES]
-    files += [home.ASSETS_ART_OUT] + [home.ASSETS_FONT_DIR / n for n in home.ASSETS_FONT_FILES]
+    files += [home.ASSETS_ART_OUT, home.ASSETS_SCENE_OUT] + [home.ASSETS_FONT_DIR / n for n in home.ASSETS_FONT_FILES]
     for d in (LAYERS_DIR, OBJECTS_DIR, REVIEW_DIR):
         files += sorted(d.iterdir())
     return files
@@ -566,7 +585,7 @@ def main():
     if args.home_only:
         load_committed_parts()
         write_home()
-        for out in [home.HOME_OUT, home.ASSETS_ART_OUT] + [home.ASSETS_FONT_DIR / n for n in home.ASSETS_FONT_FILES]:
+        for out in [home.HOME_OUT, home.ASSETS_ART_OUT, home.ASSETS_SCENE_OUT] + [home.ASSETS_FONT_DIR / n for n in home.ASSETS_FONT_FILES]:
             print(f"wrote {out.relative_to(HERE.parents[1])}")
         return 0
     if args.splash_only:

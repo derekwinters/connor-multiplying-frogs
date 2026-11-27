@@ -3,10 +3,16 @@
 <title>Multiplying Frogs splash - Sky</title>
 <defs>
 <linearGradient id="sky-gradient" x1="0" y1="0" x2="0" y2="991" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#56cafc"/><stop offset="0.02" stop-color="#5bcafc"/><stop offset="0.03" stop-color="#56c8fb"/><stop offset="0.05" stop-color="#5bc9fb"/><stop offset="0.06" stop-color="#5dcafb"/><stop offset="0.08" stop-color="#69cdfb"/><stop offset="0.1" stop-color="#6ccffb"/><stop offset="0.11" stop-color="#73d1fb"/><stop offset="0.13" stop-color="#73d1fb"/><stop offset="0.15" stop-color="#7bd4fb"/><stop offset="0.16" stop-color="#7dd5fb"/><stop offset="0.18" stop-color="#80d6fb"/><stop offset="0.19" stop-color="#7bd4fb"/><stop offset="0.21" stop-color="#7ed5fb"/><stop offset="0.23" stop-color="#82d7fb"/><stop offset="0.24" stop-color="#85d8fb"/><stop offset="0.26" stop-color="#8adafb"/><stop offset="0.27" stop-color="#91dcfb"/><stop offset="0.29" stop-color="#9de0fa"/><stop offset="0.31" stop-color="#aae4fa"/><stop offset="0.32" stop-color="#b2e6fa"/><stop offset="0.34" stop-color="#b5e7fa"/><stop offset="0.36" stop-color="#b7e8fa"/><stop offset="0.37" stop-color="#b7e8fa"/><stop offset="0.39" stop-color="#b8e8fa"/><stop offset="0.4" stop-color="#bdebfa"/><stop offset="0.42" stop-color="#c2ecf9"/><stop offset="0.44" stop-color="#c2ecf9"/><stop offset="0.45" stop-color="#c6ecf8"/><stop offset="0.47" stop-color="#ceeff8"/><stop offset="0.48" stop-color="#cceef8"/><stop offset="0.5" stop-color="#c9eef8"/><stop offset="0.52" stop-color="#d0eff7"/><stop offset="0.53" stop-color="#d2f0f7"/><stop offset="0.55" stop-color="#d3f1f7"/><stop offset="0.57" stop-color="#d1f0f7"/><stop offset="0.58" stop-color="#d5f0f6"/><stop offset="0.6" stop-color="#d7f0f5"/><stop offset="1" stop-color="#d8f0f5"/></linearGradient>
+<clipPath id="sky-past-all" clipPathUnits="userSpaceOnUse"><rect x="-600" y="-200" width="600" height="1392"/><rect x="1586" y="-200" width="600" height="1392"/><rect x="0" y="-200" width="1586" height="200"/><rect x="0" y="992" width="1586" height="200"/><rect x="-600" y="988" width="2786" height="204"/></clipPath>
 </defs>
 <g id="layer-sky" inkscape:groupmode="layer" inkscape:label="Sky">
 <g id="sky" inkscape:label="Sky">
+<g id="sky-framed" inkscape:label="in the frame">
 <rect id="sky-fill" x="-4" y="-4" width="1594" height="1000" fill="url(#sky-gradient)"/>
+</g>
+<g id="sky-beyond" inkscape:label="past the frame">
+<g clip-path="url(#sky-past-all)"><rect x="-600" y="-200" width="2786" height="1392" fill="url(#sky-gradient)"/></g>
+</g>
 </g>
 </g>
 </svg>

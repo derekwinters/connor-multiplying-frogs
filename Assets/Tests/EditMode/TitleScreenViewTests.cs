@@ -483,8 +483,42 @@ namespace Frogs.Unity.EditModeTests
             Assert.That(importer.maxTextureSize, Is.GreaterThanOrEqualTo(2048));
             Assert.That(importer.mipmapEnabled, Is.False);
             Assert.That(importer.npotScale, Is.EqualTo(TextureImporterNPOTScale.None));
-            Assert.That(importer.wrapMode, Is.EqualTo(TextureWrapMode.Clamp),
-                "the bleed samples past the art's edges and must find the edge pixels there, not the opposite edge (#533)");
+        }
+
+        [Test]
+        public void TheScene_ImportsAsAFullSizeSpriteWithNoMipmaps_LikeTheArt()
+        {
+            var path = "Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png";
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+
+            Assert.That(importer, Is.Not.Null, path);
+            Assert.That(importer.textureType, Is.EqualTo(TextureImporterType.Sprite));
+            Assert.That(importer.spriteImportMode, Is.EqualTo(SpriteImportMode.Single));
+            Assert.That(importer.maxTextureSize, Is.GreaterThanOrEqualTo(4096), "kept at its full 2880");
+            Assert.That(importer.mipmapEnabled, Is.False);
+            Assert.That(importer.npotScale, Is.EqualTo(TextureImporterNPOTScale.None));
+        }
+
+        [Test]
+        public void TheScene_IsTheCommittedExtendedScene_DrawnBehindTheArt()
+        {
+            var view = CreateView();
+
+            try
+            {
+                Assert.That(view.SceneImage.sprite, Is.SameAs(Resources.Load<Sprite>(TitleScreenView.SceneResource)));
+                Assert.That(AssetDatabase.GetAssetPath(view.SceneImage.sprite),
+                    Is.EqualTo("Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png"));
+                Assert.That(view.SceneImage.sprite.rect.size, Is.EqualTo(new Vector2(TitleScreenView.TitleSceneWidth, TitleScreenView.TitleSceneHeight)));
+                Assert.That(view.SceneImage.raycastTarget, Is.False, "a picture: tapping it does nothing");
+                Assert.That(view.SceneImage.transform.GetSiblingIndex(), Is.LessThan(view.ArtRect.GetSiblingIndex()), "behind the art");
+                Assert.That(view.SceneImage.transform.parent, Is.SameAs(view.ArtRect.parent), "fades in with the art");
+            }
+            finally
+            {
+                Destroy(view);
+            }
         }
 
         // --- #533: the whole picture on every screen ---------------------------
@@ -518,6 +552,15 @@ namespace Frogs.Unity.EditModeTests
                 Assert.That(art.yMax, Is.EqualTo(ReferenceHeight / 2f).Within(Tolerance), "MULTIPLYING is not cut off the top");
 
                 AssertOnTheArtWhereTheMockupPutsIt(view, canvas, art);
+
+                // The scene behind lines up with the art: at its scale, its
+                // middle 1920 x 1200 exactly where the art is.
+                var scene = LocalRectIn(canvas, view.SceneImage.rectTransform);
+                Assert.That(scene.width, Is.EqualTo(TitleScreenView.TitleSceneWidth).Within(Tolerance));
+                Assert.That(scene.center.x, Is.EqualTo(art.center.x).Within(Tolerance));
+                Assert.That(scene.center.y, Is.EqualTo(art.center.y).Within(Tolerance));
+                Assert.That(scene.xMin, Is.LessThanOrEqualTo(-WidePhoneCanvasWidth / 2f + Tolerance), "it reaches the left edge");
+                Assert.That(scene.xMax, Is.GreaterThanOrEqualTo(WidePhoneCanvasWidth / 2f - Tolerance), "it reaches the right edge");
             }
             finally
             {

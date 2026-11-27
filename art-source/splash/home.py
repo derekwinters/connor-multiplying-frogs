@@ -43,6 +43,19 @@ ASSETS_ART_OUT = (REPO_ROOT / "Assets" / "Art" / "TitleScreen" / "Resources" / "
 ASSETS_FONT_DIR = REPO_ROOT / "Assets" / "Fonts" / "Fredoka" / "Resources" / "Fredoka"
 ASSETS_FONT_FILES = ("Fredoka-Bold.ttf", "OFL.txt")
 
+# The extended scene (#533): the same picture with the background carried on past the
+# frame (beyond.py), for the room a screen that is not 16:10 leaves round the fitted art.
+# The window is HOME_VIEW grown by SCENE_MARGIN pixels of HOME_SIZE's scale on each side, so
+# at 2880 x 1440 its middle 1920 x 1200 is HOME_VIEW, pixel for pixel: 2.4:1 at the art's
+# height (a 19.5:9 or 20:9 phone) and 4:3 at its width.
+SCENE_MARGIN = (480, 120)
+SCENE_SIZE = (HOME_SIZE[0] + 2 * SCENE_MARGIN[0], HOME_SIZE[1] + 2 * SCENE_MARGIN[1])
+_SCALE = HOME_SIZE[0] / HOME_VIEW[2]
+SCENE_VIEW = (HOME_VIEW[0] - SCENE_MARGIN[0] / _SCALE, HOME_VIEW[1] - SCENE_MARGIN[1] / _SCALE,
+              HOME_VIEW[2] + 2 * SCENE_MARGIN[0] / _SCALE, HOME_VIEW[3] + 2 * SCENE_MARGIN[1] / _SCALE)
+ASSETS_SCENE_OUT = (REPO_ROOT / "Assets" / "Art" / "TitleScreen" / "Resources" / "TitleScreen"
+                    / "title-scene-2880x1440.png")
+
 # The START label is Fredoka Bold (docs/specs/ui/title-screen.md); title.py letters the
 # drawn title at the same instance.
 FONT_BOLD_WEIGHT = 700

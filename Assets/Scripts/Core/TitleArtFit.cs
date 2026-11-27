@@ -27,8 +27,8 @@ namespace Frogs.Core
     /// cropped,** centred in it, at its reference size whenever the safe area
     /// holds that and scaled down evenly only when a cut-out leaves less. It
     /// is never scaled up and never stretched out of its shape. Whatever the
-    /// fit leaves of the screen is <c>bleed</c>: the art's edge pixels carried
-    /// out to the screen's edges, which <see cref="BleedUv"/> maps.
+    /// fit leaves of the screen shows the extended scene behind it — the same
+    /// pond, wider and taller — which <see cref="Scene"/> places.
     ///
     /// Plain arithmetic on rectangles, so it lives here and is tested in the
     /// fast suite; the Unity side reads the canvas and Screen.safeArea and
@@ -105,19 +105,30 @@ namespace Frogs.Core
         }
 
         /// <summary>
-        /// The bleed is one quad over the whole canvas, sampling the art with
-        /// its edges clamped. This is its UV rectangle: the canvas measured in
-        /// art widths and heights from the art's bottom-left corner, so that
-        /// 0..1 lands exactly on the fitted art and everything outside it is
-        /// the art's edge pixels carried outwards.
+        /// Where the extended scene is drawn behind the art, in canvas units: the same
+        /// pond, wider and taller, <paramref name="sceneWidth"/> ×
+        /// <paramref name="sceneHeight"/> in the art's reference pixels with the art in
+        /// its middle. It is drawn at the art's <see cref="Scale"/>, centred on the
+        /// art, so the two line up exactly; only where that would stop short of an edge
+        /// of the <paramref name="canvasWidth"/> × <paramref name="canvasHeight"/>
+        /// canvas — a screen wider than the scene, or a cut-out that shrank the art —
+        /// is it scaled up about the art's centre, just enough to cover.
         /// </summary>
-        public LayoutRect BleedUv(float canvasWidth, float canvasHeight)
+        public LayoutRect Scene(float canvasWidth, float canvasHeight, float sceneWidth, float sceneHeight)
         {
-            return new LayoutRect(
-                -Art.X / Art.Width,
-                -Art.Y / Art.Height,
-                canvasWidth / Art.Width,
-                canvasHeight / Art.Height);
+            var centreX = Art.X + (Art.Width / 2f);
+            var centreY = Art.Y + (Art.Height / 2f);
+
+            var scale = Math.Max(
+                Scale,
+                Math.Max(
+                    2f * Math.Max(centreX, canvasWidth - centreX) / sceneWidth,
+                    2f * Math.Max(centreY, canvasHeight - centreY) / sceneHeight));
+
+            var width = sceneWidth * scale;
+            var height = sceneHeight * scale;
+
+            return new LayoutRect(centreX - (width / 2f), centreY - (height / 2f), width, height);
         }
 
         // Written so a NaN fails it too.
