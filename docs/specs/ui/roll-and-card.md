@@ -1,21 +1,51 @@
-# Roll and card
+# Roll and card (retired)
 
-You pressed `Roll`. This is the die landing, the pile it sends you to, and the
-card you drew.
+**This dialog is retired.** The [turn panel](turn-panel.md) replaces it. That
+panel holds the die, the three piles and the drawn card, then the grid, on one
+screen. Nothing new is built to this page. It stays so the decisions on it
+can still be read, and so links to its invariants keep working.
 
-## Pending redesign
+> **How the spec is changing (#402).** This page used to describe a dialog of
+> its own. It opened after the board's `Roll`, showed the die settling, the
+> pile's name and the drawn card behind a `Solve it` button, and handed over to
+> a separate [working-out grid](working-out-grid.md) dialog. It now describes
+> nothing that will be built. A turn is one [turn panel](turn-panel.md) in three
+> phases, Ready, Rolling and Solving, and the card stays on screen beside the
+> grid instead of being left behind in the previous dialog. That is Derek's
+> redesign, agreed with a prototype on
+> [#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402).
+> Everything below the line describes the retired dialog as it was built. It
+> still is built, until the turn panel's build issues replace it.
 
-**This screen is not restyled in the [Pond style](style-guide.md), on purpose.**
-It is being redesigned rather than repainted: the
-[turn panel](https://github.com/derekwinters/connor-multiplying-frogs/issues/400)
-puts the easy, medium and hard piles on screen and flips the card over after
-the roll, and its wireframe
-([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402))
-is drawn in the Pond style from the start. Until that lands, this page and its
-mockup describe the screen as it is built today, in the old look. Its
-[button](shared-components.md#button) and [dialog](shared-components.md#dialog)
-are shared components, so if they are restyled first this screen picks that up
-without being redrawn.
+## Where this page's decisions went
+
+**Every invariant was carried across**, in the turn panel's own words:
+
+| Invariant here | On the turn panel |
+| --- | --- |
+| The die face shown is the roll; the pile shown is the pile it maps to | [The face at the end of the tumble is the rolled face](turn-panel.md#invariants), and the card turned over is from that face's pile |
+| No re-roll, no discard; nothing can change which pile was drawn | Unchanged. The roll happens once, in `Core`, and the panel has no control that undoes it |
+| Every pile is worth the same one lily pad | [Nothing on the panel implies one pile is worth more](turn-panel.md#invariants) |
+| Cannot be dismissed; back is inert | [The panel cannot be dismissed, in any phase](turn-panel.md#invariants) |
+| The animation is a readout and can be skipped by tapping anywhere ([Behaviour](#behaviour)) | [The roll happens in `Core` first](turn-panel.md#invariants), and [tap anywhere to skip](turn-panel.md#tp-8) |
+
+**Constants**:
+
+| Constant here | What became of it |
+| --- | --- |
+| `DieFaceSize`, `DieCornerRadius`, `DieBorderWidth`, `DiePipInset`, `DiePipDiameter` | **Kept, with new values**, on the [turn panel](turn-panel.md#the-die): 260, 52, 7, 36 and 46 px |
+| `DieRollDuration` (0.8 s) | Replaced by the tumble: `DieTumbleFaceCount` × `DieTumbleStepDuration`, 30 × 40 ms, then `DieSettleHold` |
+| `CardDealDuration` (0.3 s) | Replaced by the [pile card](shared-components.md#pile-card)'s pick-up and turn-over |
+| `CardWidth`, `CardHeight`, `CardRadius`, `CardBorderWidth`, `CardProblemSize`, `CardRuleGap`, `CardRuleThickness`, `CardRuleLength` | Replaced by the [pile card](shared-components.md#pile-card)'s front, `RevealedCard*` |
+| `PileLabelSize` | Retired. The pile is named on the card's own log, `PileCardNameSize` and `RevealedCardNameSize` |
+| `RolledLabelSize`, `RolledLabelGap` | Retired with the word `rolled`. The panel's words, `Roll the die` and `Work it out`, use the grid's `GridPromptSize` and `GridHeaderGap` |
+| `RollDialogWidth`, `RollDialogHeight`, `DieColumnWidth`, `DieGroupTop`, `CardTop`, `RollCardGap` | Retired. The panel is `TurnPanelWidth` × `TurnPanelHeight`, laid out on its own page |
+
+**Its two open questions are answered.** It is one beat, not two, and the
+pile you drew stays named while you answer. See the turn panel's
+[open questions](turn-panel.md#open-questions).
+
+---
 
 ## Invariants
 

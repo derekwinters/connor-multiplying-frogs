@@ -100,7 +100,8 @@ nav:
           - Title screen: specs/ui/title-screen.md
           - Game setup: specs/ui/game-setup.md
           - Game board: specs/ui/game-board.md
-          - Roll and card: specs/ui/roll-and-card.md
+          - Turn panel: specs/ui/turn-panel.md
+          - Roll and card (retired): specs/ui/roll-and-card.md
           - Working-out grid: specs/ui/working-out-grid.md
           - Answer result: specs/ui/answer-result.md
           - A player has won: specs/ui/player-won.md

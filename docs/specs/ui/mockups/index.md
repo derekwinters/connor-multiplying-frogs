@@ -18,7 +18,12 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 | Game setup, before names | [`game-setup.html`](game-setup.html) | [Game setup](../game-setup.md) |
 | Game board | [`game-board.html`](game-board.html) | [Game board](../game-board.md) |
 | Game board, on a wider screen | [`game-board-wide.html`](game-board-wide.html) | [Game board](../game-board.md) |
-| Roll and card | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
+| Turn panel, Ready, piles beside the die (chosen) | [`turn-panel-ready-piles-beside.html`](turn-panel-ready-piles-beside.html) | [Turn panel](../turn-panel.md) |
+| Turn panel, Ready, piles above the die (the comparison) | [`turn-panel-ready-piles-above.html`](turn-panel-ready-piles-above.html) | [Turn panel](../turn-panel.md) |
+| Turn panel, Rolling | [`turn-panel-rolling.html`](turn-panel-rolling.html) | [Turn panel](../turn-panel.md) |
+| Turn panel, Solving, `331 × 41` | [`turn-panel-solving.html`](turn-panel-solving.html) | [Turn panel](../turn-panel.md) |
+| Turn panel, Solving, `331 × 41`, `Help me` pressed | [`turn-panel-solving-help.html`](turn-panel-solving-help.html) | [Turn panel](../turn-panel.md) |
+| Roll and card (retired) | [`roll-and-card.html`](roll-and-card.html) | [Roll and card](../roll-and-card.md) |
 | Working-out grid, `331 × 41` | [`working-out-grid-331x41.html`](working-out-grid-331x41.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `68 × 5` | [`working-out-grid-68x5.html`](working-out-grid-68x5.html) | [Working-out grid](../working-out-grid.md) |
 | Working-out grid, `331 × 41` grown to the cap | [`working-out-grid-331x41-grown.html`](working-out-grid-331x41-grown.html) | [Working-out grid](../working-out-grid.md) |
