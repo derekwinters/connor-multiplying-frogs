@@ -25,6 +25,15 @@ setup does so because the choice has already been made, not because it can be
 made somewhere else.
 **Invariant:** the version string is present and is read from `/VERSION`, never
 typed into a layout.
+**Invariant:** the whole picture is on screen, on every screen. The art is
+fitted *inside* the device's safe area and never cropped, so the drawn title,
+the big frog on the log and the `START` sign are all visible on a 2.17:1 phone,
+on the 16:10 tablet and on a 4:3 screen alike. A wider or taller screen adds
+[`bleed`](#regions) around the picture; it never cuts into it.
+**Invariant:** the sign and the version string are laid out on the fitted
+picture, not on the screen. Wherever the picture lands and at whatever size,
+each of them is on the same spot of it as on the 16:10 mockup — the sign on the
+grass right of the log, the version string in the grass corner bottom-left.
 
 ### The invariants this page used to carry
 
@@ -47,7 +56,8 @@ visible, and they are not true anywhere else on this page.
 
 | Region | Job |
 | --- | --- |
-| `art` | The whole splash picture — every frog with its hop line, the log, and the drawn title — over the whole canvas, behind everything |
+| `art` | The whole splash picture — every frog with its hop line, the log, and the drawn title — fitted whole inside the screen's safe area, behind the sign and the version string |
+| `bleed` | Where the screen is wider or taller than 16:10: the picture's own edge carried out to the screen's edges, behind `art` |
 | `start` | The `START` sign: a plank on a post, standing in the grass bottom-right |
 | `footprint` | Version string, bottom-left; small and quiet |
 
@@ -59,8 +69,23 @@ one — [open question 8](#open-questions).
 
 ## Anchors
 
-- `art` fills the canvas, cropped from the centre outwards. It is the one
-  element allowed to run to the screen edge, because it is a picture and a
+- `art` is fitted **inside the device's safe area**, whole and never cropped,
+  and centred in it. It is drawn at its 1920 × 1200 reference size whenever
+  the safe area holds that — which, with the [expanding
+  canvas](shared-components.md#what-fills-a-screen-that-is-not-1610), is every
+  screen with no cut-out — and only when a notch or a cut-out leaves less is
+  it scaled down, evenly, until it fits. It is never scaled up and never
+  stretched out of its 16:10 shape. The device's safe area is the screen less
+  what the system reports as cut-outs and rounded corners (Unity's
+  `Screen.safeArea`).
+- `bleed` fills the rest of the screen, to all four edges: each strip beside
+  or above and below the picture continues the picture's own edge outwards —
+  every row of the picture's left and right edge carried out sideways, every
+  column of its top and bottom edge carried out up and down. On a wide phone
+  that is sky, reeds, water and grass running out to the sides; on a 4:3
+  screen, sky above and grass below. It is drawn from the art, fades in with
+  it, and is never tappable. The art and its bleed together are the one
+  element allowed to run to the screen edge, because they are a picture and a
   margin around a picture is a border nobody asked for.
 - `art` is Connor's splash picture, rebuilt as layers under
   [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
@@ -68,9 +93,11 @@ one — [open question 8](#open-questions).
   unused splashes on the lily pads are not in it. The game draws it from
   `Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png`, the
   same render the mockup loads.
-- `start`: the plank's **right edge is on the right safe area**, and its
-  **bottom edge is `TitleSignBottomOffset` up from the bottom safe area**. At
-  1920 × 1200 that puts the plank at 1552–1872 px across and 930–1058 px down,
+- `start` is placed on the fitted `art`, measured in the art's own reference
+  pixels: the plank's **right edge is `SafeMargin` in from the art's right
+  edge**, and its **bottom edge is `SafeMargin` + `TitleSignBottomOffset` up
+  from the art's bottom edge** — at 1920 × 1200, where the art is the whole
+  screen, the right and bottom safe areas, exactly as before. That puts the plank at 1552–1872 px across and 930–1058 px down,
   on the grass and water right of the log's cut end, clear of every frog. The
   plank is tilted `TitleSignTilt` about its own centre. The post is centred
   under the plank, runs from behind it, and ends `TitleSignPostDrop` below the
@@ -78,12 +105,33 @@ one — [open question 8](#open-questions).
 - The tap target is **the plank**, 320 × 128 px — over `MinTouchTarget` (96
   px) both ways, as the [shared Button](shared-components.md#button) requires.
   The post is part of the drawing, not of the target.
-- `footprint` is pinned to the bottom-left safe area corner.
-- On a screen that is not 16:10, the art crops and everything else keeps its
-  distance from the **safe area**, not the screen edge. The sign is anchored
-  to the safe area like everything else, so on a much wider or taller screen
-  it can drift a little off the grass it stands on in the art; that is the
-  same trade every anchored element on every screen makes.
+- `footprint` is pinned to the art's bottom-left corner, `SafeMargin` in from
+  each edge — at 1920 × 1200, the bottom-left safe area corner. It stays on the
+  picture rather than going out into `bleed`, by the
+  [shared rule](shared-components.md#what-fills-a-screen-that-is-not-1610)
+  that the extra space a wider screen gives is background and nothing else.
+- When the art is scaled down to fit a cut-out, the sign and the version string
+  are scaled with it, so they stay on their spots of the picture. The plank's
+  tap target shrinks with them, and stays over `MinTouchTarget` until the art
+  is below 75% of its size, which no cut-out comes near.
+
+### The anchors this page used to carry
+
+Until [#533](https://github.com/derekwinters/connor-multiplying-frogs/issues/533)
+the art covered the screen and the sign kept to the screen's safe area:
+
+> `art` fills the canvas, cropped from the centre outwards.
+>
+> On a screen that is not 16:10, the art crops and everything else keeps its
+> distance from the **safe area**, not the screen edge. The sign is anchored
+> to the safe area like everything else, so on a much wider or taller screen
+> it can drift a little off the grass it stands on in the art.
+
+On Derek's 2340 × 1080 phone that cropped about 212 px off the top and the
+bottom of the picture — the top of MULTIPLYING, the log and the big frog's
+feet — and left the version string on a lily pad, because the picture had
+grown under it. The picture is fitted, not cropped, and the sign and the
+version string are placed on it, so they cannot drift off it.
 
 ## Named constants
 

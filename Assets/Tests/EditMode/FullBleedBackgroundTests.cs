@@ -147,7 +147,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TitleScreen_CoversEveryEdgeWithItsArt_CroppedFromTheCentre_AndLeavesItsContentAtReferenceSize()
+        public void TitleScreen_FitsItsArtWhole_BleedsItsEdgesToEveryEdge_AndLeavesItsContentAtReferenceSize()
         {
             var canvas = OversizedCanvas();
 
@@ -157,23 +157,34 @@ namespace Frogs.Unity.EditModeTests
                     .AddComponent<TitleScreenView>();
                 view.transform.SetParent(canvas, worldPositionStays: false);
 
+                // A screen whose safe area is all of it, so the batch-mode
+                // runner's own Screen does not decide the answer.
+                view.UseSafeArea(
+                    new Rect(0f, 0f, OversizedCanvasWidth, OversizedCanvasHeight),
+                    new Vector2(OversizedCanvasWidth, OversizedCanvasHeight));
+
                 AssertCoversTheWholeCanvas(view.BackgroundImage.rectTransform, canvas, "the title screen's background");
                 AssertIsTheReferenceCanvasCentred(view.ContentRect, canvas, "the title screen's content");
 
-                // The splash art is the one element allowed to run to the
-                // screen edge (docs/specs/ui/title-screen.md's Anchors): it
-                // covers the whole canvas, cropped from the centre outwards,
-                // and keeps its own 16:10 shape rather than being stretched to
-                // the device's. 2400 x 1400 is wider than 16:10, so the art is
-                // scaled to the width and cropped top and bottom.
-                var scale = Mathf.Max(OversizedCanvasWidth / ReferenceWidth, OversizedCanvasHeight / ReferenceHeight);
+                // The splash art is fitted whole and never cropped
+                // (docs/specs/ui/title-screen.md's Anchors, #533): at its
+                // reference size, because the safe area holds that, centred.
+                // It used to cover the canvas, cropped from the centre, which
+                // cut the drawn title and the log off a wide phone.
+                AssertIsTheReferenceCanvasCentred(view.ArtRect, canvas, "the title screen's art");
 
-                Assert.That(view.ArtRect.rect.width, Is.EqualTo(ReferenceWidth * scale).Within(Tolerance),
-                    "the art covers the canvas's width");
-                Assert.That(view.ArtRect.rect.height, Is.EqualTo(ReferenceHeight * scale).Within(Tolerance),
-                    "the art keeps its 16:10 shape, so it overhangs the canvas's height");
-                Assert.That(view.ArtRect.rect.height, Is.GreaterThanOrEqualTo(OversizedCanvasHeight - Tolerance));
-                AssertIsCentredOn(view.ArtRect, canvas, "the title screen's art");
+                // What the art leaves is its bleed: the art's own texture over
+                // the whole canvas, mapped so 0..1 lands exactly on the art.
+                AssertCoversTheWholeCanvas(view.BleedImage.rectTransform, canvas, "the title screen's bleed");
+                Assert.That(view.BleedImage.texture, Is.SameAs(view.ArtImage.sprite.texture), "the bleed is drawn from the art");
+
+                var uv = view.BleedImage.uvRect;
+                var marginX = (OversizedCanvasWidth - ReferenceWidth) / 2f;
+                var marginY = (OversizedCanvasHeight - ReferenceHeight) / 2f;
+                Assert.That(uv.x, Is.EqualTo(-marginX / ReferenceWidth).Within(Tolerance));
+                Assert.That(uv.y, Is.EqualTo(-marginY / ReferenceHeight).Within(Tolerance));
+                Assert.That(uv.width, Is.EqualTo(OversizedCanvasWidth / ReferenceWidth).Within(Tolerance));
+                Assert.That(uv.height, Is.EqualTo(OversizedCanvasHeight / ReferenceHeight).Within(Tolerance));
             }
             finally
             {

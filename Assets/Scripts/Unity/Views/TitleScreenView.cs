@@ -17,7 +17,8 @@ namespace Frogs.Unity.Views
     /// <summary>
     /// The title screen — docs/specs/ui/title-screen.md — built to the
     /// wireframe #484 settled: Connor's splash picture, frogs, log and drawn
-    /// title and all, full-bleed behind everything, and a wooden sign in the
+    /// title and all, fitted whole inside the screen's safe area with its own
+    /// edges carried out to the screen's edges (#533), and a wooden sign in the
     /// grass bottom-right that says `START` (#520). `START` is the control
     /// that used to read `NEW`: it goes to game setup and does nothing else.
     /// `RESUME` is still a real shared <see cref="Button"/> behind the
@@ -96,9 +97,19 @@ namespace Frogs.Unity.Views
 
         RectTransform _backdropRect;
         CanvasGroup _backdropCanvasGroup;
+        RawImage _bleedImage;
         RectTransform _artRect;
         Image _artImage;
-        Vector2 _fittedTo = new Vector2(-1f, -1f);
+
+        // What the art was last fitted to: the canvas, the screen in pixels
+        // and its safe area. Refitted only when one of them changes.
+        Vector2 _fittedCanvas = new Vector2(-1f, -1f);
+        Vector2 _fittedScreen = new Vector2(-1f, -1f);
+        Rect _fittedSafeArea;
+
+        // Set only by UseSafeArea; otherwise the device's own are read.
+        Rect? _safeAreaOverride;
+        Vector2? _screenOverride;
 
         Button _resumeButton;
 
@@ -136,12 +147,13 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, centred: the sign, `RESUME` and the footprint.</summary>
+        /// <summary>Everything laid out in reference pixels — the 1920 x 1200 reference canvas, laid exactly over the fitted art: the sign, `RESUME` and the footprint.</summary>
         public RectTransform ContentRect
         {
             get
             {
                 EnsureInitialized();
+                FitArt();
                 return _contentRect;
             }
         }
@@ -166,7 +178,23 @@ namespace Frogs.Unity.Views
             }
         }
 
-        /// <summary>The `art` region's <see cref="RectTransform"/>: the screen covered, cropped from the centre.</summary>
+        /// <summary>
+        /// The `bleed` region: the art's texture over the whole canvas, its
+        /// edges clamped, mapped so the art's own span lands exactly on
+        /// <see cref="ArtRect"/> and the strips the fit leaves carry the art's
+        /// edge pixels out to the screen's edges.
+        /// </summary>
+        public RawImage BleedImage
+        {
+            get
+            {
+                EnsureInitialized();
+                FitArt();
+                return _bleedImage;
+            }
+        }
+
+        /// <summary>The `art` region's <see cref="RectTransform"/>: the whole picture, fitted inside the safe area and never cropped.</summary>
         public RectTransform ArtRect
         {
             get
@@ -254,6 +282,63 @@ namespace Frogs.Unity.Views
             {
                 FitArt();
             }
+        }
+
+        /// <summary>
+        /// Fits the art, and everything laid out on it, inside
+        /// <paramref name="safeAreaPixels"/> on a screen of
+        /// <paramref name="screenPixels"/> — both measured the way Unity's
+        /// <see cref="UnityEngine.Screen"/> reports them — from now on, in
+        /// place of the device's own. Public so an EditMode test can hand the
+        /// screen a phone with a cut-out; nothing in the game calls it.
+        /// </summary>
+        public void UseSafeArea(Rect safeAreaPixels, Vector2 screenPixels)
+        {
+            EnsureInitialized();
+
+            _safeAreaOverride = safeAreaPixels;
+            _screenOverride = screenPixels;
+            FitArt();
+        }
+
+        void FitToSafeArea(Rect safeAreaPixels, Vector2 screenPixels)
+        {
+            var canvas = _rect.rect.size;
+            if (canvas == _fittedCanvas && screenPixels == _fittedScreen && safeAreaPixels == _fittedSafeArea)
+            {
+                return;
+            }
+
+            _fittedCanvas = canvas;
+            _fittedScreen = screenPixels;
+            _fittedSafeArea = safeAreaPixels;
+
+            var safeArea = TitleArtFit.SafeAreaInCanvas(
+                screenPixels.x,
+                screenPixels.y,
+                new LayoutRect(safeAreaPixels.x, safeAreaPixels.y, safeAreaPixels.width, safeAreaPixels.height),
+                canvas.x,
+                canvas.y);
+            var fit = TitleArtFit.Fit(canvas.x, canvas.y, safeArea, CanvasWidth, CanvasHeight);
+
+            // Both are anchored at the canvas's centre, so each is placed by
+            // its own centre's distance from it.
+            var artCentre = new Vector2(
+                fit.Art.X + (fit.Art.Width / 2f) - (canvas.x / 2f),
+                fit.Art.Y + (fit.Art.Height / 2f) - (canvas.y / 2f));
+
+            _artRect.sizeDelta = new Vector2(fit.Art.Width, fit.Art.Height);
+            _artRect.anchoredPosition = artCentre;
+
+            // The sign, RESUME and the footprint are laid out in reference
+            // pixels on the reference canvas; it is laid over the art at the
+            // art's scale, so each stays on its spot of the picture.
+            _contentRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            _contentRect.localScale = new Vector3(fit.Scale, fit.Scale, 1f);
+            _contentRect.anchoredPosition = artCentre;
+
+            var uv = fit.BleedUv(canvas.x, canvas.y);
+            _bleedImage.uvRect = new Rect(uv.X, uv.Y, uv.Width, uv.Height);
         }
 
         /// <summary>
@@ -386,12 +471,26 @@ namespace Frogs.Unity.Views
             _backdropCanvasGroup.interactable = false;
             _backdropCanvasGroup.blocksRaycasts = false;
 
-            // art — the whole splash composite, the one element allowed to
-            // run to the screen edge. Centred on the screen, at its own 16:10
-            // shape, scaled to cover; see FitArt.
+            // bleed — the art's own texture over the whole canvas, sampled
+            // with its edges clamped (TitleScreenArtImport sets the clamp), so
+            // what the fitted art leaves of the screen is the art's edge
+            // pixels carried outwards: sky, reeds, water and grass to the
+            // sides of a wide phone, sky above and grass below on a 4:3
+            // screen. Its UV rectangle is set by FitArt.
+            var bleedGO = new GameObject("Bleed", typeof(RectTransform), typeof(RawImage));
+            _bleedImage = bleedGO.GetComponent<RawImage>();
+            var artSprite = Resources.Load<Sprite>(ArtResource);
+            _bleedImage.texture = artSprite != null ? artSprite.texture : null;
+            _bleedImage.color = Color.white;
+            _bleedImage.raycastTarget = false;
+            _bleedImage.rectTransform.SetParent(_backdropRect, worldPositionStays: false);
+            StretchToFill(_bleedImage.rectTransform);
+
+            // art — the whole splash composite, fitted whole inside the
+            // safe area at its own 16:10 shape; see FitArt.
             var artGO = new GameObject("Art", typeof(RectTransform), typeof(Image));
             _artImage = artGO.GetComponent<Image>();
-            _artImage.sprite = Resources.Load<Sprite>(ArtResource);
+            _artImage.sprite = artSprite;
             _artImage.color = Color.white;
             _artImage.type = Image.Type.Simple;
             _artImage.raycastTarget = false;
@@ -407,9 +506,9 @@ namespace Frogs.Unity.Views
 
         void BuildContent()
         {
-            // The reference canvas, centred. The sign, RESUME and the version
-            // keep their distance from this — the safe area — not from the
-            // screen edge.
+            // The reference canvas, laid over the fitted art (FitArt).
+            // The sign, RESUME and the version keep their distance from this
+            // — the picture's edges — not from the screen edge.
             var contentGO = new GameObject("Content", typeof(RectTransform));
             _contentRect = (RectTransform)contentGO.transform;
             _contentRect.SetParent(_rect, worldPositionStays: false);
@@ -555,23 +654,13 @@ namespace Frogs.Unity.Views
             _router?.NavigateToScreen(CoreScreen.GameSetup);
         }
 
-        // Covers the screen with the art, cropped from the centre outwards:
-        // the art keeps its 16:10 shape and is scaled until it reaches every
-        // edge. The canvas is never smaller than the reference (the
-        // CanvasScaler expands), so the scale is never below 1 — and a root
-        // that has not been laid out yet still gets the art at its drawn size.
+        // Fits the art inside the device's own safe area — docs/specs/ui/
+        // title-screen.md's Anchors, and TitleArtFit for the arithmetic.
         void FitArt()
         {
-            var screen = _rect.rect.size;
-            if (screen == _fittedTo)
-            {
-                return;
-            }
-
-            _fittedTo = screen;
-
-            var scale = Mathf.Max(1f, Mathf.Max(screen.x / CanvasWidth, screen.y / CanvasHeight));
-            _artRect.sizeDelta = new Vector2(CanvasWidth * scale, CanvasHeight * scale);
+            FitToSafeArea(
+                _safeAreaOverride ?? UnityEngine.Screen.safeArea,
+                _screenOverride ?? new Vector2(UnityEngine.Screen.width, UnityEngine.Screen.height));
         }
 
         static Sprite PostOutlineSprite

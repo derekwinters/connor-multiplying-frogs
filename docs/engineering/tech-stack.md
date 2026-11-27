@@ -564,7 +564,7 @@ GUID and neither has a committed `.meta`.
 | Font | `Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf`, with its `OFL.txt` beside it — the game's first font that is not Unity's built-in one |
 | Made by | `art-source/splash/build_splash.py --home-only` (`art-source/splash/home.py`) |
 | Its tests | `.github/scripts/tests/test_title_screen_art.py` |
-| Import settings | `TitleScreenArtImport`, in `Assets/Editor/` — the picture as the launch splash's (a single sprite, full size, no mipmaps); the font as a dynamic font with its data included |
+| Import settings | `TitleScreenArtImport`, in `Assets/Editor/` — the picture as the launch splash's (a single sprite, full size, no mipmaps), with its edges clamped, because the screen's bleed samples past them ([#533](https://github.com/derekwinters/connor-multiplying-frogs/issues/533)); the font as a dynamic font with its data included |
 | Its EditMode tests | `Assets/Tests/EditMode/TitleScreenViewTests.cs` |
 
 **The font is a static Bold, not the variable font.** The title is set in Fredoka at
