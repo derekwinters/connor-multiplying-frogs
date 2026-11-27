@@ -16,6 +16,7 @@ on:
       - ProjectSettings/**
       - Packages/**
       - VERSION
+      - .github/signing/**
       - .github/workflows/pr-build.yml
   workflow_dispatch:
 
@@ -70,6 +71,17 @@ jobs:
           # here. A shallow checkout would silently produce a lower number than
           # the last build, and Android refuses to install that.
           fetch-depth: 0
+
+      # The one committed debug keystore, so every debug APK is signed with the
+      # same certificate and installs over the last (#532). Without it Unity
+      # signs with a debug key generated fresh in this container, and Android
+      # refuses each new build as an update. It is a debug key for the `.debug`
+      # application ID only, not a secret — see .github/signing/README.md. The
+      # release key stays in secrets that only release-build can name.
+      - name: Read the debug keystore
+        id: debug_key
+        if: steps.licence.outputs.present == 'true'
+        run: echo "base64=$(base64 -w0 .github/signing/debug.keystore)" >> "$GITHUB_OUTPUT"
 
       - name: Work out the build stamp
         id: stamp
@@ -132,13 +144,17 @@ jobs:
           cliVersion: v0.1.77
           targetPlatform: Android
           androidExportType: androidPackage
-          # No keystore inputs, so Unity signs with the Android debug key. That
-          # is deliberate: the release keystore is a secret this workflow should
-          # not be able to reach from a PR branch.
+          # The committed debug keystore, never a secret: the release keystore
+          # is one this workflow must not be able to reach from a PR branch.
           buildsPath: build/device
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}
           allowDirtyBuild: true
           customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsBuildSha ${{ steps.stamp.outputs.build_sha }} -frogsApplicationIdSuffix .debug -frogsAndroidProfile device
+          androidKeystoreName: debug.keystore
+          androidKeystoreBase64: ${{ steps.debug_key.outputs.base64 }}
+          androidKeystorePass: android
+          androidKeyaliasName: androiddebugkey
+          androidKeyaliasPass: android
 
       # Uploaded before the emulator build starts, not after it finishes. The
       # device APK is the one that answers "does it still build", and a later
@@ -155,7 +171,7 @@ jobs:
           retention-days: 14
 
       # x86_64 rather than ARM64, so it installs on a desktop emulator. Same
-      # version name, same .debug suffix, same debug signing — the only thing
+      # version name, same .debug suffix, same debug key — the only thing
       # that differs is the profile, and therefore the architecture.
       #
       # No `continue-on-error`: unlike release-build, nothing here is waiting
@@ -186,6 +202,11 @@ jobs:
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-${{ steps.stamp.outputs.build_sha }}-emulator
           allowDirtyBuild: true
           customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsBuildSha ${{ steps.stamp.outputs.build_sha }} -frogsApplicationIdSuffix .debug -frogsAndroidProfile emulator
+          androidKeystoreName: debug.keystore
+          androidKeystoreBase64: ${{ steps.debug_key.outputs.base64 }}
+          androidKeystorePass: android
+          androidKeyaliasName: androiddebugkey
+          androidKeyaliasPass: android
 
       - name: Upload the emulator APK
         if: steps.licence.outputs.present == 'true'

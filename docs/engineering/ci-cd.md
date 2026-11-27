@@ -228,10 +228,12 @@ moves only by hand:
 Every PR produces installable debug APKs, so "does it still build" is answered
 by a build rather than by hope, and so Connor can try a change before it merges.
 
-- **Debug signing**, with the Android debug keystore. No secrets, so the
+- **Debug signing, with one committed debug key** —
+  `.github/signing/debug.keystore` — so every debug APK has the same
+  certificate and installs over the one before (#532). No secrets, so the
   workflow runs on any PR without special permissions — and a PR branch can
-  never reach the release key. See [release signing](#release-signing) for
-  which builds use which key.
+  never reach the release key. See [the debug key](#the-debug-key) and
+  [release signing](#release-signing) for which builds use which key.
 - **The commit SHA is in the version name** — `0.2.3-abc1234`. A phone with four
   test builds on it needs to say which is which, and "the one from Tuesday" is
   not an answer.
@@ -363,9 +365,10 @@ it before the release is real.
 - **The version comes from `/VERSION` on that branch**, which release-please has
   already bumped to the version about to ship — exactly the version an RC should
   carry.
-- **Same debug signing and `.debug` suffix as a PR build.** An RC is for trying
-  the game; [release signing](#release-signing) needs a keystore secret this
-  workflow should not be able to reach.
+- **Same committed [debug key](#the-debug-key) and `.debug` suffix as a PR
+  build**, so each RC installs over the last. An RC is for trying the game;
+  [release signing](#release-signing) needs a keystore secret this workflow
+  should not be able to reach.
 - **Artifacts only.** An RC is not a release: no tag, no GitHub release.
 
 #### The `rcN` number is derived, not chosen
@@ -556,11 +559,44 @@ before it — and the uninstall that forced lost the game in progress (#442).
 | Build | Key | Application ID |
 | --- | --- | --- |
 | `release-build` (device and emulator) | the release key, from the secrets below | the app's own |
-| `pr-build`, `rc-build` | the Android debug key | `.debug` suffix |
+| `pr-build` (device and emulator), `rc-build` | the committed [debug key](#the-debug-key) | `.debug` suffix |
 
 The debug builds keep their `.debug` suffix, so they still install *alongside*
 the release app rather than over it, and a debug key never meets a
 release-signed install of the same ID.
+
+##### The debug key {#the-debug-key}
+
+Until #532, `pr-build` and `rc-build` passed no keystore, so Unity signed with
+"the Android debug key" — which in CI is generated fresh inside each build
+container. Every debug and RC APK had a different certificate, and none would
+install over the one before: the same failure #442 fixed for releases.
+
+They now sign with one debug keystore committed to the repository:
+
+| | |
+| --- | --- |
+| File | `.github/signing/debug.keystore` (JKS) |
+| Store and key password | `android` |
+| Key alias | `androiddebugkey` |
+| SHA-256 | `7F:DC:54:D4:B2:EE:59:86:B6:D1:D9:FE:C8:04:E6:EE:B9:49:EA:52:27:6F:97:63:66:8E:48:53:2D:0A:32:76` |
+
+A step in each workflow base64-encodes the committed file into a step output,
+and each Unity build is handed it through the same `androidKeystore*` inputs the
+release uses — from that output and from the literals above, **never from a
+secret**.
+
+**Committing it is deliberate, and safe.** It is a debug key: it signs only the
+`.debug` application ID, so it cannot update or impersonate the release app,
+and it grants nothing. The conventional `android` passwords say as much. The
+release key is a different key and never touches these workflows.
+`.github/signing/README.md` documents it beside the file; changing the key
+means changing the fingerprint there and here in the same commit.
+
+**One uninstall, once.** The `.debug` app already on a device was signed with
+one of the old per-container keys, so it has to be uninstalled before the
+first stable-key build will install. After that, each debug or RC build
+installs over the last — provided its versionCode is not lower.
 
 Five repository Actions secrets hold the key, and only `release-build.yml`
 names them:
@@ -579,7 +615,9 @@ Nothing is committed, and the keystore never leaves the release job.
 
 **`pr-build` and `rc-build` must not mention these secrets at all.** They build
 branches anyone with a PR can push to; a workflow that can read the release
-key from a PR branch can hand it to whoever wrote the branch.
+key from a PR branch can hand it to whoever wrote the branch. They do pass the
+builder keystore inputs — for the committed [debug key](#the-debug-key) only,
+and none of them comes from a secret.
 
 ##### The certificate is checked before anything is attached
 
@@ -621,7 +659,11 @@ release builds get all four keystore inputs from the right secrets, one step
 runs the check on both APK paths after both builds and before the attach, a
 rejected APK is moved out of the way, a later step fails the run on it, and
 neither `pr-build.yml` nor `rc-build.yml` contains any `ANDROID_KEY*` secret or
-keystore input. `test_check_apk_signature.py` covers the checker itself.
+takes a keystore input from a secret. It also asserts every Unity build in
+those two workflows is handed the committed debug keystore — encoded from
+`.github/signing/debug.keystore`, with its alias and passwords — and that the
+file parses and its certificate's SHA-256 is the one in
+`.github/signing/README.md`. `test_check_apk_signature.py` covers the checker itself.
 
 The first release-signed release is still one uninstall away from the last
 debug-signed one: the installed app's certificate is the old debug key, and
