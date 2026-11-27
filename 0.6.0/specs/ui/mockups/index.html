@@ -2276,6 +2276,11 @@ a mockup judged at the wrong size, and size is most of what a wireframe decides.
 <td><a href="game-over.html"><code>game-over.html</code></a></td>
 <td><a href="../game-over/">Game over</a></td>
 </tr>
+<tr>
+<td>Pile card, back and front — a component, not a screen</td>
+<td><a href="pile-card.html"><code>pile-card.html</code></a></td>
+<td><a href="../shared-components/#pile-card">Shared components § Pile card</a></td>
+</tr>
 </tbody>
 </table>
 <p>Two screens have more than one mockup, both drawing <strong>a state that only exists
@@ -2376,7 +2381,7 @@ Since <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/5
 they are drawn in the <a href="../style-guide/">Pond style</a>, whose palette <em>is</em> a
 decision — Derek's — and the files say so in their header comment. Those are
 <code>end-game-confirm.html</code>, <code>settings-dialog.html</code>, both <code>answer-result-</code> files,
-both <code>player-won-</code> files, <code>game-over.html</code>, the five agreed
+both <code>player-won-</code> files, <code>game-over.html</code>, <code>pile-card.html</code>, the five agreed
 <code>working-out-grid-</code> files, and the lane chips in both <code>game-board</code> files.
 Everything else in this folder is still drawn in the grey wireframe palette, and
 its colours are still placeholders.</p>
@@ -2417,6 +2422,14 @@ path. The restyled files also load the title's Fredoka from its committed copy,
 for the same reason the title screen does. Nunito, the style's second face, is
 not committed yet, so those files name it and fall back to the system
 sans-serif for sentences.</p>
+<p>The <a href="../shared-components/#pile-card">pile card</a> is the third case. Its back
+<em>is</em> a little pond — two lily pads on the water and a log carrying the pile's
+name — so <code>pile-card.html</code> loads the pad renders, the water texture and the
+bark from <a href="../images/pile-card/water.png"><code>../images/pile-card/</code></a> by relative
+path. It is also the one file in this folder that draws a component rather than
+a screen: the three cards, both ways round, on the turn panel's <code>Paper</code>, with a
+few words saying which is which. It was generated once and committed, and has
+no script in it.</p>
 <p><strong>Is not:</strong> a prototype. No behaviour, no navigation between screens, no
 interactivity. The moment a mockup does something, people start judging what it
 does instead of how it looks, and it stops being cheap to change — which was the
