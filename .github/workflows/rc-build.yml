@@ -62,6 +62,17 @@ jobs:
           # produce a number Android refuses to install over the last build.
           fetch-depth: 0
 
+      # The one committed debug keystore, so every debug APK is signed with the
+      # same certificate and installs over the last (#532). Without it Unity
+      # signs with a debug key generated fresh in this container, and Android
+      # refuses each new build as an update. It is a debug key for the `.debug`
+      # application ID only, not a secret — see .github/signing/README.md. The
+      # release key stays in secrets that only release-build can name.
+      - name: Read the debug keystore
+        id: debug_key
+        if: steps.licence.outputs.present == 'true'
+        run: echo "base64=$(base64 -w0 .github/signing/debug.keystore)" >> "$GITHUB_OUTPUT"
+
       # /VERSION on this branch is release-please's, already bumped to the
       # version about to ship — which is exactly the version an RC should carry.
       - name: Work out the version and the rc number
@@ -104,9 +115,9 @@ jobs:
           key: Library-android-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
           restore-keys: Library-android-
 
-      # Same debug signing and .debug suffix as a PR build. An RC is for trying
-      # the game, and release signing needs a secret this workflow should not be
-      # able to reach.
+      # Same committed debug key and .debug suffix as a PR build, so each RC
+      # installs over the last. An RC is for trying the game, and release
+      # signing needs a secret this workflow should not be able to reach.
       #
       # `customParameters` rather than `env:`, for the reason in #218: the
       # editor runs in a container that sees only unity-builder's own variables.
@@ -133,6 +144,11 @@ jobs:
           buildName: multiplying-frogs-${{ steps.stamp.outputs.version }}-rc${{ steps.stamp.outputs.rc }}
           allowDirtyBuild: true
           customParameters: -frogsVersionCode ${{ steps.stamp.outputs.version_code }} -frogsRcNumber ${{ steps.stamp.outputs.rc }} -frogsApplicationIdSuffix .debug
+          androidKeystoreName: debug.keystore
+          androidKeystoreBase64: ${{ steps.debug_key.outputs.base64 }}
+          androidKeystorePass: android
+          androidKeyaliasName: androiddebugkey
+          androidKeyaliasPass: android
 
       # Artifacts only. An RC is not a release: no tag, no GitHub release.
       - name: Upload the release candidate

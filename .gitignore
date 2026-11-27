@@ -81,6 +81,9 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+# Except the committed debug keystore pr-build and rc-build sign with (#532).
+# A debug key for the `.debug` application ID only; it is not a secret.
+!.github/signing/debug.keystore
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
