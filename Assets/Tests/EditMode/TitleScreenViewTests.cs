@@ -486,6 +486,173 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
+        public void TheScene_ImportsAsAFullSizeSpriteWithNoMipmaps_LikeTheArt()
+        {
+            var path = "Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png";
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+
+            Assert.That(importer, Is.Not.Null, path);
+            Assert.That(importer.textureType, Is.EqualTo(TextureImporterType.Sprite));
+            Assert.That(importer.spriteImportMode, Is.EqualTo(SpriteImportMode.Single));
+            Assert.That(importer.maxTextureSize, Is.GreaterThanOrEqualTo(4096), "kept at its full 2880");
+            Assert.That(importer.mipmapEnabled, Is.False);
+            Assert.That(importer.npotScale, Is.EqualTo(TextureImporterNPOTScale.None));
+        }
+
+        [Test]
+        public void TheScene_IsTheCommittedExtendedScene_DrawnBehindTheArt()
+        {
+            var view = CreateView();
+
+            try
+            {
+                Assert.That(view.SceneImage.sprite, Is.SameAs(Resources.Load<Sprite>(TitleScreenView.SceneResource)));
+                Assert.That(AssetDatabase.GetAssetPath(view.SceneImage.sprite),
+                    Is.EqualTo("Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png"));
+                Assert.That(view.SceneImage.sprite.rect.size, Is.EqualTo(new Vector2(TitleScreenView.TitleSceneWidth, TitleScreenView.TitleSceneHeight)));
+                Assert.That(view.SceneImage.raycastTarget, Is.False, "a picture: tapping it does nothing");
+                Assert.That(view.SceneImage.transform.GetSiblingIndex(), Is.LessThan(view.ArtRect.GetSiblingIndex()), "behind the art");
+                Assert.That(view.SceneImage.transform.parent, Is.SameAs(view.ArtRect.parent), "fades in with the art");
+            }
+            finally
+            {
+                Destroy(view);
+            }
+        }
+
+        // --- #533: the whole picture on every screen ---------------------------
+
+        // Derek's phone: 2340 x 1080 pixels, which Expand makes a 2600 x 1200
+        // canvas.
+        const float WidePhoneScreenWidth = 2340f;
+        const float WidePhoneScreenHeight = 1080f;
+        const float WidePhoneCanvasWidth = 2600f;
+
+        [Test]
+        public void OnAWidePhone_TheWholeArtIsOnScreen_AndTheSignAndVersionAreOnTheirSpotsOfIt()
+        {
+            var canvas = CanvasOf(WidePhoneCanvasWidth, ReferenceHeight);
+            var view = CreateViewOn(canvas);
+
+            try
+            {
+                view.UseSafeArea(
+                    new Rect(0f, 0f, WidePhoneScreenWidth, WidePhoneScreenHeight),
+                    new Vector2(WidePhoneScreenWidth, WidePhoneScreenHeight));
+
+                var art = LocalRectIn(canvas, view.ArtRect);
+
+                // Never cropped: the whole picture inside the canvas, at its
+                // reference size, centred.
+                Assert.That(art.width, Is.EqualTo(ReferenceWidth).Within(Tolerance));
+                Assert.That(art.height, Is.EqualTo(ReferenceHeight).Within(Tolerance));
+                Assert.That(art.xMin, Is.EqualTo(-ReferenceWidth / 2f).Within(Tolerance));
+                Assert.That(art.yMin, Is.EqualTo(-ReferenceHeight / 2f).Within(Tolerance), "the log is not cut off the bottom");
+                Assert.That(art.yMax, Is.EqualTo(ReferenceHeight / 2f).Within(Tolerance), "MULTIPLYING is not cut off the top");
+
+                AssertOnTheArtWhereTheMockupPutsIt(view, canvas, art);
+
+                // The scene behind lines up with the art: at its scale, its
+                // middle 1920 x 1200 exactly where the art is.
+                var scene = LocalRectIn(canvas, view.SceneImage.rectTransform);
+                Assert.That(scene.width, Is.EqualTo(TitleScreenView.TitleSceneWidth).Within(Tolerance));
+                Assert.That(scene.center.x, Is.EqualTo(art.center.x).Within(Tolerance));
+                Assert.That(scene.center.y, Is.EqualTo(art.center.y).Within(Tolerance));
+                Assert.That(scene.xMin, Is.LessThanOrEqualTo(-WidePhoneCanvasWidth / 2f + Tolerance), "it reaches the left edge");
+                Assert.That(scene.xMax, Is.GreaterThanOrEqualTo(WidePhoneCanvasWidth / 2f - Tolerance), "it reaches the right edge");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(canvas.gameObject);
+            }
+        }
+
+        [Test]
+        public void WhenACutOutLeavesLessThanTheArt_TheArtSignAndVersionShrinkTogether_InsideTheSafeArea()
+        {
+            // A 4:3 screen, 1600 x 1200 pixels (a 1920 x 1440 canvas), with a
+            // cut-out taking 100 px off its left edge: the safe area is 1500
+            // pixels, 1800 canvas units, wide, so the art is drawn at 1800 / 1920.
+            var canvas = CanvasOf(ReferenceWidth, 1440f);
+            var view = CreateViewOn(canvas);
+
+            try
+            {
+                view.UseSafeArea(new Rect(100f, 0f, 1500f, 1200f), new Vector2(1600f, 1200f));
+
+                var art = LocalRectIn(canvas, view.ArtRect);
+
+                Assert.That(art.width, Is.EqualTo(1800f).Within(Tolerance));
+                Assert.That(art.height, Is.EqualTo(1125f).Within(Tolerance), "still 16:10");
+                Assert.That(art.xMin, Is.EqualTo(120f - (ReferenceWidth / 2f)).Within(Tolerance), "clear of the cut-out");
+
+                Assert.That(view.ContentRect.localScale.x, Is.EqualTo(0.9375f).Within(0.0001f));
+                AssertOnTheArtWhereTheMockupPutsIt(view, canvas, art);
+
+                var plank = LocalRectIn(canvas, view.StartButton.RectTransform);
+                Assert.That(Mathf.Min(plank.width, plank.height), Is.GreaterThanOrEqualTo(Button.MinTouchTarget),
+                    "the plank is still a full-size tap target");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(canvas.gameObject);
+            }
+        }
+
+        // The sign's plank and the version string sit on the same spot of the
+        // picture as on the 16:10 mockup, measured in the art's own reference
+        // pixels: the plank's centre (unrotated) and the version's corner.
+        static void AssertOnTheArtWhereTheMockupPutsIt(TitleScreenView view, RectTransform canvas, Rect art)
+        {
+            var scale = art.width / ReferenceWidth;
+
+            var plankCentre = (Vector2)canvas.InverseTransformPoint(view.StartButton.RectTransform.position);
+            var plankFromArtRight = (art.xMax - plankCentre.x) / scale;
+            var plankFromArtBottom = (plankCentre.y - art.yMin) / scale;
+
+            Assert.That(plankFromArtRight, Is.EqualTo(TitleScreenView.SafeMargin + (TitleScreenView.TitleSignWidth / 2f)).Within(Tolerance),
+                "the sign stays on the grass right of the log");
+            Assert.That(
+                plankFromArtBottom,
+                Is.EqualTo(TitleScreenView.SafeMargin + TitleScreenView.TitleSignBottomOffset + (TitleScreenView.TitleSignHeight / 2f)).Within(Tolerance));
+
+            var version = (Vector2)canvas.InverseTransformPoint(view.VersionText.rectTransform.position);
+            Assert.That((version.x - art.xMin) / scale, Is.EqualTo(TitleScreenView.SafeMargin).Within(Tolerance),
+                "the version string is in the picture's grass corner, not on a lily pad");
+            Assert.That((version.y - art.yMin) / scale, Is.EqualTo(TitleScreenView.SafeMargin).Within(Tolerance));
+        }
+
+        static RectTransform CanvasOf(float width, float height)
+        {
+            var host = new GameObject("Canvas", typeof(RectTransform));
+            var rect = (RectTransform)host.transform;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(width, height);
+            rect.anchoredPosition = Vector2.zero;
+            return rect;
+        }
+
+        static TitleScreenView CreateViewOn(RectTransform canvas)
+        {
+            var view = new GameObject(nameof(TitleScreenView), typeof(RectTransform)).AddComponent<TitleScreenView>();
+            view.transform.SetParent(canvas, worldPositionStays: false);
+            return view;
+        }
+
+        // A rect's corners in the canvas's own space, origin its centre.
+        static Rect LocalRectIn(RectTransform canvas, RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            var min = (Vector2)canvas.InverseTransformPoint(corners[0]);
+            var max = (Vector2)canvas.InverseTransformPoint(corners[2]);
+            return Rect.MinMaxRect(Mathf.Min(min.x, max.x), Mathf.Min(min.y, max.y), Mathf.Max(min.x, max.x), Mathf.Max(min.y, max.y));
+        }
+
+        [Test]
         public void TheFont_ImportsAsADynamicFontWithItsDataIncluded()
         {
             var path = "Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf";

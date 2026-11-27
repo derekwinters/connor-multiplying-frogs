@@ -18,6 +18,10 @@ namespace Frogs.EditorTools
     /// only ever drawn at full screen or larger. Compression is left at
     /// Unity's default, as the launch splash's is.
     ///
+    /// The extended scene behind it (#533) is the same picture carried on past
+    /// its frame, rendered by the same build step, and imports with the same
+    /// settings; only its largest size is bigger, because it is 2880 wide.
+    ///
     /// The font is a static Fredoka Bold, instanced at weight 700 from the
     /// variable font by the same build step, because the legacy font importer
     /// has no setting that picks a variable font's weight. It imports as a
@@ -25,21 +29,24 @@ namespace Frogs.EditorTools
     /// with the font data included in the build, since no device has Fredoka
     /// of its own to fall back on.
     ///
-    /// Only these two paths are touched. Both live under a Resources folder,
+    /// Only these three paths are touched. All live under a Resources folder,
     /// because TitleScreenView loads them by path at runtime: nothing refers
-    /// to either by GUID, so neither needs a committed <c>.meta</c>.
+    /// to any of them by GUID, so none needs a committed <c>.meta</c>.
     /// </summary>
     public sealed class TitleScreenArtImport : AssetPostprocessor
     {
         public const string ArtPath = "Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png";
+        public const string ScenePath = "Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png";
         public const string FontPath = "Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf";
 
         // Bumped whenever the settings below change, so Unity re-imports the
         // files with them instead of keeping its cached import.
         const uint SettingsVersion = 1;
 
-        // The picture's long side is 1920; Unity's sizes are powers of two.
+        // The picture's long side is 1920, the scene's 2880; Unity's sizes are
+        // powers of two.
         const int MaxSize = 2048;
+        const int SceneMaxSize = 4096;
 
         public override uint GetVersion()
         {
@@ -48,7 +55,7 @@ namespace Frogs.EditorTools
 
         void OnPreprocessTexture()
         {
-            if (assetPath != ArtPath)
+            if (assetPath != ArtPath && assetPath != ScenePath)
             {
                 return;
             }
@@ -60,7 +67,7 @@ namespace Frogs.EditorTools
             importer.sRGBTexture = true;
             importer.npotScale = TextureImporterNPOTScale.None;
             importer.mipmapEnabled = false;
-            importer.maxTextureSize = MaxSize;
+            importer.maxTextureSize = assetPath == ScenePath ? SceneMaxSize : MaxSize;
         }
 
         void OnPreprocessAsset()

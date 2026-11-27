@@ -25,6 +25,16 @@ setup does so because the choice has already been made, not because it can be
 made somewhere else.
 **Invariant:** the version string is present and is read from `/VERSION`, never
 typed into a layout.
+**Invariant:** the whole picture is on screen, on every screen. The art is
+fitted *inside* the device's safe area and never cropped, so the drawn title,
+the big frog on the log and the `START` sign are all visible on a 2.17:1 phone,
+on the 16:10 tablet and on a 4:3 screen alike. A wider or taller screen adds
+more of the same pond — [`scene`](#regions) — around the picture; it never
+cuts into it.
+**Invariant:** the sign and the version string are laid out on the fitted
+picture, not on the screen. Wherever the picture lands and at whatever size,
+each of them is on the same spot of it as on the 16:10 mockup — the sign on the
+grass right of the log, the version string in the grass corner bottom-left.
 
 ### The invariants this page used to carry
 
@@ -47,7 +57,8 @@ visible, and they are not true anywhere else on this page.
 
 | Region | Job |
 | --- | --- |
-| `art` | The whole splash picture — every frog with its hop line, the log, and the drawn title — over the whole canvas, behind everything |
+| `art` | The whole splash picture — every frog with its hop line, the log, and the drawn title — fitted whole inside the screen's safe area, behind the sign and the version string |
+| `scene` | Where the screen is wider or taller than 16:10: the same pond carried on past the picture's frame — more sky, water, reeds and grass — to the screen's edges, behind `art` |
 | `start` | The `START` sign: a plank on a post, standing in the grass bottom-right |
 | `footprint` | Version string, bottom-left; small and quiet |
 
@@ -59,18 +70,40 @@ one — [open question 8](#open-questions).
 
 ## Anchors
 
-- `art` fills the canvas, cropped from the centre outwards. It is the one
-  element allowed to run to the screen edge, because it is a picture and a
-  margin around a picture is a border nobody asked for.
+- `art` is fitted **inside the device's safe area**, whole and never cropped,
+  and centred in it. It is drawn at its 1920 × 1200 reference size whenever
+  the safe area holds that — which, with the [expanding
+  canvas](shared-components.md#what-fills-a-screen-that-is-not-1610), is every
+  screen with no cut-out — and only when a notch or a cut-out leaves less is
+  it scaled down, evenly, until it fits. It is never scaled up and never
+  stretched out of its 16:10 shape. The device's safe area is the screen less
+  what the system reports as cut-outs and rounded corners (Unity's
+  `Screen.safeArea`).
+- `scene` fills the rest of the screen, to all four edges. It is the same
+  picture made wider and taller, 2880 × 1440 (`TitleSceneWidth` ×
+  `TitleSceneHeight`) with the 1920 × 1200 art exactly in its middle: the
+  splash's background layers are drawn on past the frame (the sky's gradient,
+  the reed clumps and far banks mirrored at the edge, the pond and the front
+  grass carried round from the other side), so a wide phone sees more pond
+  beside the picture and a 4:3 screen more sky above and grass below. It is
+  drawn at the art's own scale and centred on it, so the two line up and no
+  join shows; only on a screen wider than 2.4:1 or taller than 4:3, or when a
+  cut-out has shrunk the art, is it scaled up about the art's centre, just
+  enough to reach every edge. It fades in with the art and is never tappable.
+  The art and its scene together are the one element allowed to run to the
+  screen edge, because they are a picture and a margin around a picture is a
+  border nobody asked for.
 - `art` is Connor's splash picture, rebuilt as layers under
   [`art-source/splash/`](https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash),
   with every layer it uses shown: the same picture as the launch splash. The
   unused splashes on the lily pads are not in it. The game draws it from
   `Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png`, the
   same render the mockup loads.
-- `start`: the plank's **right edge is on the right safe area**, and its
-  **bottom edge is `TitleSignBottomOffset` up from the bottom safe area**. At
-  1920 × 1200 that puts the plank at 1552–1872 px across and 930–1058 px down,
+- `start` is placed on the fitted `art`, measured in the art's own reference
+  pixels: the plank's **right edge is `SafeMargin` in from the art's right
+  edge**, and its **bottom edge is `SafeMargin` + `TitleSignBottomOffset` up
+  from the art's bottom edge** — at 1920 × 1200, where the art is the whole
+  screen, the right and bottom safe areas, exactly as before. That puts the plank at 1552–1872 px across and 930–1058 px down,
   on the grass and water right of the log's cut end, clear of every frog. The
   plank is tilted `TitleSignTilt` about its own centre. The post is centred
   under the plank, runs from behind it, and ends `TitleSignPostDrop` below the
@@ -78,12 +111,45 @@ one — [open question 8](#open-questions).
 - The tap target is **the plank**, 320 × 128 px — over `MinTouchTarget` (96
   px) both ways, as the [shared Button](shared-components.md#button) requires.
   The post is part of the drawing, not of the target.
-- `footprint` is pinned to the bottom-left safe area corner.
-- On a screen that is not 16:10, the art crops and everything else keeps its
-  distance from the **safe area**, not the screen edge. The sign is anchored
-  to the safe area like everything else, so on a much wider or taller screen
-  it can drift a little off the grass it stands on in the art; that is the
-  same trade every anchored element on every screen makes.
+- `footprint` is pinned to the art's bottom-left corner, `SafeMargin` in from
+  each edge — at 1920 × 1200, the bottom-left safe area corner. It stays on the
+  picture rather than going out into `scene`, by the
+  [shared rule](shared-components.md#what-fills-a-screen-that-is-not-1610)
+  that the extra space a wider screen gives is background and nothing else.
+- When the art is scaled down to fit a cut-out, the sign and the version string
+  are scaled with it, so they stay on their spots of the picture. The plank's
+  tap target shrinks with them, and stays over `MinTouchTarget` until the art
+  is below 75% of its size, which no cut-out comes near.
+
+### The anchors this page used to carry
+
+Until [#533](https://github.com/derekwinters/connor-multiplying-frogs/issues/533)
+the art covered the screen and the sign kept to the screen's safe area:
+
+> `art` fills the canvas, cropped from the centre outwards.
+>
+> On a screen that is not 16:10, the art crops and everything else keeps its
+> distance from the **safe area**, not the screen edge. The sign is anchored
+> to the safe area like everything else, so on a much wider or taller screen
+> it can drift a little off the grass it stands on in the art.
+
+On Derek's 2340 × 1080 phone that cropped about 212 px off the top and the
+bottom of the picture — the top of MULTIPLYING, the log and the big frog's
+feet — and left the version string on a lily pad, because the picture had
+grown under it. The picture is fitted, not cropped, and the sign and the
+version string are placed on it, so they cannot drift off it.
+
+What fills the room beside the fitted picture was Derek's call on
+[PR #535](https://github.com/derekwinters/connor-multiplying-frogs/pull/535).
+Two fills were drawn first and turned down: the picture's edge pixels
+stretched outwards (*"The streaks look bad"*) and a blurred copy of it
+(*"Can't we just extend the scene instead of adding blurry edges"*). He chose
+the extended scene, built into the splash's layers rather than painted onto
+the flat picture (*"That's part of all the assets right?"*). Its known flaws,
+accepted with it: each reed clump past the frame is a mirror image of the one
+inside it; where a mirror meets the shoreline there is a small notch; and on
+a 4:3 screen a faint lighter column shows above the title, where its glow is
+mirrored upwards.
 
 ## Named constants
 
@@ -107,6 +173,8 @@ one — [open question 8](#open-questions).
 | `START` label letter spacing | `TitleSignLabelTracking` | 2 px |
 | Sign plank's size while held, of its own | `TitleSignPressScale` | 0.95 |
 | Version string size | `VersionLabelSize` | 28 px |
+| Extended scene width, in the art's reference pixels | `TitleSceneWidth` | 2880 px |
+| Extended scene height, likewise | `TitleSceneHeight` | 1440 px |
 | Entering fade, art (the drawn title is part of it) | `TitleFadeDuration` | 0.3 s |
 
 The `START` label is set in **Fredoka Bold** (weight 700), the font the title is

@@ -561,10 +561,11 @@ GUID and neither has a committed `.meta`.
 | | |
 | --- | --- |
 | Picture | `Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png` — the home build step's render, the same bytes as the mockup's `full.png`, and the same picture as the launch splash |
+| Extended scene | `Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png` — the same layers in a window 480 px wider each side and 120 px taller top and bottom, drawn behind the fitted picture on screens that are not 16:10; the layers carry their drawing past the frame (`art-source/splash/beyond.py`), so its middle is the picture ([#533](https://github.com/derekwinters/connor-multiplying-frogs/issues/533)) |
 | Font | `Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf`, with its `OFL.txt` beside it — the game's first font that is not Unity's built-in one |
 | Made by | `art-source/splash/build_splash.py --home-only` (`art-source/splash/home.py`) |
-| Its tests | `.github/scripts/tests/test_title_screen_art.py` |
-| Import settings | `TitleScreenArtImport`, in `Assets/Editor/` — the picture as the launch splash's (a single sprite, full size, no mipmaps); the font as a dynamic font with its data included |
+| Its tests | `.github/scripts/tests/test_title_screen_art.py`, and `test_splash_beyond.py` for the extended scene |
+| Import settings | `TitleScreenArtImport`, in `Assets/Editor/` — the picture as the launch splash's (a single sprite, full size, no mipmaps), and the extended scene behind it the same way, with a 4096 largest size because it is 2880 wide ([#533](https://github.com/derekwinters/connor-multiplying-frogs/issues/533)); the font as a dynamic font with its data included |
 | Its EditMode tests | `Assets/Tests/EditMode/TitleScreenViewTests.cs` |
 
 **The font is a static Bold, not the variable font.** The title is set in Fredoka at

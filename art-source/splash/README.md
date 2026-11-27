@@ -23,6 +23,7 @@ The approach follows `derekwinters/lucas-doggiehood` `art-source/splash/`, adapt
 | `icon.py` | The app icon's crop: the window (`ICON_CROP`), its size (`ICON_SIZE`) and the layers it hides (`ICON_HIDDEN`). |
 | `launch.py` | The launch splash's window (`SPLASH_VIEW`) and size (`SPLASH_SIZE`). |
 | `home.py` | The title screen's art: the window, the size and where it is written, and the font files copied beside it. |
+| `beyond.py` | Each background layer's drawing past the frame, for the title screen's extended scene (#533). |
 | `build_splash.py` | The one script that writes all of the above, the app icon source and the launch splash, then self-checks. |
 | `cutout.py`, `tracing.py`, `sky.py`, `title.py` | Its stages: cut-out and completion, VTracer tracing, the fitted sky and glow, the vector title. |
 | `fonts/Fredoka-Variable.ttf`, `fonts/OFL.txt` | The title's font and its licence (SIL Open Font License 1.1). |
@@ -195,3 +196,28 @@ with and without the log, the title on its own, a lily pad, and a fade on the ti
 glow's tail, which shows once the big frog is gone). They were deleted with the losing
 mockups; with the frogs in, the tail is behind the big frog.
 `.github/scripts/tests/test_title_screen_art.py` checks what is left.
+
+## Past the frame: the title screen's extended scene
+
+The title screen fits this picture whole inside the screen, so a phone wider than 16:10
+has room beside it and a 4:3 tablet above and below it (#533). That room shows more of
+the same pond. Every layer the frame cuts - `sky`, `title-glow`, the banks, the reeds,
+`pond` and `grass` - carries a second group, `<id>-beyond`, drawn **only outside** the
+1586 × 992 frame (`beyond.py`): the sky's gradient carries on; the glow is mirrored
+upwards and fades; each reed clump and bank is mirrored at its edge; the pond and the
+front grass are carried round from the other side, with a short mirrored fade at each
+join; and below the frame the grass's ground carries on. The layer's own drawing is
+unchanged, in `<id>-framed`.
+
+Because all of it is outside the frame, every render of the frame - the launch splash,
+the title screen's art, the app icon, the composite, the layer PNGs - is byte for byte
+what it was. `--home-only` also renders the stack in a window 480 px wider each side and
+120 px taller top and bottom (`home.SCENE_VIEW`), at the same scale, to
+`Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png`, which the
+title screen draws behind its art. Standalone object crops leave the drawing past the
+frame out (`beyond.within_frame`). `.github/scripts/tests/test_splash_beyond.py` checks it.
+
+Derek chose this over stretching the picture's edge pixels and over a blur (PR #535).
+Accepted flaws: each mirrored reed clump is a reflection of the one inside the frame,
+there is a small notch where a mirror meets the shoreline, and on a 4:3 screen a faint
+lighter column shows above the title where its glow is mirrored.

@@ -147,7 +147,7 @@ namespace Frogs.Unity.EditModeTests
         }
 
         [Test]
-        public void TitleScreen_CoversEveryEdgeWithItsArt_CroppedFromTheCentre_AndLeavesItsContentAtReferenceSize()
+        public void TitleScreen_FitsItsArtWhole_ExtendsItsSceneToEveryEdge_AndLeavesItsContentAtReferenceSize()
         {
             var canvas = OversizedCanvas();
 
@@ -157,23 +157,31 @@ namespace Frogs.Unity.EditModeTests
                     .AddComponent<TitleScreenView>();
                 view.transform.SetParent(canvas, worldPositionStays: false);
 
+                // A screen whose safe area is all of it, so the batch-mode
+                // runner's own Screen does not decide the answer.
+                view.UseSafeArea(
+                    new Rect(0f, 0f, OversizedCanvasWidth, OversizedCanvasHeight),
+                    new Vector2(OversizedCanvasWidth, OversizedCanvasHeight));
+
                 AssertCoversTheWholeCanvas(view.BackgroundImage.rectTransform, canvas, "the title screen's background");
                 AssertIsTheReferenceCanvasCentred(view.ContentRect, canvas, "the title screen's content");
 
-                // The splash art is the one element allowed to run to the
-                // screen edge (docs/specs/ui/title-screen.md's Anchors): it
-                // covers the whole canvas, cropped from the centre outwards,
-                // and keeps its own 16:10 shape rather than being stretched to
-                // the device's. 2400 x 1400 is wider than 16:10, so the art is
-                // scaled to the width and cropped top and bottom.
-                var scale = Mathf.Max(OversizedCanvasWidth / ReferenceWidth, OversizedCanvasHeight / ReferenceHeight);
+                // The splash art is fitted whole and never cropped
+                // (docs/specs/ui/title-screen.md's Anchors, #533): at its
+                // reference size, because the safe area holds that, centred.
+                // It used to cover the canvas, cropped from the centre, which
+                // cut the drawn title and the log off a wide phone.
+                AssertIsTheReferenceCanvasCentred(view.ArtRect, canvas, "the title screen's art");
 
-                Assert.That(view.ArtRect.rect.width, Is.EqualTo(ReferenceWidth * scale).Within(Tolerance),
-                    "the art covers the canvas's width");
-                Assert.That(view.ArtRect.rect.height, Is.EqualTo(ReferenceHeight * scale).Within(Tolerance),
-                    "the art keeps its 16:10 shape, so it overhangs the canvas's height");
-                Assert.That(view.ArtRect.rect.height, Is.GreaterThanOrEqualTo(OversizedCanvasHeight - Tolerance));
-                AssertIsCentredOn(view.ArtRect, canvas, "the title screen's art");
+                // What the art leaves shows the extended scene (#533): the same
+                // pond carried on past the art's frame, at the art's scale and
+                // centred on it, reaching every edge.
+                Assert.That(view.SceneImage.sprite, Is.Not.Null, "the scene did not load — check " + TitleScreenView.SceneResource);
+                AssertReachesEveryEdge(view.SceneImage.rectTransform, canvas, "the title screen's scene");
+                Assert.That(view.SceneImage.rectTransform.rect.size,
+                    Is.EqualTo(new Vector2(TitleScreenView.TitleSceneWidth, TitleScreenView.TitleSceneHeight)),
+                    "at the art's own scale, so its middle is the art");
+                AssertIsCentredOn(view.SceneImage.rectTransform, canvas, "the title screen's scene");
             }
             finally
             {
@@ -347,6 +355,22 @@ namespace Frogs.Unity.EditModeTests
                     $"{what} does not reach the canvas vertically — corner {corner}. "
                     + "The strip it leaves is where the engine's own clear shows through.");
             }
+        }
+
+        // At least the whole canvas: a picture may overhang it, as the title
+        // screen's extended scene does, but may not stop short of an edge.
+        static void AssertReachesEveryEdge(RectTransform rect, RectTransform canvas, string what)
+        {
+            var expected = new Vector3[4];
+            var actual = new Vector3[4];
+
+            canvas.GetWorldCorners(expected);
+            rect.GetWorldCorners(actual);
+
+            Assert.That(actual[0].x, Is.LessThanOrEqualTo(expected[0].x + Tolerance), $"{what} stops short of the left edge");
+            Assert.That(actual[0].y, Is.LessThanOrEqualTo(expected[0].y + Tolerance), $"{what} stops short of the bottom edge");
+            Assert.That(actual[2].x, Is.GreaterThanOrEqualTo(expected[2].x - Tolerance), $"{what} stops short of the right edge");
+            Assert.That(actual[2].y, Is.GreaterThanOrEqualTo(expected[2].y - Tolerance), $"{what} stops short of the top edge");
         }
 
         static void AssertIsTheReferenceCanvasCentred(RectTransform rect, RectTransform canvas, string what)
