@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.7.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.6.0...v0.7.0) (2026-11-27)
+
+
+### Features
+
+* **art:** a 3D frog whose legs move when it hops ([#463](https://github.com/derekwinters/connor-multiplying-frogs/issues/463)) ([7915a4a](https://github.com/derekwinters/connor-multiplying-frogs/commit/7915a4a8bf4026924c2bbfb981db0661e0f6be2e))
+* **art:** draw the start and end logs with the approved 3D log ([#470](https://github.com/derekwinters/connor-multiplying-frogs/issues/470)) ([7d54dd9](https://github.com/derekwinters/connor-multiplying-frogs/commit/7d54dd93c5ede3d429eba7e477b0f34d07ca8d88)), closes [#468](https://github.com/derekwinters/connor-multiplying-frogs/issues/468)
+* **art:** make the app icon a close crop of the frog on the log ([#513](https://github.com/derekwinters/connor-multiplying-frogs/issues/513)) ([f03b19a](https://github.com/derekwinters/connor-multiplying-frogs/commit/f03b19a5b4038e95b070db9fd8e0978c767010c8)), closes [#483](https://github.com/derekwinters/connor-multiplying-frogs/issues/483)
+* **art:** put the approved 3D lily pads on the board ([#467](https://github.com/derekwinters/connor-multiplying-frogs/issues/467)) ([1ea64c6](https://github.com/derekwinters/connor-multiplying-frogs/commit/1ea64c68eec9fb01d32a17311894eb7456ccbb5c)), closes [#465](https://github.com/derekwinters/connor-multiplying-frogs/issues/465)
+* **art:** rebuild the splash art as separate layers ([#512](https://github.com/derekwinters/connor-multiplying-frogs/issues/512)) ([af5dc14](https://github.com/derekwinters/connor-multiplying-frogs/commit/af5dc142590b3441a328345d939c294002b0ebf8))
+* **board:** fit the frog to its sitting pose so it fills the lily pad ([#475](https://github.com/derekwinters/connor-multiplying-frogs/issues/475)) ([b776b73](https://github.com/derekwinters/connor-multiplying-frogs/commit/b776b7371e6a802c29980f7a4d5669221790c763)), closes [#474](https://github.com/derekwinters/connor-multiplying-frogs/issues/474)
+* **board:** give the pond the approved drifting water texture ([#472](https://github.com/derekwinters/connor-multiplying-frogs/issues/472)) ([7a0e433](https://github.com/derekwinters/connor-multiplying-frogs/commit/7a0e433d163f2f664d546d55a3a1f3080b6c27ed))
+* **board:** slow the frog's hop to 0.5 s ([#478](https://github.com/derekwinters/connor-multiplying-frogs/issues/478)) ([fb26b41](https://github.com/derekwinters/connor-multiplying-frogs/commit/fb26b4166efbf257bb623ce04064e36fc19ce2d5)), closes [#476](https://github.com/derekwinters/connor-multiplying-frogs/issues/476)
+* **build:** show Connor's splash picture when the app launches ([#516](https://github.com/derekwinters/connor-multiplying-frogs/issues/516)) ([109b313](https://github.com/derekwinters/connor-multiplying-frogs/commit/109b313f94eb841a909d782a97ab8f4d2dfc3e41))
+* **ui:** build the title screen on the splash art with the START sign ([#522](https://github.com/derekwinters/connor-multiplying-frogs/issues/522)) ([d468cd4](https://github.com/derekwinters/connor-multiplying-frogs/commit/d468cd48778cdf51a63f74ff49ff923381bb7a3f))
+
+
+### Bug Fixes
+
+* **board:** draw the frog from straight above, sitting flat on its pad ([#479](https://github.com/derekwinters/connor-multiplying-frogs/issues/479)) ([6b3c462](https://github.com/derekwinters/connor-multiplying-frogs/commit/6b3c4627e9d7082fae39ab360168f195060a889f))
+* **build:** put Connor's app icon into the Android build ([#514](https://github.com/derekwinters/connor-multiplying-frogs/issues/514)) ([5709754](https://github.com/derekwinters/connor-multiplying-frogs/commit/5709754675346711a3dd52aac34e0ac27547ea5d))
+* **ci:** pin the game-ci CLI version and authenticate its GitHub calls ([#519](https://github.com/derekwinters/connor-multiplying-frogs/issues/519)) ([258df46](https://github.com/derekwinters/connor-multiplying-frogs/commit/258df46304657679d2f6477085e2eee162972129)), closes [#480](https://github.com/derekwinters/connor-multiplying-frogs/issues/480)
+* **frogs:** lighten FrogBlue so the blue frog stands out on the new log ([#473](https://github.com/derekwinters/connor-multiplying-frogs/issues/473)) ([a39799b](https://github.com/derekwinters/connor-multiplying-frogs/commit/a39799b1e6bfc072c936db0615e3152f56551415))
+* **release:** read apksigner's scheme-named signer lines in the APK signature check ([#451](https://github.com/derekwinters/connor-multiplying-frogs/issues/451)) ([63945dc](https://github.com/derekwinters/connor-multiplying-frogs/commit/63945dc62294430bb5a90687ab2fd4b3e3ba5ec0)), closes [#450](https://github.com/derekwinters/connor-multiplying-frogs/issues/450)
+* **release:** run the release checks from the workflow's commit, not the tag ([#454](https://github.com/derekwinters/connor-multiplying-frogs/issues/454)) ([70994d1](https://github.com/derekwinters/connor-multiplying-frogs/commit/70994d12b8cedfebf000b69e3b8b1511928428b7))
+* **ui:** keep title, frog and START sign visible on wide phone screens ([#535](https://github.com/derekwinters/connor-multiplying-frogs/issues/535)) ([fc0abb2](https://github.com/derekwinters/connor-multiplying-frogs/commit/fc0abb20b5ead1d42499972b258c59d274a583c5))
+
 ## [0.6.0](https://github.com/derekwinters/connor-multiplying-frogs/compare/v0.5.0...v0.6.0) (2026-10-11)
 
 
