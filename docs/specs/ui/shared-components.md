@@ -286,7 +286,7 @@ A panel over a dimmed copy of the screen underneath, used for everything that
 interrupts play: the card, the working-out grid, the result, settings, and
 confirms.
 
-Used by: [roll and card](roll-and-card.md),
+Used by: the [turn panel](turn-panel.md), which holds the
 [working-out grid](working-out-grid.md), [answer result](answer-result.md),
 [a player has won](player-won.md), [settings dialog](settings-dialog.md),
 [end-game confirm](end-game-confirm.md).
@@ -302,9 +302,11 @@ no close cross. It is left by pressing one of its buttons, so a game is never
 half-answered because a sleeve brushed the glass.
 **Invariant:** the hardware back button does what the dialog's *least
 destructive* button does, and never what its most destructive one does —
-except the four dialogs whose pages make back inert (roll and card,
-working-out grid, answer result, [a player has won](player-won.md)), where back
-does nothing. All four sit inside a single turn's own chain, where a stray press
+except the dialogs whose pages make back inert (the
+[turn panel](turn-panel.md), which holds the working-out grid, answer result,
+[a player has won](player-won.md)), where back does nothing. They used to be
+four, until roll and card and the grid became one panel (#402). All of them sit
+inside a single turn's own chain, where a stray press
 should not fast-forward past something the game stopped to show.
 **Invariant:** the scrim lets the board read as water. It is `DeepPond`, never
 black, and never so dark the pond underneath is lost.
@@ -383,8 +385,8 @@ places it sits have different things around it:
 
 Used by: [game board](game-board.md) (lane chip),
 [working-out grid](working-out-grid.md) and [answer result](answer-result.md)
-(dialog chip), and [roll and card](roll-and-card.md), which keeps its current
-drawing until it is [redesigned](roll-and-card.md#pending-redesign).
+(dialog chip), and the [turn panel](turn-panel.md) (dialog chip, active, in
+every phase). [Roll and card](roll-and-card.md) is retired.
 
 #### 2. Invariants
 
@@ -531,7 +533,7 @@ state still earns its place on this component. It does:
 | Screen | Where the Active chip is |
 | --- | --- |
 | [Game board](game-board.md) | the active frog's **lane** chip, in the pond |
-| [Roll and card](roll-and-card.md) | the `whose` region, beside `rolled` — until it is redesigned |
+| [Turn panel](turn-panel.md) | the `header`, beside `Roll the die`, then `Work it out` |
 | [Working-out grid](working-out-grid.md) | the `header`, beside `Work it out` |
 | [Answer result](answer-result.md) | **none** — a Default dialog chip for the frog that just answered |
 
@@ -697,9 +699,8 @@ One of the three piles a turn draws from, drawn as a card: face down it says
 The same card is used three times on one panel — Easy, Medium and Hard — which
 is why it is specified here and not on a screen page.
 
-Used by: the turn panel
-([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402),
-not yet written), which replaces [roll and card](roll-and-card.md) and the
+Used by: the [turn panel](turn-panel.md)
+([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402)), which replaces [roll and card](roll-and-card.md) and the
 separate [working-out grid](working-out-grid.md) dialog with one panel. Where the
 three cards sit on that panel, and what the two undrawn cards do, is that page's
 question; this section only fixes the card.
@@ -981,7 +982,7 @@ not specify it, because nobody has agreed it.
 
 The lime glow that marks the matched pile between the die settling and the card
 being picked up is the turn panel's, not the card's — its colour, width and hold
-are on #402.
+are on [the turn panel](turn-panel.md#the-glow).
 
 #### 5. Behaviour
 
@@ -990,8 +991,8 @@ are on #402.
 - It is told which pile it is and, once drawn, which problem to show. It never
   draws a problem itself; that is Core's.
 - The pick-up and the turn-over run once per turn, in that order, with
-  `PileCardLiftHold` between them. Whether a tap can skip them is the turn
-  panel's question, on #402.
+  `PileCardLiftHold` between them. A tap anywhere skips them, and the rest of the
+  animation, to the settled state: [the turn panel's TP-8](turn-panel.md#tp-8).
 
 #### Open questions
 

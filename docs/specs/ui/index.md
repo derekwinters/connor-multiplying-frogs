@@ -18,14 +18,27 @@ Every screen and every dialog in v1, in the order a game meets them.
 | [Title screen](title-screen.md) | The way in. Carry on, or start a new game. |
 | [Game setup](game-setup.md) | Which frogs are playing, and in what order |
 | [Game board](game-board.md) | The pond, the lanes, and `Roll` |
-| [Roll and card](roll-and-card.md) | The die, the pile it maps to, the card you drew |
-| [Working-out grid](working-out-grid.md) | The grid and keypad you answer on |
+| [Turn panel](turn-panel.md) | The three piles, the die, and the card you drew, turned over beside the grid |
+| [Working-out grid](working-out-grid.md) | The grid and keypad you answer on: the turn panel's Solving phase |
 | [Answer result](answer-result.md) | Right or wrong, and what your frog does |
 | [A player has won](player-won.md) | The moment a frog gets home |
 | [Settings dialog](settings-dialog.md) | The rules, the exit, the version |
 | [How to play](how-to-play.md) | Five pages saying how a turn goes |
 | [End-game confirm](end-game-confirm.md) | The one dialog that can end everybody's game |
 | [Game over](game-over.md) | Who won, and where everybody got to |
+
+[Roll and card](roll-and-card.md) is **retired** and kept only as a record.
+The turn panel replaced it.
+
+> **How the spec is changing (#402).** The table used to list two steps
+> between the board and the answer: *Roll and card* (the die, the pile and the
+> drawn card) and then the *Working-out grid* as a dialog of its own. It now
+> lists one, the [turn panel](turn-panel.md). It holds the three piles face
+> down, rolls the die, turns the drawn card over, and brings the grid in beside
+> it. The grid keeps its own page because everything inside it is unchanged;
+> only where it sits moved. Derek asked for one panel so the card stays on
+> screen while you work it out
+> ([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402)).
 
 Every one of these is designed at **1920 × 1200, landscape** — the target is a
 kids' Android tablet, and that is the one canvas every layout is drawn against.

@@ -1022,7 +1022,9 @@ change harder to judge. Whether they now read as a frame or as leftovers is
   including while it is not your turn — it is the way out of a game and hiding
   it would be worse.
 - **`Roll`** — primary [button](shared-components.md#button), oversized. Opens
-  [roll and card](roll-and-card.md). Disabled from the moment it is pressed
+  the [turn panel](turn-panel.md), which has its own `Roll` that throws the
+  die. It used to open [roll and card](roll-and-card.md), now retired
+  ([#402](https://github.com/derekwinters/connor-multiplying-frogs/issues/402)). Disabled from the moment it is pressed
   until the turn resolves.
 - **Lane × 2–4** — one per frog, in turn order, top to bottom (A) or left to
   right (B).
@@ -1266,7 +1268,7 @@ How the model and its texture are imported is
 
 - Entering from [game setup](game-setup.md): every frog on its Start log, frog 1
   active, `Roll` enabled.
-- `Roll` → [roll and card](roll-and-card.md) →
+- `Roll` → [turn panel](turn-panel.md), whose Solving phase is the
   [working-out grid](working-out-grid.md) →
   [answer result](answer-result.md) → back here with the frog moved and the turn
   passed to the next frog in order.
