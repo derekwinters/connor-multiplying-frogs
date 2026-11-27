@@ -1060,6 +1060,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Anchors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-anchors-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The anchors this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2227,6 +2244,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Anchors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-anchors-this-page-used-to-carry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The anchors this page used to carry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2371,7 +2405,17 @@ was started. The one path that leaves this screen without passing through game
 setup does so because the choice has already been made, not because it can be
 made somewhere else.
 <strong>Invariant:</strong> the version string is present and is read from <code>/VERSION</code>, never
-typed into a layout.</p>
+typed into a layout.
+<strong>Invariant:</strong> the whole picture is on screen, on every screen. The art is
+fitted <em>inside</em> the device's safe area and never cropped, so the drawn title,
+the big frog on the log and the <code>START</code> sign are all visible on a 2.17:1 phone,
+on the 16:10 tablet and on a 4:3 screen alike. A wider or taller screen adds
+more of the same pond — <a href="#regions"><code>scene</code></a> — around the picture; it never
+cuts into it.
+<strong>Invariant:</strong> the sign and the version string are laid out on the fitted
+picture, not on the screen. Wherever the picture lands and at whatever size,
+each of them is on the same spot of it as on the 16:10 mockup — the sign on the
+grass right of the log, the version string in the grass corner bottom-left.</p>
 <h3 id="the-invariants-this-page-used-to-carry">The invariants this page used to carry<a class="headerlink" href="#the-invariants-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/228">#228</a>,
 the first invariant on this page read:</p>
@@ -2397,7 +2441,11 @@ visible, and they are not true anywhere else on this page.</p>
 <tbody>
 <tr>
 <td><code>art</code></td>
-<td>The whole splash picture — every frog with its hop line, the log, and the drawn title — over the whole canvas, behind everything</td>
+<td>The whole splash picture — every frog with its hop line, the log, and the drawn title — fitted whole inside the screen's safe area, behind the sign and the version string</td>
+</tr>
+<tr>
+<td><code>scene</code></td>
+<td>Where the screen is wider or taller than 16:10: the same pond carried on past the picture's frame — more sky, water, reeds and grass — to the screen's edges, behind <code>art</code></td>
 </tr>
 <tr>
 <td><code>start</code></td>
@@ -2416,18 +2464,40 @@ roughly 50–520 px down. <code>RESUME</code> has no region either until a save 
 one — <a href="#open-questions">open question 8</a>.</p>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
 <ul>
-<li><code>art</code> fills the canvas, cropped from the centre outwards. It is the one
-  element allowed to run to the screen edge, because it is a picture and a
-  margin around a picture is a border nobody asked for.</li>
+<li><code>art</code> is fitted <strong>inside the device's safe area</strong>, whole and never cropped,
+  and centred in it. It is drawn at its 1920 × 1200 reference size whenever
+  the safe area holds that — which, with the <a href="../shared-components/#what-fills-a-screen-that-is-not-1610">expanding
+  canvas</a>, is every
+  screen with no cut-out — and only when a notch or a cut-out leaves less is
+  it scaled down, evenly, until it fits. It is never scaled up and never
+  stretched out of its 16:10 shape. The device's safe area is the screen less
+  what the system reports as cut-outs and rounded corners (Unity's
+  <code>Screen.safeArea</code>).</li>
+<li><code>scene</code> fills the rest of the screen, to all four edges. It is the same
+  picture made wider and taller, 2880 × 1440 (<code>TitleSceneWidth</code> ×
+  <code>TitleSceneHeight</code>) with the 1920 × 1200 art exactly in its middle: the
+  splash's background layers are drawn on past the frame (the sky's gradient,
+  the reed clumps and far banks mirrored at the edge, the pond and the front
+  grass carried round from the other side), so a wide phone sees more pond
+  beside the picture and a 4:3 screen more sky above and grass below. It is
+  drawn at the art's own scale and centred on it, so the two line up and no
+  join shows; only on a screen wider than 2.4:1 or taller than 4:3, or when a
+  cut-out has shrunk the art, is it scaled up about the art's centre, just
+  enough to reach every edge. It fades in with the art and is never tappable.
+  The art and its scene together are the one element allowed to run to the
+  screen edge, because they are a picture and a margin around a picture is a
+  border nobody asked for.</li>
 <li><code>art</code> is Connor's splash picture, rebuilt as layers under
   <a href="https://github.com/derekwinters/connor-multiplying-frogs/tree/main/art-source/splash"><code>art-source/splash/</code></a>,
   with every layer it uses shown: the same picture as the launch splash. The
   unused splashes on the lily pads are not in it. The game draws it from
   <code>Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png</code>, the
   same render the mockup loads.</li>
-<li><code>start</code>: the plank's <strong>right edge is on the right safe area</strong>, and its
-  <strong>bottom edge is <code>TitleSignBottomOffset</code> up from the bottom safe area</strong>. At
-  1920 × 1200 that puts the plank at 1552–1872 px across and 930–1058 px down,
+<li><code>start</code> is placed on the fitted <code>art</code>, measured in the art's own reference
+  pixels: the plank's <strong>right edge is <code>SafeMargin</code> in from the art's right
+  edge</strong>, and its <strong>bottom edge is <code>SafeMargin</code> + <code>TitleSignBottomOffset</code> up
+  from the art's bottom edge</strong> — at 1920 × 1200, where the art is the whole
+  screen, the right and bottom safe areas, exactly as before. That puts the plank at 1552–1872 px across and 930–1058 px down,
   on the grass and water right of the log's cut end, clear of every frog. The
   plank is tilted <code>TitleSignTilt</code> about its own centre. The post is centred
   under the plank, runs from behind it, and ends <code>TitleSignPostDrop</code> below the
@@ -2435,13 +2505,42 @@ one — <a href="#open-questions">open question 8</a>.</p>
 <li>The tap target is <strong>the plank</strong>, 320 × 128 px — over <code>MinTouchTarget</code> (96
   px) both ways, as the <a href="../shared-components/#button">shared Button</a> requires.
   The post is part of the drawing, not of the target.</li>
-<li><code>footprint</code> is pinned to the bottom-left safe area corner.</li>
-<li>On a screen that is not 16:10, the art crops and everything else keeps its
-  distance from the <strong>safe area</strong>, not the screen edge. The sign is anchored
-  to the safe area like everything else, so on a much wider or taller screen
-  it can drift a little off the grass it stands on in the art; that is the
-  same trade every anchored element on every screen makes.</li>
+<li><code>footprint</code> is pinned to the art's bottom-left corner, <code>SafeMargin</code> in from
+  each edge — at 1920 × 1200, the bottom-left safe area corner. It stays on the
+  picture rather than going out into <code>scene</code>, by the
+  <a href="../shared-components/#what-fills-a-screen-that-is-not-1610">shared rule</a>
+  that the extra space a wider screen gives is background and nothing else.</li>
+<li>When the art is scaled down to fit a cut-out, the sign and the version string
+  are scaled with it, so they stay on their spots of the picture. The plank's
+  tap target shrinks with them, and stays over <code>MinTouchTarget</code> until the art
+  is below 75% of its size, which no cut-out comes near.</li>
 </ul>
+<h3 id="the-anchors-this-page-used-to-carry">The anchors this page used to carry<a class="headerlink" href="#the-anchors-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
+<p>Until <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/533">#533</a>
+the art covered the screen and the sign kept to the screen's safe area:</p>
+<blockquote>
+<p><code>art</code> fills the canvas, cropped from the centre outwards.</p>
+<p>On a screen that is not 16:10, the art crops and everything else keeps its
+distance from the <strong>safe area</strong>, not the screen edge. The sign is anchored
+to the safe area like everything else, so on a much wider or taller screen
+it can drift a little off the grass it stands on in the art.</p>
+</blockquote>
+<p>On Derek's 2340 × 1080 phone that cropped about 212 px off the top and the
+bottom of the picture — the top of MULTIPLYING, the log and the big frog's
+feet — and left the version string on a lily pad, because the picture had
+grown under it. The picture is fitted, not cropped, and the sign and the
+version string are placed on it, so they cannot drift off it.</p>
+<p>What fills the room beside the fitted picture was Derek's call on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/pull/535">PR #535</a>.
+Two fills were drawn first and turned down: the picture's edge pixels
+stretched outwards (<em>"The streaks look bad"</em>) and a blurred copy of it
+(<em>"Can't we just extend the scene instead of adding blurry edges"</em>). He chose
+the extended scene, built into the splash's layers rather than painted onto
+the flat picture (<em>"That's part of all the assets right?"</em>). Its known flaws,
+accepted with it: each reed clump past the frame is a mirror image of the one
+inside it; where a mirror meets the shoreline there is a small notch; and on
+a 4:3 screen a faint lighter column shows above the title, where its glow is
+mirrored upwards.</p>
 <h2 id="named-constants">Named constants<a class="headerlink" href="#named-constants" title="Link to this section">&para;</a></h2>
 <table>
 <thead>
@@ -2541,6 +2640,16 @@ one — <a href="#open-questions">open question 8</a>.</p>
 <td>Version string size</td>
 <td><code>VersionLabelSize</code></td>
 <td>28 px</td>
+</tr>
+<tr>
+<td>Extended scene width, in the art's reference pixels</td>
+<td><code>TitleSceneWidth</code></td>
+<td>2880 px</td>
+</tr>
+<tr>
+<td>Extended scene height, likewise</td>
+<td><code>TitleSceneHeight</code></td>
+<td>1440 px</td>
 </tr>
 <tr>
 <td>Entering fade, art (the drawn title is part of it)</td>

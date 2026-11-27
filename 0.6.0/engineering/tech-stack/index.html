@@ -3765,6 +3765,10 @@ GUID and neither has a committed <code>.meta</code>.</p>
 <td><code>Assets/Art/TitleScreen/Resources/TitleScreen/title-screen-1920x1200.png</code> — the home build step's render, the same bytes as the mockup's <code>full.png</code>, and the same picture as the launch splash</td>
 </tr>
 <tr>
+<td>Extended scene</td>
+<td><code>Assets/Art/TitleScreen/Resources/TitleScreen/title-scene-2880x1440.png</code> — the same layers in a window 480 px wider each side and 120 px taller top and bottom, drawn behind the fitted picture on screens that are not 16:10; the layers carry their drawing past the frame (<code>art-source/splash/beyond.py</code>), so its middle is the picture (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/533">#533</a>)</td>
+</tr>
+<tr>
 <td>Font</td>
 <td><code>Assets/Fonts/Fredoka/Resources/Fredoka/Fredoka-Bold.ttf</code>, with its <code>OFL.txt</code> beside it — the game's first font that is not Unity's built-in one</td>
 </tr>
@@ -3774,11 +3778,11 @@ GUID and neither has a committed <code>.meta</code>.</p>
 </tr>
 <tr>
 <td>Its tests</td>
-<td><code>.github/scripts/tests/test_title_screen_art.py</code></td>
+<td><code>.github/scripts/tests/test_title_screen_art.py</code>, and <code>test_splash_beyond.py</code> for the extended scene</td>
 </tr>
 <tr>
 <td>Import settings</td>
-<td><code>TitleScreenArtImport</code>, in <code>Assets/Editor/</code> — the picture as the launch splash's (a single sprite, full size, no mipmaps); the font as a dynamic font with its data included</td>
+<td><code>TitleScreenArtImport</code>, in <code>Assets/Editor/</code> — the picture as the launch splash's (a single sprite, full size, no mipmaps), and the extended scene behind it the same way, with a 4096 largest size because it is 2880 wide (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/533">#533</a>); the font as a dynamic font with its data included</td>
 </tr>
 <tr>
 <td>Its EditMode tests</td>
