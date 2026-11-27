@@ -831,6 +831,8 @@
       
         
       
+        
+      
     
     
     
@@ -1681,6 +1683,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../turn-panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Turn panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../roll-and-card/" class="md-nav__link">
         
   
@@ -1688,7 +1718,7 @@
   <span class="md-ellipsis">
     
   
-    Roll and card
+    Roll and card (retired)
   
 
     
@@ -3535,7 +3565,7 @@ outcome than a button that is obviously not ready yet.</p>
 <p>A panel over a dimmed copy of the screen underneath, used for everything that
 interrupts play: the card, the working-out grid, the result, settings, and
 confirms.</p>
-<p>Used by: <a href="../roll-and-card/">roll and card</a>,
+<p>Used by: the <a href="../turn-panel/">turn panel</a>, which holds the
 <a href="../working-out-grid/">working-out grid</a>, <a href="../answer-result/">answer result</a>,
 <a href="../player-won/">a player has won</a>, <a href="../settings-dialog/">settings dialog</a>,
 <a href="../end-game-confirm/">end-game confirm</a>.</p>
@@ -3549,9 +3579,11 @@ no close cross. It is left by pressing one of its buttons, so a game is never
 half-answered because a sleeve brushed the glass.
 <strong>Invariant:</strong> the hardware back button does what the dialog's <em>least
 destructive</em> button does, and never what its most destructive one does —
-except the four dialogs whose pages make back inert (roll and card,
-working-out grid, answer result, <a href="../player-won/">a player has won</a>), where back
-does nothing. All four sit inside a single turn's own chain, where a stray press
+except the dialogs whose pages make back inert (the
+<a href="../turn-panel/">turn panel</a>, which holds the working-out grid, answer result,
+<a href="../player-won/">a player has won</a>), where back does nothing. They used to be
+four, until roll and card and the grid became one panel (#402). All of them sit
+inside a single turn's own chain, where a stray press
 should not fast-forward past something the game stopped to show.
 <strong>Invariant:</strong> the scrim lets the board read as water. It is <code>DeepPond</code>, never
 black, and never so dark the pond underneath is lost.
@@ -3703,8 +3735,8 @@ places it sits have different things around it:</p>
 </table>
 <p>Used by: <a href="../game-board/">game board</a> (lane chip),
 <a href="../working-out-grid/">working-out grid</a> and <a href="../answer-result/">answer result</a>
-(dialog chip), and <a href="../roll-and-card/">roll and card</a>, which keeps its current
-drawing until it is <a href="../roll-and-card/#pending-redesign">redesigned</a>.</p>
+(dialog chip), and the <a href="../turn-panel/">turn panel</a> (dialog chip, active, in
+every phase). <a href="../roll-and-card/">Roll and card</a> is retired.</p>
 <h4 id="2-invariants_3">2. Invariants<a class="headerlink" href="#2-invariants_3" title="Link to this section">&para;</a></h4>
 <p><strong>Invariant:</strong> a frog is identified by its colour <strong>and</strong> a word, always
 together, and never by colour alone. The word is the frog's name: its colour's
@@ -4012,8 +4044,8 @@ state still earns its place on this component. It does:</p>
 <td>the active frog's <strong>lane</strong> chip, in the pond</td>
 </tr>
 <tr>
-<td><a href="../roll-and-card/">Roll and card</a></td>
-<td>the <code>whose</code> region, beside <code>rolled</code> — until it is redesigned</td>
+<td><a href="../turn-panel/">Turn panel</a></td>
+<td>the <code>header</code>, beside <code>Roll the die</code>, then <code>Work it out</code></td>
 </tr>
 <tr>
 <td><a href="../working-out-grid/">Working-out grid</a></td>
@@ -4202,15 +4234,29 @@ somebody to find by measuring.</p>
 <strong>which pile</strong> it is, and turned over it carries <strong>the problem</strong> that was drawn.
 The same card is used three times on one panel — Easy, Medium and Hard — which
 is why it is specified here and not on a screen page.</p>
-<p>Used by: the turn panel
-(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>,
-not yet written), which replaces <a href="../roll-and-card/">roll and card</a> and the
+<p>Used by: the <a href="../turn-panel/">turn panel</a>
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>), which replaces <a href="../roll-and-card/">roll and card</a> and the
 separate <a href="../working-out-grid/">working-out grid</a> dialog with one panel. Where the
 three cards sit on that panel, and what the two undrawn cards do, is that page's
 question; this section only fixes the card.</p>
 <p>Mockup: <a href="../mockups/pile-card.html"><code>pile-card.html</code></a> — the three backs in both
 orientations, the drawn card picked up, and the front carrying <code>331 × 41</code> at its
 full covering size.</p>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> This card was merged at <code>S = 225</code>,
+<code>L = 405</code>, <code>G = 27</code> (#401). It is now <strong><code>S = 200</code>, <code>L = 360</code>, <code>G = 24</code></strong>, and
+everything on its back is 8/9 of what it was. The reason is on the
+<a href="../turn-panel/#the-horizontal-arithmetic">turn panel</a>: beside a 405 px card,
+<code>Help me</code>'s printed products on a Hard card ran onto the card
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/529">#529</a>).
+Derek chose a smaller card and a slimmer keypad to make room, rather than
+moving or shrinking the products. Nothing about the card's design changed:
+the same pond, pads, dice, log, front, motion and timings, and the same 9/5
+scale on the turn-over. The line weights (outlines, the name's stroke) and
+the shadows are the <a href="../style-guide/">Pond style</a>'s and keep their values;
+the sizes and positions are scaled. The old values are kept below for the
+record.</p>
+</blockquote>
 <p>The design was settled by Derek with interactive prototypes after the issue was
 written, and it differs from the issue in two ways, both his decisions:</p>
 <ul>
@@ -4304,17 +4350,17 @@ card's <strong>outer</strong> edge, outline included.</p>
 <tr>
 <td>Short side, <code>S</code></td>
 <td><code>PileCardShortSide</code></td>
-<td>225</td>
+<td>200 (was 225)</td>
 </tr>
 <tr>
 <td>Long side, <code>L</code></td>
 <td><code>PileCardLongSide</code></td>
-<td>405</td>
+<td>360 (was 405)</td>
 </tr>
 <tr>
 <td>Gap between piles, <code>G</code></td>
 <td><code>PileCardGap</code></td>
-<td>27</td>
+<td>24 (was 27)</td>
 </tr>
 <tr>
 <td>Scale of the turned-over card</td>
@@ -4364,17 +4410,17 @@ beside the die</strong>. The other layout, which #402 still draws for comparison
 <tr>
 <td>Lily pad, square</td>
 <td><code>PileCardPadSize</code></td>
-<td>128</td>
+<td>114 (was 128)</td>
 </tr>
 <tr>
 <td>Gap between the two pads</td>
 <td><code>PileCardPadGap</code></td>
-<td>41</td>
+<td>36 (was 41)</td>
 </tr>
 <tr>
 <td>Left edge to the first pad</td>
 <td><code>PileCardPadLeft</code></td>
-<td>54 — <code>(L − 2 × 128 − 41) / 2</code>, so the pair is centred</td>
+<td>48 (was 54) — <code>(L − 2 × 114 − 36) / 2</code>, so the pair is centred</td>
 </tr>
 <tr>
 <td>Top edge to both pads</td>
@@ -4399,17 +4445,17 @@ beside the die</strong>. The other layout, which #402 still draws for comparison
 <tr>
 <td>One die picture, square</td>
 <td><code>PileCardDieFaceSize</code></td>
-<td>62, <code>White</code>, centred on its pad</td>
+<td>56 (was 62), <code>White</code>, centred on its pad, 29 in from the pad's edge</td>
 </tr>
 <tr>
 <td>Gap between the two die pictures</td>
 <td><code>PileCardDieFaceGap</code></td>
-<td>107 — <code>PileCardPadGap</code> + <code>PileCardPadSize</code> − <code>PileCardDieFaceSize</code>, because each is centred on its pad</td>
+<td>94 (was 107) — <code>PileCardPadGap</code> + <code>PileCardPadSize</code> − <code>PileCardDieFaceSize</code>, because each is centred on its pad</td>
 </tr>
 <tr>
 <td>Die picture corner</td>
 <td><code>PileCardDieFaceRadius</code></td>
-<td>12</td>
+<td>11 (was 12)</td>
 </tr>
 <tr>
 <td>Die picture outline</td>
@@ -4419,27 +4465,27 @@ beside the die</strong>. The other layout, which #402 still draws for comparison
 <tr>
 <td>One pip</td>
 <td><code>PileCardDiePipDiameter</code></td>
-<td>11, <code>Ink</code></td>
+<td>10 (was 11), <code>Ink</code></td>
 </tr>
 <tr>
 <td>Pip centre to pip centre</td>
 <td><code>PileCardDiePipPitch</code></td>
-<td>14; the outer pips' centres are 17 from the die picture's edge, so 17 + 14 + 14 + 17 = 62</td>
+<td>12 (was 14); the outer pips' centres are 16 from the die picture's edge, so 16 + 12 + 12 + 16 = 56</td>
 </tr>
 <tr>
 <td>Log body</td>
 <td><code>PileCardLogWidth</code> × <code>PileCardLogHeight</code></td>
-<td>256 × 58</td>
+<td>228 × 52 (was 256 × 58)</td>
 </tr>
 <tr>
 <td>Bottom edge to the log</td>
 <td><code>PileCardLogBottom</code></td>
-<td>18</td>
+<td>16 (was 18)</td>
 </tr>
 <tr>
 <td>Log corner</td>
 <td><code>PileCardLogRadius</code></td>
-<td>22</td>
+<td>20 (was 22)</td>
 </tr>
 <tr>
 <td>Log outline</td>
@@ -4449,7 +4495,7 @@ beside the die</strong>. The other layout, which #402 still draws for comparison
 <tr>
 <td>The log's cut end</td>
 <td><code>PileCardLogEndWidth</code></td>
-<td>An ellipse 34 wide and as tall as the log, outlined like it, standing 5 past the log's right end. The log and its end together are 261 wide, so the log starts 72 from the card's left edge and the pair is centred.</td>
+<td>An ellipse 30 wide (was 34) and as tall as the log, outlined like it, standing 4 past the log's right end (was 5). The log and its end together are 232 wide, so the log starts 64 from the card's left edge (was 72) and the pair is centred.</td>
 </tr>
 <tr>
 <td>Log shadow</td>
@@ -4459,7 +4505,7 @@ beside the die</strong>. The other layout, which #402 still draws for comparison
 <tr>
 <td>Pile name</td>
 <td><code>PileCardNameSize</code></td>
-<td>38, <code>FontDisplay</code> semibold, 0.03 em letter spacing, <code>LogCarve</code></td>
+<td>34 (was 38), <code>FontDisplay</code> semibold, 0.03 em letter spacing, <code>LogCarve</code></td>
 </tr>
 <tr>
 <td>The ink round the name</td>
@@ -4519,12 +4565,22 @@ the negatives: <code>+15</code>, <code>−20</code>, <code>+30</code>.</p>
 left, and are the same as the panel's die: 1 → centre; 2 → top left, bottom
 right; 3 → those and the centre; 4 → the four corners; 5 → the corners and the
 centre; 6 → the left and right columns. A pip is
-<code>PileCardDiePipDiameter</code> / <code>PileCardDieFaceSize</code> = 11 / 62 ≈ 0.18 of its die
+<code>PileCardDiePipDiameter</code> / <code>PileCardDieFaceSize</code> = 10 / 56 ≈ 0.18 of its die
 picture, the same proportion as the panel's die in the agreed prototype
 (46 / 260), so the card's dice read as small copies of it.</p>
+<p><strong>What did not scale.</strong> The card's outline (6), corner (26), its shadows, the
+pads' outline (3) and shadow (6), the die pictures' outline (4), the log's
+outline (5) and shadow (6), and the name's stroke (6) keep their values. They
+are line weights and shadow depths, which the <a href="../style-guide/">Pond style</a>
+keeps the same across components, and 8/9 of them is not a whole pixel. The
+water tile stays 256, because it is the texture's scale, not the card's. On
+the 200 px card the pads end 116 down and the log starts 132 down, so there
+are 16 between them, where there were 19.</p>
 <h5 id="the-front">The front<a class="headerlink" href="#the-front" title="Link to this section">&para;</a></h5>
 <p>The front is the back's other side: <code>S</code> wide and <code>L</code> tall once it has turned,
-which is <code>405 × 729</code> on screen. Positions are from the turned-over card's outer
+which is <code>360 × 648</code> on screen (was <code>405 × 729</code>). Its constants are in card
+units and are <strong>unchanged</strong>; on the smaller card they leave less white round
+the problem, not a smaller problem. Positions are from the turned-over card's outer
 edge.</p>
 <table>
 <thead>
@@ -4616,12 +4672,14 @@ edge.</p>
 </tr>
 </tbody>
 </table>
-<p>The log and its end together are 137 wide, so the log starts 44 from the left
-edge and the pair is centred.</p>
+<p>The log and its end together are 137 wide, so the log starts 31.5 from the
+left edge (56.7 px on screen) and the pair is centred. It started 44 on the
+225 card.</p>
 <p><strong>The problem gets bigger when it is turned over, not smaller.</strong> At 108 px,
 <code>331</code> is 165 px wide and <code>× 41</code> 178 px, measured in the committed Fredoka, so
-the widest problem in the game sits right-aligned, its left edge 137 px in
-from the card's left edge. Every problem fits: no pile deals anything wider than three digits over
+the widest problem in the game sits right-aligned, its left edge
+360 − 90 − 178 = <strong>92 px</strong> in from the card's left edge (137 px on the 405 px
+front). Every problem fits: no pile deals anything wider than three digits over
 <code>×</code> and two.</p>
 <h5 id="the-motion">The motion<a class="headerlink" href="#the-motion" title="Link to this section">&para;</a></h5>
 <table>
@@ -4691,18 +4749,22 @@ on its own. The height matches only if</p>
 <p><strong><code>S</code> and <code>G</code> were chosen; <code>L</code> follows.</strong> The prototype Derek agreed had
 <code>S = 223</code>, <code>L = 400</code>, <code>G = 24</code>, which is close but not exact:
 <code>3 × 223² + 2 × 24 × 223 = 159 891</code>, not <code>400² = 160 000</code>, so its revealed card
-was 717.49 px long against a 717 px footprint. The nearest set that comes out exactly in
-whole pixels is <code>S = 225</code>, <code>G = 27</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>3S² + 2GS = 3 × 225² + 2 × 27 × 225
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>          = 3 × 50 625 + 12 150
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>          = 151 875 + 12 150
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          = 164 025
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>          = 405²,  so L = 405
+was 717.49 px long against a 717 px footprint. The set first merged was the
+nearest that comes out exactly in whole pixels, <code>S = 225</code>, <code>G = 27</code>, <code>L = 405</code>.
+The turn panel then needed the card about 45 px narrower (#402), and the set
+it uses is the same shape at 8/9 the size, <code>S = 200</code>, <code>G = 24</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>3S² + 2GS = 3 × 200² + 2 × 24 × 200
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>          = 3 × 40 000 + 9 600
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>          = 120 000 + 9 600
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>          = 129 600
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>          = 360²,  so L = 360
 </code></pre></div>
-<p>Check: the column is <code>3 × 225 + 2 × 27 = 729</code> tall and <code>405</code> wide. The card
-turned and grown by <code>405 / 225 = 9/5</code> is <code>225 × 9/5 = 405</code> wide and
-<code>405 × 9/5 = 729</code> tall — exactly the column. The drawn card's centre moves by
-<code>S + G = 252</code> (down for Easy, none for Medium, up for Hard).</p>
+<p>Check: the column is <code>3 × 200 + 2 × 24 = 648</code> tall and <code>360</code> wide. The card
+turned and grown by <code>360 / 200 = 9/5</code> is <code>200 × 9/5 = 360</code> wide and
+<code>360 × 9/5 = 648</code> tall — exactly the column. The drawn card's centre moves by
+<code>S + G = 224</code> (down for Easy, none for Medium, up for Hard).</p>
+<p>Its <code>G</code> is the prototype's 24 again. The old set was
+<code>3 × 225² + 2 × 27 × 225 = 164 025 = 405²</code>, a 405 × 729 column.</p>
 <p>Choosing <code>S</code> and <code>G</code> rather than <code>L</code> keeps the scale a simple fraction, which is
 what makes every number on the front exact: 9/5 times a whole number is never
 more than one decimal place.</p>
@@ -4712,6 +4774,11 @@ more than one decimal place.</p>
 not chosen: its cards are less than a third of the area, and the die pictures
 come out at 38 with 7 px pips. If #402 picks it after all, these replace the
 chosen values; otherwise nothing here is built.</p>
+<p><strong>It was not resized with the chosen card.</strong> Its row is 405 wide, the old
+column's width. At 9/5 no whole-number set gives a 360 px row (it would need
+<code>S</code> ≈ 111.1), so it is left as it was drawn, for the comparison only. If it
+were ever chosen, its numbers would be worked out again against the panel as
+it is then.</p>
 <table>
 <thead>
 <tr>
@@ -4799,7 +4866,7 @@ not specify it, because nobody has agreed it.</p>
 </table>
 <p>The lime glow that marks the matched pile between the die settling and the card
 being picked up is the turn panel's, not the card's — its colour, width and hold
-are on #402.</p>
+are on <a href="../turn-panel/#the-glow">the turn panel</a>.</p>
 <h4 id="5-behaviour_5">5. Behaviour<a class="headerlink" href="#5-behaviour_5" title="Link to this section">&para;</a></h4>
 <ul>
 <li>The card does not take input. It is never a button: the roll decides which
@@ -4807,8 +4874,8 @@ are on #402.</p>
 <li>It is told which pile it is and, once drawn, which problem to show. It never
   draws a problem itself; that is Core's.</li>
 <li>The pick-up and the turn-over run once per turn, in that order, with
-  <code>PileCardLiftHold</code> between them. Whether a tap can skip them is the turn
-  panel's question, on #402.</li>
+  <code>PileCardLiftHold</code> between them. A tap anywhere skips them, and the rest of the
+  animation, to the settled state: <a href="../turn-panel/#tp-8">the turn panel's TP-8</a>.</li>
 </ul>
 <h4 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Link to this section">&para;</a></h4>
 <p>None. The issue's two are settled:</p>

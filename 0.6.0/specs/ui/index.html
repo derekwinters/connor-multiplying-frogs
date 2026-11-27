@@ -831,6 +831,8 @@
       
         
       
+        
+      
     
     
     
@@ -1035,6 +1037,34 @@
   
   
     <li class="md-nav__item">
+      <a href="turn-panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Turn panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="roll-and-card/" class="md-nav__link">
         
   
@@ -1042,7 +1072,7 @@
   <span class="md-ellipsis">
     
   
-    Roll and card
+    Roll and card (retired)
   
 
     
@@ -2163,12 +2193,12 @@ you are about to open a wireframe issue.</p>
 <td>The pond, the lanes, and <code>Roll</code></td>
 </tr>
 <tr>
-<td><a href="roll-and-card/">Roll and card</a></td>
-<td>The die, the pile it maps to, the card you drew</td>
+<td><a href="turn-panel/">Turn panel</a></td>
+<td>The three piles, the die, and the card you drew, turned over beside the grid</td>
 </tr>
 <tr>
 <td><a href="working-out-grid/">Working-out grid</a></td>
-<td>The grid and keypad you answer on</td>
+<td>The grid and keypad you answer on: the turn panel's Solving phase</td>
 </tr>
 <tr>
 <td><a href="answer-result/">Answer result</a></td>
@@ -2196,6 +2226,19 @@ you are about to open a wireframe issue.</p>
 </tr>
 </tbody>
 </table>
+<p><a href="roll-and-card/">Roll and card</a> is <strong>retired</strong> and kept only as a record.
+The turn panel replaced it.</p>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> The table used to list two steps
+between the board and the answer: <em>Roll and card</em> (the die, the pile and the
+drawn card) and then the <em>Working-out grid</em> as a dialog of its own. It now
+lists one, the <a href="turn-panel/">turn panel</a>. It holds the three piles face
+down, rolls the die, turns the drawn card over, and brings the grid in beside
+it. The grid keeps its own page because everything inside it is unchanged;
+only where it sits moved. Derek asked for one panel so the card stays on
+screen while you work it out
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>).</p>
+</blockquote>
 <p>Every one of these is designed at <strong>1920 × 1200, landscape</strong> — the target is a
 kids' Android tablet, and that is the one canvas every layout is drawn against.
 See <a href="../../engineering/tech-stack/#target-platform">target platform</a>.</p>

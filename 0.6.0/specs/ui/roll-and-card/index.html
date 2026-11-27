@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://derekwinters.github.io/connor-multiplying-frogs/0.6.0/specs/ui/roll-and-card/">
       
       
-        <link rel="prev" href="../game-board/">
+        <link rel="prev" href="../turn-panel/">
       
       
         <link rel="next" href="../working-out-grid/">
@@ -29,7 +29,7 @@
     
     
       
-        <title>Roll and card - Multiplying Frogs</title>
+        <title>Roll and card (retired) - Multiplying Frogs</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#roll-and-card" class="md-skip">
+        <a href="#roll-and-card-retired" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Roll and card
+              Roll and card (retired)
             
           </span>
         </div>
@@ -831,6 +831,8 @@
       
         
       
+        
+      
     
     
     
@@ -1032,6 +1034,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../turn-panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Turn panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1051,7 +1081,7 @@
   <span class="md-ellipsis">
     
   
-    Roll and card
+    Roll and card (retired)
   
 
     
@@ -1069,7 +1099,7 @@
   <span class="md-ellipsis">
     
   
-    Roll and card
+    Roll and card (retired)
   
 
     
@@ -1095,10 +1125,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#pending-redesign" class="md-nav__link">
+  <a href="#where-this-pages-decisions-went" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pending redesign
+        Where this page's decisions went
       
     </span>
   </a>
@@ -2105,10 +2135,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#pending-redesign" class="md-nav__link">
+  <a href="#where-this-pages-decisions-went" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pending redesign
+        Where this page's decisions went
       
     </span>
   </a>
@@ -2228,21 +2258,99 @@
   
 
 
-<h1 id="roll-and-card">Roll and card<a class="headerlink" href="#roll-and-card" title="Link to this section">&para;</a></h1>
-<p>You pressed <code>Roll</code>. This is the die landing, the pile it sends you to, and the
-card you drew.</p>
-<h2 id="pending-redesign">Pending redesign<a class="headerlink" href="#pending-redesign" title="Link to this section">&para;</a></h2>
-<p><strong>This screen is not restyled in the <a href="../style-guide/">Pond style</a>, on purpose.</strong>
-It is being redesigned rather than repainted: the
-<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/400">turn panel</a>
-puts the easy, medium and hard piles on screen and flips the card over after
-the roll, and its wireframe
-(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>)
-is drawn in the Pond style from the start. Until that lands, this page and its
-mockup describe the screen as it is built today, in the old look. Its
-<a href="../shared-components/#button">button</a> and <a href="../shared-components/#dialog">dialog</a>
-are shared components, so if they are restyled first this screen picks that up
-without being redrawn.</p>
+<h1 id="roll-and-card-retired">Roll and card (retired)<a class="headerlink" href="#roll-and-card-retired" title="Link to this section">&para;</a></h1>
+<p><strong>This dialog is retired.</strong> The <a href="../turn-panel/">turn panel</a> replaces it. That
+panel holds the die, the three piles and the drawn card, then the grid, on one
+screen. Nothing new is built to this page. It stays so the decisions on it
+can still be read, and so links to its invariants keep working.</p>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> This page used to describe a dialog of
+its own. It opened after the board's <code>Roll</code>, showed the die settling, the
+pile's name and the drawn card behind a <code>Solve it</code> button, and handed over to
+a separate <a href="../working-out-grid/">working-out grid</a> dialog. It now describes
+nothing that will be built. A turn is one <a href="../turn-panel/">turn panel</a> in three
+phases, Ready, Rolling and Solving, and the card stays on screen beside the
+grid instead of being left behind in the previous dialog. That is Derek's
+redesign, agreed with a prototype on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>.
+Everything below the line describes the retired dialog as it was built. It
+still is built, until the turn panel's build issues replace it.</p>
+</blockquote>
+<h2 id="where-this-pages-decisions-went">Where this page's decisions went<a class="headerlink" href="#where-this-pages-decisions-went" title="Link to this section">&para;</a></h2>
+<p><strong>Every invariant was carried across</strong>, in the turn panel's own words:</p>
+<table>
+<thead>
+<tr>
+<th>Invariant here</th>
+<th>On the turn panel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The die face shown is the roll; the pile shown is the pile it maps to</td>
+<td><a href="../turn-panel/#invariants">The face at the end of the tumble is the rolled face</a>, and the card turned over is from that face's pile</td>
+</tr>
+<tr>
+<td>No re-roll, no discard; nothing can change which pile was drawn</td>
+<td>Unchanged. The roll happens once, in <code>Core</code>, and the panel has no control that undoes it</td>
+</tr>
+<tr>
+<td>Every pile is worth the same one lily pad</td>
+<td><a href="../turn-panel/#invariants">Nothing on the panel implies one pile is worth more</a></td>
+</tr>
+<tr>
+<td>Cannot be dismissed; back is inert</td>
+<td><a href="../turn-panel/#invariants">The panel cannot be dismissed, in any phase</a></td>
+</tr>
+<tr>
+<td>The animation is a readout and can be skipped by tapping anywhere (<a href="#behaviour">Behaviour</a>)</td>
+<td><a href="../turn-panel/#invariants">The roll happens in <code>Core</code> first</a>, and <a href="../turn-panel/#tp-8">tap anywhere to skip</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Constants</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Constant here</th>
+<th>What became of it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DieFaceSize</code>, <code>DieCornerRadius</code>, <code>DieBorderWidth</code>, <code>DiePipInset</code>, <code>DiePipDiameter</code></td>
+<td><strong>Kept, with new values</strong>, on the <a href="../turn-panel/#the-die">turn panel</a>: 260, 52, 7, 36 and 46 px</td>
+</tr>
+<tr>
+<td><code>DieRollDuration</code> (0.8 s)</td>
+<td>Replaced by the tumble: <code>DieTumbleFaceCount</code> × <code>DieTumbleStepDuration</code>, 30 × 40 ms, then <code>DieSettleHold</code></td>
+</tr>
+<tr>
+<td><code>CardDealDuration</code> (0.3 s)</td>
+<td>Replaced by the <a href="../shared-components/#pile-card">pile card</a>'s pick-up and turn-over</td>
+</tr>
+<tr>
+<td><code>CardWidth</code>, <code>CardHeight</code>, <code>CardRadius</code>, <code>CardBorderWidth</code>, <code>CardProblemSize</code>, <code>CardRuleGap</code>, <code>CardRuleThickness</code>, <code>CardRuleLength</code></td>
+<td>Replaced by the <a href="../shared-components/#pile-card">pile card</a>'s front, <code>RevealedCard*</code></td>
+</tr>
+<tr>
+<td><code>PileLabelSize</code></td>
+<td>Retired. The pile is named on the card's own log, <code>PileCardNameSize</code> and <code>RevealedCardNameSize</code></td>
+</tr>
+<tr>
+<td><code>RolledLabelSize</code>, <code>RolledLabelGap</code></td>
+<td>Retired with the word <code>rolled</code>. The panel's words, <code>Roll the die</code> and <code>Work it out</code>, use the grid's <code>GridPromptSize</code> and <code>GridHeaderGap</code></td>
+</tr>
+<tr>
+<td><code>RollDialogWidth</code>, <code>RollDialogHeight</code>, <code>DieColumnWidth</code>, <code>DieGroupTop</code>, <code>CardTop</code>, <code>RollCardGap</code></td>
+<td>Retired. The panel is <code>TurnPanelWidth</code> × <code>TurnPanelHeight</code>, laid out on its own page</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Its two open questions are answered.</strong> It is one beat, not two, and the
+pile you drew stays named while you answer. See the turn panel's
+<a href="../turn-panel/#open-questions">open questions</a>.</p>
+<hr />
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
 <p><strong>Invariant:</strong> the die face shown is the roll, and the pile shown is the pile
 that roll maps to. The mapping is fixed and is the classroom board's — 1 or 2 →

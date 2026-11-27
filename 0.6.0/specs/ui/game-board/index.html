@@ -18,7 +18,7 @@
         <link rel="prev" href="../game-setup/">
       
       
-        <link rel="next" href="../roll-and-card/">
+        <link rel="next" href="../turn-panel/">
       
       
         
@@ -831,6 +831,8 @@
       
         
       
+        
+      
     
     
     
@@ -1431,6 +1433,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../turn-panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Turn panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../roll-and-card/" class="md-nav__link">
         
   
@@ -1438,7 +1468,7 @@
   <span class="md-ellipsis">
     
   
-    Roll and card
+    Roll and card (retired)
   
 
     
@@ -4104,7 +4134,9 @@ question 4, settled by Derek.
   including while it is not your turn — it is the way out of a game and hiding
   it would be worse.
 - <strong><code>Roll</code></strong> — primary <a href="../shared-components/#button">button</a>, oversized. Opens
-  <a href="../roll-and-card/">roll and card</a>. Disabled from the moment it is pressed
+  the <a href="../turn-panel/">turn panel</a>, which has its own <code>Roll</code> that throws the
+  die. It used to open <a href="../roll-and-card/">roll and card</a>, now retired
+  (<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>). Disabled from the moment it is pressed
   until the turn resolves.
 - <strong>Lane × 2–4</strong> — one per frog, in turn order, top to bottom (A) or left to
   right (B).
@@ -4398,7 +4430,7 @@ chosen. Whether it is right on the tablet is Derek's and Connor's to judge.</p>
 <ul>
 <li>Entering from <a href="../game-setup/">game setup</a>: every frog on its Start log, frog 1
   active, <code>Roll</code> enabled.</li>
-<li><code>Roll</code> → <a href="../roll-and-card/">roll and card</a> →
+<li><code>Roll</code> → <a href="../turn-panel/">turn panel</a>, whose Solving phase is the
   <a href="../working-out-grid/">working-out grid</a> →
   <a href="../answer-result/">answer result</a> → back here with the frog moved and the turn
   passed to the next frog in order.</li>

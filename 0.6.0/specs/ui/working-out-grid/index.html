@@ -831,6 +831,8 @@
       
         
       
+        
+      
     
     
     
@@ -1035,6 +1037,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../turn-panel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Turn panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../roll-and-card/" class="md-nav__link">
         
   
@@ -1042,7 +1072,7 @@
   <span class="md-ellipsis">
     
   
-    Roll and card
+    Roll and card (retired)
   
 
     
@@ -2472,6 +2502,42 @@ of, and
 <a href="../../../adr/0002-structured-working-out-grid/">ADR-0002</a> is why it exists: at
 the table, paper is ambient and the working-out <em>is</em> the exercise; on a tablet
 there is nowhere to work.</p>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> This page used to describe a dialog of
+its own. The player reached it from <a href="../roll-and-card/">roll and card</a> by
+pressing <code>Solve it</code>, and once it opened the card was gone except for a pill
+in the header. <strong>The grid is now the Solving phase of the
+<a href="../turn-panel/">turn panel</a></strong>: one panel that rolls the die, turns the drawn
+card over, and brings the grid in beside the card, which stays on screen the
+whole time the player works.</p>
+<p><strong>What this page still owns is unchanged:</strong> the grid's columns, rows, carry
+strips, growable addition section, <code>Help me</code> and its printed products, the
+keypad and <code>Check it</code>, and all of their behaviour. Every one of their
+constants is unchanged too, <strong>except the keypad's key size</strong>, 140 → 124 px,
+which makes <code>KeypadWidth</code> 452 → 404 (see below).</p>
+<p><strong>What moved:</strong></p>
+<ul>
+<li><strong>The panel is the turn panel's.</strong> It is the same full-bleed size, but this
+  is no longer a dialog of its own.</li>
+<li><strong>The <code>header</code> is the turn panel's.</strong> It is in the same band, at the same
+  numbers, and still carries the chip, <code>Work it out</code> and <code>Help me</code>.</li>
+<li><strong>The card readout pill is retired.</strong> The card itself is beside the grid,
+  bigger, and it names the pile.</li>
+<li><strong>The space the grid is centred in starts at the card's right edge.</strong> It
+  used to start at <code>DialogPadding</code>.</li>
+</ul>
+<p>That last change is why <code>Help me</code>'s printed products <strong>stopped fitting on a
+Hard card</strong>: <a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/529">#529</a>.
+Derek answered it with <strong>layout D</strong>: a smaller pile card, and keypad keys
+of 124 px instead of 140. The grid is now centred together with the room
+its products need, which is kept beside it whether or not <code>Help me</code> is
+pressed, so the grid does not move across when it is
+(<a href="#anchors">below</a>). Derek asked for the redesign on
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>.
+This page's open questions are carried across unchanged, and the two that
+are still open about the grid's shape, 2 and 4, are no more and no less open
+than before.</p>
+</blockquote>
 <h2 id="invariants">Invariants<a class="headerlink" href="#invariants" title="Link to this section">&para;</a></h2>
 <p><strong>Invariant:</strong> nothing in the grid is marked. Only the answer row decides
 whether the frog moves. Carry boxes and addition rows are scratch paper — they
@@ -2510,8 +2576,9 @@ piles produce — <code>2×1</code>, <code>2×2</code>, <code>3×2</code> digits
 widest.
 <strong>Invariant:</strong> <code>Check it</code> is disabled until at least one digit is in the answer
 row. An empty answer is not a wrong answer.
-<strong>Invariant:</strong> this dialog cannot be dismissed. The card is drawn and the turn
-is under way.</p>
+<strong>Invariant:</strong> the grid cannot be dismissed. It is a phase of the
+<a href="../turn-panel/">turn panel</a>, which cannot be dismissed, because the card is
+drawn and the turn is under way.</p>
 <h3 id="the-invariants-this-page-used-to-carry">The invariants this page used to carry<a class="headerlink" href="#the-invariants-this-page-used-to-carry" title="Link to this section">&para;</a></h3>
 <p>Until this wireframe, two of the invariants above read differently. Both were
 made false by the addition section becoming growable
@@ -2575,7 +2642,7 @@ way.</p>
 <tbody>
 <tr>
 <td><code>header</code></td>
-<td>Whose turn, and the card being worked</td>
+<td>Whose turn, <code>Work it out</code> and <code>Help me</code>. It is the <a href="../turn-panel/">turn panel</a>'s header since #402; this page still owns <code>Help me</code> in it</td>
 </tr>
 <tr>
 <td><code>grid</code></td>
@@ -2601,18 +2668,26 @@ in it is a cell: it is writing in the margin beside the rows, and the grid's
 own column count, cell kinds and geometry are exactly what they were before the
 button existed.</p>
 <h2 id="anchors">Anchors<a class="headerlink" href="#anchors" title="Link to this section">&para;</a></h2>
-<p>A full-bleed <a href="../shared-components/#dialog">dialog</a> — <code>DialogMaxWidth</code> by
-<code>DialogMaxHeight</code>, which is the canvas inset by <code>SafeMargin</code> on every side.</p>
+<p>The <a href="../turn-panel/#anchors">turn panel</a> in its Solving phase: a full-bleed
+<a href="../shared-components/#dialog">dialog</a>, <code>DialogMaxWidth</code> by <code>DialogMaxHeight</code>,
+which is the canvas inset by <code>SafeMargin</code> on every side. The turned-over
+<a href="../shared-components/#pile-card">pile card</a> takes the left 360 px of the
+content, and this page's regions take the rest.</p>
 <p>Inside it, two columns:</p>
 <ul>
 <li><code>keypad</code> and <code>submit</code> are pinned to the <strong>right</strong>, <code>DialogPadding</code> from the
   panel edge. Fixed position and fixed size for every problem, so the digit keys
   are in the same place on every turn of every game. A keypad that moves is a
   keypad you have to look at.</li>
-<li><code>grid</code> is centred in the space left over. It is the part that changes size
-  with the problem, so it is the part that is allowed to move.</li>
-<li><code>header</code> runs along the top, left-aligned — and now carries <code>Help me</code> at its
-  <strong>right</strong> end, pinned to the panel's inner right edge, which is the keypad
+<li><code>grid</code> is centred in the space left over, which now runs from the turned-over
+  card's right edge to the keypad: 948 px. What is centred is the grid with
+  <code>GridHelpColumnWidth</code> + <code>GridHelpGap</code> (160 px) kept on its left for <code>help</code>,
+  as one block. It is the part that changes size with the problem, so it is
+  the part that is allowed to move, but it moves only with the card, never
+  because <code>Help me</code> was pressed.</li>
+<li><code>header</code> runs along the top, left-aligned. It is the turn panel's band now,
+  and the card readout pill that used to sit in it is retired: the card is on
+  screen. It carries <code>Help me</code> at its <strong>right</strong> end, pinned to the panel's inner right edge, which is the keypad
   column's right edge. It is <code>GridHelpButtonHeight</code> tall, not the shared
   <code>ButtonHeight</code>, so that it sits exactly inside the <code>GridHeaderHeight</code> band
   alongside the <code>GridCardReadoutHeight</code> pill it shares that band with.</li>
@@ -2636,6 +2711,22 @@ into a panel whose last usable pixel is 1048 px — about 100 px of slack agains
 <code>GridAdditionRowHeight</code> once the section grows, and the grid fits at every
 count up to the cap. The numbers are worked through under <a href="#mockup">Mockup</a>,
 and the third mockup is the picture of them.</p>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> The paragraph below says <code>help</code> fits
+in space that already existed. It did in the grid's own dialog. Beside the
+turned-over card it <strong>stopped fitting on a Hard card</strong>: the grid had 95 px on
+its left, and <code>40 × 300</code> measures 122.5 px in the committed Fredoka at
+<code>GridHelpItemSize</code> (the 149 px below is an older measurement in the system
+font), so the column needed 154.5 px with its gap. That was
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/529">#529</a>.
+<strong>It fits again</strong> with Derek's layout D: the card is 360 px instead of 405,
+the keypad 404 px instead of 452, and the grid's space is 948 px. The space
+for <code>help</code> is now <strong>kept</strong>, not found: <code>GridHelpColumnWidth</code> (128 px) and
+<code>GridHelpGap</code> are centred with the grid as one block. On <code>331 × 41</code> that
+leaves 62 px between the card and the kept column, and 62 px between the
+grid and the keypad. The <a href="../turn-panel/#the-horizontal-arithmetic">turn panel</a>
+has the sums. Nothing is shrunk.</p>
+</blockquote>
 <p><strong><code>help</code> fits in space that already existed, and this is where it comes
 from.</strong> The grid is centred in the 1257 px between <code>DialogPadding</code> and the
 keypad column, and no card fills it: the widest, <code>331 × 41</code>, is 664 px, so
@@ -2646,8 +2737,12 @@ that is the one where the grid is widest <em>and</em> the items are longest —
 clears with 115 px to spare. That margin is worth knowing because it is what a
 wider grid would eat.</p>
 <p><strong>"Centred in the space left over" is the rule, in both directions.</strong>
-Horizontally that space runs from <code>DialogPadding</code> to the keypad column's left
-edge; vertically from the bottom of the header band (<code>GridHeaderHeight</code>) to the
+Horizontally that space runs from the turned-over card's right edge to the
+keypad column's left edge (it ran from <code>DialogPadding</code> before
+<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/402">#402</a>),
+and what is centred across it is the grid with <code>GridHelpColumnWidth</code> +
+<code>GridHelpGap</code> on its left, so the grid's left edge is the same before and
+after <code>Help me</code>; vertically from the bottom of the header band (<code>GridHeaderHeight</code>) to the
 panel's last usable pixel (<code>DialogMaxHeight</code> less <code>DialogPadding</code>) — 908 px.
 The grid moves within that space as it grows and shrinks, which is what lets a
 six-row section sit higher up the panel than a two-row one. The two committed
@@ -2761,32 +2856,32 @@ the screen is built to.</p>
 <td>44 px</td>
 </tr>
 <tr>
-<td>Card readout pill height</td>
+<td>Card readout pill height — <strong>retired, #402</strong></td>
 <td><code>GridCardReadoutHeight</code></td>
 <td>96 px</td>
 </tr>
 <tr>
-<td>Card readout pill padding, each side</td>
+<td>Card readout pill padding, each side — <strong>retired, #402</strong></td>
 <td><code>GridCardReadoutPaddingX</code></td>
 <td>32 px</td>
 </tr>
 <tr>
-<td>Card readout pill corner radius</td>
+<td>Card readout pill corner radius — <strong>retired, #402</strong></td>
 <td><code>GridCardReadoutRadius</code></td>
 <td>48 px — fully round</td>
 </tr>
 <tr>
-<td>Card readout pill outline</td>
+<td>Card readout pill outline — <strong>retired, #402</strong></td>
 <td><code>GridCardReadoutBorderWidth</code></td>
 <td>4 px <code>Ink</code></td>
 </tr>
 <tr>
-<td>Card readout pill fill</td>
+<td>Card readout pill fill — <strong>retired, #402</strong></td>
 <td><code>LilyWash</code></td>
 <td><code>#EEF8DC</code></td>
 </tr>
 <tr>
-<td>Card readout label</td>
+<td>Card readout label — <strong>retired, #402</strong></td>
 <td><code>GridCardReadoutLabelSize</code></td>
 <td>40 px</td>
 </tr>
@@ -2818,7 +2913,7 @@ the screen is built to.</p>
 <tr>
 <td>Keypad key, square</td>
 <td><code>KeypadKeySize</code></td>
-<td>140 px</td>
+<td>124 px (was 140, #402)</td>
 </tr>
 <tr>
 <td>Gap between keys</td>
@@ -2858,7 +2953,7 @@ the screen is built to.</p>
 <tr>
 <td>Keypad width (3 keys + 2 gaps)</td>
 <td><code>KeypadWidth</code></td>
-<td>452 px</td>
+<td>404 px (was 452, #402)</td>
 </tr>
 <tr>
 <td>Gap between keypad and <code>Check it</code></td>
@@ -2890,8 +2985,33 @@ the screen is built to.</p>
 <td><code>GridHelpGap</code></td>
 <td>32 px</td>
 </tr>
+<tr>
+<td>Width kept for the <code>help</code> column, printed or not</td>
+<td><code>GridHelpColumnWidth</code></td>
+<td>128 px</td>
+</tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> Two rows above are new or changed for
+the <a href="../turn-panel/">turn panel</a>, on Derek's layout D
+(<a href="https://github.com/derekwinters/connor-multiplying-frogs/issues/529">#529</a>).
+<strong><code>KeypadKeySize</code> is 124 px, not 140</strong>, so <code>KeypadWidth</code> is
+3 × 124 + 2 × 16 = 404 and the four rows of keys are 544 px tall, not 608.
+The gap, corner, outline, shadow and labels are unchanged, and a 124 px key
+is still well over <code>MinTouchTarget</code>. The keypad is changed here rather than
+given a turn-panel-only size, because the grid is now only ever shown as the
+turn panel's Solving phase: two key sizes would be one too many.
+<strong><code>GridHelpColumnWidth</code> is new.</strong> It is the width the grid keeps on its left
+for <code>help</code>, so the grid can be centred with it and not move when <code>Help me</code>
+is pressed. 128 px holds the widest product any pile deals, <code>40 × 300</code> at
+122.5 px, with 5.5 px to spare.</p>
+</blockquote>
+<p>The six card readout pill rows are <strong>retired</strong> by the
+<a href="../turn-panel/#elements">turn panel</a>: the card is on screen beside the grid,
+so the pill would show it twice. They stay in the table until the turn panel's
+build removes them from the code. <code>GridHelpButtonHeight</code> keeps its 96 px for
+the other two reasons given below, the band and <code>MinTouchTarget</code>.</p>
 <p><code>GridAdditionRowsAtStart</code> and <code>GridAdditionRowsMax</code> are counts, not pixels. They
 are in this table anyway, because the number of rows the addition section starts
 and stops at is exactly the kind of number that otherwise ends up as an unnamed
@@ -3218,7 +3338,9 @@ past it.</p>
   form the rows are written in on paper.</p>
 <h2 id="behaviour">Behaviour<a class="headerlink" href="#behaviour" title="Link to this section">&para;</a></h2>
 <ul>
-<li>Entering from <a href="../roll-and-card/">roll and card</a>. The answer row's <strong>leftmost</strong>
+<li>Entering from the <a href="../turn-panel/">turn panel</a>'s reveal, as the drawn card
+  lands (it used to be from <a href="../roll-and-card/">roll and card</a>'s <code>Solve it</code>).
+  The answer row's <strong>leftmost</strong>
   digit column is the focused one; typing fills the answer row <strong>left to
   right</strong>, which is the direction the answer is written and read in.</li>
 <li><strong>Exactly one cell is focused, always, and it is the one the next digit lands
@@ -3406,6 +3528,16 @@ over <strong>every card the three piles can deal</strong> — all 90,000 of them
 over one example, because the card that would break a bound is the one nobody
 thought to write down.</p>
 <h2 id="mockup">Mockup<a class="headerlink" href="#mockup" title="Link to this section">&para;</a></h2>
+<blockquote>
+<p><strong>How the spec is changing (#402).</strong> The drawings below are the grid in its
+old dialog, with the card readout pill in the header and the grid centred in
+the whole width. <strong>Their grids and annotations still stand.</strong> Their keypads
+are drawn with the old 140 px keys; the 124 px keys are drawn on the turn
+panel. Where the grid now sits, beside the turned-over card, is drawn in
+<a href="../mockups/turn-panel-solving.html"><code>mockups/turn-panel-solving.html</code></a>, and
+with <code>Help me</code> pressed on a Hard card in
+<a href="../mockups/turn-panel-solving-help.html"><code>mockups/turn-panel-solving-help.html</code></a>.</p>
+</blockquote>
 <p>Three, all at 1920 × 1200.</p>
 <p><strong>Five of the six files are redrawn in the <a href="../style-guide/">Pond style</a></strong> — the
 three below and the two agreed <code>Help me</code> drawings. Their grids, keypads and
@@ -3673,6 +3805,10 @@ anyone has said yet.</p>
   outright. <strong>Under <code>Check it</code> does not fit</strong>: the keypad runs to 827 px into
   the panel, <code>KeypadSubmitGap</code> and <code>CheckButtonHeight</code> take it to 979, and the
   last usable pixel is 1048 — 69 px, where the shared <code>ButtonHeight</code> is 112.
+  (Measured with 140 px keys. With layout D's 124 px keys <code>Check it</code> ends at
+  912, which would leave 136 px. The answer does not change: the header band
+  was also chosen to keep a one-way control away from the hand that is
+  typing, as <a href="#elements">Elements</a> says, and that still holds.)
   There is no room in that column and there is no way to make room without
   moving the digit keys, which
   <a href="#anchors">Anchors</a> forbids. <em>"Floating beside the grid"</em> was ruled out for a
